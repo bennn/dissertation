@@ -1,1 +1,22 @@
-Beginning
+Began with a capable implementation of migratory typing; namely, Typed Racket.
+That proof-of-concept back in 2006 had matured to support all kinds of Racket programs.
+It also clearly had performance troubles, identified by users around the world.
+
+The question was, how bad is performance?
+To answer, we developed a method and conducted an evaluation.
+The results were quite bad, inspired a lot of improvements, and are still a challenge today.
+
+Meanwhile, other groups explored migratory typing in other contexts.
+Transient Reticulated particularly interesting.
+We adapted the evaluation method to Transient.
+Findings --- on completely different benchmarks --- were encouraging in a big (order of magnitude) way.
+
+Compared Transient style to Typed Racket style on Racket programs.
+Performance results confirm findings from the Transient-alone study.
+
+Developed models to state and prove properties for each.
+Different type soundness!
+Whats more, different about trusting the types.
+TR-style is a complete monitor but Transient-style is not.
+
+
