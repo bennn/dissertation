@@ -1,13 +1,31 @@
 \begin{enumerate}
-\item Combine deep, shallow, and erasure in a model language; formulate and prove safety properties.
+\item Combine deep and shallow migratory typing in a model; formulate and prove safety properties.
 \item Implement the model via a Shallow Typed Racket; re-use the Typed Racket type system.
 \item Compare the performance of the combined language to Typed Racket + Racket.
 \end{enumerate}
 
 \subsection{Challenge 1: Model}
 
+We need a model that combines deep and shallow migratory typing.
+The model must allow the definition of deep-typed code, shallow-typed code, and untyped code.
+All three must be able to interact.
+
+The primary goal of the model is to state and prove safety properties for each kind of type.
+Deep types must be trustworthy in any context.
+Shallow types must match the type-tag of values in shallow-typed contexts.
+If the safety properties depend on any new extensions, the model must make these clear.
+For example, shallow-typed code may need to accept proxied values from deep-typed code.
+
+% primary = implementable?
+
+A secondary goal of the model is to realize safety with few run-time checks.
+We plan to identify methods that may (and may not) be used to reduce the necessary run-time checks.
+Time-permitting, we plan to explore promising methods in the implementation.
+
 
 \subsection{Challenge 2: Implementation}
+
+
 
 
 \subsection{Challenge 3: Evaluation}
