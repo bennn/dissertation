@@ -25,7 +25,19 @@ Time-permitting, we plan to explore promising methods in the implementation.
 
 \subsection{Challenge 2: Implementation}
 
+An implementation must validate the model.
+Racket is a natural target for such an implementation, because it fully supports deep migratory typing and partially supports shallow migratory typing.
+What remains is to extend the partial support for shallow migratory typing and to combine the two styles according to the model.
 
+The current partial support for shallow migratory typing must be extended to accomodate all Typed Racket types in an efficient manner.
+New type-to-check translations must be defined for common types.
+Shallow-typed code must compile about as quickly as deep-typed code; some overhead may arise from the pass that rewrites typed code, but anything more than a 10\% slowdown must be studied and explained.
+
+FILL IN HERE
+
+Time-permitting, the implementation may adapt the Typed Racket optimizer for shallow types and enable it in shallow code.
+A shallow optimizer may trust type-tags and little more.
+For example, it may specialize an application of \racketcode{+} to expect unboxed numbers.
 
 
 \subsection{Challenge 3: Evaluation}
