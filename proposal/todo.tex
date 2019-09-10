@@ -28,24 +28,71 @@ Time-permitting, we plan to explore promising methods in the implementation.
 An implementation must validate the model.
 Racket is a natural target for such an implementation, because it fully supports deep migratory typing and partially supports shallow migratory typing.
 What remains is to extend the partial support for shallow migratory typing and to combine the two styles according to the model.
+Time-permitting, we may explore further extensions.
 
-The current partial support for shallow migratory typing must be extended to accomodate all Typed Racket types in an efficient manner.
-New type-to-check translations must be defined for common types.
-Shallow-typed code must compile about as quickly as deep-typed code; some overhead may arise from the pass that rewrites typed code, but anything more than a 10\% slowdown must be studied and explained.
 
-% From notebook:
-% - functional, all benchmarks
-% - remove racket/contract, what is cost?
-% - theory / practice of 3way interop
-% - - -
-% - add OO
-% - static analysis, exploit types
+\subsubsection{Primary Goals}
 
-FILL IN HERE
+The current partial support for shallow migratory typing must be extended to accomodate all Typed Racket types
+ that appear in the functional GTP benchmarks.
+Each type needs a matching tag-check.
+Some tag-checks are easy to define; for example, the proper tag-check for the \racketcode{Symbol} type is the \racketcode{symbol?} predicate.
+Other types present a choice:
+ should the check for \racketcode{Listof} ensure a proper list?
+ should the check for \racketcode{->*} validate arity and keyword arguments?
+We plan to say ``yes'' to both questions, and generally to check all possible first-order properties.
 
-Time-permitting, the implementation may adapt the Typed Racket optimizer for shallow types and enable it in shallow code.
-A shallow optimizer may trust type-tags and little more.
+The implementation must avoid the Racket contract library.
+Contract combinators have administrative overhead.
+Tag-checks must be realized with simple Racket code wherever possible to
+improve run-time performance and take advantage of compiler optimizations.
+
+The implementation must support safe interop. with Typed Racket.
+Statically, shallow and deep-typed code must be able to share type definitions.
+Dynamically, deep-typed code must protect itself against shallow values.
+No combination of deep and shallow code can lead to a memory error.
+
+Shallow-typed code must compile efficiently.
+Some overhead relative to deep-Typed Racket may arise from the pass that
+rewrites typed code.
+Anything more than a 10\% slowdown, however, must be studied and explained.
+
+
+\subsubsection{Secondary Goals}
+
+Add support for class and object types.
+These types need a tag check, but there are many question about how deeply such
+ checks should explore compatible values.
+One idea is to mimic the first-order checks done by the contract system;
+ the question is whether those checks suffice for soundness.
+% TODO fact-check
+%  alt: traverse hierarchy?
+
+Investigate a static analysis to remove tag checks.
+Typed Racket employs occurrence typing to propagate information about type-tests.
+A tag-check is a simple type test; its success has implications for the rest of
+the program.
+For example, if a block of code projects an element of an immutable pair twice in a row,
+ then only the first projection should go through a tag check.
+The completion of this goal requires: the design of a static analysis,
+ an implementation within the Typed Racket compiler,
+ and an evaluation to test whether the analysis saves time in realistic programs.
+
+Adapt the Typed Racket optimizer.
+The current implementation of shallow types is incompatible with the Typed
+Racket optimizer.
+For one, the implementation outputs code that the optimizer cannot handle.
+More significantly, some optimization passes are inappropriate for shallow-typed
+code (because the passes rely on deep type information).
+Shallow-typed code may still benefit from simple optimizations, however,
+so it is worthwhile to try reusing the optimizer.
 For example, it may specialize an application of \racketcode{+} to expect unboxed numbers.
+
+Compare performance with and without contracts.
+If an early implementation of shallow tag checks relies on the contract library,
+then it would be useful to measure the performance delta after removing contracts.
+The data would be a useful reference for other clients of the contract library,
+and may reveal potential improvements to contracts.
 
 
 \subsection{Challenge 3: Evaluation}
