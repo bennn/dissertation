@@ -97,4 +97,55 @@ and may reveal potential improvements to contracts.
 
 \subsection{Challenge 3: Evaluation}
 
+% - functional subset of GTP benchmarks, possibly OO
+% - avoid 3^N analysis because ...
+%   well its huge and hard, possibly, to understand b/c 2^N for each node
+%   but ok, DON'T make this a stated goal
 
+An evaluation must test the hypothesis that a combination of deep and shallow
+ types is better than either one individually.
+There are a few ways that a programmer could benefit:
+ changing one module from deep to shallow may reduce the cost of type boundaries,
+ changing a collection of modules from shallow to deep may remove many tag checks,
+ and/or changing a library from deep to shallow may improve the performance of untyped programs.
+
+In particular, we posit that changing the Racket math library to use shallow
+types will improve its performance in untyped programs without ``shifting the problem''
+to deep-typed clients.
+We expect all clients to suffer moderate overhead after the change instead
+of the +25x pathologies that programmers currently need to deal with.
+
+We plan to use the GTP benchmark programs in a systematic performance evaluation.
+It is unclear, however, how to conduct such an evaluation.
+
+To test the math library, the existing method suffices:
+ convert the math library to be shallow-typed and measure the performance lattice.
+This same protocol applies to any benchmarks that depend on typed libraries.
+
+To test the benefits for program authors, who now have three choices for every
+module, we propose a path-based metric.
+First, we assume that authors are seeking fully-typed programs.
+Second, we assume that the authors are seeking deep-typed programs.
+The question is what percentage of paths through the deep-typed performance
+lattice have no configurations that exceed a certain overhead, say 10x, given
+the option at each step of converting some modules to shallow types.
+
+The idea is that a programmer moves up the lattice by adding type annotations
+to one module.
+If, at any step, deep types lead to unacceptable overhead, the programmer can
+switch to shallow (since both use the same static types).
+Once the programmer has added ``enough'' types, switching back to deep should
+offer a performance boost (in addition to the stronger guarantees of deep types).
+
+Both assumptions above threaten the validity of any conclusions we draw from the
+evaluation.
+Experience with Racket suggests that fully-typed programs are not the norm.
+Programmers often end up with partially-typed programs, especially when they
+intend to support typed and untyped client programs.
+It is also unclear that deep-typing offers the best performance for fully-typed
+programs.
+There are $2^N$ ways of mixing deep and shallow typing in a fully-typed program;
+ without a full evaluation, we cannot be sure that a mixed program out-performs
+ the deep version.
+If we integrate shallow typing with a variant of the Typed Racket optimizer,
+then we plan to validate this second assumption.
