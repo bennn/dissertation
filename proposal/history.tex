@@ -1,3 +1,133 @@
+A migratory typing system adds static types onto a
+dynamically-typed host language.
+At a minimum, the addition requires a static type checker and an extended
+syntax to accomodate \emph{mixed-typed}\/ code.
+If the types are intended to serve as claims about the kinds of values that
+flow through a program at run-time, then the addition also requires a method
+of enforcing types.
+
+Typed Racket~\cite{tf-popl-2008} is one example of a migratory typing system; it adds
+a new language, \racketcode{\#lang typed/racket}, to Racket.
+The language accepts type-annotated Racket programs,
+validates the annotations with a sophisticated type checker~\cite{tf-icfp-2010},
+and enforces the annotations with higher-order contracts.
+For example, \figureref{fig:guess-game} presents a mixed-typed
+program consisting of three modules.
+The two untyped modules at the top of the figure define a guessing game
+and a game player.
+The typed module at the bottom gives the player five chances to submit a
+correct guess.
+
+\begin{figure}[h]
+  \begin{minipage}[t]{0.45\columnwidth}
+    \begin{lstlisting}
+      #lang racket
+
+      (provide play)
+
+      (define (play)
+        (define n (random 10))
+        (lambda (guess)
+          (= guess n)))
+    \end{lstlisting}
+
+  \end{minipage}\begin{minipage}[t]{0.45\columnwidth}
+    \begin{lstlisting}
+      #lang racket
+
+      (provide stubborn-player)
+
+      (define (stubborn-player i)
+        4)
+    \end{lstlisting}
+
+  \end{minipage}
+
+  \bigskip
+  \begin{centering}
+    \begin{minipage}{0.6\columnwidth}
+      \begin{lstlisting}
+        #lang typed/racket
+
+        (require/typed "guess-game.rkt"
+          [play (-> (-> Natural Boolean))])
+        (require/typed "stubborn-player.rkt"
+          [stubborn-player (-> Natural Natural)])
+
+        (define check-guess (play))
+        (for/or ([i : Natural (in-range 5)])
+          (check-guess (stubborn-player i)))
+      \end{lstlisting}
+    \end{minipage}
+  \end{centering}
+
+  \caption{A mixed-typed Typed Racket program~\cite{gtnffvf-jfp-2019}}
+  \label{fig:guess-game}
+\end{figure}
+
+Technically, both the guessing game and the player are represented as functions.
+The typed driver module assigns a static type to each function.
+At compile-time, the type checker validates the contents of the driver module
+\emph{assuming}\/ that the types assigned to the untyped functions are correct.
+At run-time, higher-order contracts dynamically enforce the claims in the types.
+
+these types are enforced with higher-order contracts.
+
+Typed Racket is somewhat unusual in the way that it enforces
+
+
+When an untyped function enters typed code, it is wrapped in a proxy that 
+
+The typed driver module imports these functions and associates each to a type
+annotation.
+
+
+During compilation, the Typed Racket type checker validates the expre
+
+by assigning a type
+annotation to each.
+
+Technically, the guessing game is a higher-order thunk; when invoked, it
+chooses a random number and returns a new procedure that compares the number
+to a guess.
+The game player is also a procedure.
+
+
+When
+When i
+
+Turning up.
+
+%Programs in the new language 
+%
+%The syntax of the new language 
+%
+%Typed code is validated by a stati
+%
+%
+%It adds a new language to Racket, 
+%accepts type-annotated Racket programs.
+%
+%
+%A type checker validates the annotations
+%
+%The literature contains many other examples; see \citet{gf-icfp-2018} for a
+%brief survey.
+%
+%for Racket.
+%
+%Typed Racket extends the syntax
+%
+% extends the syntax of Racket with a 
+%
+
+- - -
+
+Ultimately, the goal is something practical.
+Bring research type systems to widely-used languages.
+
+- - -
+
 Began with a capable implementation of migratory typing; namely, Typed Racket.
 That proof-of-concept back in 2006 had matured to support all kinds of Racket programs.
 It also clearly had performance troubles, identified by users around the world.

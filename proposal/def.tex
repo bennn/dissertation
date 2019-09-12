@@ -1,10 +1,35 @@
+\usepackage{listings}
+
+
+\lstset{
+  escapeinside={(*@}{@*)},
+  numbers=left, 
+  basicstyle=\small\ttfamily, 
+  frame=leftline,
+  xleftmargin=.5cm,
+  breaklines=true
+}
+
 \mathchardef\mhyphen="2D
-\newcommand{\racketcode}[1]{\texttt{#1}}
 \overfullrule=1mm
 
-\newcommand{\txhallow}[1]{{#1}hallow}
-\newcommand{\txeep}[1]{{#1}onest}
-\newcommand{\tshallow}{\txhallow{l}}
-\newcommand{\tdeep}{\txeep{h}}
-\newcommand{\tShallow}{\txhallow{L}}
-\newcommand{\tDeep}{\txeep{H}}
+\newcommand{\racketcode}[1]{\texttt{#1}}
+
+\newcommand{\makewordmacro}[1]{\expandafter\newcommand\csname X#1\endcsname[1]{##1#1}}
+\makewordmacro{hallow}
+\makewordmacro{eep}
+
+\newcommand{\tshallow}{\Xhallow{l}}
+\newcommand{\tdeep}{\Xeep{h}}
+\newcommand{\tShallow}{\Xhallow{L}}
+\newcommand{\tDeep}{\Xeep{H}}
+
+\newcommand{\makerefmacro}[1]{\expandafter\newcommand\csname X#1ref\endcsname[2]{##1#1~\ref{##2}}}
+\makerefmacro{igure}
+\makerefmacro{ection}
+
+\newcommand{\figureref}[1]{\Xigureref{f}{#1}}
+\newcommand{\sectionref}[1]{\Xectionref{s}{#1}}
+
+\newcommand{\Figureref}[1]{\Xigureref{F}{#1}}
+\newcommand{\Sectionref}[1]{\Xectionref{S}{#1}}
