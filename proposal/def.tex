@@ -18,9 +18,9 @@
 
 \newcommand{\racketcode}[1]{\texttt{#1}}
 
-\newcommand{\makewordmacro}[1]{\expandafter\newcommand\csname X#1\endcsname[1]{##1#1}}
-\makewordmacro{hallow}
-\makewordmacro{eep}
+\newcommand{\makewordmacro}[2]{\expandafter\newcommand\csname X#1\endcsname[1]{##1#2}}
+\makewordmacro{hallow}{ying}
+\makewordmacro{eep}{onest}
 
 \newcommand{\tshallow}{\Xhallow{l}}
 \newcommand{\tdeep}{\Xeep{h}}
