@@ -1,7 +1,7 @@
 A migratory typing system adds static types onto a
 dynamically-typed host language.
 At a minimum, the addition requires a static type checker and an extended
-syntax to accomodate \emph{mixed-typed}\/ code.
+syntax to accomodate mixed-typed code.
 If the types are intended to serve as claims about the kinds of values that
 flow through a program at run-time, then the addition also requires a method
 of enforcing types.
@@ -18,45 +18,51 @@ and a game player.
 The typed module at the bottom gives the player five chances to submit a
 correct guess.
 
+Technically, both the guessing game and the player are represented as functions.
+The typed driver module assigns a static type to each function.
+At compile-time, the type checker validates the contents of the driver module
+\emph{assuming}\/ that the types assigned to the untyped functions are correct.
+At run-time, higher-order contracts dynamically enforce the claims in the types.
+Thanks to the contracts, these types are kept honest.
+
 \begin{figure}[h]
   \begin{minipage}[t]{0.45\columnwidth}
     \begin{lstlisting}
-      #lang racket
+#lang racket
+(provide play)
 
-      (provide play)
-
-      (define (play)
-        (define n (random 10))
-        (lambda (guess)
-          (= guess n)))
+(define (play)
+  (define n (random 10))
+  (lambda (guess)
+    (= guess n)))
     \end{lstlisting}
 
   \end{minipage}\begin{minipage}[t]{0.45\columnwidth}
     \begin{lstlisting}
-      #lang racket
+#lang racket
+(provide stubborn-player)
 
-      (provide stubborn-player)
-
-      (define (stubborn-player i)
-        4)
+(define (stubborn-player i)
+  4)
     \end{lstlisting}
 
   \end{minipage}
 
-  \bigskip
+  \smallskip
   \begin{centering}
     \begin{minipage}{0.6\columnwidth}
       \begin{lstlisting}
-        #lang typed/racket
+#lang typed/racket
 
-        (require/typed "guess-game.rkt"
-          [play (-> (-> Natural Boolean))])
-        (require/typed "stubborn-player.rkt"
-          [stubborn-player (-> Natural Natural)])
+(require/typed "guess-game.rkt"
+  [play (-> (-> Natural Boolean))])
+(require/typed "stubborn-player.rkt"
+  [stubborn-player (-> Natural Natural)])
 
-        (define check-guess (play))
-        (for/or ([i : Natural (in-range 5)])
-          (check-guess (stubborn-player i)))
+(define check-guess (play))
+
+(for/or ([i : Natural (in-range 5)])
+  (check-guess (stubborn-player i)))
       \end{lstlisting}
     \end{minipage}
   \end{centering}
@@ -65,21 +71,43 @@ correct guess.
   \label{fig:guess-game}
 \end{figure}
 
-Technically, both the guessing game and the player are represented as functions.
-The typed driver module assigns a static type to each function.
-At compile-time, the type checker validates the contents of the driver module
-\emph{assuming}\/ that the types assigned to the untyped functions are correct.
-At run-time, higher-order contracts dynamically enforce the claims in the types.
+In theory, Typed Racket lets programmers freely mix typed and untyped modules.
+The maintainer of a large untyped codebase may add types to any
+ one module while leaving the rest untyped.
+After the conversion, the new module benefits from static type checking
+ and type-based compiler optimizations; the full mixed-typed codebase can
+ be run without further changes.
+Running the code may reveal a dynamic mismatch; in particular, an untyped value
+ that flows into the newly-typed module may fail to live up to the type annotations.
+If so, the program halts and the programmer can fix the types
+ and/or the untyped code accordingly.
+Adding types thus leads to incremental improvements.
 
-these types are enforced with higher-order contracts.
+In practice, a programmer's freedom to add types is severly limited by
+ the run-time cost of type enforcement.
+Adding types to one module adds a contract boundary to its neighbors.
+When two modules communicate through a boundary, they may experience three kinds
+ of performance overhead.
+First, there is the obvious cost of checking every value that crosses the
+ boundary.
+Second, a higher-order boundary must allocate a new wrappers to constrain the
+ future behavior of any values that cross it.
+Third, wrapped values suffer from a layer of indirection.
+These costs may increase the overall running time of a program by an order
+ of magnitude (\figureref{fig:max-overhead}).
+Clearly, keeping types honest may impose a huge cost.
 
-Typed Racket is somewhat unusual in the way that it enforces
+\begin{figure}[h]
+  \includegraphics[width=0.8\columnwidth]{src/jfp-2019-max.png}
+  \caption{Worst-case overheads across 20 benchmarks and 3 versions of Typed Racket~\cite{gtnffvf-jfp-2019}}
+  \label{fig:max-overhead}
+\end{figure}
+%\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/index.html}}
 
+Other migratory typing systems take a different approach to type enforcement.
+Instead of keeping types honest, they perform incomplete checks,
+ provide weaker guarantees, and offer different performance tradeoffs.
 
-When an untyped function enters typed code, it is wrapped in a proxy that 
-
-The typed driver module imports these functions and associates each to a type
-annotation.
 
 
 During compilation, the Typed Racket type checker validates the expre
