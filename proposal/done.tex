@@ -9,3 +9,71 @@
 %  can ask now, what is to be done
 %
 %
+
+My research to date has focused on
+ understanding the performance challenges for natural
+ and comparing natural to other approaches.
+The performance efforts have shown that a combination of natural
+ and transient is worth exploring.
+The comparison efforts have produced a theoretical model for the combined
+ language.
+% all told .... ?
+
+
+\subsection{Performance Evaluation}
+
+I began my Ph.D. studies in Fall 2014.
+At this time, Typed Racket was a mature implementation of natural-style
+ migratory typing.
+Its type system understood compositional type tests (via occurrence typing),
+ variable-arity polymorphism,
+ delimited continuations,
+ first-class structural classes,
+ and many idioms specific to Racket programs.
+Its compiler could optimize-away safety checks thanks to the static types.
+It shipped with the Racket main distribution.
+And lastly, it came with a base environment of useful types for many core
+ libraries.
+
+Programmers had begun using Typed Racket in various applications.
+A few programmers noticed, however, that types could slow code down.
+Messages appeared on the Racket mailing list documenting overheads
+ of TODO and even TODO in typed code.
+Invariably, these typed modules mixed with untyped code.
+
+Prior work on Typed Racket had acknowledged that the performance of mixed-typed
+ programs could be an issue.
+Users experiences affirmed that performance was a crucial issue.
+
+As a first step, \citeN{Tecoop} proposed an exhaustive method of performance
+ evaluation: for a program with $N$ modules, measure the $2^N$ combinations in
+ which each module is typed or untyped.
+They applied this method to two object-oriented programs and noted the need
+ for a deeper study~\cite{stop}.
+My first task as a Ph.D. student was thus to analyze Typed Racket.
+
+
+\subsubsection{Exhaustive Method}
+
+
+
+\subsubsection{Measuring Improvements}
+
+% ... do I have anything to show?
+
+% Collapsible
+
+
+\subsubsection{Approximate Method}
+
+
+\subsection{Models of Migratory Typing}
+
+
+\subsubsection{Apples to Apples Comparison}
+
+\subsubsection{Interlude: User Study}
+
+
+\subsubsection{Honest vs. Lying Types}
+
