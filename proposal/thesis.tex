@@ -1,12 +1,34 @@
 % Are lying types an acceptable compromise for migratory typing?
 %% says nothing about interactions!
 
+% We are interested in general-purpose migratory typing systems that offer a
+%  non-trivial type soundness guarantee.
+% Concrete types are out because they limit the expressiveness of untyped code,
+%  and really only make sense in a nominal object-oriented language, in which
+%  every value is an instance of a class and every class has a type.
+% Erased types are out because they lack type soundness.
+% Hence we focus on natural and transient.
+
 \begin{quote}
   \emph{Does migratory typing benefit from a combination of \tdeep{} and \tshallow{} types?}
 %% well ... we mean a particular combination with some angelic guidance from the programmer
 \end{quote}
 
-This one question rests on two sub-questions.
-Can \tdeep{} and \tshallow{} types be combined?
-Does the combination offer any benefit over either individually?
+We plan to explore a combination of the natural and transient approaches to
+ run-time type enforcement within one migratory typing system.
+In the combined system, each component in a program shall be either:
+ dynamically-typed,
+ statically-typed with natural type enforcement,
+ or statically-typed with transient type enforcement.
+Both variants of static typing shall employ the same language of types and the
+ same type checker.
+Honest types must continue to be honest (\sectionref{sec:done})
+ and lying types must continue to be tag-sound (\sectionref{sec:done}).
+
+Beyond these requirements, the thesis question leaves room for exploration.
+In particular, two sub-questions must be addressed.
+The first is \emph{how to combine}\/ honest and lying
+ types in a way that preserves their respective guarantees.
+The second is \emph{how to measure the benefit}\/ of the combination.
+\Sectionref{sec:todo} outlines criteria and proposes solutions.
 

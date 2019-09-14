@@ -75,7 +75,7 @@ In theory, Typed Racket lets programmers freely mix typed and untyped modules.
 The maintainer of a large untyped codebase may add types to any
  one module while leaving the rest untyped.
 After the conversion, the new module benefits from static type checking
- and type-based compiler optimizations; the full mixed-typed codebase can
+ and type-driven compiler optimizations; the full mixed-typed codebase can
  be run without further changes.
 Running the code may reveal a dynamic mismatch; in particular, an untyped value
  that flows into the newly-typed module may fail to live up to the type annotations.
@@ -93,8 +93,8 @@ First, there is the obvious cost of checking every value that crosses the
 Second, a higher-order boundary must allocate a new wrappers to constrain the
  future behavior of any values that cross it.
 Third, wrapped values suffer from a layer of indirection.
-These costs may increase the overall running time of a program by an order
- of magnitude (\figureref{fig:max-overhead}).
+These costs can dramatically increase the running time of a program
+ (\figureref{fig:max-overhead}).
 Clearly, keeping types honest may impose a huge cost.
 
 \begin{figure}[h]
@@ -103,6 +103,12 @@ Clearly, keeping types honest may impose a huge cost.
   \label{fig:max-overhead}
 \end{figure}
 %\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/index.html}}
+
+Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
+ strategy.
+A natural semantics carefully guards the boundaries between typed and untyped
+ code by wrapping higher-order values in proxies and by eagerly
+ checking/traversing other data.
 
 Other migratory typing systems employ different strategies.
 Some add a runtime invariant to reduce the cost of honest types.
@@ -122,8 +128,7 @@ In a run-time system that enforces these invariants, types can be kept honest
 For example, if a typed function expects a vector of integers and receives
  a value from a dynamically-typed context, it can check whether the value's
  label is a subtype of the expected type.
-If so, the value is safe to use; if not, the value definitely contradicts the
-static type.
+The value is safe to use if and only if the label is ok.
 
 An \emph{erasure}\/ migratory typing system ignores types at run-time.
 Typed code benefits from static type checking, but runs the same as untyped code.
@@ -148,16 +153,19 @@ The existence of different approaches indicates a conflict between the theory
 Honest types are ideal, but require either sophisticated run-time checks
  or strict limits on the expressiveness of untyped code.
 Erased types require no run-time support, but sacrifice all
- guarantees.
-If researchers can do no better than erasure, then the theory of
- sound migratory typing is a failure.
+ guarantees;
+ if researchers can do no better than erasure, then the theory of
+ sound migratory typing is a dead end.
 Transient types suggest a compromise; however, they can mislead a programmer
- and they impose overhead on all typed code.
+ and the transient checking strategy imposes overhead on all typed code.
+By contrast, natural types are only expensive when typed and untyped code interact.
 To illustrate, \figureref{fig:icfp-bars} compares the performance improvement
  in fully-typed Typed Racket code over untyped to the improvement in a
  transient prototype.
+Evidently, natural types have better performance in fully-typed programs.
 
 \begin{figure}[h]
+  % TODO log scale, add X for overhead, darker stripes
   \includegraphics[width=0.8\columnwidth]{src/icfp-bars.png}
   \caption{Speedup factor of Typed Racket vs. untyped (solid bars) and a transient Racket vs. untyped (striped bars)~\cite{gf-icfp-2018}}
   \label{fig:icfp-bars}
