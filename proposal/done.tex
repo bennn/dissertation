@@ -13,11 +13,11 @@
 My research to date has focused on
  understanding the performance challenges for natural
  and comparing natural to other approaches.
-The performance efforts have shown that a combination of natural
- and transient is worth exploring.
-The comparison efforts have produced a theoretical model for the combined
- language.
-% all told .... ?
+These efforts have led up to the above thesis question.
+The performance studies motivate a combination of \tdeep{} and \tshallow{}
+ types, and suggest methods to empirically validate the result.
+The comparison studies provide a theoretical model for defining the
+ combination and understanding its formal guarantees.
 
 
 \subsection{Performance Evaluation}
@@ -32,7 +32,7 @@ Its type system understood compositional type tests (via occurrence typing),
  and many idioms specific to Racket programs.
 Its compiler could optimize-away safety checks thanks to the static types.
 It shipped with the Racket main distribution.
-And lastly, it came with a base environment of useful types for many core
+And it came with a base environment of useful types for many core
  libraries.
 
 Programmers had begun using Typed Racket in various applications.
@@ -44,20 +44,68 @@ Invariably, these typed modules mixed with untyped code.
 Prior work on Typed Racket had acknowledged that the performance of mixed-typed
  programs could be an issue.
 Users experiences affirmed that performance was a crucial issue.
-
-As a first step, \citeN{Tecoop} proposed an exhaustive method of performance
- evaluation: for a program with $N$ modules, measure the $2^N$ combinations in
- which each module is typed or untyped.
-They applied this method to two object-oriented programs and noted the need
- for a deeper study~\cite{stop}.
-My first task as a Ph.D. student was thus to analyze Typed Racket.
+My first task as a Ph.D. student was thus to develop a method to assess the
+ performance impact of a migratory typing system.
 
 
 \subsubsection{Exhaustive Method}
 
+In 2015, \citeN{ecoop} measured the performance impact of gradual typing on
+ two object-oriented programs.
+Their key insight was to begin with a fully-typed program and measure the
+ running time of all gradually-typed configurations obtained by removing
+ some type annotations.
+By working backwards from the types, the method lets a researcher systematically
+ visit the codes that a programmer may encounter as they migrate an
+ application.
+By measuring all configurations, the method enables general claims about
+ migratory typing---which, after all, advertises the freedom to mix typed
+ and untyped code.
+
+This method for collecting data motivated a larger study~\cite{stop}.
+I helped develop (and measure) 12 functional benchmark programs, ranging in
+ size from 30 to 6,000 lines of code, for an evaluation of Typed
+ Racket~\cite{popl}.
+
+During the evaluation, it became clear that the data analysis was a major
+ issue.
+The first evaluation~\cite{ecoop} had studied two program of four modules each
+ and presented the results in two powerset lattices of $2^4$ configurations.
+This visualization method was impractical for programs with seven or more
+ module.
+The typical ``summary statistics'' of mean, median, min, and max were also a
+ poor fit; although worst-case performance could be terrible
+ (\figureref{fig:max-overhead}), there is no guarantee that a programmer
+ will actually encounter the worst case.
+
+To summarize our exponentially-large datasets, we formulated the notion
+ of a \deliverable{D} configuration.
+A mixed-typed configuration is \deliverable{D} if it runs at most $D$ times
+ slower than a fully-untyped baseline configuration.
+For programmers, the relevant question is what percent of all configurations
+ are \deliverable{D} for a few critical values.
+If a team is willing to accept a 6x slowdown due to migratory typing,
+ and the percent of \deliverable{6} configurations is above 90\% on a suite
+ of representative benchmarks, then they may conclude that new types are
+ unlikely to break their performance goal.
+
+Our 2016 paper~\cite{} plots the proportion of \deliverable{D} configurations
+ for $D$ between 1x and 20x.
+The results gave an extremely negative image of natural-style migratory typing;
+ in half the benchmarks, fewer than 60\% of all configurations were
+ \deliverable{20}.
+The plots also explored whether adding types to two additional modules could
+ improve performance in the best case.
+Unfortunately, the extra conversions steps could not guarantee a drastic
+ performance improvement.
+
+% picture here?
 
 
 \subsubsection{Measuring Improvements}
+
+Our negative results inspired work on Typed Racket and the underlying contract
+ system.
 
 % ... do I have anything to show?
 
