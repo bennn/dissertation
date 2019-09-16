@@ -174,7 +174,7 @@ The sampling method counts the percent of \deliverable{D} configurations
  percent of \deliverable{D} configurations.
 
 We validated the sampling method on six benchmarks with $12$ to $17$ ``unit''
- of type conversion each (consequently, $2^{12}$ to $2^17$ configurations).
+ of type conversion each (consequently, $2^{12}$ to $2^{17}$ configurations).
 For each of these benchmarks, we conducted both an exhaustive evaluation and
  an approximate one; the approximation took $10$ samples with $120$ to $170$
  configurations in each sample.
@@ -186,6 +186,23 @@ Therefore, we conclude that the method is useful for benchmarks in which we
 
 
 \subsection{Models of Migratory Typing}
+
+Our evalution of Transient Reticulated prompted further study of alternatives
+ to \tdeep{} types.
+On one hand, it was clear from the preliminary evaluation that transient offered
+ a different performance tradeoff.
+Overhead typically increased with the total number of type annotations---regardless
+ of the particular types or boundaries---but never exceeded a $10$x
+ slowdown~\cite{gm-pepm-2018}.
+On the other hand, our experience adding transient types to benchmarks
+ did not go as smoothly as our experience with \tdeep{} types.
+If an annotation was incorrect and led to a runtime error, the error message
+ rarely helped us find the bug.
+In sum, we needed a side-by-side comparison of transient and natural to
+ understand their differences.
+
+% also wondered if there might be other compromises ... but so far found nothing
+% exciting? only monotonic? ... hm yeah we don't have much to say
 
 
 \subsubsection{Apples to Apples Comparison}
