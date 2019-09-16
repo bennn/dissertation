@@ -39,3 +39,41 @@
 
 \newcommand{\deliverable}[1]{$#1$-deliverable}
 \newcommand{\bm}[1]{\texttt{#1}}
+
+\newcommand{\sfont}[1]{\mathsf{#1}}
+\newcommand{\Nsym}{\sfont{N}}
+\newcommand{\Tsym}{\sfont{T}}
+
+\newcommand{\boundaryfnfont}[1]{\mathcal{#1}}
+\newcommand{\Dsym}{\boundaryfnfont{D}}
+\newcommand{\Ssym}{\boundaryfnfont{S}}
+\newcommand{\DNsym}{\Dsym_{\Nsym}}
+\newcommand{\DTsym}{\Dsym_{\Tsym}}
+\newcommand{\SNsym}{\Ssym_{\Nsym}}
+\newcommand{\STsym}{\Ssym_{\Tsym}}
+\newcommand{\fDN}[2]{\DNsym(#1, #2)}
+\newcommand{\fSN}[2]{\SNsym(#1, #2)}
+\newcommand{\fDT}[2]{\DTsym(#1, #2)}
+\newcommand{\fST}[2]{\STsym(#1, #2)}
+
+\newcommand{\stype}{\tau}
+\newcommand{\svalue}{v}
+\newcommand{\sexpr}{e}
+\newcommand{\sint}{i}
+\newcommand{\serror}{\sfont{Error}}
+\newcommand{\smon}{\sfont{mon}}
+\newcommand{\sdyn}{\sfont{dyn}}
+\newcommand{\ssta}{\sfont{stat}}
+
+\newcommand{\emon}[2]{\smon\,#1~#2}
+\newcommand{\edyn}[2]{\sdyn\,#1~#2}
+\newcommand{\esta}[2]{\ssta\,#1~#2}
+\newcommand{\epair}[2]{\langle #1, #2 \rangle}
+
+\newcommand{\tarr}[2]{#1\!\Rightarrow\!#2}
+\newcommand{\tpair}[2]{#1\!\times\!#2}
+\newcommand{\tint}{\sfont{Int}}
+\newcommand{\tnat}{\sfont{Nat}}
+
+\newenvironment{mfarray}{\begin{array}{l@{~~}c@{~}l}}{\end{array}}
+\newcommand{\sidecond}[1]{\multicolumn{3}{l}{\mbox{\quad #1}}}

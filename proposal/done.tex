@@ -1,14 +1,8 @@
-% key elements of prior work
-% 1. eval method (sampling for large spaces)
-% 2. multi-lang model, understand via boundary behavior?, different TS, examples
-% 3. CM analysis, Shallow types lie
-%
-% SO its clear now what we mean by lying types, and the tradeoffs involved
-%
-% This understanding of the design space prepares for ... next question ...
-%  can ask now, what is to be done
-%
-%
+% 2019-09-16
+% Header can be about me and past tense: I have done X Y Z
+% Body should describe results in the present tense, normal technical style
+% The end of a section may use self-cites, and those may use past tense to
+%  say "I did ...."
 
 My research to date has focused on
  understanding the performance challenges for natural
@@ -206,6 +200,156 @@ In sum, we needed a side-by-side comparison of transient and natural to
 
 
 \subsubsection{Apples to Apples Comparison}
+
+% developed model, (1) what are boundaries (2) what are checks
+% implemented for TR
+% - same method! aha
+% - 
+
+Building on the \citeN{mf-toplas-2009} multi-language approach, we designed
+ a model of a mixed-typed language.
+The model combines a typical statically-typed language and an independent
+ dynamically-typed language.
+Every mixed-typed program in the model links components from the sub-languages
+ with boundary expressions.
+These boundaries are the initial channels of communication between typed and
+ untyped code.
+During evaluation new channels may arise, but the models keep a separation
+ between the two languages.
+
+The main question for a semantics is what to do when a value crosses one
+ of the boundaries separating typed and untyped code.
+Natural eagerly and deeply checks values if possible, and otherwise wraps
+ an incoming higher-order value in a proxy wrapper.
+If a wrapped value is later used, the wrapper checks its behavior against
+ the boundary type.
+Transient performs type-tag checks at boundaries, but additionally
+ treats every elimination form in typed code as a potential boundary.
+These shallow checks match a value against the shape expected by the
+ client context; they do not fully enforce the types at the boundaries.
+
+% more to say? surely
+
+\begin{figure}[h]
+  \(\begin{array}[t]{l@{\qquad}l}
+
+  \fbox{$\DNsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}
+  &
+  \fbox{$\SNsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\newline
+
+  \\
+
+  \begin{mfarray}
+    \fDN{\tarr{\stype_0}{\stype_1}}{\svalue_0}
+    & = &
+    \emon{\tarr{\stype_0}{\stype_1}}{\svalue_0}
+    \\\sidecond{if $\svalue_0$ is a function}
+    \\
+    \fDN{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}}
+    & = &
+    \epair{\edyn{\stype_0}{\svalue_0}}{\edyn{\stype_1}{\svalue_1}}
+    \\
+    \fDN{\tint}{\sint_0}
+    & = &
+    \sint_0
+    \\
+    \fDN{\tnat}{\sint_0}
+    & = &
+    \sint_0
+    \\\sidecond{if $0 \leq \sint_0$}
+    \\
+    \fDN{\stype_0}{\svalue_0}
+    & = &
+    \serror
+    \\\sidecond{otherwise}
+  \end{mfarray}
+
+  &
+
+  \begin{mfarray}
+    \fSN{\tarr{\stype_0}{\stype_1}}{\svalue_0}
+    & = &
+    \emon{(\tarr{\stype_0}{\stype_1})}{\svalue_0}
+    \\\sidecond{if $\svalue_0$ is a function}
+    \\
+    \fSN{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}}
+    & = &
+    \epair{\esta{\stype_0}{\svalue_0}}{\esta{\stype_1}{\svalue_1}}
+    \\
+    \fSN{\stype_0}{\svalue_0}
+    & = &
+    \svalue_0
+    \\\sidecond{otherwise (justified by type soundness)}
+  \end{mfarray}
+
+  \\
+  \\
+
+  \fbox{$\DTsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\newline
+
+  &
+
+  \fbox{$\STsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\newline
+
+  \\
+
+  \begin{mfarray}
+    \fDT{\tarr{\stype_0}{\stype_1}}{\svalue_0}
+    & = &
+    \svalue_0
+    \\\sidecond{if $\svalue_0$ is a function}
+    \\
+    \fDT{\tpair{\stype_0}{\stype_1}}{\svalue_0}
+    & = &
+    \svalue_0
+    \\\sidecond{if $\svalue_0$ is a pair}
+    \\
+    \fDT{\tint}{\sint_0}
+    & = &
+    \sint_0
+    \\
+    \fDT{\tnat}{\sint_0}
+    & = &
+    \sint_0
+    \\\sidecond{if $0 \leq \sint_0$}
+    \\
+    \fDT{\stype_0}{\svalue_0}
+    & = &
+    \serror
+    \\\sidecond{otherwise}
+  \end{mfarray}
+
+  &
+
+  \begin{mfarray}
+    \fST{\stype_0}{\svalue_0}
+    & = &
+    \svalue_0
+  \end{mfarray}
+  \end{array}\)
+
+\caption{At a dynamic-to-static boundary ($\mathcal{D}$),
+         natural eagerly checks/wraps values and transient checks tags.
+         At a static-to-dynamic boundary ($\mathcal{S}$),
+         natural wraps higher-order values and transient does nothing.}
+\label{fig:boundary-function}
+\end{figure}
+
+With the models as a guide, we implemented a transient prototype for a
+ functional subset of Typed Racket~\cite{gf-icfp-2018}.
+The prototype enabled a systematic comparison of the natural and transient
+ styles; starting with one suite of surface-language programs, we ran
+ each under two semantics.
+
+The results of the evaluation confirmed our earlier conjectures.
+Natural may have abysmal performance on heavily-mixed programs,
+ but performs well when all but a few modules are typed.
+Transient rarely slows a program by 10x, but its cost increases with the
+ quantity of type annotations.
+In a fully-typed program, natural is likely the best choice;
+ in partially typed programs, however, transient can have far better
+ performance.
+
 
 \subsubsection{Interlude: User Study}
 
