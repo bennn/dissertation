@@ -148,28 +148,41 @@ Once again, the exhaustive evaluation method was one of the ways that we
 
 \subsubsection{Approximate Method}
 
-Concurrently with the improvements to Typed Racket, Zeina Migeed and I conducted
- a performance evaluation of Transient Reticulated Python.
+Concurrently with the improvements to Typed Racket, Zeina Migeed and I
+ adapted the evaluation method to Transient Reticulated Python~\cite{gm-pepm-2018}.
+This proved challenging because Reticulated allows type annotations
+ at a finer granularity than Typed Racket; in particular, any function
+ parameter, function return, and class field may have a type annotation.
+Additionally, Reticulated changes the behavior of untyped Python code that
+ it preprocesses.
 
+For our evaluation, we elected to type entire function and class definitions
+ as one ``unit'' of type conversion.
+We also added one configuration to the space, with Python running the untyped
+ code, as a baseline for comparisons.
+In a program with three functions and four classes, we thus explored
+ $2^{3+4} + 1$ configurations for the evaluation.
 
-Interesting because transient has a different strategy to enforce types.
-No proxies
+Even this coarse space, however, is too large to evaluate programs with more
+ than $20$ functions and classes.
+To overcome this practical limitation, we developed a method based on
+ simple random sampling to approximate the number of \deliverable{D}
+ configurations in a benchmark.
+The sampling method counts the percent of \deliverable{D} configurations
+ in a few sets of configurations, whose members are chosen uniform-randomly;
+ the resulting set of percentages provides a confidence bound for the true
+ percent of \deliverable{D} configurations.
 
-Challenging because Reticulated allows type annotations at a finer granularit
-than TR.
-For example ...
-
-We chose to apply the method at a coarser granularity; the function
-and class field.
-
-Still too large.
-Developed method to approximate the percent of \deliverable{D} configurations
-by simple random sampling.
-
-With these adaptations, evaluated Retic systematically on K benchmarks.
-Found perf approx linear
-
-Inspired a closer investigation of Retic; hence the models
+We validated the sampling method on six benchmarks with $12$ to $17$ ``unit''
+ of type conversion each (consequently, $2^{12}$ to $2^17$ configurations).
+For each of these benchmarks, we conducted both an exhaustive evaluation and
+ an approximate one; the approximation took $10$ samples with $120$ to $170$
+ configurations in each sample.
+The $95$\% confidence intervals for the samples yielded tight bounds on the
+ true percents of \deliverable{D} configurations for $D$ between $1$x and
+ $10$x.
+Therefore, we conclude that the method is useful for benchmarks in which we
+ cannot obtain ground-truth results in a practical timeframe.
 
 
 \subsection{Models of Migratory Typing}
