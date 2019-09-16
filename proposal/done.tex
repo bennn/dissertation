@@ -50,7 +50,7 @@ My first task as a Ph.D. student was thus to develop a method to assess the
 
 \subsubsection{Exhaustive Method}
 
-In 2015, \citeN{ecoop} measured the performance impact of gradual typing on
+In 2015, \citeN{tfdfftf-ecoop-2015} measured the performance impact of gradual typing on
  two object-oriented programs.
 Their key insight was to begin with a fully-typed program and measure the
  running time of all gradually-typed configurations obtained by removing
@@ -62,14 +62,14 @@ By measuring all configurations, the method enables general claims about
  migratory typing---which, after all, advertises the freedom to mix typed
  and untyped code.
 
-This method for collecting data motivated a larger study~\cite{stop}.
+This method for collecting data motivated a larger study.\footnote{\shorturl{https://www.}{ccs.neu.edu/home/asumu/papers/stop15-tfgnvf.pdf}}
 I helped develop (and measure) 12 functional benchmark programs, ranging in
  size from 30 to 6,000 lines of code, for an evaluation of Typed
- Racket~\cite{popl}.
+ Racket~\cite{tfgnvf-popl-2016}.
 
 During the evaluation, it became clear that the data analysis was a major
  issue.
-The first evaluation~\cite{ecoop} had studied two program of four modules each
+The first evaluation~\cite{tfdfftf-ecoop-2015} had studied two program of four modules each
  and presented the results in two powerset lattices of $2^4$ configurations.
 This visualization method was impractical for programs with seven or more
  module.
@@ -89,8 +89,8 @@ If a team is willing to accept a 6x slowdown due to migratory typing,
  of representative benchmarks, then they may conclude that new types are
  unlikely to break their performance goal.
 
-Our 2016 paper~\cite{todo} plots the proportion of \deliverable{D} configurations
- for $D$ between 1x and 20x.
+Our 2016 paper~\cite{tfgnvf-popl-2016} plots the proportion of
+ \deliverable{D} configurations for $D$ between 1x and 20x.
 The results gave an extremely negative image of natural-style migratory typing;
  in half the benchmarks, fewer than 60\% of all configurations were
  \deliverable{20}.
@@ -140,8 +140,8 @@ The curve for version 6.4 lies above the others, meaning the percent of
 \label{fig:snake-jfp}
 \end{figure}
 
-Daniel Feltey later contributed a major change to the contract system:
- collapsible higher-order contracts~\cite{fgsfs-oopsla-2018}.
+\citeN{fgsfs-oopsla-2018} later contributed a major change to the contract system:
+ collapsible higher-order contracts.
 Once again, the exhaustive evaluation method was one of the ways that we
  measured the impact of the new contracts.
 
