@@ -89,7 +89,7 @@ If a team is willing to accept a 6x slowdown due to migratory typing,
  of representative benchmarks, then they may conclude that new types are
  unlikely to break their performance goal.
 
-Our 2016 paper~\cite{} plots the proportion of \deliverable{D} configurations
+Our 2016 paper~\cite{todo} plots the proportion of \deliverable{D} configurations
  for $D$ between 1x and 20x.
 The results gave an extremely negative image of natural-style migratory typing;
  in half the benchmarks, fewer than 60\% of all configurations were
@@ -98,21 +98,78 @@ The plots also explored whether adding types to two additional modules could
  improve performance in the best case.
 Unfortunately, the extra conversions steps could not guarantee a drastic
  performance improvement.
+For example, the plots in \figureref{fig:snake-popl} show the percent of
+ \deliverable{D} configurations allowing 0, 1, and 2 extra conversion steps.
+Even in the rightmost plot, allowing 2 angelic conversion steps, there are
+ still many (~20\%) configurations that run 10 times slower than the baseline.
 
-% picture here?
+\begin{figure}[h]
+\includegraphics[width=0.96\columnwidth]{src/snake-popl.png}
+\caption{Counting \deliverable{D} configurations in the \bm{snake}
+         benchmark~\cite{tfgnvf-popl-2016}. The $x$-axis ranges over $D$ values;
+         the vertical lines mark $D=3$ and $D=10$.
+         The $y$-axis counts configurations; the dashed horizontal line marks
+         $60$\% of all configs.
+         The thick blue line is the number of \deliverable{x} configs.}
+\label{fig:snake-popl}
+\end{figure}
 
 
 \subsubsection{Measuring Improvements}
 
-Our negative results inspired work on Typed Racket and the underlying contract
- system.
+The evaluation of Typed Racket inspired many efforts to improve its performance.
+Sam Tobin-Hochstadt fixed issues in Typed Racket and modified it to produce
+ simpler contracts for common function shapes.
+Robert Bruce Findler greatly reduced the allocation costs of Racket contracts.
+Others, including myself, contributed smaller patches.
 
-% ... do I have anything to show?
+All told, Typed Racket changed significantly between versions 6.2 (June 2015)
+ and 6.4 (February 2016).
+The evaluation method quantified the effect of these changes on
+ performance with plot containing multiple \deliverable{D} curves on the same
+ axis~\cite{gtnffvf-jfp-2019}.
+To demonstrate, \figureref{fig:snake-jfp} presents curves for the \bm{snake}
+ benchmark on Racket 6.2, 6.3, and 6.4.
+The curve for version 6.4 lies above the others, meaning the percent of
+ \deliverable{D} configurations is increased for every value of $D$ along
+ the $x$ axis.
 
-% Collapsible
+\begin{figure}[h]
+\includegraphics[width=0.8\columnwidth]{src/snake-jfp.png}
+\caption{Comparing performance across three versions of Typed Racket}
+\label{fig:snake-jfp}
+\end{figure}
+
+Daniel Feltey later contributed a major change to the contract system:
+ collapsible higher-order contracts~\cite{fgsfs-oopsla-2018}.
+Once again, the exhaustive evaluation method was one of the ways that we
+ measured the impact of the new contracts.
 
 
 \subsubsection{Approximate Method}
+
+Concurrently with the improvements to Typed Racket, Zeina Migeed and I conducted
+ a performance evaluation of Transient Reticulated Python.
+
+
+Interesting because transient has a different strategy to enforce types.
+No proxies
+
+Challenging because Reticulated allows type annotations at a finer granularit
+than TR.
+For example ...
+
+We chose to apply the method at a coarser granularity; the function
+and class field.
+
+Still too large.
+Developed method to approximate the percent of \deliverable{D} configurations
+by simple random sampling.
+
+With these adaptations, evaluated Retic systematically on K benchmarks.
+Found perf approx linear
+
+Inspired a closer investigation of Retic; hence the models
 
 
 \subsection{Models of Migratory Typing}
