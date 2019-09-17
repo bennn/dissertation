@@ -1,8 +1,8 @@
-A migratory typing system adds static types onto a
+A migratory typing system adds static types to a
 dynamically-typed host language.
 At a minimum, the addition requires a static type checker and an extended
 syntax to accomodate mixed-typed code.
-If the types are intended to serve as claims about the kinds of values that
+If the types are intended as claims about the kinds of values that
 flow through a program at run-time, then the addition also requires a method
 of enforcing types.
 
@@ -18,12 +18,14 @@ and a game player.
 The typed module at the bottom gives the player five chances to submit a
 correct guess.
 
-Technically, both the guessing game and the player are represented as functions.
-The typed driver module assigns a static type to each function.
+Technically, both the guessing game and the player are represented as functions
+and the typed driver module assigns a static type to each function.
 At compile-time, the type checker validates the contents of the driver module
-\emph{assuming}\/ that the types assigned to the untyped functions are correct.
+assuming that the types assigned to the untyped functions are correct.
 At run-time, higher-order contracts dynamically enforce the claims in the types.
-Thanks to the contracts, these types are kept honest.
+Thanks to the contracts, these types are kept honest---if a different player
+function were to submit a string as a guess, a contract violation would halt
+the program.
 
 \begin{figure}[h]
   \begin{minipage}[t]{0.45\columnwidth}
@@ -104,21 +106,32 @@ Clearly, keeping types honest may impose a huge cost.
 \end{figure}
 %\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/index.html}}
 
-Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
- strategy.
-A natural semantics carefully guards the boundaries between typed and untyped
- code by wrapping higher-order values in proxies and by eagerly
- checking/traversing other data.
-
-Other migratory typing systems employ different strategies.
+Other migratory typing systems, however, do not keep types honest in the
+ same manner as Typed Racket.
 Some add a runtime invariant to reduce the cost of honest types.
-Still others allow types to lie.
+Still others choose to selectively enforce types; a value may be obliged to
+ satisfy a type is some contexts, but not others.
+% TODO explain more
 With a few exceptions,\footnote{Like types
  let a programmer toggle between concrete types and erasure.
  Grace enforces user-supplied type annotations with tag checks.
  Pyret enforces user-supplied type annotations with tag checks
   for certain types and a deep traversal for others.}
- the alternatives fall into three broad categories.
+ the alternatives fall into three broad categories:
+ concrete, erasure, and transient.
+
+Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
+ strategy.
+A natural semantics carefully guards the boundaries between typed and untyped
+ code by wrapping higher-order values in proxies and by eagerly
+ checking/traversing other data.
+For example, if a natural language expects a list of numbers then it shall
+ check every element of an incoming list.
+If a natural language expects a function, it shall create a proxy that
+ protects future inputs and validates future results.
+% On one hand, this strategy lets typed code interact with arbitrary values and
+%  ensures that every untyped value completely matches all types associated to it.
+% On the other hand, it requires many run-time checks.
 
 A \emph{concrete}\/ migratory typing system comes with two invariants.
 First, only statically-typed code can create new values.
@@ -131,9 +144,11 @@ For example, if a typed function expects a vector of integers and receives
 The value is safe to use if and only if the label is ok.
 
 An \emph{erasure}\/ migratory typing system ignores types at run-time.
-Typed code benefits from static type checking, but runs the same as untyped code.
+Typed code benefits from static type checking, but behaves exactly the same
+ as untyped code.
 Erased types therefore add zero performance overhead and provide zero feedback
- when statically-typed code receives unexpected input.
+ when statically-typed code receives an input that contradicts the static
+ types.
 If a typed function receives a bad argument, the application proceeds without
  hesitation and may compute a nonsensical result.
 
@@ -150,19 +165,21 @@ Transient types are not honest; however, they protect typed code from tag
 
 The existence of different approaches indicates a conflict between the theory
  and practice of migratory typing.
-Honest types are ideal, but require either sophisticated run-time checks
- or strict limits on the expressiveness of untyped code.
-Erased types require no run-time support, but sacrifice all
- guarantees;
- if researchers can do no better than erasure, then the theory of
- sound migratory typing is a dead end.
+Honest types are ideal from a theoretical perspective, but require either
+ sophisticated run-time checks or strict limits on the expressiveness of
+ untyped code.
+Erased types are the polar opposite, as they require no run-time support
+ and sacrifice all guarantees.
+If researchers can do no better than erasure, then the theory of
+ type-sound migratory typing is a dead end.
 Transient types suggest a compromise; however, they can mislead a programmer
  and the transient checking strategy imposes overhead on all typed code.
 By contrast, natural types are only expensive when typed and untyped code interact.
 To illustrate, \figureref{fig:icfp-bars} compares the performance improvement
  in fully-typed Typed Racket code over untyped to the improvement in a
  transient prototype.
-Evidently, natural types have better performance in fully-typed programs.
+Evidently, natural types have better performance in fully-typed programs,
+ suggesting the need for a combination.
 
 \begin{figure}[h]
   % TODO log scale, add X for overhead, darker stripes
@@ -170,38 +187,5 @@ Evidently, natural types have better performance in fully-typed programs.
   \caption{Speedup factor of Typed Racket vs. untyped (solid bars) and a transient Racket vs. untyped (striped bars)~\cite{gf-icfp-2018}}
   \label{fig:icfp-bars}
 \end{figure}
-
-%Concrete types offer alluring performance benefits, but we find the
-% restrictions on dynamically-typed code unacceptable.\footnote{The requirement
-% that all values come with a precise type is easier to meet in a nominal
-% object-oriented language, in which every value is an instance of a class and
-% every class has 
-% }
- 
-% In this proposal, we aim for stronger guarantees. (than erasure)
-
-
-% - - -
-% 
-% Began with a capable implementation of migratory typing; namely, Typed Racket.
-% That proof-of-concept back in 2006 had matured to support all kinds of Racket programs.
-% It also clearly had performance troubles, identified by users around the world.
-% 
-% The question was, how bad is performance?
-% To answer, we developed a method and conducted an evaluation.
-% The results were quite bad, inspired a lot of improvements, and are still a challenge today.
-% 
-% Meanwhile, other groups explored migratory typing in other contexts.
-% Transient Reticulated particularly interesting.
-% We adapted the evaluation method to Transient.
-% Findings --- on completely different benchmarks --- were encouraging in a big (order of magnitude) way.
-% 
-% Compared Transient style to Typed Racket style on Racket programs.
-% Performance results confirm findings from the Transient-alone study.
-% 
-% Developed models to state and prove properties for each.
-% Different type soundness!
-% Whats more, different about trusting the types.
-% TR-style is a complete monitor but Transient-style is not.
 
 
