@@ -14,7 +14,7 @@ Current:
 - Amal
 - Shriram
 - Fritz
-- 
+- Sam
 
 TODO:
 - [ ] call Zeina and ask how is Jens about giving feeback
