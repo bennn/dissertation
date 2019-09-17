@@ -44,7 +44,7 @@ My first task as a Ph.D. student was thus to develop a method to assess the
 
 \subsubsection{Exhaustive Method}
 
-In 2015, \citeN{tfdfftf-ecoop-2015} measured the performance impact of gradual typing on
+In 2015, \citet{tfdfftf-ecoop-2015} measured the performance impact of gradual typing on
  two object-oriented programs.
 Their key insight was to begin with a fully-typed program and measure the
  running time of all gradually-typed configurations obtained by removing
@@ -134,7 +134,7 @@ The curve for version 6.4 lies above the others, meaning the percent of
 \label{fig:snake-jfp}
 \end{figure}
 
-\citeN{fgsfs-oopsla-2018} later contributed a major change to the contract system:
+\citet{fgsfs-oopsla-2018} later contributed a major change to the contract system:
  collapsible higher-order contracts.
 Once again, the exhaustive evaluation method was one of the ways that we
  measured the impact of the new contracts.
@@ -206,7 +206,7 @@ In sum, we needed a side-by-side comparison of transient and natural to
 % - same method! aha
 % - 
 
-Building on the \citeN{mf-toplas-2009} multi-language approach, we designed
+Building on the \citet{mf-toplas-2009} multi-language approach, we designed
  a model of a mixed-typed language.
 The model combines a typical statically-typed language and an independent
  dynamically-typed language.
@@ -353,6 +353,24 @@ In a fully-typed program, natural is likely the best choice;
 
 \subsubsection{Interlude: User Study}
 
+\citet{tgpk-dls-2018} leverage the common understanding from the model
+ to create a survey about different gradual typing semantics.
+
+The survey follows a mystery languages outline.
+Participants are faced with a series of programs written in a hypothetical
+ syntax.
+Each program comes with two to three possible outcomes.
+The question is whether each outcome is liked and/or expected; to be precise
+ there are four choices: liked and expected, dislike and expected,
+ liked and unexpected, dislike and unexpected.
+% (Few questions received zero responses in a category.)
+
+The survey demonstrates that the model is useful.
+The responses suggest a preference for honest types.
+
 
 \subsubsection{Honest vs. Lying Types}
+
+
+
 
