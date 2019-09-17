@@ -13,7 +13,7 @@ Current:
 - Jan
 - Amal
 - Shriram
-- 
+- Fritz
 - 
 
 TODO:
