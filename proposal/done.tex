@@ -350,6 +350,9 @@ In a fully-typed program, natural is likely the best choice;
  in partially typed programs, however, transient can have far better
  performance.
 
+Now that we have measured performance, we can ask whether a combined system
+ can integrate benefits from each style.
+
 
 \subsubsection{Interlude: User Study}
 
@@ -368,9 +371,37 @@ The question is whether each outcome is liked and/or expected; to be precise
 The survey demonstrates that the model is useful.
 The responses suggest a preference for honest types.
 
+% TODO can segue into "need characterization"
+
 
 \subsubsection{Honest vs. Lying Types}
+% what did we learn?
 
+The model makes it clear that the semantic choices affect behavior.
+The differences are not explained by type soundness; can demonstrate
+ with a compromise semantics (co-natural, amnesic).
 
+% cannot trust types example?
 
+To fix, adapted insights from the world of higher-order contracts to migratory
+ typing.
+A contract system satisfies complete monitoring if it is possible to attach
+ a contract to every channel of communication between parties.
+The practical significance is that complete monitoring offers an explanation
+ for every contract violation; the system can pinpoint the faulty boundary.
+
+A mixed-typed language satisfies complete monitoring if every channel of
+ communication between typed and untyped components is protected with
+ appropriate type-checks.
+This means that programmers can trust the types,
+ whether they work on typed or untyped code;
+ a system that satisfies complete monitoring gives types an indefinite extent.
+
+Complete monitoring formalizes the intuitive notions of honest and lying types.
+Well-monitored types cannot lie.
+
+On the other hand, complete monitoring is apparently expensive.
+
+Now that we can state complete monitoring theorems, we can ask whether a combined
+system satisfies them.
 
