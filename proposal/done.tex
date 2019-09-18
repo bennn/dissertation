@@ -1,6 +1,9 @@
 % 2019-09-16
+%
 % Header can be about me and past tense: I have done X Y Z
+%
 % Body should describe results in the present tense, normal technical style
+%
 % The end of a section may use self-cites, and those may use past tense to
 %  say "I did ...."
 
@@ -13,36 +16,58 @@ The performance studies motivate a combination of \tdeep{} and \tshallow{}
 The comparison studies provide a theoretical model for defining the
  combination and understanding its formal guarantees.
 
+% others = their they
+%
+% mine = our we
+
+% This section reviews my prior work and explains how each project contributes
+%  to the thesis question.
+
 
 \subsection{Performance Evaluation}
 
-I began my Ph.D. studies in Fall 2014.
-At this time, Typed Racket was a mature implementation of natural-style
- migratory typing.
-Its type system understood compositional type tests (via occurrence typing),
- variable-arity polymorphism,
- delimited continuations,
- first-class structural classes,
- and many idioms specific to Racket programs.
-Its compiler could optimize-away safety checks thanks to the static types.
-It shipped with the Racket main distribution.
-And it came with a base environment of useful types for many core
- libraries.
+Migratory typing promises the ability to mix typed and untyped code.
+A performance evaluation for a migratory typing system must, therefore,
+ evaluate mixed-typed programs.\footnote{\shorturl{https://www.}{ccs.neu.edu/home/asumu/papers/stop15-tfgnvf.pdf}}
 
-Programmers had begun using Typed Racket in various applications.
-A few programmers noticed, however, that types could slow code down.
-Messages appeared on the Racket mailing list documenting overheads
- of TODO and even TODO in typed code.
-Invariably, these typed modules mixed with untyped code.
+\citet{tfdfftf-ecoop-2015} present the first systematic evaluation
+ of a mixed-typed language.
+The paper applies a method to two fully-typed programs consisting of four
+ modules; for each program, this method demands the generation and
+ measurement of $2^4$ partially-typed configurations.
+The paper tabulates the results of this evaluation in two lattices showing
+ the fully-untyped configuration on the bottom and fully-typed on top
+ (\figureref{fig:takikawa-lattice}),
+ and thereby shows the running times a programmer
+ might see if they added the same types in an arbitrary manner.
+Using these lattices, the paper discusses the worst-case performance
+ and the existence of bottom-up paths through the lattice that avoid slowdowns.
 
-Prior work on Typed Racket had acknowledged that the performance of mixed-typed
- programs could be an issue.
-Users experiences affirmed that performance was a crucial issue.
-My first task as a Ph.D. student was thus to develop a method to assess the
- performance impact of a migratory typing system.
+\begin{figure}[h]
+  \begin{tabular}{c@{\qquad\qquad}c}
+  \includegraphics[width=0.30\columnwidth]{src/takikawa-lattice-acquire.png}
+    &
+  \includegraphics[width=0.30\columnwidth]{src/takikawa-lattice-gofish.png}
+  \end{tabular}
+  \caption{Performance results for two Typed Racket programs~\cite{{tfdfftf-ecoop-2015}}}
+  \label{fig:takikawa-lattice}
+\end{figure}
+
+The method clearly needs further refinement; a lattice presents a lot
+ of information, but does little to convey insights.
+Furthermore, the exhaustive approach to data collection cannot handle large
+ programs.
+To summarize, the method raises three challenging questions:
+ \begin{itemize}
+   \item Is there a concise way to summarize the performance of a program?
+   \item Can the method compare different implementations of migratory typing?
+   \item Can the method be adapted to programs with a large number (+20) of configurations?
+ \end{itemize}
+My work on performance evaluation developed answers to these questions.
 
 
 \subsubsection{Exhaustive Method}
+% D-deliverable
 
 In 2015, \citet{tfdfftf-ecoop-2015} measured the performance impact of gradual typing on
  two object-oriented programs.
@@ -56,7 +81,7 @@ By measuring all configurations, the method enables general claims about
  migratory typing---which, after all, advertises the freedom to mix typed
  and untyped code.
 
-This method for collecting data motivated a larger study.\footnote{\shorturl{https://www.}{ccs.neu.edu/home/asumu/papers/stop15-tfgnvf.pdf}}
+This method for collecting data motivated a larger study.
 I helped develop (and measure) 12 functional benchmark programs, ranging in
  size from 30 to 6,000 lines of code, for an evaluation of Typed
  Racket~\cite{tfgnvf-popl-2016}.
@@ -180,6 +205,8 @@ Therefore, we conclude that the method is useful for benchmarks in which we
 
 
 \subsection{Models of Migratory Typing}
+
+
 
 Our evalution of Transient Reticulated prompted further study of alternatives
  to \tdeep{} types.
