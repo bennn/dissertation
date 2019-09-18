@@ -57,7 +57,7 @@ The method clearly needs further refinement; a lattice presents a lot
  of information, but does little to convey insights.
 Furthermore, the exhaustive approach to data collection cannot handle large
  programs.
-To summarize, the method raises three challenging questions:
+To summarize, the method raises at least three questions of size and scale:
  \begin{itemize}
    \item Is there a concise way to summarize the performance of a program?
    \item Can the method compare different implementations of migratory typing?
@@ -204,26 +204,31 @@ Therefore, we conclude that the method is useful for benchmarks in which we
  cannot obtain ground-truth results in a practical timeframe.
 
 
-\subsection{Models of Migratory Typing}
+\subsection{Comparative Models}
 
+Models of migratory typing systems come in many varieties---often because
+ the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008}.
+ % TODO cite many more
+These models share the common goal of mixing static and dynamic typing,
+ but realize the goal with different formalizations.
+Unfortunately, the lack of a common model makes it difficult to compare the
+ properties satisfied by each.
 
+\citet{clzv-ecoop-2018} address the diversity with a typed language, \kafka{},
+ that can express different methods of enforcing types.
+The paper uses \kafka{} as a target language for four translations from
+ a mixed-typed surface language; the translations represent natural,
+ concrete, erasure, and transient.
+The paper illustrates the different semantics with examples, but does not
+ provide a formal characterization.
 
-Our evalution of Transient Reticulated prompted further study of alternatives
- to \tdeep{} types.
-On one hand, it was clear from the preliminary evaluation that transient offered
- a different performance tradeoff.
-Overhead typically increased with the total number of type annotations---regardless
- of the particular types or boundaries---but never exceeded a $10$x
- slowdown~\cite{gm-pepm-2018}.
-On the other hand, our experience adding transient types to benchmarks
- did not go as smoothly as our experience with \tdeep{} types.
-If an annotation was incorrect and led to a runtime error, the error message
- rarely helped us find the bug.
-In sum, we needed a side-by-side comparison of transient and natural to
- understand their differences.
-
-% also wondered if there might be other compromises ... but so far found nothing
-% exciting? only monotonic? ... hm yeah we don't have much to say
+For my work on comparing styles of migratory typing, we developed
+ a model that expresses styles as different semantics
+ for a common surface language.
+The common model enabled fair comparisons of properties
+ such as type soundness and complete monitoring.
+Additionally, the model encouraged the design of new semantics for migratory
+ typing.
 
 
 \subsubsection{Apples to Apples Comparison}
