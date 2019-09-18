@@ -66,8 +66,51 @@ To summarize, the method raises at least three questions of size and scale:
 My work on performance evaluation developed answers to these questions.
 
 
-\subsubsection{Exhaustive Method}
+\subsubsection{Summarizing Performance}
 % D-deliverable
+
+Turing's negative answer to the halting problem tells us that a computer
+ program cannot tell the difference between an infinite running time and
+ a very large one.
+This suggests a corresponding law for software developers:
+ all programs that are not ``fast enough'' are equally worthless.
+
+\citet{tfgnvf-popl-2016} use this relevance law to summarize the performance
+ of a migratory typing system.
+If a configuration is fast enough, then it is good.
+Otherwise it is worthless.
+In this way, a performance lattice defines a ratio; namely, the proportion of
+ good configurations.
+A software developer can examine the ratios for a set of benchmarks to
+ assess the performance risk of migratory typing for their own code.
+
+Technically, \citet{tfgnvf-popl-2016} call a configuration \deliverable{D}
+ if its running time is no more than $D$x slower than a baseline running
+ time.\footnote{One useful baseline is the performance of the host language
+ with absolutely no migratory typing.
+ (This may differ from the fully-untyped configuration in a lattice~\cite{gm-pepm-2018}.)
+ Other baselines may prove useful in the future.}
+Given a positive value for $D$, the proportion of \deliverable{D} configurations
+ is the proportion of ``good'' configurations.
+They accommodate varying notions of good performance by combining the results
+ for $D$ between $1$ and $20$ in a plot
+
+ CDF ...
+
+
+To accommodate varying requirments, they present the 
+
+They accommodate varying performance requirements by reporting the percent
+ of \deliverable{D} configurations for $D$ ranging between 1 and 20.
+ 
+
+
+Given a parameter $D$ 
+
+Given a parameter $D$
+
+
+
 
 In 2015, \citet{tfdfftf-ecoop-2015} measured the performance impact of gradual typing on
  two object-oriented programs.
@@ -134,7 +177,7 @@ Even in the rightmost plot, allowing 2 angelic conversion steps, there are
 \end{figure}
 
 
-\subsubsection{Measuring Improvements}
+\subsubsection{Comparing Implementations}
 
 The evaluation of Typed Racket inspired many efforts to improve its performance.
 Sam Tobin-Hochstadt fixed issues in Typed Racket and modified it to produce
@@ -165,7 +208,7 @@ Once again, the exhaustive evaluation method was one of the ways that we
  measured the impact of the new contracts.
 
 
-\subsubsection{Approximate Method}
+\subsubsection{Scaling the Method}
 
 Concurrently with the improvements to Typed Racket, Zeina Migeed and I
  adapted the evaluation method to Transient Reticulated Python~\cite{gm-pepm-2018}.
@@ -229,7 +272,7 @@ The common model enabled fair comparisons of properties
  such as type soundness and complete monitoring.
 Additionally, the model encouraged the design of new semantics for migratory
  typing.
-
+% Need to mention other things? This paragraph should lead into the subsections
 
 \subsubsection{Apples to Apples Comparison}
 
