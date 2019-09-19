@@ -130,43 +130,52 @@ In this case, one conclusion supported by the right-most plot is that
  to at most two extra modules, then 80\% of the configurations can reach
  an acceptable state.
 Once again the key takeaway is not the particular conclusion,
- but the fact that the methods helps answer useful questions.
+ but the fact that the method helps answer useful questions.
 
 
 \subsubsection{Comparing Implementations}
 
 % TODO
+% Can the method compare different implementations of migratory typing?
 
-The evaluation of Typed Racket inspired many efforts to improve its performance.
-Sam Tobin-Hochstadt fixed issues in Typed Racket and modified it to produce
- simpler contracts for common function shapes.
-Robert Bruce Findler greatly reduced the allocation costs of Racket contracts.
-Others, including myself, contributed smaller patches.
+The \deliverable{D} metric enables comparisons of different migratory
+ typing systems.
+If there are two languages that can execute the same program,
+ then the language with better performance is the one that maximizes the
+ number of \deliverable{D} configurations.
+The difference may be plotted by drawing two curves on the same
+ axes.
 
-All told, Typed Racket changed significantly between versions 6.2 (June 2015)
- and 6.4 (February 2016).
-The evaluation method quantified the effect of these changes on
- performance with plot containing multiple \deliverable{D} curves on the same
- axis~\cite{gtnffvf-jfp-2019}.
-To demonstrate, \figureref{fig:snake-jfp} presents curves for the \bm{snake}
- benchmark on Racket 6.2, 6.3, and 6.4.
+\citet{gtnffvf-jfp-2019} use this observation to compare three versions
+ of Racket: v6.2, v6.3, and v6.4.
+Racket~v6.3 contains a few improvements inspired by the performance
+ evaluation of Racket v6.2~\cite{tfgnvf-popl-2016}.
+Racket~v6.4 contains many more changes:
+ it inlines the contract checks for simple typed functions,
+ validates struct predicates with a first-order check (instead of a higher-order wrapper),
+ and reduces the memory overhead of contract in general.
+\Figureref{fig:snake-jfp} shows the effect of these changes on one benchmark.
 The curve for version 6.4 lies above the others, meaning the percent of
  \deliverable{D} configurations is increased for every value of $D$ along
  the $x$ axis.
 
 \begin{figure}[h]
 \includegraphics[width=0.8\columnwidth]{src/snake-jfp.png}
-\caption{Comparing performance across three versions of Typed Racket}
+\caption{Comparing performance across three versions of Typed Racket; the right plot allows one type conversion step}
 \label{fig:snake-jfp}
 \end{figure}
 
-\citet{fgsfs-oopsla-2018} later contributed a major change to the contract system:
+\citet{fgsfs-oopsla-2018} use similar plots to measure the impact of
  collapsible higher-order contracts.
-Once again, the exhaustive evaluation method was one of the ways that we
- measured the impact of the new contracts.
+\citet{gf-icfp-2018} use the plots to compare Typed Racket to a prototype
+ implementation of transient type checks.
 
 
 \subsubsection{Scaling the Method}
+
+% Can the method be adapted to programs with a large number (+20) of configurations?
+
+
 
 Concurrently with the improvements to Typed Racket, Zeina Migeed and I
  adapted the evaluation method to Transient Reticulated Python~\cite{gm-pepm-2018}.
