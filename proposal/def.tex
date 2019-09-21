@@ -1,5 +1,6 @@
 \usepackage{listings}
 \usepackage{graphicx}
+\usepackage{wrapfig}
 
 
 \lstset{
@@ -57,6 +58,7 @@
 \newcommand{\fST}[2]{\STsym(#1, #2)}
 
 \newcommand{\stype}{\tau}
+\newcommand{\svar}{x}
 \newcommand{\svalue}{v}
 \newcommand{\sexpr}{e}
 \newcommand{\sint}{i}
@@ -69,6 +71,8 @@
 \newcommand{\edyn}[2]{\sdyn\,#1~#2}
 \newcommand{\esta}[2]{\ssta\,#1~#2}
 \newcommand{\epair}[2]{\langle #1, #2 \rangle}
+\newcommand{\eapp}[2]{#1~#2}
+\newcommand{\efun}[2]{\lambda #1.\, #2}
 
 \newcommand{\tarr}[2]{#1\!\Rightarrow\!#2}
 \newcommand{\tpair}[2]{#1\!\times\!#2}
