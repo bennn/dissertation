@@ -443,6 +443,25 @@ Technically, co-natural detects more errors than forgetful, which detects
 % in partially typed programs, however, transient can have far better
 % performance.
 
+\subsubsection{A User Study}
+
+\citet{tgpk-dls-2018} use the models to create a survey about semantics
+ for mixed-typed languages.
+The survey employs the common surface syntax and three semantics:
+ natural, erasure, and transient.
+Each question presents one program and 2-3 possible outcomes of running
+ the program.
+Repondents must form an opinion based on two \emph{attitudes}:
+ (1) do they like/dislike the behavior,
+ and (2) do they find it expected/unexpected.
+The two attitudes form a matrix of four possible answers.
+
+The authors administered their survey to three populations:
+ software engineers at a major Silicon Valley technology company;
+ computer science students at a highly selective, private US university;
+ and workers on Mechanical Turk who claimed to have programming experience.
+They found a preference for the natural semantics---and more generally,
+ for enforcing all claims implied by the types---across the populations.
 
 
 \subsubsection{Honest vs. Lying Types}
@@ -511,22 +530,5 @@ In this framework, a semantics satisfies complete monitoring iff it never
 
 % note blame?
 
-
-%\subsubsection{Interlude: User Study}
-%
-%\citet{tgpk-dls-2018} leverage the common understanding from the model
-% to create a survey about different gradual typing semantics.
-%
-%The survey follows a mystery languages outline.
-%Participants are faced with a series of programs written in a hypothetical
-% syntax.
-%Each program comes with two to three possible outcomes.
-%The question is whether each outcome is liked and/or expected; to be precise
-% there are four choices: liked and expected, dislike and expected,
-% liked and unexpected, dislike and unexpected.
-%% (Few questions received zero responses in a category.)
-%
-%The survey demonstrates that the model is useful.
-%The responses suggest a preference for honest types.
 
 
