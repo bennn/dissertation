@@ -420,12 +420,14 @@ Co-natural allocates wrappers for all kinds of structured data---not only
  higher-order values---and thereby reduces the amount of checking at a boundary
  to a tag check.
 Forgetful extends co-natural; if a wrapped value reaches a boundary, a new
- wrapper replaces the existing one.
+ wrapper replaces the existing one.\footnote{The forgetful semantics and its
+  is inspired by forgetful contracts~\cite{g-popl-2015}.}
+Both co-natural and forgetful provide a type soundness guarantee that resembles
+ type soundness for natural.
+They both fail, however, to detect some type violations that natural detects.
+Technically, co-natural detects more errors than forgetful, which detects
+ more errors than transient~\cite{gf-icfp-2018}.
 
-%Both co-natural and forgetful provide a type soundness guarantee that resembles
-% the guarantee for natural, but enforce fewer type guarantees.
-%\citet{gf-icfp-2018} prove an errors-inequality theorem but say no more
- 
 %With the models as a guide, we implemented a transient prototype for a
 % functional subset of Typed Racket~\cite{gf-icfp-2018}.
 %The prototype enabled a systematic comparison of the natural and transient
@@ -445,7 +447,7 @@ Forgetful extends co-natural; if a wrapped value reaches a boundary, a new
 
 \subsubsection{Honest vs. Lying Types}
 
-The different type soundness theorems for the natural and transient semantics
+The different type soundness theorems for natural and transient
  demonstrate their different guarantees for typed code.
 Clearly, natural-typed code can trust full types and transient-typed code
  can trust top-level type constructors.
@@ -466,8 +468,8 @@ A natural semantics halts the program when the pair reaches the boundary to
  typed code.
 A transient semantics lets the pair cross into typed code, and out to the
  untyped client.
-Both behaviors are permitted by type soundness;
- after all, soundness for untyped code has nothing to say about the type of a
+Both behaviors are permitted by type soundness.
+After all, soundness for untyped code has nothing to say about the type of a
  result value.
 But the transient behavior means that untyped code cannot trust a typed
  API.
@@ -492,8 +494,22 @@ A mixed-typed language satisfies complete monitoring if all communication
  across boundaries factors through runtime checks.
 If so, then a pair value cannot smuggle a string such as $\estring{hello}$
  across a boundary that expects a number.
-The natural semantics satisfies complete monitoring and the transient
- semantics does not.
+
+The key to proving a complete monitoring theorem is to enrich the syntax of
+ the models with ownership annotations.
+Ownership annotations state which components are responsible for the
+ expressions and values in a program.
+When a value flows across a boundary, its ownership changes depending on
+ the type checks that occur.
+If the checks fully validate the boundary type, the value replaces its previous
+ owners with a new one.
+Otherwise, the value keeps the previous owners and gains a new owner.
+In this framework, a semantics satisfies complete monitoring iff it never
+ lets a value accumulate more than one owner.
+%A natural semantics satisfies complete monitoring and a transient
+% semantics does not.
+
+% note blame?
 
 
 %\subsubsection{Interlude: User Study}
