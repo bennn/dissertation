@@ -444,54 +444,73 @@ Forgetful extends co-natural; if a wrapped value reaches a boundary, a new
 
 
 \subsubsection{Honest vs. Lying Types}
-% what did we learn?
 
-The model makes it clear that the semantic choices affect behavior.
-The differences are not explained by type soundness; can demonstrate
- with a compromise semantics (co-natural, amnesic).
+The different type soundness theorems for the natural and transient semantics
+ demonstrate their different guarantees for typed code.
+Clearly, natural-typed code can trust full types and transient-typed code
+ can trust top-level type constructors.
+Type soundness fails, however, to describe their different guarantees for
+ untyped code.
+Suppose that one untyped component $E$ expects a pair of numbers from a
+ typed component;
+ suppose further that the typed component provides a pair that it receives
+ from a different untyped component---and that the pair contains strings
+ rather than integers.
 
-% cannot trust types example?
+\[
+  E[\esta{(\tpair{\tint}{\tint})}{(\edyn{(\tpair{\tint}{\tint})}{\epair{\estring{hello}}{\estring{world}}})}]
+\]
 
-To fix, adapted insights from the world of higher-order contracts to migratory
- typing.
-A contract system satisfies complete monitoring if it is possible to attach
- a contract to every channel of communication between parties.
-The practical significance is that complete monitoring offers an explanation
- for every contract violation; the system can pinpoint the faulty boundary.
+\noindent
+A natural semantics halts the program when the pair reaches the boundary to
+ typed code.
+A transient semantics lets the pair cross into typed code, and out to the
+ untyped client.
+Both behaviors are permitted by type soundness;
+ after all, soundness for untyped code has nothing to say about the type of a
+ result value.
+But the transient behavior means that untyped code cannot trust a typed
+ API.
 
-A mixed-typed language satisfies complete monitoring if every channel of
- communication between typed and untyped components is protected with
- appropriate type-checks.
-This means that programmers can trust the types,
- whether they work on typed or untyped code;
- a system that satisfies complete monitoring gives types an indefinite extent.
+In general, natural types are \emph{honest}\/ because a type is a valid
+ claim about all future behaviors of a value.
+If natural accepts a value at a certain type, then it has either fully-checked
+ the value or wrapped it in a monitoring proxy,
+Transient types are \emph{lying}\/ to most of the program because a type is
+ a valid claim only in a specific context.
+For example, the type $(\tpair{\tint}{\tint})$ above in only enforced in
+ the typed component; if a different component relies in this type, it
+ may be misled into an error or---worse yet---a silent failure.
 
-Complete monitoring formalizes the intuitive notions of honest and lying types.
-Well-monitored types cannot lie.
+\citet{gfd-oopsla-2019} formalize these intuitions with a complete
+ monitoring theorem.
+Complete monitoring comes from prior work on higher-order contracts;
+ in brief, a contract system satisfies complete monitoring if every channel
+ of communication between components is able to be monitored
+ by a contract~\cite{dtf-esop-2012}.
+A mixed-typed language satisfies complete monitoring if all communication
+ across boundaries factors through runtime checks.
+If so, then a pair value cannot smuggle a string such as $\estring{hello}$
+ across a boundary that expects a number.
+The natural semantics satisfies complete monitoring and the transient
+ semantics does not.
 
-On the other hand, complete monitoring is apparently expensive.
 
-Now that we can state complete monitoring theorems, we can ask whether a combined
-system satisfies them.
-
-
-\subsubsection{Interlude: User Study}
-
-\citet{tgpk-dls-2018} leverage the common understanding from the model
- to create a survey about different gradual typing semantics.
-
-The survey follows a mystery languages outline.
-Participants are faced with a series of programs written in a hypothetical
- syntax.
-Each program comes with two to three possible outcomes.
-The question is whether each outcome is liked and/or expected; to be precise
- there are four choices: liked and expected, dislike and expected,
- liked and unexpected, dislike and unexpected.
-% (Few questions received zero responses in a category.)
-
-The survey demonstrates that the model is useful.
-The responses suggest a preference for honest types.
-
-% TODO can segue into "need characterization"
+%\subsubsection{Interlude: User Study}
+%
+%\citet{tgpk-dls-2018} leverage the common understanding from the model
+% to create a survey about different gradual typing semantics.
+%
+%The survey follows a mystery languages outline.
+%Participants are faced with a series of programs written in a hypothetical
+% syntax.
+%Each program comes with two to three possible outcomes.
+%The question is whether each outcome is liked and/or expected; to be precise
+% there are four choices: liked and expected, dislike and expected,
+% liked and unexpected, dislike and unexpected.
+%% (Few questions received zero responses in a category.)
+%
+%The survey demonstrates that the model is useful.
+%The responses suggest a preference for honest types.
 
 
