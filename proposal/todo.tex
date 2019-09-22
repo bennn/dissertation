@@ -47,67 +47,69 @@ Time-permitting, we may explore further extensions.
 
 \subsubsection{Primary Goals}
 
-The current partial support for \tshallow{} migratory typing must be extended to accomodate all Typed Racket types
- that appear in the functional GTP benchmarks.
-Each type needs a matching tag-check.
-Some tag-checks are easy to define; for example, the proper tag-check for the \racketcode{Symbol} type is the \racketcode{symbol?} predicate.
-Other types present a choice:
- should the check for \racketcode{Listof} ensure a proper list?
- should the check for \racketcode{->*} validate arity and keyword arguments?
-We plan to initially answer ``yes'' to both questions, and generally to check
- all possible first-order properties.
-
-The implementation must avoid the Racket contract library.
-Contract combinators have administrative overhead.
-Tag-checks must be realized with simple Racket code wherever possible to
-improve run-time performance and take advantage of compiler optimizations.
-
-The implementation must interact safely with Typed Racket.
-Statically, \tshallow{} and \tdeep{}-typed code must be able to share type definitions.
-Dynamically, \tdeep{}-typed code must protect itself against \tshallow{} values.
-No combination of \tdeep{} and \tshallow{} code can lead to a memory error.
-
-\tShallow{}-typed code must compile efficiently.
-Some overhead relative to \tdeep{}-Typed Racket may arise from the pass that
-rewrites typed code.
-Anything more than a 10\% slowdown, however, must be studied and explained.
+\begin{itemize}
+  \item
+    Extend the current partial support for \tshallow{} migratory typing
+     to accomodate all Typed Racket types that appear in the functional GTP
+     benchmarks.
+    Each type needs a matching tag-check.
+    Some tag-checks are easy to define; for example, the proper tag-check for
+     the \racketcode{Symbol} type is the \racketcode{symbol?} predicate.
+    Other types present a choice:
+     should the check for \racketcode{Listof} ensure a proper list?
+     should the check for \racketcode{->*} validate arity and keyword arguments?
+    We plan to initially answer ``yes'' to both questions, and generally to check
+     all possible first-order properties.
+  \item
+    Avoid the Racket contract library.
+    Contract combinators have administrative overhead.
+    Tag-checks must be realized with simple Racket code wherever possible to
+     improve run-time performance and take advantage of compiler optimizations.
+  \item
+    Interact safely with Typed Racket.
+    Statically, \tshallow{} and \tdeep{}-typed code must be able to share type definitions.
+    Dynamically, \tdeep{}-typed code must protect itself against \tshallow{} values.
+  \item
+    Provide relatively fast compilation times for \tshallow{}-typed racket.
+    Some overhead relative to \tdeep{}-Typed Racket may arise from the pass that
+    rewrites typed code.
+    Anything more than a 10\% slowdown, however, must be studied and explained.
+\end{itemize}
 
 
 \subsubsection{Secondary Goals}
 
-Add support for class and object types.
-These types need a tag check, but there are many question about how \tdeep{}ly such
- checks should explore compatible values.
-One idea is to mimic the first-order checks done by the contract system;
- the question is whether those checks suffice for soundness.
-% TODO fact-check
-%  alt: traverse hierarchy?
-
-Investigate a static analysis to remove tag checks.
-Typed Racket employs occurrence typing to propagate information about type-tests.
-A tag-check is a simple type test; its success has implications for the rest of
-the program.
-For example, if a block of code projects an element of an immutable pair twice in a row,
- then only the first projection should go through a tag check.
-The completion of this goal requires: the design of a static analysis,
- an implementation within the Typed Racket compiler,
- and an evaluation to test whether the analysis saves time in realistic programs.
-
-Adapt the Typed Racket optimizer.
-The current implementation of \tshallow{} types is incompatible with the Typed
-Racket optimizer.
-For one, the implementation outputs code that the optimizer cannot handle.
-More significantly, some optimization passes are inappropriate for \tshallow{}-typed
-code (because the passes rely on \tdeep{} type information).
-\tShallow{}-typed code may still benefit from simple optimizations, however,
-so it is worthwhile to try reusing the optimizer.
-For example, it may specialize an application of \racketcode{+} to expect unboxed numbers.
-
-Compare performance with and without contracts.
-If an early implementation of \tshallow{} tag checks relies on the contract library,
-then it would be useful to measure the performance delta after removing contracts.
-The data would be a useful reference for other clients of the contract library,
-and may reveal potential improvements to contracts.
+\begin{itemize}
+  \item
+    Add support for class and object types.
+    These types need a tag check, but there are many question about how such
+     checks should explore compatible values.
+    One idea is to mimic the first-order checks done by the contract system;
+     the question is whether those checks suffice for soundness.
+  \item
+    Investigate a static analysis to remove tag checks.
+    Typed Racket employs occurrence typing to propagate information about type-tests.
+    A tag-check is a simple type test, and the success of one check has implications
+     for the rest of the program.
+    For example, if a block of code projects an element of an immutable pair twice in a row,
+     then only the first projection should go through a tag check.
+  \item
+    Adapt the Typed Racket optimizer.
+    The current implementation of \tshallow{} types is incompatible with the Typed
+     Racket optimizer.
+    For one, the implementation outputs code that the optimizer cannot handle.
+    More significantly, some optimization passes are inappropriate for \tshallow{}-typed
+     code because they rely on \tdeep{} type information.
+    \tShallow{}-typed code may still benefit from simple optimizations, however,
+     so it is worthwhile to try reusing the optimizer.
+    For example, it may specialize an application of \racketcode{+} to expect unboxed numbers.
+  \item
+   Compare performance with and without contracts.
+   If an early implementation of \tshallow{} tag checks relies on the contract library,
+   then it would be useful to measure the performance delta after removing contracts.
+   The data would be a useful reference for other clients of the contract library,
+   and may reveal potential improvements to contracts.
+\end{itemize}
 
 
 \subsection{Challenge 3: Evaluation}
@@ -117,37 +119,37 @@ and may reveal potential improvements to contracts.
 %   well its huge and hard, possibly, to understand b/c 2^N for each node
 %   but ok, DON'T make this a stated goal
 
-An evaluation must test the hypothesis that a combination of \tdeep{} and \tshallow{}
- types is better than either one individually.
+The third challenge is to test the hypothesis that a combination of \tdeep{}
+ and \tshallow{} types is better than either one individually.
 There are a few ways that a programmer could benefit:
  changing one module from \tdeep{} to \tshallow{} may reduce the cost of type boundaries,
  changing a collection of modules from \tshallow{} to \tdeep{} may remove many tag checks,
- and/or changing a library from \tdeep{} to \tshallow{} may improve the performance of untyped programs.
+ and changing a library from \tdeep{} to \tshallow{} may improve the performance of untyped programs.
 In particular, we posit that changing the Racket math library to use \tshallow{}
 types will improve its performance in untyped programs without ``shifting the problem''
 to \tdeep{}-typed clients.
 We expect all clients to suffer moderate overhead after the change instead
-of the +25x pathologies that programmers currently need to deal with.\footnote{\shorturl{https://}{docs.racket-lang.org/math/array.html}}
+of the +25x pathologies that programmers currently face.\footnote{\shorturl{https://}{docs.racket-lang.org/math/array.html}}
 
 We plan to use the GTP benchmark programs in a systematic performance evaluation.
 It is unclear, however, how to conduct such an evaluation.
+We propose two ideas for now.
 
 To test the math library, the existing method suffices:
  convert the math library to be \tshallow{}-typed and measure the performance lattice.
 This same protocol applies to any benchmarks that depend on typed libraries.
 
 To test the benefits for program authors, who now have three choices for every
-module, we propose a path-based metric.
+module, we propose a path-based metric based on two assumptions.
 First, we assume that authors are seeking fully-typed programs.
 Second, we assume that the authors are seeking \tdeep{}-typed programs.
-The question is what percentage of paths through the \tdeep{}-typed performance
-lattice have no configurations that exceed a certain overhead, say 10x, given
-the option at each step of converting some modules to \tshallow{} types.
-
+For the evaluation, we ask what percentage of paths through the \tdeep{}-typed performance
+ lattice have no configurations that exceed a certain overhead, say 10x, given
+ the option at each step of converting some modules to \tshallow{} types.
 The idea is that a programmer moves up the lattice by adding type annotations
-to one module.
+ to one module at a time.
 If, at any step, \tdeep{} types lead to unacceptable overhead, the programmer can
-switch to \tshallow{} (since both use the same static types).
+ switch to \tshallow{} because both use the same static types.
 Once the programmer has added ``enough'' types, switching back to \tdeep{} should
 offer a performance boost (in addition to the stronger guarantees of \tdeep{} types).
 
