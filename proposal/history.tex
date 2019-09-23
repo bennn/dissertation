@@ -1,13 +1,13 @@
 A migratory typing system adds static types to a
 dynamically-typed host language.
-At a minimum, the addition requires a static type checker and an extended
+At a minimum, the addition requires a static type checker and
 syntax to accomodate mixed-typed code.
 If the types are intended as claims about the kinds of values that
 flow through a program at run-time, then the addition also requires a method
 of enforcing types.
 
-Typed Racket~\cite{tf-popl-2008} is one example of a migratory typing system; it adds
-a new language, \racketcode{\#lang typed/racket}, to Racket.
+Typed Racket~\cite{tf-popl-2008} is one example of a migratory typing system.
+It adds a new language, \racketcode{\#lang typed/racket}, to Racket.
 The language accepts type-annotated Racket programs,
 validates the annotations with a type checker,
 and enforces the annotations with higher-order contracts.
@@ -18,14 +18,15 @@ and a game player.
 The typed module at the bottom gives the player five chances to submit a
 correct guess.
 
-Technically, both the guessing game and the player are represented as functions
-and the typed driver module assigns a static type to each function.
+The typed driver module assigns a static type to the untyped game and
+ game player.
 At compile-time, the type checker validates the contents of the driver module
-assuming that the types assigned to the untyped functions are correct.
+ assuming that the types assigned to these untyped functions are correct.
 At run-time, higher-order contracts dynamically enforce the claims in the types.
-Thanks to the contracts, these types are kept honest---if a different player
-function were to submit a string as a guess, a contract violation would halt
-the program.
+Thanks to the contracts, these types are kept honest.
+If a different player function were to submit a string as a guess, a contract
+ violation would halt the program and direct the programmer to the boundary
+ between the typed driver and the untyped player.
 
 \begin{figure}[h]
   \begin{minipage}[t]{0.45\columnwidth}
@@ -74,28 +75,28 @@ the program.
 \end{figure}
 
 In theory, Typed Racket lets programmers freely mix typed and untyped modules.
-The maintainer of a large untyped codebase may add types to any
- one module while leaving the rest untyped.
+Imagine a large, untyped codebase;
+ its maintainers may add types to any single module while leaving the rest
+ untyped to arrive at a new, runnable program.
 After the conversion, the new module benefits from static type checking
- and type-driven compiler optimizations; the full mixed-typed codebase can
- be run without further changes.
-Running the code may reveal a dynamic mismatch; in particular, an untyped value
- that flows into the newly-typed module may fail to live up to the type annotations.
-If so, the program halts and the programmer can fix the types
- and/or the untyped code accordingly.
-Adding types thus leads to incremental improvements.
+ and type-driven compiler optimizations.
+Furthermore, running the new program may reveal a dynamic mismatch between
+ the type annotations and an untyped input value.
+If so, the error message from the mismatch points to the faulty code.
+Adding types thus helps improve the codebase incrementally.
 
 In practice, a programmer's freedom to add types is severly limited by
  the run-time cost of type enforcement.
-Adding types to one module adds a contract boundary to its neighbors.
+Adding types to one module adds a contract boundary to its neighbors;
+ these boundaries may add overhead throughout the program.
 When two modules communicate through a boundary, they may experience three kinds
  of performance overhead.
-First, there is the obvious cost of checking every value that crosses the
+First, there is the obvious overhead of checking every value that crosses the
  boundary.
 Second, a higher-order boundary must allocate a new wrappers to constrain the
  future behavior of any values that cross it.
 Third, wrapped values suffer from a layer of indirection.
-These costs can dramatically increase the running time of a program
+These overheads can dramatically increase the running time of a program
  (\figureref{fig:max-overhead}).
 Clearly, keeping types honest may impose a huge cost.
 
@@ -121,14 +122,14 @@ With a few exceptions,\footnote{Like types
  concrete, erasure, and transient.
 
 Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
- strategy.
+ strategy~\cite{todo}.
 A natural semantics carefully guards the boundaries between typed and untyped
  code by wrapping higher-order values in proxies and by eagerly
  checking/traversing other data.
-For example, if a natural language expects a list of numbers then it shall
- check every element of an incoming list.
-If a natural language expects a function, it shall create a proxy that
- protects future inputs and validates future results.
+For example, if a natural language expects a list of numbers then it
+ checks every element of an incoming list.
+If a natural language expects a function, it creates a proxy around an incoming
+ function to protects future inputs and validate future results.
 % On one hand, this strategy lets typed code interact with arbitrary values and
 %  ensures that every untyped value completely matches all types associated to it.
 % On the other hand, it requires many run-time checks.
@@ -136,12 +137,12 @@ If a natural language expects a function, it shall create a proxy that
 A \emph{concrete}\/ migratory typing system comes with two invariants.
 First, only statically-typed code can create new values.
 Second, every value has an immutable and precise type label.
-In a run-time system that enforces these invariants, types can be kept honest
+If a run-time system enforces these invariants, then types can be kept honest
  through label checks.
 For example, if a typed function expects a vector of integers and receives
- a value from a dynamically-typed context, it can check whether the value's
- label is a subtype of the expected type.
-The value is safe to use if and only if the label is ok.
+ a value from a dynamically-typed context, the function can check whether the
+ value's label is a subtype of the expected type;
+ the value is safe to use if and only if the label is ok.
 
 An \emph{erasure}\/ migratory typing system ignores types at run-time.
 Typed code benefits from static type checking, but behaves exactly the same
@@ -158,28 +159,32 @@ In typed code, every elimination form and every boundary to untyped code
  is protected with a tag check.
 Each tag check matches the top-level shape of a value againt the outermost
  constructor of the expected type; for example, the tag check for a
- list of lists of numbers accepts any list---no matter the contents.
+ list of numbers accepts any list---no matter the contents.
 In untyped code, there are no checks.
-Transient types are not honest; however, they protect typed code from tag
- errors.
+Transient types are not honest; however, they protect typed code from simple
+ tag errors such as adding an integer to a function.
 
 The existence of different approaches indicates a conflict between the theory
  and practice of migratory typing.
 Honest types are ideal from a theoretical perspective, but require either
  sophisticated run-time checks or strict limits on the expressiveness of
- untyped code.
+ untyped code.\footnote{The Pycket team has significantly improved the performance
+  of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017}.
+  We are exploring complementary improvements.}
 Erased types are the polar opposite, as they require no run-time support
  and sacrifice all guarantees.
 If researchers can do no better than erasure, then the theory of
  type-sound migratory typing is a dead end.
-Transient types suggest a compromise; however, they can mislead a programmer
- and the transient checking strategy imposes overhead on all typed code.
-By contrast, natural types are only expensive when typed and untyped code interact.
-To illustrate, \figureref{fig:icfp-bars} compares the performance improvement
+Transient types explore a compromise between guarantees and performance;
+ however, they suffer major limitations.
+For one, the transient guarantees are so weak that types can mislead
+ programmers trying to understand a faulty program.
+Second, the transient type enforcement strategy adds overhead to all typed code;
+ by contrast, natural types are only expensive when typed and untyped code interact.
+To illustrate the differences on fully-typed programs,
+ \figureref{fig:icfp-bars} compares the performance improvement
  in fully-typed Typed Racket code over untyped to the improvement in a
- transient prototype.
-Evidently, natural types have better performance in fully-typed programs,
- suggesting the need for a combination.
+ transient Racket prototype.
 
 \begin{figure}[h]
   % TODO log scale, add X for overhead, darker stripes
@@ -188,4 +193,7 @@ Evidently, natural types have better performance in fully-typed programs,
   \label{fig:icfp-bars}
 \end{figure}
 
+\noindent
+The complementary strengths of natural and transient suggest the need for a
+ combination.
 
