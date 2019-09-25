@@ -8,8 +8,8 @@
 %  say "I did ...."
 
 My research to date has focused on
- understanding the performance challenges for natural
- and comparing natural to other approaches.
+ (1) understanding the performance challenges for natural
+ and (2) comparing natural to other approaches.
 These efforts have led up to the above thesis question.
 The performance studies motivate a combination of \tdeep{} and \tshallow{}
  types, and suggest methods to empirically validate the result.
@@ -29,6 +29,9 @@ The comparison studies provide a theoretical model for defining the
 Migratory typing promises the ability to mix typed and untyped code.
 A performance evaluation for a migratory typing system must, therefore,
  evaluate mixed-typed programs.\footnote{\shorturl{https://www.}{ccs.neu.edu/home/asumu/papers/stop15-tfgnvf.pdf}}
+% Prior work did not measure mixed-typed programs~\cite{rsfbv-popl-2015,vss-popl-2017}.
+% - rzv-ecoop-2015 do not measure code with runtime checks (sec 7.2, end)
+% - aft-dls-2013 have mixed-typed variations of two benchmarks (sec 6.1)
 
 \citet{tfdfftf-ecoop-2015} present the first systematic evaluation
  of a mixed-typed language.
@@ -57,7 +60,7 @@ The method clearly needs further refinement; a lattice presents a lot
  of information, but does little to convey insights.
 Furthermore, the exhaustive approach to data collection cannot handle large
  programs.
-To summarize, the method raises at least three questions of size and scale:
+In summary, the method raises at least three questions of size and scale:
  \begin{itemize}
    \item Is there a concise way to summarize the performance of a program?
    \item Can the method compare different implementations of migratory typing?
@@ -87,16 +90,16 @@ Our method of summarizing the performance in an exponentially-large set
 If a configuration meets a fixed performance requirement, then it is good.
 Otherwise it is worthless.
 With this binary classification method, the performance of a mixed-typed
- program may be summarized with a ratio; namely,
+ program may be summarized by a single ratio; namely,
  the proportion of good configurations.
 Likewise, a sequence of benchmarks may be summarized with a sequence of ratios.
 These ratios can help software developers assess the performance risk of
  migratory typing.
 
-Technically, \citet{tfgnvf-popl-2016} call a configuration \deliverable{D}
+Technically, a configuration is \deliverable{D}
  if its running time is no more than $D$x slower than the baseline performance
  with no migratory typing.\footnote{In Racket, the fully-untyped configuration
- is an appropriate baseline. In Reticulated Python, the fully-untyped configuration
+ is an appropriate baseline. In transient Reticulated Python, the fully-untyped configuration
  run via Python (not via Reticulated) is an appropriate baseline~\cite{gm-pepm-2018}.}
 Given a positive number $D$, the proportion of \deliverable{D} configurations
  is exactly the proportion of ``good'' configurations described above.
@@ -117,7 +120,7 @@ The key takeaway is that the plot answers an important question and does
          the vertical lines mark $D=3$ and $D=10$.
          The $y$-axis counts configurations; the dashed horizontal line marks
          $60$\% of all configs.
-         The thick blue line is the number of \deliverable{x} configs.}
+         The thick blue line is the number of \deliverable{x} configurations.}
 \label{fig:snake-popl}
 \end{figure}
 
@@ -128,8 +131,8 @@ For example, the two other plots in \figureref{fig:snake-popl}
  conversion steps.
 In this case, one conclusion supported by the right-most plot is that
  if a $10$x slowdown is acceptable and the client is willing to add types
- to at most two extra modules, then 80\% of the configurations can reach
- an acceptable state.
+ to at most two extra modules, then 80\% of the configurations are within
+ range of an acceptable state.
 Once again the key takeaway is not the particular conclusion,
  but the fact that the method helps answer useful questions.
 
@@ -142,8 +145,6 @@ The \deliverable{D} metric enables comparisons of different migratory
 If there are two languages that can execute the same program,
  then the language with better performance is the one that maximizes the
  number of \deliverable{D} configurations.
-The difference may be plotted by drawing two curves on the same
- axes.
 
 \citet{gtnffvf-jfp-2019} use this observation to compare three versions
  of Racket: v6.2, v6.3, and v6.4.
@@ -152,7 +153,7 @@ Racket~v6.3 contains a few improvements inspired by the performance
 Racket~v6.4 contains many more changes:
  it inlines the contract checks for simple typed functions,
  validates struct predicates with a first-order check (instead of a higher-order wrapper),
- and reduces the memory overhead of contract in general.
+ and reduces the memory overhead of contracts in general.
 \Figureref{fig:snake-jfp} shows the effect of these changes on one benchmark.
 The curve for version 6.4 lies above the others, meaning the percent of
  \deliverable{D} configurations is increased for every value of $D$ along
@@ -164,7 +165,7 @@ The curve for version 6.4 lies above the others, meaning the percent of
 \label{fig:snake-jfp}
 \end{figure}
 
-These plots appear in related work:\footnote{\citet{kat-pldi-2019} plot the
+Similar plots appear in related work:\footnote{\citet{kat-pldi-2019} plot the
  \deliverable{D} configurations in Typed Racket alongside a count based on
  the overhead of a new language, Grift, relative to Racket.
  The latter is not the \deliverable{D} metric because removing all typse from
@@ -185,11 +186,11 @@ Every function/method parameter, function return type, and class field may
  be optionally annotated.
 Unfortunately for the exhaustive method, this freedom means that relatively
  small programs may have a huge number of configurations---counting
- the proportion of \deliverable{D} is impractical for a class with 20 fields.
+ the proportion of \deliverable{D} becomes impractical for a class with 20 fields.
 
 The paper demonstrates, however, that a linear number of random samples can
  approximate the true number of good configurations.
-Intuitively, the result is that the overhead experienced by $N$ developers
+Intuitively, the result says that the overhead experienced by $N$ developers
  provides useful information for the next one to add types to the same program.
 
 To approximate the proportion of \deliverable{D} configurations,
@@ -197,7 +198,7 @@ To approximate the proportion of \deliverable{D} configurations,
  proportion of \deliverable{D} configurations in this sample.
 Repeat for $r$ samples to build a set of proportions.
 Use the set to build a confidence interval, and finally interpret the
- confidence interval to approximate the true deliverable configurations.
+ confidence interval to approximate the true proportion of deliverable configurations.
 
 \citet{gm-pepm-2018} perform an experiment in which $r=10$ is a constant
  and $s = 10 * (F + C)$ is linear in the number of functions $F$ and classes
@@ -212,7 +213,7 @@ Note that this is fewer configurations than Reticulated allows.
 As \figureref{fig:sampling} shows, the confidence intervals provide a tight
  bound on the ground truth.
 
-\begin{figure}[h]
+\begin{figure}[t]
   \includegraphics[width=\columnwidth]{src/sampling.png}
   \caption{Thin blue lines plot \deliverable{D} configurations; thick brown lines plot 95\% confidence intervals}
   \label{fig:sampling}
@@ -232,7 +233,7 @@ They use the same number of samples and same linear sample size, and find
 \citet{gtnffvf-jfp-2019} formally introduce a suite of mixed-typed benchmark
  programs.
 The benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/}}
- and have been used to validate other work on Typed Racket~\cite{gf-icfp-2018,bbst-oopsla-2017}.
+ and have been used to validate other changes to Typed Racket~\cite{gf-icfp-2018,bbst-oopsla-2017}.
 % also Cameron (in submission) + Lukas (in submission)
 
 
@@ -243,10 +244,9 @@ Models of migratory typing systems come in many varieties---often because
  % TODO cite many more
 These models share the common goal of mixing static and dynamic typing,
  but realize the goal with different formalizations.
-Unfortunately, the diversity makes it difficult to compare the
- properties satisfied by each.
+Unfortunately, the diversity makes it difficult to compore models in a scientific manner.
 
-\citet{clzv-ecoop-2018} provide one unified model via a typed language,
+\citet{clzv-ecoop-2018} provide a unified model via a typed language,
  \kafka{}, that can express different methods of enforcing types.
 The paper uses \kafka{} as a target language for four translations from
  a mixed-typed surface language; the translations represent natural,
@@ -414,14 +414,14 @@ Additionally, the models serve as a tool for language design.
 One may develop a new semantics by proposing a new strategy for checking
  the boundaries between typed and untyped components.
 \citet{gf-icfp-2018} present two such variants of the natural semantics,
- dubbed co-natural and forgetful.
-In short, these two bridge the gap between natural and transient.
+ dubbed co-natural and forgetful,
+ that bridge the gap between natural and transient.
 Co-natural allocates wrappers for all kinds of structured data---not only
  higher-order values---and thereby reduces the amount of checking at a boundary
  to a tag check.
 Forgetful extends co-natural; if a wrapped value reaches a boundary, a new
  wrapper replaces the existing one.\footnote{The forgetful semantics and its
-  is inspired by forgetful contracts~\cite{g-popl-2015}.}
+  type soundness are inspired by forgetful contracts~\cite{g-popl-2015}.}
 Both co-natural and forgetful provide a type soundness guarantee that resembles
  type soundness for natural.
 They both fail, however, to detect some type violations that natural detects.
@@ -499,8 +499,8 @@ If natural accepts a value at a certain type, then it has either fully-checked
  the value or wrapped it in a monitoring proxy,
 Transient types are \emph{lying}\/ to most of the program because a type is
  a valid claim only in a specific context.
-For example, the type $(\tpair{\tint}{\tint})$ above in only enforced in
- the typed component; if a different component relies in this type, it
+For example, the type $(\tpair{\tint}{\tint})$ above is only enforced in
+ the visible typed component; if a different component relies in this type, it
  may be misled into an error or---worse yet---a silent failure.
 
 \citet{gfd-oopsla-2019} formalize these intuitions with a complete

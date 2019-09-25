@@ -9,7 +9,7 @@ Three challenges stand between the thesis question and an answer:
 \subsection{Challenge 1: Model}
 
 The first challenge is to extend our model of migratory typing to combine
- \tdeep{} and \tshallow{} types in one semantics, rather than parallel
+ \tdeep{} and \tshallow{} types in one semantics, rather than as parallel
  developments.
 The new model must allow the definition of \tdeep{}-typed code,
  \tshallow{}-typed code, and untyped code in the surface syntax.
@@ -21,8 +21,7 @@ The primary goal of the model is to state and prove safety properties for each
  of the three languages in the model.
 \tDeep{} types must be trustworthy in any context; they must satisfy a complete
  monitoring theorem and a standard type soundness theorem.
-\tShallow{} types must match the type-tag of values in \tshallow{}-typed
- contexts.
+\tShallow{} types must match the type-tag of values.
 Untyped code must have well-defined behavior.
 
 A secondary goal of the model is to minimize the amount of run-time checking
@@ -58,8 +57,9 @@ Time-permitting, we may explore further extensions.
     Other types present a choice:
      should the check for \racketcode{Listof} ensure a proper list?
      should the check for \racketcode{->*} validate arity and keyword arguments?
-    We plan to initially answer ``yes'' to both questions, and generally to check
-     all possible first-order properties.
+    We plan to initially answer ``yes'' to both questions and generally to check
+     all possible first-order properties; at least until there is evidence
+     that these checks are too expensive.
   \item
     Avoid the Racket contract library.
     Contract combinators have administrative overhead.
@@ -70,7 +70,7 @@ Time-permitting, we may explore further extensions.
     Statically, \tshallow{} and \tdeep{}-typed code must be able to share type definitions.
     Dynamically, \tdeep{}-typed code must protect itself against \tshallow{} values.
   \item
-    Provide relatively fast compilation times for \tshallow{}-typed racket.
+    Provide relatively fast compilation times for \tshallow{}-Typed racket.
     Some overhead relative to \tdeep{}-Typed Racket may arise from the pass that
     rewrites typed code.
     Anything more than a 10\% slowdown, however, must be studied and explained.

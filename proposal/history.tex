@@ -122,7 +122,7 @@ With a few exceptions,\footnote{Like types
  concrete, erasure, and transient.
 
 Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
- strategy~\cite{todo}.
+ strategy~\cite{mf-toplas-2009,tf-popl-2008}.
 A natural semantics carefully guards the boundaries between typed and untyped
  code by wrapping higher-order values in proxies and by eagerly
  checking/traversing other data.
@@ -170,7 +170,8 @@ Honest types are ideal from a theoretical perspective, but require either
  sophisticated run-time checks or strict limits on the expressiveness of
  untyped code.\footnote{The Pycket team has significantly improved the performance
   of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017}.
-  We are exploring complementary improvements.}
+  We consider the JIT a sophisticated implementation of run-time checks
+  and are exploring complementary improvements.}
 Erased types are the polar opposite, as they require no run-time support
  and sacrifice all guarantees.
 If researchers can do no better than erasure, then the theory of
