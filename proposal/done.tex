@@ -8,12 +8,12 @@
 %  say "I did ...."
 
 My research to date has focused on
- (1) understanding the performance challenges for natural
- and (2) comparing natural to other approaches.
+ (1) understanding the performance challenges for natural~\cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}
+ and (2) analyzing the design space with novel theoretical foundations~\cite{gf-icfp-2018}.
 These efforts have led up to the above thesis question.
 The performance studies motivate a combination of \tdeep{} and \tshallow{}
- types, and suggest methods to empirically validate the result.
-The comparison studies provide a theoretical model for defining the
+ types and suggest methods to validate the result.
+The design-space analysis provides a theoretical model for defining the
  combination and understanding its formal guarantees.
 
 % others = their they
@@ -27,46 +27,16 @@ The comparison studies provide a theoretical model for defining the
 \subsection{Performance Evaluation}
 
 Migratory typing promises the ability to mix typed and untyped code.
-A performance evaluation for a migratory typing system must, therefore,
- evaluate mixed-typed programs.\footnote{\shorturl{https://www.}{ccs.neu.edu/home/asumu/papers/stop15-tfgnvf.pdf}}
+A performance evaluation for a migratory typing system must therefore
+ evaluate mixed-typed programs.
+My work proposed the first systematic evaluation method~\cite{tfgnvf-popl-2016},
+ showed how to compare different implementations of migratory typing~\cite{gtnffvf-jfp-2019}
+ and adapted the first method to programs with millions
+ of ways to mix typed and untyped code~\cite{gm-pepm-2018,gtnffvf-jfp-2019}.
+
 % Prior work did not measure mixed-typed programs~\cite{rsfbv-popl-2015,vss-popl-2017}.
 % - rzv-ecoop-2015 do not measure code with runtime checks (sec 7.2, end)
 % - aft-dls-2013 have mixed-typed variations of two benchmarks (sec 6.1)
-
-\citet{tfdfftf-ecoop-2015} present the first systematic evaluation
- of a mixed-typed language.
-The paper applies a method to two fully-typed programs consisting of four
- modules; for each program, this method demands the generation and
- measurement of $2^4$ partially-typed configurations.
-The paper tabulates the results of this evaluation in two lattices showing
- the fully-untyped configuration on the bottom and fully-typed on top
- (\figureref{fig:takikawa-lattice}),
- and thereby shows the running times a programmer
- might see if they added the same types in an arbitrary manner.
-Using these lattices, the paper discusses the worst-case performance
- and the existence of bottom-up paths through the lattice that avoid slowdowns.
-
-\begin{figure}[h]
-  \begin{tabular}{c@{\qquad\qquad}c}
-  \includegraphics[width=0.30\columnwidth]{src/takikawa-lattice-acquire.png}
-    &
-  \includegraphics[width=0.30\columnwidth]{src/takikawa-lattice-gofish.png}
-  \end{tabular}
-  \caption{Performance results for two Typed Racket programs~\cite{{tfdfftf-ecoop-2015}}}
-  \label{fig:takikawa-lattice}
-\end{figure}
-
-The method clearly needs further refinement; a lattice presents a lot
- of information, but does little to convey insights.
-Furthermore, the exhaustive approach to data collection cannot handle large
- programs.
-In summary, the method raises at least three questions of size and scale:
- \begin{itemize}
-   \item Is there a concise way to summarize the performance of a program?
-   \item Can the method compare different implementations of migratory typing?
-   \item Can the method be adapted to programs with a large number (+20) of configurations?
- \end{itemize}
-My work on performance evaluation developed answers to these questions.
 
 
 \subsubsection{Summarizing Performance}
@@ -98,11 +68,12 @@ These ratios can help software developers assess the performance risk of
 
 Technically, a configuration is \deliverable{D}
  if its running time is no more than $D$x slower than the baseline performance
- with no migratory typing.\footnote{In Racket, the fully-untyped configuration
+ with no migratory typing.\footnote{For example, in Racket, the fully-untyped configuration
  is an appropriate baseline. In transient Reticulated Python, the fully-untyped configuration
- run via Python (not via Reticulated) is an appropriate baseline~\cite{gm-pepm-2018}.}
+ run via Python (not via Reticulated) is an appropriate baseline because it is the starting
+ point for a developer who wishes to migrate code~\cite{gm-pepm-2018}.}
 Given a positive number $D$, the proportion of \deliverable{D} configurations
- is exactly the proportion of ``good'' configurations described above.
+ is exactly the proportion of good configurations described above.
 
 The paper accommodates varying notions of good performance by combining the
  results for $D$ between $1$ and $20$ into a plot.
@@ -134,7 +105,8 @@ In this case, one conclusion supported by the right-most plot is that
  to at most two extra modules, then 80\% of the configurations are within
  range of an acceptable state.
 Once again the key takeaway is not the particular conclusion,
- but the fact that the method helps answer useful questions.
+ but the fact that the method helps answer practical questions
+ about the implementation of migratory typing.
 
 
 \subsubsection{Comparing Implementations}
@@ -144,7 +116,7 @@ The \deliverable{D} metric enables comparisons of different migratory
  typing systems.
 If there are two languages that can execute the same program,
  then the language with better performance is the one that maximizes the
- number of \deliverable{D} configurations.
+ proportion of \deliverable{D} configurations.
 
 \citet{gtnffvf-jfp-2019} use this observation to compare three versions
  of Racket: v6.2, v6.3, and v6.4.
@@ -152,11 +124,11 @@ Racket~v6.3 contains a few improvements inspired by the performance
  evaluation of Racket v6.2~\cite{tfgnvf-popl-2016}.
 Racket~v6.4 contains many more changes:
  it inlines the contract checks for simple typed functions,
- validates struct predicates with a first-order check (instead of a higher-order wrapper),
+ validates struct predicates with a first-order check,
  and reduces the memory overhead of contracts in general.
 \Figureref{fig:snake-jfp} shows the effect of these changes on one benchmark.
 The curve for version 6.4 lies above the others, meaning the percent of
- \deliverable{D} configurations is increased for every value of $D$ along
+ \deliverable{D} configurations is larger for every value of $D$ along
  the $x$ axis.
 
 \begin{figure}[ht]
@@ -180,7 +152,7 @@ Similar plots appear in related work:\footnote{\citet{kat-pldi-2019} plot the
 
 \citet{gm-pepm-2018} adapt the method to evaluate the performance of Reticulated
  Python.
-By contrast to Typed Racket, Reticulated allows optional type annotations at
+In contrast to Typed Racket, Reticulated allows optional type annotations at
  a fine granularity.
 Every function/method parameter, function return type, and class field may
  be optionally annotated.
@@ -219,9 +191,9 @@ As \figureref{fig:sampling} shows, the confidence intervals provide a tight
   \label{fig:sampling}
 \end{figure}
 
-\citet{gtnffvf-jfp-2019} also validate the sampling method on Typed Racket
+\citet{gtnffvf-jfp-2019} validate this sampling method on Typed Racket
  programs.
-They use the same number of samples and same linear sample size, and find
+They use the same number of samples and same linear sample size and find
  that the intervals yield tight approximations.
 
 %Thanks to the approximation method, \cite{gm-pepm-2018} evaluate three programs
@@ -237,31 +209,25 @@ The benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lan
 % also Cameron (in submission) + Lukas (in submission)
 
 
-\subsection{Comparative Model}
+\subsection{Design Space Analysis}
 
-Models of migratory typing systems come in many varieties---often because
- the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008}.
+Models of migratory typing systems come in many varieties---often (but not always) because
+ the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008,bat-ecoop-2014}.
  % TODO cite many more
 These models share the common goal of mixing static and dynamic typing,
  but realize the goal with different formalizations.
-Unfortunately, the diversity makes it difficult to compore models in a scientific manner.
+Unfortunately, the diversity makes it difficult to compare properties of
+ models in a scientific manner.
 
-\citet{clzv-ecoop-2018} provide a unified model via a typed language,
- \kafka{}, that can express different methods of enforcing types.
-The paper uses \kafka{} as a target language for four translations from
- a mixed-typed surface language; the translations represent natural,
- concrete, erasure, and transient.
-The paper illustrates the differences between semantics with examples,
- but does not provide a formal characterization.
-
-For my work on comparing styles of migratory typing, we developed
- a model that expresses styles as different semantics
+My work on comparing alternative approaches to migratory typing employs
+ a model that expresses realizations as different semantics
  for a common surface language.
-The common model enabled fair comparisons of properties
+The common model enables well-founded comparisons of properties
  such as type soundness and complete monitoring.
-Additionally, the model facilitated the design of new semantics for migratory
+Additionally, the model facilitates the design of new semantics for migratory
  typing.
 % Need to mention other things? This paragraph should lead into the subsections
+
 
 \subsubsection{A Spectrum of Type Soundness}
 
@@ -400,10 +366,10 @@ These three methods of enforcing type boundaries lead to three different
  semantics for surface programs.
 One may compare the results of running one program via the three semantics,
  and one may formulate theorems that characterize general differences.
-The models therefore serve as a tool for language analysis.
-\citet{gf-icfp-2018} demonstrate one analysis by proving three pairs of type
+The models therefore serve as a tool for design analysis.
+\citet{gf-icfp-2018} demonstrate this point by proving three pairs of type
  soundness theorems for the semantics.
-For typed contexts, these theorems roughly guarantee that:
+For typed contexts, these theorems roughly guarantee the following:
  the natural semantics can only yield values that fully match the expected type;
  the erasure semantics can yield any value;
  and the transient semantics can only yield values with a tag that matches
@@ -445,7 +411,7 @@ Technically, co-natural detects more errors than forgetful, which detects
 
 \subsubsection{A User Study}
 
-\citet{tgpk-dls-2018} use the models to create a survey about semantics
+\citet{tgpk-dls-2018} use the model of \citet{gf-icfp-2018} to create a survey about semantics
  for mixed-typed languages.
 The survey employs the common surface syntax and three semantics:
  natural, erasure, and transient.
@@ -461,7 +427,7 @@ The authors administered their survey to three populations:
  computer science students at a highly selective, private US university;
  and workers on Mechanical Turk who claimed to have programming experience.
 They found a preference for the natural semantics---and more generally,
- for enforcing all claims implied by the types---across the populations.
+ for enforcing all claims implied by the types---across all three populations.
 
 
 \subsubsection{Honest vs. Lying Types}
@@ -493,15 +459,15 @@ After all, soundness for untyped code has nothing to say about the type of a
 But the transient behavior means that untyped code cannot trust a typed
  API.
 
-In general, natural types are \emph{honest}\/ because a type is a valid
+In general, a natural type is \emph{honest}\/ because it is a valid
  claim about all future behaviors of a value.
 If natural accepts a value at a certain type, then it has either fully-checked
- the value or wrapped it in a monitoring proxy,
-Transient types are \emph{lying}\/ to most of the program because a type is
- a valid claim only in a specific context.
+ the value or wrapped it in a monitoring proxy.
+A transient type is valid in one specific context, and \emph{lying}\/
+ to the rest of the program.
 For example, the type $(\tpair{\tint}{\tint})$ above is only enforced in
- the visible typed component; if a different component relies in this type, it
- may be misled into an error or---worse yet---a silent failure.
+ the visible typed component; the rest of the program cannot assume that the
+ type is a valid claim about the contents of pairs that flow through the component.
 
 \citet{gfd-oopsla-2019} formalize these intuitions with a complete
  monitoring theorem.

@@ -2,13 +2,13 @@ Three challenges stand between the thesis question and an answer:
 
 \begin{enumerate}
 \item Combine \tdeep{} and \tshallow{} migratory typing in a model; formulate and prove safety properties.
-\item Implement the model via for Racket, re-using the Typed Racket type system.
-\item Compare the performance of the combined language to Typed Racket and Racket.
+\item Implement the model for Racket, re-using the Typed Racket type system.
+\item Evaluate the performance of the combined semantics.
 \end{enumerate}
 
 \subsection{Challenge 1: Model}
 
-The first challenge is to extend our model of migratory typing to combine
+The first challenge is to extend our semantic model of migratory typing to combine
  \tdeep{} and \tshallow{} types in one semantics, rather than as parallel
  developments.
 The new model must allow the definition of \tdeep{}-typed code,
@@ -31,7 +31,7 @@ A secondary goal of the model is to minimize the amount of run-time checking
 \tDeep{}-typed code may benefit from trusting the constructors of \tshallow{}-typed
  values.
 The challenge is to explore the design space, find methods that are likely to
- give a performance benefit, and (time-permitting) pursue an implementation.
+ give a performance benefit, and (time permitting) pursue a full-fledged implementation.
 
 
 \subsection{Challenge 2: Implementation}
@@ -103,12 +103,12 @@ Time-permitting, we may explore further extensions.
     \tShallow{}-typed code may still benefit from simple optimizations, however,
      so it is worthwhile to try reusing the optimizer.
     For example, it may specialize an application of \racketcode{+} to expect unboxed numbers.
-  \item
-   Compare performance with and without contracts.
-   If an early implementation of \tshallow{} tag checks relies on the contract library,
-   then it would be useful to measure the performance delta after removing contracts.
-   The data would be a useful reference for other clients of the contract library,
-   and may reveal potential improvements to contracts.
+%  \item
+%   Compare performance with and without contracts.
+%   If an early implementation of \tshallow{} tag checks relies on the contract library,
+%   then it would be useful to measure the performance delta after removing contracts.
+%   The data would be a useful reference for other clients of the contract library,
+%   and may reveal potential improvements to contracts.
 \end{itemize}
 
 
@@ -124,15 +124,17 @@ The third challenge is to test the hypothesis that a combination of \tdeep{}
 There are a few ways that a programmer could benefit:
  changing one module from \tdeep{} to \tshallow{} may reduce the cost of type boundaries,
  changing a collection of modules from \tshallow{} to \tdeep{} may remove many tag checks,
- and changing a library from \tdeep{} to \tshallow{} may improve the performance of untyped programs.
-In particular, we posit that changing the Racket math library to use \tshallow{}
-types will improve its performance in untyped programs without ``shifting the problem''
-to \tdeep{}-typed clients.
-We expect all clients to suffer moderate overhead after the change instead
-of the +25x pathologies that programmers currently face.\footnote{\shorturl{https://}{docs.racket-lang.org/math/array.html}}
+ and changing a library from \tdeep{} to \tshallow{} may improve the performance of untyped clients.
+% In particular, we posit that changing the Racket math library to use \tshallow{}
+% types will improve its performance in untyped programs without ``shifting the problem''
+% to \tdeep{}-typed clients.
+% We expect all clients to suffer moderate overhead after the change instead
+% of the +25x pathologies that programmers currently face.\footnote{\shorturl{https://}{docs.racket-lang.org/math/array.html}}
 
 We plan to use the GTP benchmark programs in a systematic performance evaluation.
 It is unclear, however, how to conduct such an evaluation.
+An exhaustive study requires $3^N$ measurements for each program with $N$
+ modules, which is a large amount of data to collect and interpret.
 We propose two ideas for now.
 
 To test the math library, the existing method suffices:
