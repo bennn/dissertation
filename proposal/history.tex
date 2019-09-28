@@ -1,5 +1,5 @@
-A migratory typing system adds static types to a
-dynamically-typed host language.
+A migratory typing system adds static types to an existing
+dynamically-typed host language~\cite{tfffgksst-snapl-2017}.
 At a minimum, the addition requires a static type checker and
 syntax to accomodate mixed-typed code.
 If the types are intended as claims about the kinds of values that
@@ -7,10 +7,9 @@ flow through a program at run-time, then the addition also requires a method
 of enforcing types.
 
 Typed Racket~\cite{tf-popl-2008} is one example of a migratory typing system.
-It adds a new language, \racketcode{\#lang typed/racket}, to Racket.
 The language accepts type-annotated Racket programs,
-validates the annotations with a type checker,
-and enforces the annotations with higher-order contracts.
+validates the annotations with a type checker, and enforces the annotations
+with a translation of types to higher-order contracts.
 For example, \figureref{fig:guess-game} presents a mixed-typed
 program consisting of three modules.
 The two untyped modules at the top of the figure define a guessing game
@@ -58,9 +57,9 @@ If a different player function were to submit a string as a guess, a contract
 #lang typed/racket
 
 (require/typed "guess-game.rkt"
-  [play (-> (-> Natural Boolean))])
+  [play (-> (Natural -> Boolean))])
 (require/typed "stubborn-player.rkt"
-  [stubborn-player (-> Natural Natural)])
+  [stubborn-player (Natural -> Natural)])
 
 (define check-guess (play))
 
@@ -74,26 +73,22 @@ If a different player function were to submit a string as a guess, a contract
   \label{fig:guess-game}
 \end{figure}
 
-In theory, Typed Racket lets programmers freely mix typed and untyped modules.
+In theory, Typed Racket gives programmers the ability to freely mix typed and untyped modules.
 Imagine a large, untyped codebase;
  its maintainers may add types to any single module while leaving the rest
  untyped to arrive at a new, runnable program.
-After the conversion, the new module benefits from static type checking
- and type-driven compiler optimizations.
-Furthermore, running the new program may reveal a dynamic mismatch between
- the type annotations and an untyped input value.
-If so, the error message from the mismatch points to the faulty code.
-Adding types thus helps improve the codebase incrementally.
+After the conversion, the new module benefits from static type checking,
+ which enables type-driven compiler optimizations.
 
 In practice, a programmer's freedom to add types is severly limited by
- the run-time cost of type enforcement.
-Adding types to one module adds a contract boundary to its neighbors;
- these boundaries may add overhead throughout the program.
+ the run-time cost of type enforcement~\cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
+Adding types to one module adds a contract boundary to its neighbors.
+These boundaries may add overhead throughout the program.
 When two modules communicate through a boundary, they may experience three kinds
  of performance overhead.
 First, there is the obvious overhead of checking every value that crosses the
  boundary.
-Second, a higher-order boundary must allocate a new wrappers to constrain the
+Second, a higher-order boundary must allocate new wrappers to constrain the
  future behavior of any values that cross it.
 Third, wrapped values suffer from a layer of indirection.
 These overheads can dramatically increase the running time of a program
@@ -107,42 +102,45 @@ Clearly, keeping types honest may impose a huge cost.
 \end{figure}
 %\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/index.html}}
 
+
+\subsection{Different Strategies}
+
 Other migratory typing systems, however, do not keep types honest in the
  same manner as Typed Racket.
-Some add a runtime invariant to reduce the cost of honest types.
+Some add a runtime invariant to reduce the cost of honest types~\cite{wnlov-popl-2010,bmt-ecoop-2010,mt-oopsla-2017}.
 Still others choose to selectively enforce types; a value may be obliged to
- satisfy a type is some contexts, but not others.
+ satisfy a type in some contexts, but not others~\cite{vss-popl-2017}.
 % TODO explain more
 With a few exceptions,\footnote{Like types
- let a programmer toggle between concrete types and erasure.
- Grace enforces user-supplied type annotations with tag checks.
+ let a programmer toggle between concrete types and erased types~\cite{wnlow-popl-2010,rzv-ecoop-2015}.
+ Grace enforces user-supplied type annotations with tag checks~\cite{rmhn-ecoop-2019}.
  Pyret enforces user-supplied type annotations with tag checks
-  for certain types and a deep traversal for others.}
- the alternatives fall into three broad categories:
- concrete, erasure, and transient.
+  for certain types and a deep traversal for others (\shorturl{https://www.}{pyret.org}).}
+ the different strategies fall into four broad categories:
+ natural, concrete, erasure, and transient.
 
-Stepping back, Typed Racket implements the \emph{natural}\/ type enforcement
+Typed Racket implements the \emph{natural}\/ type enforcement
  strategy~\cite{mf-toplas-2009,tf-popl-2008}.
 A natural semantics carefully guards the boundaries between typed and untyped
  code by wrapping higher-order values in proxies and by eagerly
  checking/traversing other data.
-For example, if a natural language expects a list of numbers then it
+For example, if a natural language expects a list of numbers, then it
  checks every element of an incoming list.
 If a natural language expects a function, it creates a proxy around an incoming
- function to protects future inputs and validate future results.
+ function to protect future inputs and validate future results.
 % On one hand, this strategy lets typed code interact with arbitrary values and
 %  ensures that every untyped value completely matches all types associated to it.
 % On the other hand, it requires many run-time checks.
 
-A \emph{concrete}\/ migratory typing system comes with two invariants.
+A \emph{concrete}\/ system comes with two invariants.
 First, only statically-typed code can create new values.
 Second, every value has an immutable and precise type label.
 If a run-time system enforces these invariants, then types can be kept honest
- through label checks.
+ through inexpensive label checks.
 For example, if a typed function expects a vector of integers and receives
  a value from a dynamically-typed context, the function can check whether the
- value's label is a subtype of the expected type;
- the value is safe to use if and only if the label is ok.
+ value's label is a subtype of the expected type; this operation is much
+ simpler than traversing and wrapping the vector.
 
 An \emph{erasure}\/ migratory typing system ignores types at run-time.
 Typed code benefits from static type checking, but behaves exactly the same
@@ -151,7 +149,8 @@ Erased types therefore add zero performance overhead and provide zero feedback
  when statically-typed code receives an input that contradicts the static
  types.
 If a typed function receives a bad argument, the application proceeds without
- hesitation and may compute a nonsensical result.
+ hesitation and may compute a result that is in conflict with a
+ static type and/or the logic of the program.
 
 Lastly, a \emph{transient}\/ migratory typing system partially enforces types
  via tag checks.
@@ -161,40 +160,24 @@ Each tag check matches the top-level shape of a value againt the outermost
  constructor of the expected type; for example, the tag check for a
  list of numbers accepts any list---no matter the contents.
 In untyped code, there are no checks.
-Transient types are not honest; however, they protect typed code from simple
- tag errors such as adding an integer to a function.
+Transient types protect typed code from simple
+ tag errors such as adding an integer to a function; they fail, however,
+ to protect untyped code from types that are not completely checked.
 
 The existence of different approaches indicates a conflict between the theory
  and practice of migratory typing.
 Honest types are ideal from a theoretical perspective, but require either
  sophisticated run-time checks or strict limits on the expressiveness of
- untyped code.\footnote{The Pycket team has significantly improved the performance
-  of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017}.
-  We consider the JIT a sophisticated implementation of run-time checks
-  and are exploring complementary improvements.}
+ untyped code.
+The Pycket team has significantly improved the performance
+ of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017};
+ we consider the JIT a sophisticated implementation of run-time checks
+ and are exploring complementary improvements.
+Concrete types restrict untyped code too much; one cannot migrate from untyped
+ without first defining a type for every value that occurs at runtime.
 Erased types are the polar opposite, as they require no run-time support
  and sacrifice all guarantees.
-If researchers can do no better than erasure, then the theory of
+If researchers can do no better than erasure, then
  type-sound migratory typing is a dead end.
-Transient types explore a compromise between guarantees and performance;
- however, they suffer major limitations.
-For one, the transient guarantees are so weak that types can mislead
- programmers trying to understand a faulty program.
-Second, the transient type enforcement strategy adds overhead to all typed code;
- by contrast, natural types are only expensive when typed and untyped code interact.
-To illustrate the differences on fully-typed programs,
- \figureref{fig:icfp-bars} compares the performance improvement
- in fully-typed Typed Racket code over untyped to the improvement in a
- transient Racket prototype.
-
-\begin{figure}[h]
-  % TODO log scale, add X for overhead, darker stripes
-  \includegraphics[width=0.8\columnwidth]{src/icfp-bars.png}
-  \caption{Speedup factor of Typed Racket vs. untyped (solid bars) and a transient Racket vs. untyped (striped bars)~\cite{gf-icfp-2018}}
-  \label{fig:icfp-bars}
-\end{figure}
-
-\noindent
-The complementary strengths of natural and transient suggest the need for a
- combination.
-
+I am not yet willing to give up, and I therefore propose to explore a pragmatic
+ compromise, based on a careful theoretical exploration of the design space.
