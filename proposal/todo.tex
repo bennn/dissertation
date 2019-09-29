@@ -9,13 +9,15 @@ Three challenges stand between the thesis question and an answer:
 \subsection{Challenge 1: Model}
 
 The first challenge is to extend our semantic model of migratory typing to combine
- \tdeep{} and \tshallow{} types in one semantics, rather than as parallel
- developments.
+ \tdeep{} and \tshallow{} types in one semantics.
+The current model supports them in parallel developments; the task is to
+ allow interoperability.
 The new model must allow the definition of \tdeep{}-typed code,
  \tshallow{}-typed code, and untyped code in the surface syntax.
 All three must be able to share all kinds of values via boundary terms.
-In particular, sharing implies that transient code must accept monitored
- values from natural code.
+In particular, sharing implies that \tshallow{} code must accept monitored
+ values from \tdeep{} code.
+\tDeep{}-typed code may need a rewriting pass in the style of transient.
  
 The primary goal of the model is to state and prove safety properties for each
  of the three languages in the model.
@@ -39,7 +41,7 @@ That is, these types must either be part of the model or else it must be clear
  for run-time checks.
 \citet{gf-icfp-2018} describe how to support such types in transient and
  present an implementation that does so, but integration with natural types
- may add new challenges.
+ may pose new challenges.
 
 
 \subsection{Challenge 2: Implementation}
@@ -48,7 +50,11 @@ The second challenge is to validate the model through an implementation.
 Racket is a natural target for such an implementation, because it supports
  \tdeep{} migratory typing and partially supports \tshallow{} migratory typing.
 What remains is to extend the partial support for \tshallow{} migratory typing
- and to combine the two styles according to the model.
+ and to combine the two strategies according to the model.
+\tDeep{}-typed code must continue to use the type-driven optimizer~\cite{stff-padl-2012}
+ and to protect itself against untyped code.
+\tShallow{}-typed code must be able to share type definitions with
+ \tdeep{}-typed code, and values with \tdeep{} and Racket code.
 Time-permitting, I may explore further extensions.
 
 
@@ -69,8 +75,8 @@ Time-permitting, I may explore further extensions.
      all possible first-order properties; at least until there is evidence
      that these checks are too expensive.
   \item
-    Avoid the Racket contract library.
-    Contract combinators have administrative overhead.
+    Avoid the Racket contract library
+    because contract combinators have administrative overhead.
     Tag-checks must be realized with simple Racket code wherever possible to
      improve run-time performance and take advantage of compiler optimizations.
   \item
