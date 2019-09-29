@@ -175,9 +175,9 @@ For six benchmarks with 12 to 17 functions and classes each,
  they generate six 95\%~confidence intervals.
 To validate these results, they collect the running time of every configuration
  in which: any function/method may be typed or untyped, and the set of fields
- for any class may be typed or untyped.
-Note that this is fewer configurations than Reticulated allows.
-% TODO more to say?
+ for any class may be typed or untyped.\footnote{Reticulated supports the definition
+  of many more configurations in each program; nevertheless, the experiment suffices to
+  validate the sampling method.}
 As \figureref{fig:sampling} shows, the confidence intervals provide a tight
  bound on the ground truth.
 
@@ -208,8 +208,7 @@ The benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lan
 \subsection{Design Space Analysis}
 
 Models of migratory typing systems come in many varieties---often (but not always) because
- the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008,bat-ecoop-2014}.
- % TODO cite many more
+ the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,rtsf-sac-2013,rsfbv-popl-2015,acftd-scp-2013,cvgrl-oopsla-2017,mmi-dls-2015,bdt-esop-2016,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008,clzv-ecoop-2018}.
 These models share the common goal of mixing static and dynamic typing,
  but realize the goal with different formalizations.
 Unfortunately, the diversity makes it difficult to compare properties of
@@ -274,7 +273,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
 % note that checks overapproximate, but succeed without wrappers?
 
 \begin{figure}[ht]
-  \begin{minipage}[t]{0.5\columnwidth}
+  \begin{minipage}[t]{0.60\columnwidth}\flushleft
  \fbox{$\DNsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
   \(\begin{mfarray}
     \fDN{\tarr{\stype_0}{\stype_1}}{\svalue_0}
@@ -317,7 +316,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
     \svalue_0
     \\\sidecond{otherwise}
   \end{mfarray}\)
-  \end{minipage}\begin{minipage}[t]{0.5\columnwidth}
+  \end{minipage}\begin{minipage}[t]{0.40\columnwidth}
   \fbox{$\DTsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
   \(\begin{mfarray}
     \fDT{\tarr{\stype_0}{\stype_1}}{\svalue_0}
@@ -397,7 +396,7 @@ Technically, co-natural detects more errors than forgetful, which detects
  for mixed-typed languages.
 The survey employs the common surface syntax and three semantics:
  natural, erasure, and transient.
-Each question presents one program and 2-3 possible outcomes of running
+Each question presents one program and two or three possible outcomes of running
  the program.
 Repondents must form an opinion based on two \emph{attitudes}:
  (1) do they like/dislike the behavior,

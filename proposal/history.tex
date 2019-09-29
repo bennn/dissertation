@@ -76,7 +76,7 @@ If a different player function were to submit a string as a guess, a contract
 In theory, Typed Racket gives programmers the ability to freely mix typed and untyped modules.
 Imagine a large, untyped codebase;
  its maintainers may add types to any single module while leaving the rest
- untyped to arrive at a new, runnable program.
+ untyped to arrive at a new, runnable program~\cite{tf-dls-2006,tf-popl-2008}.
 After the conversion, the new module benefits from static type checking,
  which enables type-driven compiler optimizations.
 
@@ -110,11 +110,10 @@ Other migratory typing systems, however, do not keep types honest in the
 Some add a runtime invariant to reduce the cost of honest types~\cite{wnlov-popl-2010,bmt-ecoop-2010,mt-oopsla-2017}.
 Still others choose to selectively enforce types; a value may be obliged to
  satisfy a type in some contexts, but not others~\cite{vss-popl-2017}.
-% TODO explain more
 With a few exceptions,\footnote{Like types
- let a programmer toggle between concrete types and erased types~\cite{wnlow-popl-2010,rzv-ecoop-2015}.
+ let a programmer toggle between concrete types and erased types~\cite{wnlov-popl-2010,rzv-ecoop-2015}.
  Grace enforces user-supplied type annotations with tag checks~\cite{rmhn-ecoop-2019}.
- Pyret enforces user-supplied type annotations with tag checks
+ Pyret enforces type annotations with tag checks
   for certain types and a deep traversal for others (\shorturl{https://www.}{pyret.org}).}
  the different strategies fall into four broad categories:
  natural, concrete, erasure, and transient.
@@ -127,7 +126,7 @@ A natural semantics carefully guards the boundaries between typed and untyped
 For example, if a natural language expects a list of numbers, then it
  checks every element of an incoming list.
 If a natural language expects a function, it creates a proxy around an incoming
- function to protect future inputs and validate future results.
+ function value to protect future inputs and validate future results.
 % On one hand, this strategy lets typed code interact with arbitrary values and
 %  ensures that every untyped value completely matches all types associated to it.
 % On the other hand, it requires many run-time checks.
@@ -136,13 +135,13 @@ A \emph{concrete}\/ system comes with two invariants.
 First, only statically-typed code can create new values.
 Second, every value has an immutable and precise type label.
 If a run-time system enforces these invariants, then types can be kept honest
- through inexpensive label checks.
+ through inexpensive label checks~\cite{mt-oopsla-2017,wnlov-popl-2010,bmt-ecoop-2010}.\footnote{Dart 2 implements concrete types ({https://}{dart.dev/dart-2}).}
 For example, if a typed function expects a vector of integers and receives
  a value from a dynamically-typed context, the function can check whether the
  value's label is a subtype of the expected type; this operation is much
  simpler than traversing and wrapping the vector.
 
-An \emph{erasure}\/ migratory typing system ignores types at run-time.
+An \emph{erasure}\/ migratory typing system ignores types at run-time~\cite{bat-ecoop-2014,bg-oopsla-1993,s-lisp-1990}.
 Typed code benefits from static type checking, but behaves exactly the same
  as untyped code.
 Erased types therefore add zero performance overhead and provide zero feedback
@@ -153,7 +152,7 @@ If a typed function receives a bad argument, the application proceeds without
  static type and/or the logic of the program.
 
 Lastly, a \emph{transient}\/ migratory typing system partially enforces types
- via tag checks.
+ via tag checks~\cite{vss-popl-2017,v-thesis-2019}.
 In typed code, every elimination form and every boundary to untyped code
  is protected with a tag check.
 Each tag check matches the top-level shape of a value againt the outermost
@@ -172,7 +171,7 @@ Honest types are ideal from a theoretical perspective, but require either
 The Pycket team has significantly improved the performance
  of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017};
  I consider the JIT a sophisticated implementation of run-time checks
- and are exploring complementary improvements.
+ and am exploring complementary improvements.
 Concrete types restrict untyped code too much; one cannot migrate from untyped
  without first defining a type for every value that occurs at runtime.
 Erased types are the polar opposite, as they require no run-time support
@@ -180,4 +179,4 @@ Erased types are the polar opposite, as they require no run-time support
 If researchers can do no better than erasure, then
  type-sound migratory typing is a dead end.
 I am not yet willing to give up, and I therefore propose to explore a pragmatic
- compromise, based on a careful theoretical exploration of the design space.
+ compromise based on a careful theoretical exploration of the design space.
