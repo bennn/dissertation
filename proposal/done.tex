@@ -16,10 +16,6 @@ The performance studies motivate a combination of \tdeep{} and \tshallow{}
 The design-space analysis provides a theoretical model for defining the
  combination and understanding its formal guarantees.
 
-% others = their they
-%
-% mine = our we
-
 % This section reviews my prior work and explains how each project contributes
 %  to the thesis question.
 
@@ -394,20 +390,6 @@ They both fail, however, to detect some type violations that natural detects.
 Technically, co-natural detects more errors than forgetful, which detects
  more errors than transient~\cite{gf-icfp-2018}.
 
-%With the models as a guide, we implemented a transient prototype for a
-% functional subset of Typed Racket~\cite{gf-icfp-2018}.
-%The prototype enabled a systematic comparison of the natural and transient
-% styles; starting with one suite of surface-language programs, we ran
-% each under two semantics.
-%
-%The results of the evaluation confirmed our earlier conjectures.
-%Natural may have abysmal performance on heavily-mixed programs,
-% but performs well when all but a few modules are typed.
-%Transient rarely slows a program by 10x, but its cost increases with the
-% quantity of type annotations.
-%In a fully-typed program, natural is likely the best choice;
-% in partially typed programs, however, transient can have far better
-% performance.
 
 \subsubsection{A User Study}
 
