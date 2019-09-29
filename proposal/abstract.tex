@@ -1,3 +1,15 @@
-We propose a combination of two approaches to run-time type enforcement in a
-mixed-typed language and a method to evaluate the performance benefits of the
-combination.
+The literature on migratory typing presents many strategies for
+ mixing typed and untyped code.
+Two strategies are especially interesting because they
+ guarantee type soundness and do not limit the expressiveness of untyped code;
+ these strategies are known as \emph{natural}\/ and \emph{transient}\/.
+Despite these commonalities, however, the strategies offer vastly different
+ guarantees and performance tradeoffs.
+Their complementary strengths suggest the need for a combination.
+
+My work to date has developed novel methods for understanding the semantics
+ and performance of migratory typing systems.
+I propose to leverage this expertise to: design a semantics that supports
+ interoperability between natural and transient,
+ implement the semantics,
+ and systematically evaluate the performance of the combination.
