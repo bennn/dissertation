@@ -1,37 +1,52 @@
-If all goes well, I plan to finish the research in six months.
-I plan to spend three months writing a dissertation.
+There are four major tasks ahead:
+  develop a model,
+  build an implementation,
+  evaluate the implementation,
+  and write a dissertation.
+I additionally plan to write a research paper about the combined
+ natural/transient system.
 
-The following table presents a plan for \emph{when to begin}\/ different tasks.
-The initial goal is a combined model; I propose one month to work out the
- basics, and part-time work to finish the details.
-Work on the implementation will begin once the model is in a promising state.
-I plan to start measuring performance in the early spring;
- preliminary results may change the focus of the model.
-Dissertation-writing can begin concurrently with the performance
- evaluation.
+Work on the model can begin immediately.
+By the end of this year, it should be clear whether the model can support
+ an implementation.
+Implementation work must begin with a review of the existing
+ \tshallow{}-typed Racket system~\cite{gf-icfp-2018};
+ this update can begin in parallel with the modeling.
+Evaluations will begin as soon as the implementation can support simple
+ benchmarks.
+These preliminary measurements shall inform the protocol for a final
+ performance evaluation starting in late Spring.
+As the evaluation is running, we plan to write a research report on the
+ combined system.
+The dissertation will combine this report with my other findings on
+ migratory typing.
 
- % TODO draw something new
-\begin{tabular}{rll}
-  Month & Research & Writing \\\hline
-  Oct   & develop theory combining \tdeep{} static typing, \tshallow{} static typing, and dynamic typing
-  \\
-  Nov   &
-  \\
-  Jan   & implement the theory as a variant of Typed Racket
-  \\
-  Feb   & plan and run a performance evaluation
-  \\
-  Mar   &
-  \\
-  Apr   & write dissertation
-  \\
-  May   &
-  \\
-  Jun   & defend
-  \\
-  Jul   &
-  \\
-  Aug   &
-  \\
-  Sep   &
-\end{tabular}
+\begin{figure}[t]
+\begin{verbatim}
+  Oct         * model
+              |
+  Nov         |
+              |
+  Dec         |
+              |             * implementation
+  Jan'20      |             |
+              *             |
+  Feb                       |
+                            |             * evaluation
+  Mar                       |             |
+                            |             |
+  Apr                       |             |
+                            *             |             * report
+  May                                     |             |
+                                          |             |             * dissertation
+  Jun                                     *             *             |
+                                                                      |
+  Jul                                                                 |
+                                                                      |
+  Aug                                                                 *
+
+\end{verbatim}
+  \caption{Proposed schedule}
+  \label{fig:schedule}
+\end{figure}
+
