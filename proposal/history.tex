@@ -107,7 +107,7 @@ Clearly, keeping types honest may impose a huge cost.
 
 Other migratory typing systems do not keep types honest in the
  same manner as Typed Racket.
-Some add a runtime invariant to reduce the cost of honest types~\cite{wnlov-popl-2010,bmt-ecoop-2010,mt-oopsla-2017}.
+Some add a runtime invariant to reduce the cost of honest types~\cite{wnlov-popl-2010,bmt-ecoop-2010,mt-oopsla-2017,rat-oopsla-2017}.
 Still others choose to selectively enforce types; a value may be obliged to
  satisfy a type in some contexts, but not all~\cite{vss-popl-2017}.
 With a few exceptions,\footnote{Like types
@@ -135,7 +135,7 @@ A \emph{concrete}\/ system comes with two invariants.
 First, only statically-typed code can create new values.
 Second, every value has an immutable and precise type label.
 If a run-time system enforces these invariants, then types can be kept honest
- through inexpensive label checks~\cite{mt-oopsla-2017,wnlov-popl-2010,bmt-ecoop-2010}.\footnote{Dart 2 implements concrete types (\shorturl{https://}{dart.dev/dart-2}).}
+ through inexpensive label checks~\cite{mt-oopsla-2017,wnlov-popl-2010,bmt-ecoop-2010,rat-oopsla-2017}.\footnote{Dart 2 implements concrete types (\shorturl{https://}{dart.dev/dart-2}).}
 For example, if a typed function expects a vector of integers and receives
  a value from a dynamically-typed context, the function can check whether the
  value's label is a subtype of the expected type.
