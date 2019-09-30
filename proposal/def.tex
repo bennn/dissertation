@@ -1,6 +1,9 @@
-\usepackage{listings}
-\usepackage{graphicx}
-\usepackage{wrapfig}
+\linenumbers
+\captionsetup[figure]{name={Fig.}}
+\setcitestyle{numbers,sort&compress,open={[},close={]},citesep={,}, notesep={, }}
+
+% center all figures
+\makeatletter \g@addto@macro\@floatboxreset\centering \makeatother
 
 \lstset{
   escapeinside={(*@}{@*)},
@@ -13,6 +16,11 @@
 
 \mathchardef\mhyphen="2D
 \overfullrule=1mm
+
+\definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
+\hypersetup{colorlinks,
+  linkcolor=ACMPurple,
+  urlcolor=ACMPurple}
 
 \newcommand{\shorturl}[2]{\href{#1#2}{\texttt{#2}}}
 
