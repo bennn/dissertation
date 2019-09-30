@@ -71,8 +71,8 @@ Technically, a configuration is \deliverable{D}
 Given a positive number $D$, the proportion of \deliverable{D} configurations
  is exactly the proportion of good configurations described above.
 
-The paper accommodates varying notions of good performance by combining the
- results for $D$ between $1$ and $20$ into a plot.
+To accomodate varying notions of good performance, \citet{tfgnvf-popl-2016}
+ combine the proportions for $D$ between $1$ and $20$ into a plot.
 The $x$-axis of such a plot ranges over values of $D$.
 The $y$-axis ranges over the number (or percent) of configurations.
 \Figureref{fig:snake-popl}, on the left-hand side, presents an example
@@ -150,7 +150,7 @@ Similar plots have helped other researchers validate their designs:\footnote{\ci
  Python.
 In contrast to Typed Racket, Reticulated allows optional type annotations at
  a fine granularity.
-Every function/method parameter, function return type, and class field may
+Every function parameter, function return type, and class field may
  be optionally annotated.
 Unfortunately for the exhaustive method, this freedom means that relatively
  small programs may have a huge number of configurations;
@@ -200,7 +200,7 @@ They use the same number of samples and same linear sample size and find
 
 \citet{gtnffvf-jfp-2019} formally introduce a suite of mixed-typed benchmark
  programs.
-The benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/}}
+These GTP benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lang.org/gtp-benchmarks/}}
  and have been used to validate other changes to Typed Racket~\cite{gf-icfp-2018,bbst-oopsla-2017}.
 % also Cameron (in submission) + Lukas (in submission)
 
@@ -234,7 +234,7 @@ Additionally, the model facilitates the design of new semantics for migratory
 \citet{gf-icfp-2018} introduce a model to compare natural, erasure, and
  transient migratory typing as different semantics for a common surface
  language.
-The common language is a mixed-typed system in the style of \citet{mf-toplas-2009};
+The common language is mixed-typed in the style of \citet{mf-toplas-2009};
  it syntactically combines a statically-typed language with a dynamically-typed
  language via boundary terms.
 For example, the typed expression
@@ -361,7 +361,7 @@ These three methods of enforcing type boundaries lead to three different
  semantics for surface programs.
 One may compare the results of running one program via the three semantics,
  and one may formulate theorems that characterize general differences.
-The models therefore serve as a tool for design analysis.
+The model therefore serves as a tool for design analysis.
 \citet{gf-icfp-2018} demonstrate this point by proving three pairs of type
  soundness theorems for the semantics.
 For typed contexts, these theorems roughly guarantee the following:
@@ -371,7 +371,7 @@ For typed contexts, these theorems roughly guarantee the following:
  the outermost constructor of the expected type.
 Sibling theorems describe the behavior of untyped code.
 
-Additionally, the models serve as a tool for language design.
+Additionally, the model serves as a tool for language design.
 One may develop a new semantics by proposing a new strategy for checking
  the boundaries between typed and untyped components.
 \citet{gf-icfp-2018} present two such variants of the natural semantics,
@@ -388,6 +388,8 @@ Both co-natural and forgetful provide a type soundness guarantee that resembles
 They both fail, however, to detect some type violations that natural detects.
 Technically, co-natural detects more errors than forgetful, which detects
  more errors than transient~\cite{gf-icfp-2018}.
+\citet{gfd-oopsla-2019} present a variant of transient (Amnesic) that
+ provides more precise blame information when a boundary error occurs.
 
 
 \subsubsection{A User Study}
@@ -462,7 +464,7 @@ If so, then a pair value cannot transport a string such as $\estring{hello}$
  across a boundary that expects a number.
 
 The key to proving a complete monitoring theorem is to enrich the syntax of
- the models with ownership annotations.
+ the model with ownership annotations.
 Ownership annotations state which components are responsible for the
  expressions and values in a program.
 When a value flows across a boundary, its ownership changes depending on

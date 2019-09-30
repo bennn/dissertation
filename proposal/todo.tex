@@ -37,7 +37,7 @@ The challenge is to explore the design space, find methods that are likely to
 
 The model must scale to union types, universal types, and recursive types.
 That is, these types must either be part of the model or else it must be clear
- how to support them in an implementation --- both for static typing and
+ how to add them---both for static typing and
  for run-time checks.
 \citet{gf-icfp-2018} describe how to support such types in transient and
  present an implementation that does so, but integration with natural types
@@ -84,7 +84,7 @@ Time-permitting, I may explore further extensions.
     Statically, \tshallow{} and \tdeep{}-typed code must be able to share type definitions.
     Dynamically, \tdeep{}-typed code must protect itself against \tshallow{} values.
   \item
-    Provide relatively fast compilation times for \tshallow{}-Typed racket.
+    Provide relatively fast compilation times for \tshallow{}-typed Racket.
     Some overhead relative to \tdeep{}-Typed Racket may arise from the pass that
     rewrites typed code.
     Anything more than a 10\% slowdown, however, must be studied and explained.
@@ -106,7 +106,7 @@ Time-permitting, I may explore further extensions.
     A tag-check is a simple type test, and the success of one check has implications
      for the rest of the program.
     For example, if a block of code projects an element of an immutable pair twice in a row,
-     then only the first projection should go through a tag check.
+     then only the first projection requires a tag check.
   \item
     Adapt the Typed Racket optimizer.
     The current implementation of \tshallow{} types is incompatible with the Typed
@@ -145,11 +145,11 @@ There are a few ways that a programmer could benefit:
 % I expect all clients to suffer moderate overhead after the change instead
 % of the +25x pathologies that programmers currently face.\footnote{\shorturl{https://}{docs.racket-lang.org/math/array.html}}
 
-I plan to use the GTP benchmark programs in a systematic performance evaluation.
+I plan to use the GTP benchmarks in a systematic performance evaluation.
 It is unclear, however, how to conduct such an evaluation.
 An exhaustive study requires $3^N$ measurements for each program with $N$
  modules, which is a large amount of data to collect and interpret.
-I propose two alternatives.
+I propose two alternatives for now.
 
 To test a library, the existing method suffices.
 One can convert the library to be \tshallow{}-typed and measure an
@@ -159,7 +159,7 @@ To test the benefits for program authors, who now have three choices for every
 module, I propose a path-based metric based on two assumptions.
 First, I assume that authors are seeking fully-typed programs.
 Second, I assume that the authors are seeking \tdeep{}-typed programs.
-For the evaluation, I ask what percentage of paths through the \tdeep{}-typed performance
+For the evaluation, the question is what percentage of paths through the \tdeep{}-typed performance
  lattice have no configurations that exceed a certain overhead, say 10x, given
  the option at each step of converting some modules to \tshallow{} types.
 The idea is that a programmer moves up the lattice by adding type annotations

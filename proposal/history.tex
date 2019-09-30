@@ -21,7 +21,7 @@ The typed driver module assigns a static type to the untyped game and
  game player.
 At compile-time, the type checker validates the contents of the driver module
  assuming that the types assigned to these untyped functions are correct.
-At run-time, higher-order contracts dynamically enforce the claims in the types.
+At run-time, higher-order contracts dynamically enforce the claims of the types.
 Thanks to the contracts, these types are kept honest.
 If a different player function were to submit a string as a guess, a contract
  violation would halt the program and direct the programmer to the boundary
@@ -105,16 +105,16 @@ Clearly, keeping types honest may impose a huge cost.
 
 \subsection{Different Strategies}
 
-Other migratory typing systems, however, do not keep types honest in the
+Other migratory typing systems do not keep types honest in the
  same manner as Typed Racket.
 Some add a runtime invariant to reduce the cost of honest types~\cite{wnlov-popl-2010,bmt-ecoop-2010,mt-oopsla-2017}.
 Still others choose to selectively enforce types; a value may be obliged to
- satisfy a type in some contexts, but not others~\cite{vss-popl-2017}.
+ satisfy a type in some contexts, but not all~\cite{vss-popl-2017}.
 With a few exceptions,\footnote{Like types
  let a programmer toggle between concrete types and erased types~\cite{wnlov-popl-2010,rzv-ecoop-2015}.
  Grace enforces user-supplied type annotations with tag checks~\cite{rmhn-ecoop-2019}.
  Pyret enforces type annotations with tag checks
-  for certain types and a deep traversal for others (\shorturl{https://www.}{pyret.org}).}
+  for certain types and deep traversals for others (\shorturl{https://www.}{pyret.org}).}
  the different strategies fall into four broad categories:
  natural, concrete, erasure, and transient.
 
@@ -144,7 +144,7 @@ This operation is much simpler than traversing and wrapping the vector.
 An \emph{erasure}\/ migratory typing system ignores types at run-time~\cite{bat-ecoop-2014,bg-oopsla-1993,s-lisp-1990}.
 Typed code benefits from static type checking, but behaves exactly the same
  as untyped code.
-Erased types therefore add zero performance overhead, do not benefit from
+Erased types therefore add zero performance overhead, do not enable
  type-driven optimizations, and provide zero feedback
  when statically-typed code receives an input that contradicts the static
  types.
@@ -162,7 +162,7 @@ For example, the tag check for a
  list of numbers accepts any list---no matter the contents.
 In untyped code, there are no checks.
 Transient types protect typed code from simple
- tag errors such as adding an integer to a function; they fail, however,
+ tag errors such as adding an integer to a function, but they fail
  to protect untyped code from types that are not completely checked.
 
 The existence of different approaches indicates a conflict between the theory
@@ -170,7 +170,7 @@ The existence of different approaches indicates a conflict between the theory
 Honest types are ideal from a theoretical perspective, but require either
  sophisticated run-time checks or strict limits on the expressiveness of
  untyped code.
-The Pycket team has significantly improved the performance
+For instance, the Pycket team has significantly improved the performance
  of Typed Racket with a tracing JIT compiler~\cite{bbst-oopsla-2017};
  I consider the JIT a sophisticated implementation of run-time checks
  and am exploring complementary improvements.

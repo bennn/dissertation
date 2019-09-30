@@ -1,4 +1,4 @@
-Transient types represent a novel exchange of guarantees for performance;
+Transient types represent an exchange of guarantees for performance;
  however, they suffer major limitations.
 For one, the transient guarantees are so weak that types can mislead
  programmers trying to understand a faulty program.
@@ -6,14 +6,14 @@ Second, the transient type enforcement strategy adds overhead to all typed code;
  by contrast, natural types are only expensive when typed and untyped code interact.
 To illustrate the differences on fully-typed programs,
  \figureref{fig:icfp-bars} compares the performance improvement
- in fully-typed (natural) Typed Racket code over untyped to the improvement in a
+ in Typed Racket code (natural) over untyped to the improvement in a
  transient Racket prototype.
 
 \begin{figure}[h]
   % TODO log scale, add X for overhead, darker stripes (dude its fine)
   \includegraphics[width=0.8\columnwidth]{src/icfp-bars.png}
   \caption{Speedup factor of Typed Racket vs. untyped (solid bars) and a transient Racket vs. untyped (striped bars)~\cite{gf-icfp-2018}.
-           Taller bars are better; bars below the 1x line indicate slowdowns.}
+           Taller bars are better; bars below the $1$x line indicate slowdowns.}
   \label{fig:icfp-bars}
 \end{figure}
 
