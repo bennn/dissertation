@@ -27,7 +27,7 @@ A performance evaluation for a migratory typing system must therefore
  evaluate mixed-typed programs.
 My work proposed the first systematic evaluation method~\cite{tfgnvf-popl-2016},
  showed how to compare different implementations of migratory typing~\cite{gtnffvf-jfp-2019}
- and adapted the first method to programs with millions
+ and adapted the method to programs with millions
  of ways to mix typed and untyped code~\cite{gm-pepm-2018,gtnffvf-jfp-2019}.
 
 % Prior work did not measure mixed-typed programs~\cite{rsfbv-popl-2015,vss-popl-2017}.
@@ -84,7 +84,7 @@ The key takeaway is that the plot answers an important question and does
 \includegraphics[width=0.96\columnwidth]{src/snake-popl.png}
 \caption{Counting \deliverable{D} configurations in the \bm{snake}
          benchmark~\cite{tfgnvf-popl-2016}. The $x$-axis ranges over $D$ values;
-         the vertical lines mark $D=3$ and $D=10$.
+         the vertical lines mark $x=3$ and $x=10$.
          The $y$-axis counts configurations; the dashed horizontal line marks
          $60$\% of all configs.
          The thick blue line is the number of \deliverable{x} configurations.}
@@ -94,7 +94,7 @@ The key takeaway is that the plot answers an important question and does
 Variations on the \deliverable{D} metric can answer similar questions
  about a mixed-typed program.
 For example, the two other plots in \figureref{fig:snake-popl}
- relax the metric to allow 1 (middle plot) and 2 (right plot) extra type
+ relax the metric to allow one (middle plot) and two (right plot) extra type
  conversion steps.
 In this case, one conclusion supported by the right-most plot is that
  if a $10$x slowdown is acceptable and the client is willing to add types
@@ -133,10 +133,10 @@ The curve for version 6.4 lies above the others, meaning the percent of
 \label{fig:snake-jfp}
 \end{figure}
 
-Similar plots appear in related work:\footnote{\citet{kas-pldi-2019} plot the
+Similar plots have helped other researchers validate their designs:\footnote{\citet{kas-pldi-2019} plot the
  \deliverable{D} configurations in Typed Racket alongside a count based on
  the overhead of a new language, Grift, relative to Racket.
- The latter is not the \deliverable{D} metric because removing all types from
+ The latter is not the \deliverable{D} metric because removing all gradual typing from
  a Grift program does not produce a Racket program.}
 \citet{bbst-oopsla-2017} demonstrate the benefits of adding a tracing JIT compiler to Typed Racket;
 \citet{fgsfs-oopsla-2018} measure the impact of collapsible higher-order contracts; and
@@ -153,8 +153,8 @@ In contrast to Typed Racket, Reticulated allows optional type annotations at
 Every function/method parameter, function return type, and class field may
  be optionally annotated.
 Unfortunately for the exhaustive method, this freedom means that relatively
- small programs may have a huge number of configurations---counting
- the proportion of \deliverable{D} becomes impractical for a class with 20 fields.
+ small programs may have a huge number of configurations;
+ counting the proportion of \deliverable{D} becomes impractical for a class with 20 fields.
 
 The paper demonstrates, however, that a linear number of random samples can
  approximate the true number of good configurations.
@@ -207,14 +207,14 @@ The benchmarks are available online\footnote{\shorturl{https://}{docs.racket-lan
 
 \subsection{Design Space Analysis}
 
-Models of migratory typing systems come in many varieties---often (but not always) because
+Models of migratory typing systems come in many varieties---often because
  the models reflect a proof-of-concept implementation~\cite{bat-ecoop-2014,rtsf-sac-2013,rsfbv-popl-2015,acftd-scp-2013,cvgrl-oopsla-2017,mmi-dls-2015,bdt-esop-2016,wnlov-popl-2010,mt-oopsla-2017,vss-popl-2017,tf-popl-2008,clzv-ecoop-2018}.
 These models share the common goal of mixing static and dynamic typing,
  but realize the goal with different formalizations.
 Unfortunately, the diversity makes it difficult to compare properties of
  models in a scientific manner.
 
-My work on comparing alternative approaches to migratory typing employs
+My work on comparing approaches to migratory typing employs
  a model that expresses realizations as different semantics
  for a common surface language.
 The common model enables well-founded comparisons of properties
@@ -274,7 +274,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
 
 \begin{figure}[ht]
   \begin{minipage}[t]{0.60\columnwidth}\flushleft
- \fbox{$\DNsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
+ \fbox{$\DNsym : \tpair{\stype}{\svalue} \rightarrow \sexpr$}\\
   \(\begin{mfarray}
     \fDN{\tarr{\stype_0}{\stype_1}}{\svalue_0}
     & = &
@@ -300,7 +300,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
     \\\sidecond{otherwise}
   \end{mfarray}\)
 
-  \fbox{$\SNsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
+  \fbox{$\SNsym : \tpair{\stype}{\svalue} \rightarrow \sexpr$}\\
   \(\begin{mfarray}
     \fSN{\tarr{\stype_0}{\stype_1}}{\svalue_0}
     & = &
@@ -317,7 +317,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
     \\\sidecond{otherwise}
   \end{mfarray}\)
   \end{minipage}\begin{minipage}[t]{0.40\columnwidth}
-  \fbox{$\DTsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
+  \fbox{$\DTsym : \tpair{\stype}{\svalue} \rightarrow \sexpr$}\\
   \(\begin{mfarray}
     \fDT{\tarr{\stype_0}{\stype_1}}{\svalue_0}
     & = &
@@ -344,7 +344,7 @@ Thus if the untyped value $\epair{{-2}}{{0}}$ enters typed code via a
     \\\sidecond{otherwise}
   \end{mfarray}\)
 
-  \fbox{$\STsym : \tpair{\stype}{\svalue} \rightarrow \svalue \cup \serror$}\\
+  \fbox{$\STsym : \tpair{\stype}{\svalue} \rightarrow \sexpr$}\\
   \(\begin{mfarray}
     \fST{\stype_0}{\svalue_0}
     & = &
@@ -406,7 +406,7 @@ The two attitudes form a matrix of four possible answers.
 The authors administered their survey to three populations:
  software engineers at a major Silicon Valley technology company;
  computer science students at a highly selective, private US university;
- and workers on Mechanical Turk who claimed to have programming experience.
+ and Mechanical Turk workers with some programming experience.
 They found a preference for the natural semantics---and more generally,
  for enforcing all claims implied by the types---across all three populations.
 
@@ -432,7 +432,7 @@ Suppose that one untyped component $E$ expects a pair of numbers from a
 \noindent
 A natural semantics halts the program when the pair reaches the boundary to
  typed code.
-A transient semantics lets the pair cross into typed code, and out to the
+A transient semantics lets the pair cross into typed code and out again to the
  untyped client.
 Both behaviors are permitted by type soundness.
 After all, soundness for untyped code has nothing to say about the type of a
@@ -458,7 +458,7 @@ Complete monitoring comes from prior work on higher-order contracts;
  by a contract~\cite{dtf-esop-2012}.
 A mixed-typed language satisfies complete monitoring if all communication
  across boundaries factors through runtime checks.
-If so, then a pair value cannot smuggle a string such as $\estring{hello}$
+If so, then a pair value cannot transport a string such as $\estring{hello}$
  across a boundary that expects a number.
 
 The key to proving a complete monitoring theorem is to enrich the syntax of

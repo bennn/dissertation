@@ -2,7 +2,7 @@ Three challenges stand between the thesis question and an answer:
 
 \begin{enumerate}
 \item Combine \tdeep{} and \tshallow{} migratory typing in a model; formulate and prove safety properties.
-\item Implement the model for Racket, re-using the Typed Racket type system.
+\item Implement the model for Racket; re-use the Typed Racket type system.
 \item Evaluate the performance of the combined semantics.
 \end{enumerate}
 
@@ -54,7 +54,7 @@ What remains is to extend the partial support for \tshallow{} migratory typing
 \tDeep{}-typed code must continue to use the type-driven optimizer~\cite{stff-padl-2012}
  and to protect itself against untyped code.
 \tShallow{}-typed code must be able to share type definitions with
- \tdeep{}-typed code, and values with \tdeep{} and Racket code.
+ \tdeep{}-typed code and values with both \tdeep{}-typed and untyped code.
 Time-permitting, I may explore further extensions.
 
 
@@ -149,11 +149,11 @@ I plan to use the GTP benchmark programs in a systematic performance evaluation.
 It is unclear, however, how to conduct such an evaluation.
 An exhaustive study requires $3^N$ measurements for each program with $N$
  modules, which is a large amount of data to collect and interpret.
-I propose two ideas for now.
+I propose two alternatives.
 
-To test the math library, the existing method suffices:
- convert the math library to be \tshallow{}-typed and measure the performance lattice.
-This same protocol applies to any benchmarks that depend on typed libraries.
+To test a library, the existing method suffices.
+One can convert the library to be \tshallow{}-typed and measure an
+ \tdeep{}-typed performance lattice.
 
 To test the benefits for program authors, who now have three choices for every
 module, I propose a path-based metric based on two assumptions.

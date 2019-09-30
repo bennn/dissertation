@@ -86,7 +86,7 @@ Adding types to one module adds a contract boundary to its neighbors.
 These boundaries may add overhead throughout the program.
 When two modules communicate through a boundary, they may experience three kinds
  of performance overhead.
-First, there is the obvious overhead of checking every value that crosses the
+First, there is the overhead of checking every value that crosses the
  boundary.
 Second, a higher-order boundary must allocate new wrappers to constrain the
  future behavior of any values that cross it.
@@ -135,16 +135,17 @@ A \emph{concrete}\/ system comes with two invariants.
 First, only statically-typed code can create new values.
 Second, every value has an immutable and precise type label.
 If a run-time system enforces these invariants, then types can be kept honest
- through inexpensive label checks~\cite{mt-oopsla-2017,wnlov-popl-2010,bmt-ecoop-2010}.\footnote{Dart 2 implements concrete types ({https://}{dart.dev/dart-2}).}
+ through inexpensive label checks~\cite{mt-oopsla-2017,wnlov-popl-2010,bmt-ecoop-2010}.\footnote{Dart 2 implements concrete types (\shorturl{https://}{dart.dev/dart-2}).}
 For example, if a typed function expects a vector of integers and receives
  a value from a dynamically-typed context, the function can check whether the
- value's label is a subtype of the expected type; this operation is much
- simpler than traversing and wrapping the vector.
+ value's label is a subtype of the expected type.
+This operation is much simpler than traversing and wrapping the vector.
 
 An \emph{erasure}\/ migratory typing system ignores types at run-time~\cite{bat-ecoop-2014,bg-oopsla-1993,s-lisp-1990}.
 Typed code benefits from static type checking, but behaves exactly the same
  as untyped code.
-Erased types therefore add zero performance overhead and provide zero feedback
+Erased types therefore add zero performance overhead, do not benefit from
+ type-driven optimizations, and provide zero feedback
  when statically-typed code receives an input that contradicts the static
  types.
 If a typed function receives a bad argument, the application proceeds without
@@ -156,7 +157,8 @@ Lastly, a \emph{transient}\/ migratory typing system partially enforces types
 In typed code, every elimination form and every boundary to untyped code
  is protected with a tag check.
 Each tag check matches the top-level shape of a value againt the outermost
- constructor of the expected type; for example, the tag check for a
+ constructor of the expected type.
+For example, the tag check for a
  list of numbers accepts any list---no matter the contents.
 In untyped code, there are no checks.
 Transient types protect typed code from simple

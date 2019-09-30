@@ -3,8 +3,8 @@ There are four major tasks ahead:
   build an implementation,
   evaluate the implementation,
   and write a dissertation.
-I additionally plan to write a research paper about the combined
- natural/transient system.
+I additionally plan to write a research paper about the
+ implementation.
 
 Work on the model can begin immediately.
 By the end of this year, it should be clear whether the model can support
@@ -12,7 +12,7 @@ By the end of this year, it should be clear whether the model can support
 Implementation work must begin with a review of the existing
  \tshallow{}-typed Racket system~\cite{gf-icfp-2018};
  this update can begin in parallel with the modeling.
-Evaluations will begin as soon as the implementation can support simple
+Evaluations will start as soon as the implementation can support simple
  benchmarks.
 These preliminary measurements shall inform the protocol for a final
  performance evaluation starting in late Spring.
@@ -22,30 +22,32 @@ The dissertation will combine this report with my other findings on
  migratory typing.
 
 \begin{figure}[t]
-\begin{verbatim}
-  Oct         * model
-              |
-  Nov         |
-              |
-  Dec         |
-              |             * implementation
-  Jan'20      |             |
-              *             |
-  Feb                       |
-                            |             * evaluation
-  Mar                       |             |
-                            |             |
-  Apr                       |             |
-                            *             |             * report / submission
-  May                                     |             |
-                                          |             |             * dissertation
-  Jun                                     *             *             |
-                                                                      |
-  Jul                                                                 |
-                                                                      |
-  Aug                                                                 *
-
-\end{verbatim}
+  \definecolor{lightgray}{gray}{0.85}
+  \renewcommand{\FancyVerbFormatLine}[1]{\ifodd\value{FancyVerbLine}\colorbox{lightgray}{#1}\else\colorbox{white}{#1}\fi}
+\begin{Verbatim}
+Oct         * model                                                                   .
+.           |                                                                         .
+Nov         |                                                                         .
+.           |                                                                         .
+Dec         |                                                                         .
+.           |             * implementation                                            .
+Jan'20      |             |                                                           .
+.           *             |                                                           .
+Feb                       |                                                           .
+.                         |             * evaluation                                  .
+Mar                       |             |                                             .
+.                         |             |                                             .
+Apr                       |             |                                             .
+.                         *             |             * paper                         .
+May                                     |             |                               .
+.                                       |             |             * dissertation    .
+Jun                                     *             *             |                 .
+.                                                                   |                 .
+Jul                                                                 |                 .
+.                                                                   |                 .
+Aug                                                                 *                 .
+.                                                                                     .
+\end{Verbatim}
   \caption{Proposed schedule}
   \label{fig:schedule}
 \end{figure}
