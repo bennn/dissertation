@@ -165,30 +165,30 @@ For example, the tag check for a
 In untyped code, there are no checks.
 Transient types protect typed code from simple
  tag errors such as adding an integer to a function, but they fail
- to protect untyped code from types that are not completely checked.
+ to protect untyped code from lying types that are not completely checked.
 
 The existence of different approaches indicates a conflict between the theory
  and practice of migratory typing.
 Honest types are ideal from a theoretical perspective, but require either
  sophisticated run-time checks or limits on the expressiveness of
  untyped code; \figureref{fig:solution-space} maps potential solutions to
- the performance challenge.
+ thise performance challenge.
 Erased types are the polar opposite, as they require no run-time support
  and sacrifice all guarantees.
 If researchers can do no better than erasure, then
  type-sound migratory typing is a dead end.
 I am not yet willing to give up, and I therefore propose to explore a
- compromise semantics based on a careful theoretical exploration of the design
- space.
+ compromise semantics---indicated in the right-most part of
+ \figureref{fig:solution-space}---based on a careful theoretical exploration of the design space.
 
 \begin{figure}[t]
   \begin{tikzpicture}[text centered]
     \node (0) [draw,align=left] {Goal: migratory typing\\Problem: performance};
 
-    \node (1) [align=center,below of=0,yshift=1mm,xshift=-2in] {improve an existing\\compiler~\cite{gtnffvf-jfp-2019,fgsfs-oopsla-2018}};
-    \node (4) [align=center,below of=0,yshift=0mm,xshift= 2in,draw,dashed,ellipse,outer sep=2pt] {interoperate with a\\weakened semantics};
-    \node (2) [align=center,right of=1,yshift=-9mm,xshift=20mm] {build a new\\compiler~\cite{bbst-oopsla-2017}};
-    \node (3) [align=center,left of=4,yshift=-10mm,xshift=-18mm] {design a new language~\cite{mt-oopsla-2017,kas-pldi-2019,rat-oopsla-2017}};
+    \node (1) [align=center,below of=0,yshift=1mm,xshift=-2.1in] {design a new language~\cite{mt-oopsla-2017,kas-pldi-2019,rat-oopsla-2017}};
+    \node (4) [align=center,below of=0,yshift=0mm,xshift= 2in,draw,dashed,ellipse,outer sep=2pt] {interoperate with a\\weaker semantics~\cite{rzv-ecoop-2015,wnlov-popl-2010}};
+    \node (2) [align=center,right of=1,yshift=-12mm,xshift=25mm] {build a new\\compiler~\cite{bbst-oopsla-2017}};
+    \node (3) [align=center,left of=4,yshift=-16mm,xshift=-21mm] {improve an existing\\compiler~\cite{gtnffvf-jfp-2019,fgsfs-oopsla-2018}};
 
     \draw[->] (0) to [out=270,in=90,looseness=0.55] (1);
     \draw[->] (0) to [out=270,in=90,looseness=0.95] (2);
@@ -199,7 +199,6 @@ I am not yet willing to give up, and I therefore propose to explore a
 
   \caption{Ways to influence the performance of honest migratory types.}
   \label{fig:solution-space}
-  \vspace{-2mm}
 \end{figure}
 
 %For instance, the Pycket team has significantly improved the performance

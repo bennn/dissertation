@@ -456,10 +456,10 @@ For example, the type $(\tpair{\tint}{\tint})$ above is only enforced in
  monitoring theorem.
 Complete monitoring comes from prior work on higher-order contracts;
  in brief, a contract system satisfies complete monitoring if every channel
- of communication between components is able to be monitored
+ of communication between components can be monitored
  by a contract~\cite{dtf-esop-2012}.
-A mixed-typed language satisfies complete monitoring if all communication
- across boundaries factors through runtime checks.
+A mixed-typed language satisfies complete monitoring if runtime checks protect
+ all communications across boundaries.
 If so, then a pair value cannot transport a string such as $\estring{hello}$
  across a boundary that expects a number.
 

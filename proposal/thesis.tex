@@ -6,10 +6,10 @@ Second, the transient type enforcement strategy adds overhead to all typed code;
  by contrast, natural types are only expensive when typed and untyped code interact.
 To illustrate the differences on fully-typed programs,
  \figureref{fig:icfp-bars} compares the performance improvement
- in Typed Racket code (natural) over untyped to the improvement in a
+ in Typed Racket (natural) over untyped to the improvement in a
  transient Racket prototype.
 
-\begin{figure}[h]
+\begin{figure}[b]
   % TODO log scale, add X for overhead, darker stripes (dude its fine)
   \includegraphics[width=0.8\columnwidth]{src/icfp-bars.png}
   \caption{Speedup factor of Typed Racket vs. untyped (solid bars) and a transient Racket vs. untyped (striped bars)~\cite{gf-icfp-2018}.
@@ -17,7 +17,6 @@ To illustrate the differences on fully-typed programs,
   \label{fig:icfp-bars}
 \end{figure}
 
-\noindent
 The above brings us to the central question of my dissertation research:
 
 \begin{quote}
