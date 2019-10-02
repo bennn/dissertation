@@ -1,0 +1,79 @@
+\documentclass[10pt]{article}
+
+\input{package}
+\usepackage{palatino}
+\usepackage{fourier-orns}
+
+\begin{document}
+\input{def}
+\nolinenumbers
+
+\section*{Short Guide to Papers \hfill{\normalfont\small\it Ben Greenman \quad \today}}
+
+This is a guide to the key papers on migratory typing that I've worked on.
+The proposal mentions all of these papers.
+The goal here is to briefly communicate the technical contributions in each,
+ and to show how they fit together.
+Click on the venue of a paper to open a PDF.
+
+\bigskip
+\hfill{}\decoone\hfill{}
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/popl16-tfgnvf.pdf}{POPL '16}}
+Introduces a method to evaluate the performance of a migratory typing system;
+ specifically, the method is for programmers who want to add types
+ to an arbitrary set of modules in their program.
+Evaluates Typed Racket on a suite of benchmark programs.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/gtnffvf-jfp19.pdf}{JFP '19}}
+(\emph{written in 2016}\/) \quad
+Compares the performance of three implementations of migratory typing and
+ introduces a sampling variant of the evaluation method.
+Evaluates Typed Racket on an extended suite of benchmark programs;
+ the new programs use object-oriented designs.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/pepm18-gm.pdf}{PEPM '18}}
+Evaluates Transient Reticulated Python;
+ notes major differences from Typed Racket.
+On one hand, the worst observed overhead is within one order of magnitude.
+On the other hand, the fully-typed version of a program is typically the slowest.
+Typed Racket suffers more in the worst case but fares better when fully-typed.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/icfp18-gf.pdf}{ICFP '18}}
+Models different approaches to migratory typing as different semantics for a
+ common surface language.
+Explores the different type soundness guarantees for the semantics and
+ presents additional examples.
+Compares the performance of a transient Typed Racket (TR-1) to standard
+ Typed Racket; this more careful evaluation confirms the general suspicions
+ noted in PEPM '19.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/oopsla18-fgsfs.pdf}{OOPSLA '18}}
+Uses the POPL '16 method to measure the benefit of an optimization that collapses
+ stacks of higher-order contracts to a single coercion.
+The collapsing method was implemented by Daniel Feltey and invented by
+ Michael Greenberg.
+Performance is still poor in many benchmarks after collapsing; the optimization
+ is irrelevant in some benchmarks, and needs to be implemented for additional
+ higher-order contracts to support others.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/dls18-bg.pdf}{DLS '18}}
+Uses the ICFP '18 model to survey developers' preference regarding 
+ three different semantics for migratory typing (natural, transient, and erasure).
+Respondents preferred a semantics that enforces all types.
+The survey did not ask about performance.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/oopsla19-gfd.pdf}{OOPSLA '19}}
+Adapts the notion of complete monitoring (from work on higher-order contracts)
+ to test whether a semantics enforces all types in a mixed program.
+Introduces two properties to measure the quality of blame information in
+ languages that fail to satisfy complete monitoring.
+
+
+\end{document}
