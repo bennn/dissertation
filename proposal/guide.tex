@@ -27,7 +27,7 @@ Evaluates Typed Racket on a suite of benchmark programs.
 
 
 \paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/gtnffvf-jfp19.pdf}{JFP '19}}
-(\emph{written in 2016}\/) \quad
+(\emph{written in 2016, major revision of POPL '16}\/) \quad
 Compares the performance of three implementations of migratory typing and
  introduces a sampling variant of the evaluation method.
 Evaluates Typed Racket on an extended suite of benchmark programs;
@@ -43,13 +43,23 @@ Typed Racket suffers more in the worst case but fares better when fully-typed.
 
 
 \paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/icfp18-gf.pdf}{ICFP '18}}
-Models different approaches to migratory typing as different semantics for a
- common surface language.
-Explores the different type soundness guarantees for the semantics and
- presents additional examples.
-Compares the performance of a transient Typed Racket (TR-1) to standard
- Typed Racket; this more careful evaluation confirms the general suspicions
- noted in PEPM '19.
+
+Presents a systematic, two-part investigation of the design space of migratory typing
+ systems.
+The first part models different designs as different semantics for a common
+ mixed-typed language, compares their type soundness guarantees, and
+ present additional examples that are not explained by type soundness.
+The second part compares the performance of natural, erasure, and transient
+ migratory typing as implementations of the Typed Racket surface language;
+ this evaluation confirms the suspicions noted in PEPM '19.
+
+
+\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/oopsla19-gfd.pdf}{OOPSLA '19}}
+
+Continues the theoretical investigation of ICFP '18; formally explains the
+ differences in behavior that were not accounted for by type soundness using
+ the notion of `complete monitoring' from prior work on higher-order contracts.
+% A MT system that satisfies CM 
 
 
 \paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/oopsla18-fgsfs.pdf}{OOPSLA '18}}
@@ -67,13 +77,6 @@ Uses the ICFP '18 model to survey developers' preference regarding
  three different semantics for migratory typing (natural, transient, and erasure).
 Respondents preferred a semantics that enforces all types.
 The survey did not ask about performance.
-
-
-\paragraph{\href{https://www2.ccs.neu.edu/racket/pubs/oopsla19-gfd.pdf}{OOPSLA '19}}
-Adapts the notion of complete monitoring (from work on higher-order contracts)
- to test whether a semantics enforces all types in a mixed program.
-Introduces two properties to measure the quality of blame information in
- languages that fail to satisfy complete monitoring.
 
 
 \end{document}
