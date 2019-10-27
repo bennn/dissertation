@@ -17,7 +17,7 @@ Current:
 - Sam
 
 TODO:
-- [ ] call Zeina and ask how is Jens about giving feeback
+- [X] call Zeina and ask how is Jens about giving feeback
 - [ ] find James Noble's time zone. New Zealand or not?
       I think yes
 
@@ -29,3 +29,31 @@ Next week (2019-09-16) start inviting:
 4. James Noble
 5. Eric Ernst
 
+- - -
+
+2019-06-17 thinking:
+- Matthias Amal Jan
+- Ross SamTH
+
+Ron Garcia
+Eric Tanter
+Jens Palsberg
+Michael Greenberg
+
+Gregor Kiczales
+Marc Feeley
+
+Jeff Foster
+Mike Hicks
+Sheng Chen
+Fritz Henglein
+Ranjit Jhala
+Steve Zdancewic
+Peter Thiemann
+Nada Amin
+Gregor Richards
+Nikhil Swamy
+Aseem Rastogi
+
+Aaron Turon
+Felix Klock
