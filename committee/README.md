@@ -11,9 +11,12 @@ Plan:
 Current:
 - Matthias
 - Jan
+  https://calendly.com/vitekj
 - Amal
 - Shriram
+  https://cs.brown.edu/~sk/Contact/Calendar/
 - Fritz
+  in Denmark +5 hours?
 - Sam
 
 TODO:
