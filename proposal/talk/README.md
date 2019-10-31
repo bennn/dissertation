@@ -10,4 +10,6 @@ Need to change title!
 Outline
 ---
 
+(DO NOT write a script, stick to talking points)
+
 

@@ -1,5 +1,6 @@
 #lang at-exp slideshow
 
+;; image-color.com
 ;; /Users/ben/code/racket/gtp/shallow/gf-icfp-2018/talk/simple.ss
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
@@ -373,25 +374,113 @@
 
 (define (sec:outline)
   (pslide
-    @t{Outline: Deep and Shallow Types})
+    @t{Outline: Honest and Lying Types}
+    @t{Thesis Proposal}
+    @t{Ben Greenman})
   (pslide
-    @t{Migratory Typing})
+    ;; this is a thesis proposal, so lets start with the thesis question
+    ;;  and then fill in background
+    ;; ... 3 things to explain
+    ;; First, migratory typing
+    @t{Thesis question:}
+    @t{Does migratory typing benefit from a combination of honest and lying types?})
   (pslide
-    @t{Diversity, what do types predict?})
+    ;; use OOPSLA images
+    @t{Migratory typing adds static types to an existing language}
+    @t{dynamically-typed lang. -> mixed-typed lang.}
+    @t{Interoperability problem})
   (pslide
-    @t{Rule out Erasure})
+    ;; emphasize the question
+    @t{typed values and untyped values flow across boundaries ...}
+    @t{... how do types control the interactions?})
   (pslide
-    @t{Goal: combine})
+    ;; many answers via implementations
+    ;; use OOPSLA flag slide
+    @t{Many Implementations}
+    )
   (pslide
-    @t{Deep Shallow definitions})
+    ;; many answers via models
+    ;; use OOPSLA flag slide 2
+    @t{Many Models})
   (pslide
-    @t{Deep Shallow contrast})
+    ;; "blank" landscape
+    ;;  pretty sure we WANT mixed-typed over migratory ... more accurate and people will get the idea
+    @t{Landscape of Mixed-Typed Languages})
   (pslide
-    @t{Potential Benefits})
+    ;; thanks to my past work, have much richer understanding
+    ;;  may want concentric circles instead of boundaries, to be clearer tag-S => type-S etc
+    ;;  maybe a hill of properties? up from Uni-sound to type-sound+CM ?
+    ;; TODO need a new picture to work toward, based on Leif + Michael's feedback
+    ;;  they're upset with the "subset" and the dots not looking like flag-models
+    ;;  and the properties being 1-1 with dots
+    @t{Prior Work: Characterizing the Landscape (2 Parts)})
   (pslide
-    @t{Challenges})
+    ;; want text alongside a landscape picture
+    ;; - (erasure) ignore types
+    ;; - (transient) tag-check boundaries + elim forms
+    ;; ;; - (amnesic) wrappers for tag checks (MAYBE NOT, really its a proof artifact)
+    ;; - (forgetful) wrappers, drop extras
+    ;; - (conatural) late-check all things
+    ;; - (natural) some eager some late
+    ;; all for common surface lang, run same program different ways
+    @t{Part 1: Comparable Models})
   (pslide
+    ;; uni tag type CM ... thats all, right?
+    @t{Part 2: Formal Characterization})
+  (pslide
+    ;; on LHS types don't mean anything; everywhere else have typed code no undef ops
+    ;; so lets shrink our focus
+    @t{Remove Erasure})
+  (pslide
+    ;; full landscape again ... draw weak -> strong properties axis
+    ;; recall thesis question; RHS = honest "what I'm choosing to call honest types"
+    @t{Honest Types})
+  (pslide
+    ;; full landscape
+    ;; everything else = lying
+    @t{Lying Types})
+  (pslide
+    ;; now have basic understanding of thesis question
+    ;; but honest types apparently clear winner
+    @t{Does migratory typing benefit from a combination of honest any lying types?}
+    @t{in particular, transient})
+  (pslide
+    ;; change views, instead of looking at properties need to look at performance
+    ;; again common model pays off
+    ;; have Natural (TR) and prototype Transient
+    ;; TODO need something that's not flags ... gee should models / impls be different things instead of both flags?
+    @t{Performance Characterization})
+  (pslide
+    ;; 
+    @t{Transient perf ~ linear with types})
+  (pslide
+    @t{Natural perf ~ maybe exponential, depends on boundaries})
+  (pslide
+    @t{See now why question is compelling, complementary strenghts})
+  (pslide
+    @t{Potential Benefits}
+    @t{- lib T -> S, better overall}
+    @t{- user T -> S, better perf while mixed}
+    @t{- user S -> T, better perf near top}
+    @t{- user T -> S, run more programs}
+    @t{- user S -> T, debug incorrect program})
+  (pslide
+    @t{Challenges}
+    @t{- model interactions, suggest costs}
+    @t{- implementation}
+    @t{- evaluation})
+  (pslide
+    ;; research is when it can fail (amnesic hard, need use-site types)
+    @t{Alternative: forgetful})
+  (pslide
+    ;; easy, see document
     @t{Timeline})
+  ;; ---
+  ;; Sam questions:
+  ;; - please explain all optimizations that do not apply
+  ;; - run on Pycket, to compare to other transient work?
+  ;; - get benchmarks where some contracts necessary
+  ;; - why not use approx-D method?
   (void))
 
 ;; =============================================================================
