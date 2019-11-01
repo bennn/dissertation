@@ -34,6 +34,7 @@
 (define slide-text-coord-right (coord slide-text-right slide-text-top 'rt))
 (define center-coord (coord 1/2 1/2 'cc))
 (define heading-text-coord (coord slide-left slide-top 'lt))
+(define big-landscape-coord (coord 1/2 slide-text-top 'ct))
 
 (define turn revolution)
 
@@ -53,6 +54,8 @@
 (define racket-red  (hex-triplet->color% #x9F1D20))
 (define racket-blue (hex-triplet->color% #x3E5BA9))
 (define ice-color (hex-triplet->color% #xF3F1F2))
+(define sand-color (hex-triplet->color% #xFFF7C2))
+(define cliff-color (hex-triplet->color% #x3A3B27))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -299,7 +302,6 @@
 ;
 ;(define authors-pict
 ;  (let ()
-;    ;; TODO actual NEU NWU fonts?
 ;    (define base
 ;      (ht-append
 ;        pico-x-sep
@@ -490,8 +492,37 @@
 
 ;; =============================================================================
 
+(define big-landscape-w (* 7/10 client-w))
+(define big-landscape-h (* 55/100 client-h))
+
+(define (make-landscape-background w h)
+  (define c sand-color)
+  (define bc cliff-color)
+  (define (draw-box dc dx dy)
+    (define old-brush (send dc get-brush))
+    (define old-pen (send dc get-pen))
+    (send dc set-brush (new brush% [color c] [style 'crossdiag-hatch]))
+    (for ((pw (in-list '(3 2)))
+          (offset (in-list '(0 4))))
+      (send dc set-pen (new pen% [width pw] [color bc]))
+      (define path (new dc-path%))
+      (send path rectangle (+ 0 offset) (+ 0 offset) (- w (* 2 offset)) (- h (* 2 offset)))
+      (send dc draw-path path dx dy))
+    (send dc set-brush old-brush)
+    (send dc set-pen old-pen))
+  (dc draw-box w h))
+;;  (filled-rectangle w h #:color sand-color #:draw-border? #f)
+
+(define (make-big-landscape-background)
+  (make-landscape-background big-landscape-w big-landscape-h))
+
+(define hyrule-landscape
+  (cc-superimpose (make-big-landscape-background) (inset/clip (bitmap "src/hyrule.png") -1 -6)))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+    #:go big-landscape-coord
+    hyrule-landscape
 
 
   )))))

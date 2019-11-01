@@ -13,3 +13,10 @@ Outline
 (DO NOT write a script, stick to talking points)
 
 
+
+TODO
+---
+
+- [ ] landscape, blank
+- [ ] landscape, theorems
+- [X] landscape, perf
