@@ -10,6 +10,7 @@ Plan:
 
 Current:
 - Matthias
+  + Dec 2 > Dec 3 > Dec 4 for proposal ... late Nov works too
 - Jan
   https://calendly.com/vitekj
 - Amal
@@ -18,6 +19,8 @@ Current:
 - Fritz
   in Denmark +5 hours?
 - Sam
+  + wants meeting to coordinate with Racket cabal on Dec 2 seems impossible though email Sam
+  + wait for Sam to book a flight
 
 TODO:
 - [X] call Zeina and ask how is Jens about giving feeback
