@@ -17,6 +17,6 @@ Outline
 TODO
 ---
 
-- [ ] landscape, blank
-- [ ] landscape, theorems
+- [X] landscape, blank
+- [X] landscape, theorems
 - [X] landscape, perf

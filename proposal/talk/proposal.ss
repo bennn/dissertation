@@ -51,16 +51,50 @@
 ;; COLOR
 (define black (string->color% "black"))
 (define white (string->color% "white"))
+(define transparent (color%-update-alpha white 0))
+(define program-color (hex-triplet->color% #xABC9CF)) ;; gray/blue
 (define racket-red  (hex-triplet->color% #x9F1D20))
 (define racket-blue (hex-triplet->color% #x3E5BA9))
 (define ice-color (hex-triplet->color% #xF3F1F2))
 (define sand-color (hex-triplet->color% #xFFF7C2))
+(define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
 (define untyped-color (hex-triplet->color% #x697F4D)) ;; dark green
 ;; #x72875C #x708E6D
+
+(define uni-sound-color (hex-triplet->color% #x666666))
+(define tag-sound-color (hex-triplet->color% #x888888))
+(define type-sound-color (hex-triplet->color% #xBBBBBB))
+(define complete-monitor-color (hex-triplet->color% #xFFFFFF))
+
+(define (tagof str) (string-append "⌊" str "⌋"))
+(define tag-T (tagof "T"))
+
+(define uni-sound-str "Unitype Sound")
+(define tag-sound-str "Tag Sound")
+(define type-sound-str "Type Sound")
+(define complete-monitor-str "Complete Monitoring")
+
+(define (clip* pp)
+  (clip-ascent (clip-descent pp)))
+
+(define (make-region-label txt-pict)
+  (define w (* 110/100 (pict-width txt-pict)))
+  (define h (* 120/100 (pict-height (t tag-T))))
+  (define bg (make-landscape-background w h #:color stamp-color))
+  (ppict-do bg #:go (coord 1/2 48/100 'cc) txt-pict))
+
+(define (add-landscape-background pp #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f])
+  (define x-margin (or pre-x-margin pico-x-sep))
+  (define y-margin (or pre-y-margin pico-y-sep))
+  (define w (+ (* 2 x-margin) (pict-width pp)))
+  (define h (+ (* 2 y-margin) (pict-height pp)))
+  (cc-superimpose
+    (make-landscape-background w h #:color stamp-color)
+    pp))
 
 (define racket-logo.png (build-path "src" "racket-logo2.png"))
 
@@ -102,12 +136,15 @@
 (define caption-size 40)
 (define code-size 28)
 (define code-line-sep 4)
+(define big-body-size 52)
+(define tu-size 72)
+(define big-node-size 120)
 
 (define ((make-string->text #:font font #:size size #:color color) str)
   (colorize (text str font size) color))
 
 (define (make-string->title #:size [size title-size] #:color [color black])
-  (make-string->text #:font title-font #:size size #:color color))
+  (make-string->body #:size size #:color color))
 
 (define (make-string->subtitle #:size [size subtitle-size] #:color [color black])
   (make-string->text #:font subtitle-font #:size size #:color color))
@@ -142,15 +179,10 @@
 (define blang-text (make-string->text #:font (cons 'bold code-font) #:size 32 #:color black))
 (define captiont (make-string->body #:size caption-size #:color black))
 (define (ownership-text str #:color [color black]) ((make-string->text #:font "PilGi" #:size 40 #:color color) str))
+(define huge-t (make-string->body #:size 80))
+(define big-t (make-string->body #:size big-body-size))
+(define big-tb (make-string->text #:font (cons 'bold body-font) #:size big-body-size #:color black))
 
-(define tau-str "τ")
-(define (tagof str)
-  (string-append "⌊" str "⌋"))
-
-(define U-sound-str "Uni sound")
-(define tag-sound-str (string-append (tagof "T") " sound"))
-(define full-sound-str "T sound")
-(define complete-monitoring-str "Complete monitoring")
 (define unknown-sound-str "???")
 
 (define Natural-str "Natural")
@@ -186,32 +218,29 @@
 ;;  (define old-tag (pict-tag pp))
 ;;  (define pp/b (pict:blur pp h-rad (or h-rad v-rad)))
 ;;  (if old-tag (tag-pict pp/b old-tag) pp/b))
-;;
-;;(define (make-bullet) (disk 11))
-;;
-;;(struct program-arrow [src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull color] #:transparent)
-;;
+
 ;;(define (add-landscape-line pp arrow)
 ;;  (add-program-arrow pp arrow #:hide? #true #:style 'solid #:line-width 4))
-;;
-;;(define (add-program-arrow pp arrow #:arrow-size [arrow-size 12] #:line-width [pre-line-width #f] #:style [style 'short-dash] #:label [label (blank)] #:hide? [hide? #false])
-;;  (define line-width (or pre-line-width 3))
-;;  (pin-arrow-line
-;;    arrow-size pp
-;;    (find-tag pp (program-arrow-src-tag arrow))
-;;    (program-arrow-src-find arrow)
-;;    (find-tag pp (program-arrow-tgt-tag arrow))
-;;    (program-arrow-tgt-find arrow)
-;;    #:line-width line-width
-;;    #:label label
-;;    #:hide-arrowhead? hide?
-;;    #:style style
-;;    #:start-angle (program-arrow-start-angle arrow)
-;;    #:end-angle (program-arrow-end-angle arrow)
-;;    #:start-pull (program-arrow-start-pull arrow)
-;;    #:end-pull (program-arrow-end-pull arrow)
-;;    #:color (program-arrow-color arrow)))
 
+(struct program-arrow [src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull color] #:transparent)
+
+(define (add-program-arrow pp arrow #:arrow-size [arrow-size 12] #:line-width [pre-line-width #f] #:style [style 'short-dash] #:label [label (blank)] #:hide? [hide? #false])
+  (define line-width (or pre-line-width 3))
+  (pin-arrow-line
+    arrow-size pp
+    (find-tag pp (program-arrow-src-tag arrow))
+    (program-arrow-src-find arrow)
+    (find-tag pp (program-arrow-tgt-tag arrow))
+    (program-arrow-tgt-find arrow)
+    #:line-width line-width
+    #:label label
+    #:hide-arrowhead? hide?
+    #:style style
+    #:start-angle (program-arrow-start-angle arrow)
+    #:end-angle (program-arrow-end-angle arrow)
+    #:start-pull (program-arrow-start-pull arrow)
+    #:end-pull (program-arrow-end-pull arrow)
+    #:color (program-arrow-color arrow)))
 
 (define (add-shadow-background pp #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f] #:color [shadow-color black] #:alpha [shadow-alpha 0.1])
   (define w (pict-width pp))
@@ -253,124 +282,396 @@
 (define program-w (w%->pixels 35/100))
 (define program-h (h%->pixels 45/100))
 
+(define big-landscape-w (* 7/10 client-w))
+(define big-landscape-h (* 55/100 client-h))
+
+(define (make-landscape-background w h #:color [pre-color #f])
+  (define c (or pre-color sand-color))
+  (define bc cliff-color)
+  (define (draw-box dc dx dy)
+    (define old-brush (send dc get-brush))
+    (define old-pen (send dc get-pen))
+    ;; --- white background
+    (let ((path (new dc-path%)))
+      (send dc set-brush (new brush% [color white] [style 'solid]))
+      (send dc set-pen (new pen% [width 1] [color white]))
+      (send path rectangle 0 0 w h)
+      (send dc draw-path path dx dy))
+    ;; --- foreground
+    (send dc set-brush (new brush% [color c] [style 'crossdiag-hatch]))
+    (for ((pw (in-list '(3 2)))
+          (offset (in-list '(0 4))))
+      (send dc set-pen (new pen% [width pw] [color bc]))
+      (define path (new dc-path%))
+      (send path rectangle (+ 0 offset) (+ 0 offset) (- w (* 2 offset)) (- h (* 2 offset)))
+      (send dc draw-path path dx dy))
+    (send dc set-brush old-brush)
+    (send dc set-pen old-pen))
+  (dc draw-box w h))
+;;  (filled-rectangle w h #:color sand-color #:draw-border? #f)
+
+(define (make-big-landscape-background)
+  (make-landscape-background big-landscape-w big-landscape-h))
+
+(define hyrule-landscape
+  (cc-superimpose (make-big-landscape-background) (inset/clip (bitmap "src/hyrule.png") -1 -6)))
+
+(define (make-performance-landscape)
+  hyrule-landscape)
+
+(define (make-uni-sound-region w h)
+  (filled-rectangle w h #:draw-border? #f #:color uni-sound-color))
+
+(define (make-tag-sound-region pre-w pre-h)
+  (define w (* 89/100 pre-w))
+  (define h (* 76/100 pre-h))
+  (draw-boring-curve w h tag-sound-color))
+
+(define (make-type-sound-region pre-w pre-h)
+  (define w (* 78/100 pre-w))
+  (define h (* 51/100 pre-h))
+  (draw-boring-curve w h type-sound-color))
+
+(define (make-complete-monitoring-region pre-w pre-h)
+  (define w (* 67/100 pre-w))
+  (define h (* 26/100 pre-h))
+  (draw-boring-curve w h complete-monitor-color))
+
+(define (draw-boring-curve w h color)
+  (define bc black)
+  (define c color)
+  (define (draw-region dc dx dy)
+    (define old-brush (send dc get-brush))
+    (define old-pen (send dc get-pen))
+    (send dc set-pen (new pen% [width 0] [color c]))
+    ;; TODO better way to draw curves
+    (for ((brush (in-list
+                   (list
+                     (new brush% [style 'solid] [color white])
+                     (new brush% [style 'solid] [color c])))))
+      (send dc set-brush brush)
+      (define path (new dc-path%))
+      (send path move-to 0 0)
+      (send path line-to w 0)
+      (send path line-to w h)
+      (send path line-to (* 1/10 w) h)
+      (send path curve-to (* 5/100 w) h 0 h 0 (* 7/10 h))
+      (send path line-to 0 0)
+      (send path close)
+      (send dc draw-path path dx dy))
+    (send dc set-pen (new pen% [width region-border-width] [color bc]))
+    (send dc set-brush (new brush% [style 'solid] [color c]))
+    (define path (new dc-path%))
+    (send path move-to (- w 1) h)
+    (send path line-to (* 1/10 w) h)
+    (send path curve-to (* 5/100 w) h 0 h 0 (* 7/10 h))
+    (send path line-to 0 2)
+    (send dc draw-path path dx dy)
+    ;; --
+    (send dc set-brush old-brush)
+    (send dc set-pen old-pen))
+  (dc draw-region w h))
+
+(define (make-theorem-landscape)
+  (let* ((pp (make-big-landscape-background))
+         (w (- (pict-width pp) 12))
+         (h (- (pict-height pp) 12))
+         (top-right-coord (coord 1 0 #:abs-x -6.5 #:abs-y 5.5 'rt))
+         (pp (ppict-do pp
+               #:go top-right-coord (make-uni-sound-region w h)
+               #:go top-right-coord (make-tag-sound-region w h)
+               #:go top-right-coord (make-type-sound-region w h)
+               #:go top-right-coord (make-complete-monitoring-region w h)))
+         (pp (ppict-do pp
+               #:go (coord 3/100 80/100 'lt)
+               (make-region-label (t uni-sound-str))
+               #:go (coord 20/100 55/100 'lt)
+               (make-region-label (t tag-sound-str))
+               #:go (coord 45/100 31/100 'lt)
+               (make-region-label (t type-sound-str))
+               #:go (coord 36/100 06/100 'lt)
+               (make-region-label (t complete-monitor-str))))
+         )
+    pp))
+
+(define PLT-pict
+  (vl-append 2 (bitmap "src/racket-small.png") (blank)))
+
+(define neu-pict
+  (bitmap "src/neu-small.png"))
+
+(define meeting-of-the-waters
+  (bitmap "src/meeting-of-the-waters.jpg"))
+
+(define the-Q (hb-append 0 (huge-t "Q") (big-t ". ")))
+
+(define the-mt @big-t{migratory typing})
+(define the-h @big-t{honest})
+(define the-l @big-t{lying})
+
+(define the-mt-b @big-tb{migratory typing})
+(define the-h-b @big-tb{honest})
+(define the-l-b @big-tb{lying})
+
+(define (line-append . pp*)
+  (line-append* pp*))
+
+(define (line-append* pp*)
+  (apply hb-append 0 pp*))
+
+(define (make-thesis-question bold?)
+  (define txt-pict
+    (vl-append
+      tiny-y-sep
+      (blank 0 14)
+      (line-append (tag-pict @big-t{Does  } 'qstart) (if bold? the-mt-b the-mt) @big-t{  benefit})
+      (line-append @big-t{from a combination of  } (if bold? the-h-b the-h))
+      (line-append @big-t{and  } (if bold? the-l-b the-l) @big-t{  types?})))
+  (ht-append the-Q txt-pict))
+
+(define (add-hubs pp tag)
+  (define io-margin 8)
+  (define node-padding 6)
+  (define h-blank (blank 0 io-margin))
+  (define v-blank (blank io-margin 0))
+  (vc-append
+    node-padding
+    (tag-pict v-blank (tag-append tag 'N))
+    (hc-append
+      node-padding
+      (tag-pict h-blank (tag-append tag 'W)) (tag-pict pp tag) (tag-pict h-blank (tag-append tag 'E)))
+    (tag-pict v-blank (tag-append tag 'S))))
+
+(define (make-program-pict pp #:radius [pre-radius #f] #:bg-color [bg-color #f] #:frame-color [frame-color #f] #:x-margin [pre-x #f] #:y-margin [pre-y #f])
+  (define radius (or pre-radius 12))
+  (define x-m (or pre-x (w%->pixels 5/100)))
+  (define y-m (or pre-y med-y-sep))
+  (add-rectangle-background
+    #:radius radius #:color (if (eq? bg-color transparent) transparent white)
+    (add-rounded-border
+      pp
+      #:radius radius
+      #:background-color (or bg-color (color%-update-alpha program-color 0.85))
+      #:frame-width 3
+      #:frame-color (or frame-color program-color)
+      #:x-margin x-m
+      #:y-margin y-m)))
+
+(define (make-module-pict pp #:radius radius #:bg-color [bg-color #false] #:x-margin [pre-x #f] #:y-margin [pre-y #f])
+  (add-rounded-border
+    pp
+    #:radius radius
+    #:background-color bg-color
+    #:frame-width 2
+    #:x-margin (or pre-x pico-x-sep)
+    #:y-margin (or pre-y pico-y-sep)))
+
+(define (make-typed-pict pp #:x-margin [x #f] #:y-margin [y #f])
+  (make-module-pict pp #:radius 37 #:bg-color typed-color #:x-margin x #:y-margin y))
+
+(define (make-untyped-pict pp #:x-margin [x #f] #:y-margin [y #f])
+  (make-module-pict pp #:radius 4 #:bg-color untyped-color #:x-margin x #:y-margin y))
+
+(define (make-typed-icon #:font-size [font-size #f] #:width [w #f] #:height [h #f])
+  (make-tu-icon "T" #:font-size font-size #:width w #:height h))
+
+(define (make-untyped-icon  #:font-size [font-size #f] #:width [w #f] #:height [h #f])
+  (make-tu-icon "U" #:font-size font-size #:width w #:height h))
+
+(define (make-tu-icon str #:font-size [pre-font-size #f] #:width [pre-w #f] #:height [pre-h #f])
+  (define font-size (or pre-font-size tu-size))
+  (define w (or pre-w 70))
+  (define h (or pre-h 70))
+  (define str-pict (clip-descent (text str `(bold . ,tu-font) font-size)))
+  (cc-superimpose (blank w h) str-pict))
+
+(define U-node (make-untyped-pict (make-untyped-icon)))
+(define T-node (make-typed-pict (make-typed-icon)))
+
+(define (make-tree w h tu-code* #:arrows? [draw-arrows? #false] #:owners? [draw-owners? #false] #:labels? [labels? #true])
+  (define node-sym* '(A B C D E))
+  (define node*
+    (for/fold ((acc (blank w h)))
+              ((pos (in-list (list (coord 0 0 'lt)
+                                   (coord 52/100 25/100 'ct)
+                                   (coord 1 1/100 'rt)
+                                   (coord 12/100 1 'lb)
+                                   (coord 95/100 95/100 'rb))))
+               (bool (in-list tu-code*))
+               (tag (in-list node-sym*))
+               (i (in-naturals)))
+      (define node (add-hubs (if bool T-node U-node) tag))
+      (ppict-do acc #:go pos (if draw-owners? (add-ownership node i #:draw-label? labels?) node))))
+  (define node*/arrows
+    (cond
+      [draw-arrows?
+       (define arr*
+         (list
+           (program-arrow 'D-E rt-find 'E-W lt-find (* 1/10 turn) (* 9/10 turn) 60/100 1/4 black)
+           (program-arrow 'E-N rt-find 'C-S rb-find (* 18/100 turn) (* 29/100 turn) 1/4 1/4 black)
+           ;; --
+           (program-arrow 'C-W lt-find 'A-E lt-find (* 36/100 turn) (* 64/100 turn) 1/4 1/4 black)
+           (program-arrow 'A-E rb-find 'B-W lt-find 0 0 1/2 1/2 black)
+           (program-arrow 'B-W lb-find 'D-N rt-find (* 1/2 turn) (* 3/4 turn) 1/4 1/4 black)
+           (program-arrow 'B-S rb-find 'E-N lt-find (* 3/4 turn) (* 3/4 turn) 1/8 1/8 black)
+           (program-arrow 'C-W lb-find 'B-N rt-find (* 1/2 turn) (* 3/4 turn) 1/2 1/3 black)
+           (program-arrow 'D-N lt-find 'A-S lb-find (* 1/4 turn) (* 1/4 turn) 1/4 1/4 black)
+           (program-arrow 'E-W lb-find 'D-E rb-find (* 60/100 turn) (* 45/100 turn) 1/4 1/4 black)
+           (program-arrow 'E-S lb-find 'B-S lb-find (* 70/100 turn) (* 20/100 turn) 5/10 1/4 black)))
+       (cond
+         [(eq? draw-arrows? 'path)
+          (define path-idx 2)
+          (define short-arrow* (take arr* path-idx))
+          (define val-tag 'end-val)
+          (define node/path
+            (for/fold ((acc node*))
+                      ((a (in-list short-arrow*)))
+              (add-program-arrow acc a)))
+          (define node/path+
+            (add-program-arrow node/path (list-ref arr* path-idx) #:style 'transparent #:hide? #true #:label (tag-pict (blank) val-tag)))
+          (ppict-do
+            node/path+
+            #:go (at-find-pict val-tag cc-find 'cc #:abs-y (* -3/2 (pict-height ownership-v-pict)))
+            (add-hubs (add-ownership* ownership-v-pict (decode-lbl* short-arrow*) #:draw-label? #f) 'V)
+            #:set (add-program-arrow ppict-do-state (program-arrow 'C-W lt-find 'V-E rb-find (* 36/100 turn) (* 44/100 turn) 1/4 1/4 black)))]
+         [else
+          (for/fold ((acc node*))
+                    ((a (in-list arr*)))
+            (add-program-arrow acc a))])]
+      [else
+       node*]))
+  node*/arrows)
+
+(define (decode-lbl* pa*)
+  ;; HACK get integers from the tags in pa*
+  (remove-duplicates
+    (apply append (for/list ((a (in-list pa*))) (list (decode-lbl (program-arrow-src-tag a)) (decode-lbl (program-arrow-tgt-tag a)))))))
+
+(define (decode-lbl sym)
+  ;; HACK
+  (define str (symbol->string sym))
+  (unless (< 0 (string-length str))
+    (raise-argument-error 'decode-lbl "symbol? with +0 characters"))
+  (- (char->integer (string-ref str 0)) (char->integer #\A)))
+
+(define ownership-v-pict
+  (let ((v-pict (bigct "v")))
+    (cc-superimpose (blank (* 2 (pict-width v-pict)) 0) v-pict)))
+
+(define (natural->owner-color i)
+  (color%-update-alpha (rgb-triplet->color% (->pen-color i)) 0.3))
+
+(define ell-pict
+  (ownership-text "l"))
+
+(define (natural->owner-label i)
+  (define i-pict (ownership-text (number->string i)))
+  (ht-append ell-pict (vl-append (* 36/100 (pict-height i-pict)) (blank) i-pict)))
+
+(define (add-ownership pp i #:draw-label? [draw-label? #true] #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f])
+  (define color (natural->owner-color i))
+  (define x-margin (or pre-x-margin (* 1/2 (pict-width pp))))
+  (define y-margin (or pre-y-margin (pict-height pp)))
+  (define base-pict
+    (add-spotlight-background
+      #:border-color color #:x-margin x-margin #:y-margin y-margin
+      pp))
+  (if draw-label?
+    (ppict-do
+      base-pict
+      #:go (coord 1 0 'rc)
+      (natural->owner-label i))
+    base-pict))
+
+(define (add-ownership* pp oid* #:draw-label? [draw-label? #true])
+  (define x% 30/100)
+  (define y% 30/100)
+  (define last-i (- (length oid*) 1))
+  (unless (< 0 last-i)
+    (raise-argument-error 'add-ownership* "list of 2 or more integers" 1 pp oid* '#:draw-label? draw-label?))
+  (for/fold ((acc (add-ownership pp (car oid*) #:draw-label? #f)))
+            ((lbl (in-list (cdr oid*)))
+             (i (in-naturals)))
+    (add-ownership acc lbl
+                   #:draw-label? (and draw-label? (= i last-i))
+                   #:x-margin (* (- x% (* 4/100 i)) (pict-width acc))
+                   #:y-margin (* (- y% (* 4/100 i)) (pict-height acc)))))
+
+(define (make-migration-arrow)
+  ;; TODO use a dc, draw more of a triangle with border?
+  (colorize (arrowhead (w%->pixels 5/100) 0) (hex-triplet->color% #x333333)))
+
 ;; =============================================================================
 
 (define (do-show)
   (set-page-numbers-visible! #true)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-  (sec:outline)
+;;  (sec:outline)
 ;  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    ;(sec:migration)
-    ;(sec:TS)
-    ;(sec:plot)
-    ;(sec:CM)
-    ;(sec:BSBC)
-    ;(sec:takeaways)
-    ;(sec:extra)
+    (sec:the-question)
     (void)))
 
 ;; -----------------------------------------------------------------------------
 ;; title
 
-;(define neu 'Northeastern)
-;(define nwu 'Northwestern)
-;
-;(define PLT-pict
-;  (vl-append 2 (bitmap "src/racket-small.png") (blank)))
-;
-;(define neu-pict
-;  (bitmap "src/neu-small.png"))
-;
-;(define nwu-pict
-;  (hc-append 41 (blank) (bitmap "src/nwu-small.png")))
-;
-;(define island-tag 'island)
-;
-;(define island-pict (tag-pict (bitmap (build-path "src" "island.png")) island-tag))
-;
-;(define map-bg-pict (cellophane island-pict 0.15))
-;
-;(define the-title-pict
-;  (tag-pict
-;    (vl-append
-;      (h%->pixels 4/100)
-;      @titlet[@string-upcase{Complete Monitors}]
-;      @titlet[@string-upcase{for Gradual Types}]) 'title))
-;
-;(define authors-pict
-;  (let ()
-;    (define base
-;      (ht-append
-;        pico-x-sep
-;        (vl-append (w%->pixels 12/1000) (blank) (make-compass-pict 24))
-;        (vl-append
-;          (h%->pixels 8/100)
-;          (tag-pict @sst{Ben Greenman} 'ben)
-;          (tag-pict @sst{Matthias Felleisen} 'matthias)
-;          (tag-pict @sst{Christos Dimoulas} 'christos))))
-;    (for/fold ((acc base))
-;              ((name (in-list '(ben matthias christos)))
-;               (uni (in-list (list neu-pict neu-pict nwu-pict))))
-;      (ppict-do acc
-;                #:go (at-find-pict name lb-find 'lt #:abs-x pico-x-sep)
-;                (tag-pict (hb-append PLT-pict ((make-string->body #:size (- body-size 4)) " at ")) 'aff)
-;                #:go (at-find-pict 'aff rc-find 'lc #:abs-x -36 #:abs-y 2) uni))))
-;
-;(define (sec:title)
-;  (let ((the-y 46/100))
-;  (pslide
-;    #:go center-coord map-bg-pict
-;    #:go (coord slide-text-left 18/100 'lt) the-title-pict
-;    #:go (coord slide-text-right the-y 'rt) authors-pict
-;    #:next
-;    #:go (coord 7/100 the-y 'lt)
-;    (make-legend
-;      @small-titlet{a careful analysis}
-;      @small-titlet{of the mixed-typed}
-;      @small-titlet{design space})))
-;  (void))
-;
-;;; -----------------------------------------------------------------------------
-;;; migration
-;
-;(define program-blank (blank program-w program-h))
-;(define u-tag 'L)
-;(define t-tag 'R)
-;(define macro-L
-;  (add-caption
-;    "Untyped only"
-;    (tag-pict (make-program-pict #:bg-color transparent #:frame-color transparent program-blank) u-tag)))
-;(define macro-R
-;  (add-caption
-;    "Untyped/Typed mix"
-;    (tag-pict (make-program-pict #:bg-color white #:frame-color black program-blank) t-tag)))
-;(define abstract-L
-;  (make-untyped-icon #:font-size big-node-size #:width program-w #:height program-h))
-;(define abstract-R
-;  (hc-append
-;    (make-untyped-icon #:font-size big-node-size)
-;    (make-tu-icon "+" #:font-size big-node-size)
-;    (make-typed-icon #:font-size big-node-size)))
-;(define concrete-L
-;  (make-tree program-w program-h untyped-program-code* #:arrows? #false))
-;(define concrete-R
-;  (make-program-pict #:bg-color white #:frame-color black (make-tree program-w program-h mixed-program-code* #:arrows? #true)))
-;
-;(define sample-mixed-program
-;  (make-program-pict #:bg-color white #:frame-color black (make-tree program-w program-h mixed-program-code* #:arrows? #true)))
-;
-;(define scripting-pict
-;  (make-big-ut-pict
-;    (lightbulb
-;      #:border-width 1
-;      #:bulb-radius 45
-;      #:stem-width-radians (* 1/10 turn)
-;      #:stem-height 12)
-;    (bitmap "src/parthenon-logo.png")))
-;
+(define (sec:title)
+  (pslide
+    #:go center-coord meeting-of-the-waters
+    #:go (coord 1/2 20/100 'ct)
+    (vr-append
+      tiny-y-sep
+      (add-landscape-background
+        #:x-margin small-x-sep
+        #:y-margin tiny-y-sep
+        (vc-append
+          tiny-y-sep
+          @titlet{Honest and Lying Types}
+          @t{Thesis Proposal}))
+      (add-landscape-background
+        (vc-append
+          tiny-y-sep
+          @t{Ben Greenman}
+          @t{2019-1X-XX}))))
+  (void))
+
+(define mt-code-y 80/100)
+
+(define (sec:the-question)
+  (pslide
+    #:go (coord slide-text-left 10/100 'lt)
+    (make-thesis-question #t))
+  (pslide
+    #:go heading-text-coord
+    @st{Migratory Typing}
+    #:next
+    #:go (coord slide-text-left 14/100 'lt)
+    @t{Add types to a dynamically-typed language}
+    #:go (coord 75/100 mt-code-y 'cb)
+    (add-caption "Untyped/Typed mix" (make-sample-program #f #f))
+    #:alt
+    [#:go (coord 25/100 mt-code-y 'cb)
+     (add-caption "Untyped code" (make-sample-program #t #f))
+     #:go center-coord (make-migration-arrow)]
+    #:next
+    #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
+    (vl-append
+      med-y-sep
+      (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
+      (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
+      (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
+  (pslide
+    #:go heading-text-coord
+    @st{Challenge = Interoperability}
+    #:next
+    #:go (coord slide-text-left 14/100 'lt)
+    @t{How do types restrict interactions?}
+    #:go (coord 50/100 26/100 'ct)
+    (add-caption "Untyped/Typed mix" (make-sample-program #f #t 9/10)))
+  (void))
+
 
 ;; -----------------------------------------------------------------------------
 
@@ -492,37 +793,15 @@
 
 ;; =============================================================================
 
-(define big-landscape-w (* 7/10 client-w))
-(define big-landscape-h (* 55/100 client-h))
-
-(define (make-landscape-background w h)
-  (define c sand-color)
-  (define bc cliff-color)
-  (define (draw-box dc dx dy)
-    (define old-brush (send dc get-brush))
-    (define old-pen (send dc get-pen))
-    (send dc set-brush (new brush% [color c] [style 'crossdiag-hatch]))
-    (for ((pw (in-list '(3 2)))
-          (offset (in-list '(0 4))))
-      (send dc set-pen (new pen% [width pw] [color bc]))
-      (define path (new dc-path%))
-      (send path rectangle (+ 0 offset) (+ 0 offset) (- w (* 2 offset)) (- h (* 2 offset)))
-      (send dc draw-path path dx dy))
-    (send dc set-brush old-brush)
-    (send dc set-pen old-pen))
-  (dc draw-box w h))
-;;  (filled-rectangle w h #:color sand-color #:draw-border? #f)
-
-(define (make-big-landscape-background)
-  (make-landscape-background big-landscape-w big-landscape-h))
-
-(define hyrule-landscape
-  (cc-superimpose (make-big-landscape-background) (inset/clip (bitmap "src/hyrule.png") -1 -6)))
+(define (make-sample-program untyped? arrow? [scale-by 8/10])
+  (scale
+    (make-program-pict
+      #:bg-color white #:frame-color black
+      (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
+    scale-by))
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go big-landscape-coord
-    hyrule-landscape
 
 
   )))))
