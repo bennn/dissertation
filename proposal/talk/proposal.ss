@@ -60,6 +60,7 @@
 (define sand-color (hex-triplet->color% #xFFF7C2))
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
+(define sea-color (hex-triplet->color% #x84CEB3))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -69,7 +70,7 @@
 (define uni-sound-color (hex-triplet->color% #x666666))
 (define tag-sound-color (hex-triplet->color% #x888888))
 (define type-sound-color (hex-triplet->color% #xBBBBBB))
-(define complete-monitor-color (hex-triplet->color% #xFFFFFF))
+(define complete-monitoring-color (hex-triplet->color% #xFFFFFF))
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -77,7 +78,12 @@
 (define uni-sound-str "Unitype Sound")
 (define tag-sound-str "Tag Sound")
 (define type-sound-str "Type Sound")
-(define complete-monitor-str "Complete Monitoring")
+(define complete-monitoring-str "Complete Monitoring")
+
+(define uni-sound-tag 'uni-sound)
+(define tag-sound-tag 'tag-sound)
+(define type-sound-tag 'type-sound)
+(define complete-monitoring-tag 'complete-mon)
 
 (define (clip* pp)
   (clip-ascent (clip-descent pp)))
@@ -100,6 +106,7 @@
 (define racket-logo.png (build-path "src" "racket-logo2.png"))
 
 (define region-border-width 5)
+(define region-border-color black)
 
 (define title-font
   #;"ArtNoveauDecadente" #;(fantasy)
@@ -336,10 +343,10 @@
 (define (make-complete-monitoring-region pre-w pre-h)
   (define w (* 67/100 pre-w))
   (define h (* 26/100 pre-h))
-  (draw-boring-curve w h complete-monitor-color))
+  (draw-boring-curve w h complete-monitoring-color))
 
 (define (draw-boring-curve w h color)
-  (define bc black)
+  (define bc region-border-color)
   (define c color)
   (define (draw-region dc dx dy)
     (define old-brush (send dc get-brush))
@@ -352,21 +359,21 @@
                      (new brush% [style 'solid] [color c])))))
       (send dc set-brush brush)
       (define path (new dc-path%))
-      (send path move-to 0 0)
-      (send path line-to w 0)
-      (send path line-to w h)
-      (send path line-to (* 1/10 w) h)
-      (send path curve-to (* 5/100 w) h 0 h 0 (* 7/10 h))
+      (send path move-to w 0)
       (send path line-to 0 0)
+      (send path line-to 0 h)
+      (send path line-to (* 9/10 w) h)
+      (send path curve-to (* 95/100 w) h w h w (* 7/10 h))
+      (send path line-to w 0)
       (send path close)
       (send dc draw-path path dx dy))
     (send dc set-pen (new pen% [width region-border-width] [color bc]))
     (send dc set-brush (new brush% [style 'solid] [color c]))
     (define path (new dc-path%))
-    (send path move-to (- w 1) h)
-    (send path line-to (* 1/10 w) h)
-    (send path curve-to (* 5/100 w) h 0 h 0 (* 7/10 h))
-    (send path line-to 0 2)
+    (send path move-to 1 h)
+    (send path line-to (* 9/10 w) h)
+    (send path curve-to (* 95/100 w) h w h w (* 7/10 h))
+    (send path line-to w 2)
     (send dc draw-path path dx dy)
     ;; --
     (send dc set-brush old-brush)
@@ -402,21 +409,22 @@
   (let* ((pp (make-big-landscape-background))
          (w (- (pict-width pp) 12))
          (h (- (pict-height pp) 12))
-         (top-right-coord (coord 1 0 #:abs-x -6.5 #:abs-y 5.5 'rt))
+         (top-left-coord (coord 0 0 #:abs-x +6.5 #:abs-y 5.5 'lt))
          (pp (ppict-do pp
-               #:go top-right-coord (make-uni-sound-region w h)
-               #:go top-right-coord (make-tag-sound-region w h)
-               #:go top-right-coord (make-type-sound-region w h)
-               #:go top-right-coord (make-complete-monitoring-region w h)))
+               #:go top-left-coord (make-uni-sound-region w h)
+               #:go top-left-coord (make-tag-sound-region w h)
+               #:go top-left-coord (make-type-sound-region w h)
+               #:go top-left-coord (make-complete-monitoring-region w h)))
+         (label-x 2/100)
          (pp (ppict-do pp
-               #:go (coord 3/100 80/100 'lt)
+               #:go (coord label-x 80/100 'lt)
                (make-region-label (t uni-sound-str))
-               #:go (coord 20/100 55/100 'lt)
+               #:go (coord label-x 55/100 'lt)
                (make-region-label (t tag-sound-str))
-               #:go (coord 45/100 31/100 'lt)
+               #:go (coord label-x 31/100 'lt)
                (make-region-label (t type-sound-str))
-               #:go (coord 36/100 06/100 'lt)
-               (make-region-label (t complete-monitor-str))))
+               #:go (coord label-x 06/100 'lt)
+               (make-region-label (t complete-monitoring-str))))
          )
     pp))
 
@@ -690,6 +698,65 @@
       (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
     scale-by))
 
+(define (make-bubble pp)
+  (add-rounded-border
+    #:radius 6 #:frame-width 4
+    #:x-margin small-x-sep #:y-margin small-y-sep
+    pp))
+
+(define (add-cloud-background pp #:color [pre-color #f] #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f] #:style [pre-style #f])
+  (define x-margin (or pre-x-margin pico-x-sep))
+  (define y-margin (or pre-y-margin pico-y-sep))
+  (cc-superimpose
+    (cloud (+ x-margin (pict-width pp)) (+ y-margin (pict-height pp)) (or pre-color "gray") #:style (or pre-style '(square wide)))
+    pp))
+
+(define (st-cloud str)
+  (add-cloud-background
+    #:x-margin small-x-sep #:y-margin med-y-sep #:color sea-color (st str)))
+
+(define (make-uni-sound-bubble pp)
+  (make-property-bubble uni-sound-str uni-sound-color pp))
+
+(define (make-tag-sound-bubble pp)
+  (make-property-bubble tag-sound-str tag-sound-color pp))
+
+(define (make-type-sound-bubble pp)
+  (make-property-bubble type-sound-str type-sound-color pp))
+
+(define (make-complete-monitoring-bubble pp)
+  (make-property-bubble complete-monitoring-str complete-monitoring-color pp))
+
+(define (make-property-bubble lbl-str color pp)
+  (define lbl-pict (make-region-label (t lbl-str)))
+  (define txt-pict (if pp (vl-append (* 10/100 (pict-height lbl-pict)) (blank) pp) (blank)))
+  (define bg-pict
+    (filled-rounded-rectangle
+      (* (if pp 95/100 45/100) client-w)
+      (* 2 (pict-height lbl-pict))
+      4
+      #:color color
+      #:draw-border? #true
+      #:border-color black
+      #:border-width region-border-width))
+  (ppict-do bg-pict
+    #:go (coord 0 10/100 'lt #:abs-x 10) (ht-append tiny-x-sep lbl-pict txt-pict)))
+
+(define (descr-append . pp*)
+  (descr-append* pp*))
+
+(define (descr-append* pp*)
+  (apply vl-append tiny-y-sep pp*))
+
+(define judgment-x-sep small-x-sep)
+(define judgment-y-sep small-y-sep)
+
+(define (judgment-bar color)
+  (filled-rectangle client-w 5 #:color color #:draw-border? #t #:border-color black #:border-width 1))
+
+(define (at-judgment-bar tag)
+  (at-find-pict tag lb-find 'lt #:abs-x (- tiny-x-sep) #:abs-y 1))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -700,7 +767,8 @@
 ;  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    (sec:the-question)
+;    (sec:the-question)
+    (sec:design-space)
     (void)))
 
 ;; -----------------------------------------------------------------------------
@@ -775,22 +843,80 @@
       @t{write typed code,}
       @t{use old libraries}))
   (pslide
+    ;; TODO fill margin with language logos? ruby, js, etc...
     #:go heading-text-coord
     @st{Landscape of Models and Implementations}
     #:go big-landscape-coord
-    #:alt [(make-big-landscape-background)]
-    (make-implementation-landscape))
+    (make-implementation-landscape)
+    #:next
+    #:go (coord 1/2 35/100 'ct)
+    (make-bubble (hb-append @st{Rich design space, due to a challenge})))
   (pslide
-    ;; fundamental question that separates different FLAGs?
     #:go heading-text-coord
     @st{Challenge = Interoperability}
-    #:next
-    #:go (coord slide-text-left 14/100 'lt)
-    @t{How do types restrict interactions?}
-    #:go (coord 50/100 26/100 'ct)
-    (make-sample-program #f #t 9/10))
+    #:go (coord slide-text-left 20/100 'lt)
+    (make-sample-program #f #t 9/10)
+    #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
+    @t{How do types restrict}
+    (hb-append @t{ interactions between})
+    (hb-append @t{ } @bt{untyped data})
+    (hb-append @t{ and } @bt{typed data} @t{?}))
   (void))
 
+(define (sec:design-space)
+  (pslide
+    ;; been studying landscape from 2 directions: guarantees and perf
+    ;; TODO talk about method for studying?
+    ;;  ... guarantees / perf via different semantics for one language
+    ;;  ... maybe doesn't need illustration --- big question is whether N/A matter later
+    #:go big-landscape-coord
+    (make-big-landscape-background)
+    #:go (coord 1/10 1/10 'lt)
+    (st-cloud "Guarantees?")
+    #:go (coord 9/10 1/10 'rt)
+    (st-cloud "Performance?"))
+  (pslide
+    #:go heading-text-coord @st{Landscape of Formal Guarantees}
+    #:alt [#:go big-landscape-coord (make-big-landscape-background)]
+    #:go big-landscape-coord (make-theorem-landscape))
+  (pslide
+    #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
+    (make-complete-monitoring-bubble
+      @t{types predict behavior})
+    (make-type-sound-bubble
+      (descr-append
+        @t{types predict behavior in typed}
+        @t{code, nothing in untyped code}))
+    (make-tag-sound-bubble
+      (descr-append
+        @t{types predict shapes in typed}
+        @t{code, nothing in untyped code}))
+    (make-uni-sound-bubble
+      @t{types predict nothing}))
+  (pslide
+    #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
+    (tag-pict (make-complete-monitoring-bubble #f) complete-monitoring-tag)
+    (tag-pict (make-type-sound-bubble #f) type-sound-tag)
+    (tag-pict (make-tag-sound-bubble #f) tag-sound-tag)
+    (tag-pict (make-uni-sound-bubble #f) uni-sound-tag)
+    #:next
+    #:go (at-find-pict complete-monitoring-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Honest}
+    #:go (at-judgment-bar complete-monitoring-tag) (judgment-bar "green")
+    #:next
+    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x judgment-x-sep) @st{Lying}
+    #:go (at-judgment-bar tag-sound-tag) (judgment-bar "red")
+    #:next
+    #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Absent})
+  (pslide
+    #:go heading-text-coord
+    @st{Landscape of Runtime Overhead}
+    #:go big-landscape-coord
+    #:alt [(make-big-landscape-background)]
+    (make-performance-landscape))
+  (pslide
+    ;; perf: transient vs natural
+    )
+  (void))
 
 ;; -----------------------------------------------------------------------------
 
@@ -903,6 +1029,9 @@
   ;; - run on Pycket, to compare to other transient work?
   ;; - get benchmarks where some contracts necessary
   ;; - why not use approx-D method?
+  ;; Jan questions:
+  ;; - drop static analysis? what can you do in the timeframe???
+  ;; - 
   (void))
 
 ;; =============================================================================
@@ -914,7 +1043,5 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go big-landscape-coord (make-implementation-landscape)
-
 
   )))))
