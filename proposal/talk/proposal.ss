@@ -10,6 +10,7 @@
   (prefix-in pict: pict/shadow)
   pict-abbrevs pict-abbrevs/slideshow gtp-pict
   ppict/2
+  "lightbulb.rkt"
   racket/draw
   racket/list
   racket/string
@@ -372,6 +373,31 @@
     (send dc set-pen old-pen))
   (dc draw-region w h))
 
+(define (make-implementation-landscape)
+  (define the-flag-base (blank 18 4))
+  (for/fold ((acc (make-big-landscape-background)))
+            ((xy (in-list '((89/100 07/100) (99/100 11/100) (73/100 11/100)
+                            (83/100 18/100) (94/100 26/100) (62/100 12/100)
+                            (52/100 22/100) (42/100 13/100) (32/100 20/100)
+                            (22/100 11/100) (12/100 30/100) (09/100 12/100)
+                            (80/100 31/100) (65/100 40/100) (43/100 38/100)
+                            (27/100 40/100) (08/100 46/100) (87/100 51/100)
+                            (71/100 60/100) (49/100 52/100) (24/100 56/100)
+                            (12/100 62/100) (92/100 65/100) (75/100 75/100)
+                            (46/100 71/100) (20/100 77/100) (30/100 73/100)
+                            (87/100 76/100) (65/100 89/100) (49/100 87/100)
+                            (35/100 85/100) (11/100 87/100) (93/100 89/100)
+                            (59/100 67/100)
+                            )))
+             (i (in-naturals)))
+    (ppict-do acc
+      #:go (coord (car xy) (cadr xy) 'cc)
+      (make-simple-flag the-flag-base
+        #:flag-background-color (rgb-triplet->color% (->pen-color i))
+        #:flag-brush-style 'horizontal-hatch
+        #:flag-border-color (rgb-triplet->color% (->pen-color i))
+        #:pole-height 70))))
+
 (define (make-theorem-landscape)
   (let* ((pp (make-big-landscape-background))
          (w (- (pict-width pp) 12))
@@ -601,6 +627,69 @@
   ;; TODO use a dc, draw more of a triangle with border?
   (colorize (arrowhead (w%->pixels 5/100) 0) (hex-triplet->color% #x333333)))
 
+(define (make-illustration-text . pp*)
+  (make-illustration-text* pp*))
+
+(define (make-illustration-text* pp*)
+  (apply vc-append tiny-y-sep pp*))
+
+(define (placer->signs sym)
+  (case sym
+    ((lt) (values -1 -1))
+    ((rt) (values 1 -1))
+    ((lb) (values -1 1))
+    ((rb) (values 1 1))
+    (else (error 'placer->signs))))
+
+(define big-node-blank (blank 160))
+
+(define (make-big-typed-node pp)
+  (make-typed-pict (cc-superimpose big-node-blank pp)))
+
+(define (make-big-untyped-node pp)
+  (make-untyped-pict (cc-superimpose big-node-blank pp)))
+
+(define (make-big-tu-pict tp up)
+  (combine-big-nodes (make-big-untyped-node up) 'lt (make-big-typed-node tp) 'rb))
+
+(define (make-big-ut-pict up tp)
+  (combine-big-nodes (make-big-typed-node tp) 'lt (make-big-untyped-node up) 'rb))
+
+(define (combine-big-nodes bottom-pict bottom-placer top-pict top-placer)
+  (define w (+ (pict-width bottom-pict) (pict-width top-pict)))
+  (define h (+ (pict-height bottom-pict) (pict-height top-pict)))
+  (define x-offset (* 1/10 w))
+  (define y-offset (* 1/10 h))
+  (define-values [x-b-sign y-b-sign] (placer->signs bottom-placer))
+  (define-values [x-t-sign y-t-sign] (placer->signs top-placer))
+  (ppict-do (blank (- w (* 2 x-offset)) (- h (* 2 y-offset)))
+    #:go (coord 1/2 1/2 bottom-placer #:abs-x (* x-b-sign x-offset) #:abs-y (* y-b-sign y-offset)) bottom-pict
+    #:go (coord 1/2 1/2 top-placer #:abs-x (* x-t-sign x-offset) #:abs-y (* y-t-sign y-offset)) top-pict))
+
+(define scripting-pict
+  (make-big-ut-pict
+    (lightbulb
+      #:border-width 1
+      #:bulb-radius 45
+      #:stem-width-radians (* 1/10 turn)
+      #:stem-height 12)
+    (bitmap "src/parthenon-logo.png")))
+
+(define ocaml-tag 'ocaml)
+(define ocaml-pict (bitmap "src/ocaml-logo-small.png"))
+
+(define reuse-pict
+  (make-big-tu-pict
+    (tag-pict ocaml-pict ocaml-tag)
+    (bitmap "src/opengl-logo-small.png")))
+
+(define (make-sample-program untyped? arrow? [scale-by 8/10])
+  (scale
+    (make-program-pict
+      #:bg-color white #:frame-color black
+      (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
+    scale-by))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -639,6 +728,10 @@
 
 (define mt-code-y 80/100)
 
+(define motivation-x-l 22/100)
+(define motivation-x-r 78/100)
+(define motivation-y 18/100)
+
 (define (sec:the-question)
   (pslide
     #:go (coord slide-text-left 10/100 'lt)
@@ -664,12 +757,38 @@
       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
   (pslide
     #:go heading-text-coord
+    @st{Motivations}
+    #:go (coord 1/2 20/100 'ct)
+    (filled-rectangle 1 (* 90/100 client-h) #:color black #:draw-border? #f)
+    #:go (coord 1/2 13/100 'ct)
+    (make-sample-program #f #f 5/10)
+    #:go (coord motivation-x-l motivation-y 'ct #:sep small-y-sep)
+    @t{Prototyping}
+    scripting-pict
+    (make-illustration-text
+      @t{write untyped code,}
+      @t{rely on types})
+    #:go (coord motivation-x-r motivation-y 'ct #:sep small-y-sep)
+    @t{Re-Use}
+    reuse-pict
+    (make-illustration-text
+      @t{write typed code,}
+      @t{use old libraries}))
+  (pslide
+    #:go heading-text-coord
+    @st{Landscape of Models and Implementations}
+    #:go big-landscape-coord
+    #:alt [(make-big-landscape-background)]
+    (make-implementation-landscape))
+  (pslide
+    ;; fundamental question that separates different FLAGs?
+    #:go heading-text-coord
     @st{Challenge = Interoperability}
     #:next
     #:go (coord slide-text-left 14/100 'lt)
     @t{How do types restrict interactions?}
     #:go (coord 50/100 26/100 'ct)
-    (add-caption "Untyped/Typed mix" (make-sample-program #f #t 9/10)))
+    (make-sample-program #f #t 9/10))
   (void))
 
 
@@ -793,15 +912,9 @@
 
 ;; =============================================================================
 
-(define (make-sample-program untyped? arrow? [scale-by 8/10])
-  (scale
-    (make-program-pict
-      #:bg-color white #:frame-color black
-      (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
-    scale-by))
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+    #:go big-landscape-coord (make-implementation-landscape)
 
 
   )))))
