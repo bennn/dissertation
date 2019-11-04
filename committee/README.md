@@ -13,7 +13,11 @@ Current:
   + Dec 2 > Dec 3 > Dec 4 for proposal ... late Nov works too
 - Jan
   https://calendly.com/vitekj
+  + away first week of Dec
+  + teaching on W, morning and evening
 - Amal
+  + NOTE meeting 2019-11-07 2:30 -- 3:00pm
+  + PLDI deadline Nov 22, propose after that
 - Shriram
   https://cs.brown.edu/~sk/Contact/Calendar/
 - Fritz
