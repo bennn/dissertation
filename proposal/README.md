@@ -30,3 +30,11 @@ Weave related work throughout the proposal
 - 2019-10-01 : read over, mail to committee
   say thank-you, PFA proposal, 3 weeks to look over, answer questions, propose by Thanksgiving
 - 2019-10-25 : (right after SPLASH) send emails & knock on doors to find questions
+
+- - -
+
+Edits since proposal document:
+
+- (Jan) remove the static analysis, leave for a separate topic/dissertation
+- 
+
