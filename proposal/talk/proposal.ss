@@ -19,8 +19,8 @@
   slideshow/code
   plot/no-gui (except-in plot/utils min* max*)
   (only-in images/icons/symbol check-icon x-icon)
+  (only-in images/icons/misc clock-icon)
   images/icons/style
-  ;images/icons/arrow images/icons/control images/icons/misc images/icons/symbol images/icons/style
 )
 
 (define slide-top 4/100)
@@ -459,6 +459,7 @@
   (apply hb-append 0 pp*))
 
 (define (make-thesis-question bold?)
+  ;; TODO prettier ... maybe use fancy Q
   (define txt-pict
     (vl-append
       tiny-y-sep
@@ -837,8 +838,9 @@
       (else (raise-argument-error 'add-axis-arrow "(or/c 'x 'y)" 1 p xy))))
   (pin-arrow-line 20 p p lb-find p find-dest #:line-width 6))
 
-(define (add-overhead-axis-labels pp [legend? #t])
-  (define margin 20)
+(define (add-overhead-axis-labels pp [legend? #t] #:margin [pre-margin #f])
+  ;; TODO icons for typed, untyped, time?
+  (define margin (or pre-margin 20))
   (define y-label (t " "))
   (define x-label (tcodesize "Num. Types"))
   (define fp (frame-plot pp))
@@ -852,6 +854,23 @@
 (define (make-scatterplots-pict)
   (scale-to-fit (bitmap "src/cache-scatterplots.png") (* 95/100 client-w) (* 9/10 client-h)))
 
+(define (make-clock height)
+  (bitmap (clock-icon 0 15 #:height height #:face-color white #:hand-color "darkblue")))
+
+(define (make-sieve-pict)
+  (define plot (bitmap "src/sieve.png"))
+  (ppict-do plot
+    #:go (coord 0 0 'rt) (make-clock 50)
+    #:go (coord 1 1 'lb) (scale T-node 55/100)))
+
+(define (sample-disk sym)
+  (define color (if sym (symbol->color sym) "dark gray"))
+  (cellophane (disk (pict-height @t{x}) #:draw-border? (not sym) #:color color) 8/10))
+
+(define (sample-bar)
+  (define color (symbol->color 'E))
+  (cellophane (filled-rectangle 30 8 #:color color #:draw-border? #f) 8/10))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -863,7 +882,8 @@
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
 ;    (sec:the-question)
-    (sec:design-space)
+;    (sec:design-space)
+    (sec:plan)
     (void)))
 
 ;; -----------------------------------------------------------------------------
@@ -1033,13 +1053,31 @@
       (hb-append @t{"small" overhead}))
     (make-overhead-plot '(1) example-plot-w))
   (pslide
-    ;; one graph, sieve
-    )
+    #:go heading-text-coord
+    (hb-append @st{Data: TR-Natural (} (sample-disk 'H) @st{) vs. TR-Transient (} (sample-disk '1) @st{) })
+    #:go (coord 1/2 slide-text-top 'ct #:sep small-y-sep)
+    (make-sieve-pict)
+    (make-2table
+      (list (cons (hb-append @bt{y} @t{-axis = Overhead})
+                  (hb-append @bt{x} @t{-axis = Num. Types}))
+            (cons (hc-append (sample-bar) @t{ = Untyped Perf.})
+                  (hc-append (sample-disk #f) @t{ = Other Perf.})))
+      #:col-sep med-x-sep
+      #:row-sep small-y-sep))
   (pslide
+    ;; TODO the cached pict is ugly, rebuild and ...
+    ;; - remove titles, crunch together, draw axis arrows, U T time icons?
+    ;;  (removing titles is difficult)
     #:go (coord 1/2 0 'ct)
-    (make-scatterplots-pict)
-    )
+    (make-scatterplots-pict))
   (void))
+
+(define (sec:plan)
+  (pslide
+    #:go (coord slide-text-left 10/100 'lt)
+    (make-thesis-question #f))
+  (void))
+
 
 ;; -----------------------------------------------------------------------------
 
@@ -1166,8 +1204,8 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go (coord 1/2 0 'ct)
-    (make-scatterplots-pict)
+    #:go (coord slide-text-left 10/100 'lt)
+    (make-thesis-question #f)
 
 
   )))))
