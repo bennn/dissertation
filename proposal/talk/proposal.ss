@@ -49,6 +49,8 @@
 (define small-y-sep (h%->pixels 5/100))
 (define med-y-sep (h%->pixels 10/100))
 
+(define PLOT-FN-ALPHA 0.6)
+
 ;; COLOR
 (define black (string->color% "black"))
 (define white (string->color% "white"))
@@ -61,6 +63,9 @@
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 (define sea-color (hex-triplet->color% #x84CEB3))
+(define LIGHT-RED (string->color% "Tomato"))
+(define GREEN (string->color% "mediumseagreen"))
+(define BLUE (string->color% "cornflowerblue"))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -757,6 +762,96 @@
 (define (at-judgment-bar tag)
   (at-find-pict tag lb-find 'lt #:abs-x (- tiny-x-sep) #:abs-y 1))
 
+(define (make-overhead-plot e* [w 500])
+  (define x-min 0)
+  (define x-max (+ (/ pi 10) pi))
+  (define pp
+    (parameterize ((plot-x-ticks no-ticks)
+                   (plot-y-ticks no-ticks)
+                   (plot-font-size (current-font-size)))
+      (plot-pict
+        (for/list ((e (in-list e*)))
+          (define c (symbol->color e))
+          (function (make-embedding-function e x-min x-max)
+                    #:width (* 15 (line-width))
+                    #:alpha PLOT-FN-ALPHA
+                    #:color c))
+        #:y-label #f ;;"Overhead vs. Untyped"
+        #:x-label #f ;;"Num. Type Ann."
+        #:width w
+        #:height (* 3/4 w)
+        #:x-min x-min
+        #:x-max x-max
+        #:y-min 0
+        #:y-max (* 10 (+ 1 (order-of-magnitude x-max))))))
+  (add-overhead-axis-labels (tag-pict pp 'the-plot) #true))
+
+(define (symbol->color e)
+  (case e
+    ((H)
+     LIGHT-RED)
+    ((E)
+     GREEN)
+    ((1)
+     BLUE)
+    (else
+      (raise-argument-error 'symbol->color "(or/c 'H 'E '1)" e))))
+
+(define (make-embedding-function e x-min x-max)
+  (define pi/4 (/ 3.14 4))
+  (define 3pi/4 (* 3.5 pi/4))
+  (case e
+    ((H)
+     (lambda (n)
+       (cond
+         [(< n pi/4)
+          (max 1 (+ 0.9 (sin n)))]
+         [(< n 3pi/4)
+          10]
+         [else
+          0.4])))
+    ((E)
+     (lambda (n) 1))
+    ((1)
+     (lambda (n)
+       (cond
+         [(< n 3pi/4)
+          (add1 n)]
+         [else
+           (- (+ 1 3pi/4) (* 2/10 (- n 3pi/4)))
+          ]))
+     #;(lambda (n) (add1 n)))
+    (else
+      (raise-argument-error 'make-embedding-line "embedding?" e))))
+
+(define (frame-plot p)
+  (add-axis-arrow (add-axis-arrow p 'x) 'y))
+
+(define (add-axis-arrow p xy)
+  (define find-dest
+    (case xy
+      ((x)
+       rb-find)
+      ((y)
+       lt-find)
+      (else (raise-argument-error 'add-axis-arrow "(or/c 'x 'y)" 1 p xy))))
+  (pin-arrow-line 20 p p lb-find p find-dest #:line-width 6))
+
+(define (add-overhead-axis-labels pp [legend? #t])
+  (define margin 20)
+  (define y-label (t " "))
+  (define x-label (tcodesize "Num. Types"))
+  (define fp (frame-plot pp))
+  (if legend?
+    (ht-append margin y-label (vr-append margin fp x-label))
+    fp))
+
+(define example-plot-w 320)
+(define example-perf-y 12/100)
+
+(define (make-scatterplots-pict)
+  (scale-to-fit (bitmap "src/cache-scatterplots.png") (* 95/100 client-w) (* 9/10 client-h)))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -914,7 +1009,35 @@
     #:alt [(make-big-landscape-background)]
     (make-performance-landscape))
   (pslide
-    ;; perf: transient vs natural
+    ;; very cluttered ... but ok
+    #:go heading-text-coord
+    @st{Performance Comparison}
+    #:go (coord slide-text-left example-perf-y 'lt #:sep small-y-sep)
+    (vr-append
+      pico-y-sep
+      (hb-append @sbt{Natural} @t{ semantics})
+      (make-region-label (t "Complete Mon.")))
+    (vl-append
+      tiny-y-sep
+      (hb-append @t{boundaries} @t{ add})
+      (hb-append @t{"large" overhead}))
+    (make-overhead-plot '(H) example-plot-w)
+    #:go (coord 1/2 example-perf-y 'lt #:sep small-y-sep)
+    (vr-append
+      pico-y-sep
+      (hb-append pico-x-sep @sbt{Transient} @t{ semantics})
+      (make-region-label (t tag-sound-str)))
+    (vl-append
+      tiny-y-sep
+      (hb-append @t{types} @t{ add})
+      (hb-append @t{"small" overhead}))
+    (make-overhead-plot '(1) example-plot-w))
+  (pslide
+    ;; one graph, sieve
+    )
+  (pslide
+    #:go (coord 1/2 0 'ct)
+    (make-scatterplots-pict)
     )
   (void))
 
@@ -1043,5 +1166,8 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+    #:go (coord 1/2 0 'ct)
+    (make-scatterplots-pict)
+
 
   )))))
