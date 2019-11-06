@@ -527,6 +527,7 @@
 
 (define U-node (make-untyped-pict (make-untyped-icon)))
 (define T-node (make-typed-pict (make-typed-icon)))
+(define Lib-node (make-typed-pict (make-tu-icon "Lib") #:x-margin 40 #:y-margin 10))
 
 (define (make-tree w h tu-code* #:arrows? [draw-arrows? #false] #:owners? [draw-owners? #false] #:labels? [labels? #true])
   (define node-sym* '(A B C D E))
@@ -1045,7 +1046,7 @@
     #:go (coord 1/2 example-perf-y 'lt #:sep small-y-sep)
     (vr-append
       pico-y-sep
-      (hb-append pico-x-sep @sbt{Transient} @t{ semantics})
+      (hb-append @sbt{Transient} @t{ semantics})
       (make-region-label (t tag-sound-str)))
     (vl-append
       tiny-y-sep
@@ -1074,10 +1075,128 @@
 
 (define (sec:plan)
   (pslide
-    #:go (coord slide-text-left 10/100 'lt)
-    (make-thesis-question #f))
+    #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
+    (make-thesis-question #f)
+    #:go center-coord
+    @big-t{(Transient + Natural)})
+  (pslide
+    #:go heading-text-coord
+    @st{Complementary Strengths}
+    #:go (coord 1/2 (+ example-perf-y 8/100) 'ct)
+    complement-pict
+    #:go (coord slide-text-left example-perf-y 'lt #:sep (+ (pict-height complement-pict) pico-y-sep))
+    (hb-append @sbt{Natural} @t{ semantics})
+    (vl-append
+      tiny-y-sep
+      (hb-append @t{types predict full})
+      (hb-append @t{behavior, but need})
+      (hb-append @t{to avoid critical})
+      (hb-append @t{boundaries}))
+    #:go (coord 1/2 example-perf-y 'lt #:sep (+ (pict-height complement-pict) pico-y-sep))
+    (hb-append @sbt{Transient} @t{ semantics})
+    (vl-append
+      tiny-y-sep
+      (hb-append @t{types predict shapes,})
+      (hb-append @t{but add overhead to})
+      (hb-append @t{all typed code})))
+  (pslide
+    #:go heading-text-coord
+    @st{Benefits (1/3): Migration}
+    #:go (coord slide-text-right slide-top 'rt)
+    (scale complement-pict 6/10)
+    #:go (coord slide-text-left 2/10 'lt #:sep med-y-sep)
+    @t{1. Begin with Natural types}
+    @t{2. Switch to Transient to recover performance}
+    @t{3. Revisit Natural for debugging}
+    (hb-append @t{4. } (tag-pict @t{Return to Natural after typing all} 'L1))
+    #:go (at-find-pict 'L1 lb-find 'lt #:abs-y pico-y-sep)
+    @t{critical boundaries})
+  (pslide
+    #:go heading-text-coord
+    @st{Benefits (2/3): Library Interaction}
+    #:go (coord 1/2 15/100 'ct #:sep med-y-sep)
+    #:alt [math-warning-pict]
+    (vl-append
+      tiny-y-sep
+      (blank)
+      @t{Changing a library to Transient may improve}
+      @t{overall performance (for typed and untyped)})
+    (let* ((node*
+             (for/list ((pp (in-list (list U-node U-node T-node U-node)))
+                        (i (in-naturals)))
+               (add-hubs pp (string->symbol (format "N~a" i)))))
+           (bot-row (apply hc-append med-x-sep node*))
+           (top+bot
+             (ppict-do (vc-append med-y-sep (add-hubs Lib-node 'lib) bot-row)
+               #:go (at-find-pict 'lib cb-find 'ct)
+               (let ((arr-sep 20))
+                 (ht-append (* 3/4 arr-sep) (tag-pict (blank arr-sep 0) 'lib-left) (tag-pict (blank arr-sep 0) 'lib-right)))))
+           (arr*
+             (list
+               (program-arrow 'N0-N ct-find 'lib-left lb-find (* 25/100 turn) (* 14/100 turn) 1/4 1/4 black)
+               (program-arrow 'N1-N ct-find 'lib-left rb-find (* 25/100 turn) (* 20/100 turn) 2/4 2/4 black )
+               (program-arrow 'N2-N ct-find 'lib-right lb-find (* 25/100 turn) (* 30/100 turn) 2/4 2/4 black )
+               (program-arrow 'N3-N ct-find 'lib-right rb-find (* 25/100 turn) (* 36/100 turn) 1/4 1/4 black ))))
+      (for/fold ((acc top+bot))
+                ((arr (in-list arr*)))
+        (add-program-arrow acc arr #:style 'solid))))
+  (pslide
+    #:go heading-text-coord
+    @st{Benefits (3/3): Compatibility}
+    #:go (coord 1/2 15/100 'ct #:sep med-y-sep)
+    (vl-append
+      tiny-y-sep
+      (blank)
+      @t{Wrappers may not be available for all values})
+    (table 3
+      (map tcodesize
+           '("(Async-Channel T)" "(Custodian-Box T)" "(C-Mark-Key T)"
+             "(Evt T)" "(Ephemeron T)" "(Future T)"
+             "(MPair T T')" "(MList T)" "(Prompt-Tag T T')"
+             "(Syntax T)" "(Thread-Cell T)" "(Weak-Box T)"))
+      cc-superimpose cc-superimpose small-x-sep small-y-sep)
+    @t{Natural needs wrappers, Transient does not})
+  (pslide
+    #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
+    (make-thesis-question #f)
+    #:next
+    @t{Q1. Can honest and lying types coexist?}
+    @t{Q2. Are the benefits significant?})
+  (pslide
+    ;; TODO such ugly slides ...
+    #:go heading-text-coord
+    @st{Q1. Can honest and lying types coexist?}
+    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
+    #:alt
+    [@t{Need to:}
+     @t{- develop a combined model}
+     @t{- reduce overlap in runtime checks}
+     @t{- prove complete monitoring & tag soundnes}]
+    @t{Next, implement the model:}
+      @t{- re-use the type checker}
+      @t{- support all(?) Racket values}
+      @t{- avoid the contract library}
+      @t{- adapt the TR optimizer})
+  (pslide
+    )
+  (pslide
+    ;; TODO list challenges
+    ;; - then go into detail for each
+    )
+  (pslide
+    ;; timeline
+    )
   (void))
 
+(define (sec:QA)
+  (pslide)
+  (pslide
+    #:go heading-text-coord
+    @st{but, Research can Fail}
+    #:go slide-text-coord
+    @t{- lack of synergy ... ST too slow}
+    @t{- elim. form error messages})
+  (void))
 
 ;; -----------------------------------------------------------------------------
 
@@ -1202,10 +1321,21 @@
 
 ;; =============================================================================
 
+(define complement-pict
+  (make-overhead-plot '(H 1) example-plot-w))
+
+(define math-warning-pict
+  (bitmap "src/array-warning.png"))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go (coord slide-text-left 10/100 'lt)
-    (make-thesis-question #f)
-
+    ;; TODO another boring-looking slide ... but nothing to do now
+    #:go heading-text-coord
+    @t{Q2. Are the benefits significant?}
+    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
+    @t{- measure performance }
+    ;; OK this needs an image, illustrate the plan, lattice
+    ;; can try "lazy" ... if got slow, convert last mod to Transient
+    ;; also the library-style
 
   )))))
