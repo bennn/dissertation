@@ -53,6 +53,7 @@
 
 ;; COLOR
 (define black (string->color% "black"))
+(define gray (string->color% "light gray"))
 (define white (string->color% "white"))
 (define transparent (color%-update-alpha white 0))
 (define program-color (hex-triplet->color% #xABC9CF)) ;; gray/blue
@@ -66,6 +67,7 @@
 (define LIGHT-RED (string->color% "Tomato"))
 (define GREEN (string->color% "mediumseagreen"))
 (define BLUE (string->color% "cornflowerblue"))
+(define timeline-span-color (color%-update-alpha (string->color% "lightslategray") 0.9))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -872,6 +874,49 @@
   (define color (symbol->color 'E))
   (cellophane (filled-rectangle 30 8 #:color color #:draw-border? #f) 8/10))
 
+(define (make-timeline-bar w h label)
+  (define color (if label gray white))
+  (define bar (filled-rounded-rectangle w h 1 #:color color #:draw-border? #f))
+  (ppict-do bar
+    #:go (coord 2/100 48/100 'lc) (tcodesize (or label "."))
+    #:go (coord 98/100 48/100 'rc) (tcodesize ".")))
+
+(define (make-timeline-span h label)
+  ;; TODO maybe a gradient for these?
+  (define span-radius 7)
+  (define bar-pict (filled-rounded-rectangle 25 h span-radius #:color timeline-span-color #:draw-border? #f))
+  (define label-pict (ct label))
+  (ht-append 10 bar-pict label-pict))
+
+(define (make-timeline w h)
+  (let* ((month*
+           '("Nov" "Dec" "Jan'20" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug"))
+         (bar-h
+           (/ h (* 2 (length month*))))
+         (make-span-h
+           (lambda (i) (* i bar-h)))
+         (make-span-%
+           (lambda (i) (/ (make-span-h i) h)))
+         (base
+           (for/fold ((acc (blank)))
+                     ((m (in-list month*)))
+             (vl-append 0 acc (make-timeline-bar w bar-h m) (make-timeline-bar w bar-h #f))))
+         (timeline
+           (ppict-do base
+             #:go (coord 14/100 0 'lt)
+             (make-timeline-span (make-span-h 6) "model")
+             #:go (coord 29/100 0 'lt)
+             (make-timeline-span (make-span-h 12) "implementation")
+             #:go (coord 44/100 (make-span-%  7) 'lt)
+             (make-timeline-span (make-span-h 8) "evaluation")
+             #:go (coord 59/100 (make-span-% 11) 'lt)
+             (make-timeline-span (make-span-h 4) "paper")
+             #:go (coord 74/100 (make-span-% 13) 'lt)
+             (make-timeline-span (make-span-h 7) "dissertation"))))
+    (add-rounded-border
+      #:radius 5 #:y-margin 6 #:frame-width 3 #:frame-color "slategray"
+      timeline)))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1184,8 +1229,8 @@
     ;; - then go into detail for each
     )
   (pslide
-    ;; timeline
-    )
+    #:go heading-text-coord
+    (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
   (void))
 
 (define (sec:QA)
@@ -1314,6 +1359,12 @@
   ;; - 
   (void))
 
+(define complement-pict
+  (make-overhead-plot '(H 1) example-plot-w))
+
+(define math-warning-pict
+  (bitmap "src/array-warning.png"))
+
 ;; =============================================================================
 
 (module+ main
@@ -1321,21 +1372,15 @@
 
 ;; =============================================================================
 
-(define complement-pict
-  (make-overhead-plot '(H 1) example-plot-w))
-
-(define math-warning-pict
-  (bitmap "src/array-warning.png"))
+;    #:go heading-text-coord
+;    @t{Q2. Are the benefits significant?}
+;    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
+;    @t{- measure performance }
+;    ;; OK this needs an image, illustrate the plan, lattice
+;    ;; can try "lazy" ... if got slow, convert last mod to Transient
+;    ;; also the library-style
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    ;; TODO another boring-looking slide ... but nothing to do now
-    #:go heading-text-coord
-    @t{Q2. Are the benefits significant?}
-    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
-    @t{- measure performance }
-    ;; OK this needs an image, illustrate the plan, lattice
-    ;; can try "lazy" ... if got slow, convert last mod to Transient
-    ;; also the library-style
 
   )))))
