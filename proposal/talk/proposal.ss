@@ -437,8 +437,11 @@
          )
     pp))
 
-(define PLT-pict
+(define small-PLT-pict
   (vl-append 2 (bitmap "src/racket-small.png") (blank)))
+
+(define med-PLT-pict
+  (bitmap "src/racket-med.png"))
 
 (define neu-pict
   (bitmap "src/neu-small.png"))
@@ -996,13 +999,57 @@
   (define v (vc-append (* 1 small-y-sep) (car (cdddr point*)) (car point*)))
   (hc-append pico-x-sep (cadr point*) v (caddr point*)))
 
+(define model-sidebar-x 14/100)
+
+(define model-text-y 19/100)
+
+(define model-text-coord (coord 3/10 model-text-y 'lt #:sep small-y-sep))
+(define model-illustration-coord (coord 90/100 model-text-y 'cc #:abs-y tiny-y-sep))
+
 (define perf-illustration-coord (coord 38/100 30/100 'ct))
-(define perf-text-coord (coord slide-text-left 19/100 'lt))
+(define perf-text-coord (coord slide-text-left model-text-y 'lt))
 (define perf-sidebar-x 86/100)
 (define perf-sidebar-w (w%->pixels 24/100))
 
 (define (scale-perf-sidebar pp)
   (scale-to-fit pp (- perf-sidebar-w 30) (h%->pixels 18/100)))
+
+(define (make-model-pict)
+  (define bg (ghost med-PLT-pict))
+  (define ht (make-string->title #:size (+ 16 title-size)))
+  (add-rounded-border
+    #:background-color white
+    #:frame-color black
+    #:frame-width 2
+    (ppict-do bg
+      #:go (coord 2/10 30/100 'cc) (ht "λ")
+      #:go (coord 5/10 65/100 'cc) (ht "τ")
+      #:go (coord 75/100 35/100 'cc) (ht "→"))))
+
+(define (make-impl-pict)
+  med-PLT-pict)
+
+(define (make-sidebar-background)
+  (filled-rectangle perf-sidebar-w client-h #:color bg-accent-color #:draw-border? #f))
+
+(define (make-model-sidebar)
+  (define bg (make-sidebar-background))
+  (ppict-do bg
+    #:go (coord 1/2 25/100 'ct) (scale-perf-sidebar (make-model-pict))
+    #:go (coord 1/2 55/100 'ct) (scale-perf-sidebar (make-impl-pict))))
+
+(define (make-perf-sidebar)
+  (define bg (make-sidebar-background))
+  (ppict-do bg
+    #:go (coord 1/2 20/100 'ct) (scale-perf-sidebar (make-benefits-plot-pict 'B))
+    #:go (coord 1/2 48/100 'ct) (scale-perf-sidebar (make-benefits-boundary-pict))
+    #:go (coord 1/2 65/100 'ct) (scale-perf-sidebar (make-benefits-lattice-pict))))
+
+(define complement-pict
+  (make-overhead-plot '(H 1) example-plot-w))
+
+(define math-warning-pict
+  (bitmap "src/array-warning.png"))
 
 ;; =============================================================================
 
@@ -1011,11 +1058,11 @@
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
 ;;  (sec:outline)
-;  (sec:title)
+  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-;    (sec:the-question)
-;    (sec:design-space)
+    (sec:the-question)
+    (sec:design-space)
     (sec:plan)
     (void)))
 
@@ -1295,27 +1342,32 @@
     @t{Q1. Can honest and lying types coexist?}
     @t{Q2. Are the benefits significant?})
   (pslide
-    ;; TODO such ugly slides ...
-    #:go heading-text-coord
-    @st{Q1. Can honest and lying types coexist?}
-    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
+    #:go (coord model-sidebar-x 0 'ct) (make-model-sidebar)
+    #:go (coord slide-right slide-top 'rt)
+    @st{Q1. Can honest and lying coexist?}
+    #:go model-text-coord
     #:alt
-    [@t{Need to:}
-     @t{- develop a combined model}
+    [@t{Model:}
+     (hb-append @t{- develop a combined } (tag-pict @t{model} 'model))
      @t{- reduce overlap in runtime checks}
-     @t{- prove complete monitoring & tag soundnes}]
-    @t{Next, implement the model:}
-      @t{- re-use the type checker}
-      @t{- support all(?) Racket values}
-      @t{- avoid the contract library}
-      @t{- adapt the TR optimizer})
+     (vl-append
+       tiny-y-sep
+       @t{- prove complete monitoring}
+       @t{   and tag soundnes})
+     #:go model-illustration-coord
+     (scale (make-model-pict) 1/2)]
+    #:next
+    @t{Implementation:}
+    @t{- re-use the type checker}
+    @t{- support all(?) Racket values}
+    @t{- avoid the contract library}
+    @t{- adapt the TR optimizer}
+    #:go model-illustration-coord
+    (scale (make-impl-pict) 1/2))
   (pslide
     #:go heading-text-coord
     @st{Q2. Are the benefits significant?}
-    #:go (coord perf-sidebar-x 0 'ct) (filled-rectangle perf-sidebar-w client-h #:color bg-accent-color #:draw-border? #f)
-    #:go (coord perf-sidebar-x 20/100 'ct) (scale-perf-sidebar (make-benefits-plot-pict 'B))
-    #:go (coord perf-sidebar-x 48/100 'ct) (scale-perf-sidebar (make-benefits-boundary-pict))
-    #:go (coord perf-sidebar-x 65/100 'ct) (scale-perf-sidebar (make-benefits-lattice-pict))
+    #:go (coord perf-sidebar-x 0 'ct) (make-perf-sidebar)
     #:next
     #:alt
     [#:go perf-text-coord
@@ -1334,9 +1386,9 @@
     #:go perf-illustration-coord
     (make-benefits-lattice-pict))
   (pslide
-    ;; TODO list challenges
-    ;; - then go into detail for each
-    )
+    ;; OK you've seen the plans, whats to do
+    #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
+    #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar))
   (pslide
     #:go heading-text-coord
     (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
@@ -1464,15 +1516,9 @@
   ;; - get benchmarks where some contracts necessary
   ;; - why not use approx-D method?
   ;; Jan questions:
-  ;; - drop static analysis? what can you do in the timeframe???
+  ;; - drop static analysis
   ;; - 
   (void))
-
-(define complement-pict
-  (make-overhead-plot '(H 1) example-plot-w))
-
-(define math-warning-pict
-  (bitmap "src/array-warning.png"))
 
 ;; =============================================================================
 
