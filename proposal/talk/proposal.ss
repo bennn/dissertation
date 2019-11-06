@@ -55,6 +55,7 @@
 (define black (string->color% "black"))
 (define gray (string->color% "light gray"))
 (define white (string->color% "white"))
+(define goal-color (string->color% "lime green"))
 (define transparent (color%-update-alpha white 0))
 (define program-color (hex-triplet->color% #xABC9CF)) ;; gray/blue
 (define racket-red  (hex-triplet->color% #x9F1D20))
@@ -68,6 +69,7 @@
 (define GREEN (string->color% "mediumseagreen"))
 (define BLUE (string->color% "cornflowerblue"))
 (define timeline-span-color (color%-update-alpha (string->color% "lightslategray") 0.9))
+(define bg-accent-color (color%-update-alpha timeline-span-color 5/10))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -766,7 +768,7 @@
 (define (at-judgment-bar tag)
   (at-find-pict tag lb-find 'lt #:abs-x (- tiny-x-sep) #:abs-y 1))
 
-(define (make-overhead-plot e* [w 500])
+(define (make-overhead-plot e* [w 500] #:legend? [legend? #t])
   (define x-min 0)
   (define x-max (+ (/ pi 10) pi))
   (define pp
@@ -778,7 +780,7 @@
           (define c (symbol->color e))
           (function (make-embedding-function e x-min x-max)
                     #:width (* 15 (line-width))
-                    #:alpha PLOT-FN-ALPHA
+                    #:alpha (if (eq? e 'H1) 1 PLOT-FN-ALPHA)
                     #:color c))
         #:y-label #f ;;"Overhead vs. Untyped"
         #:x-label #f ;;"Num. Type Ann."
@@ -788,7 +790,7 @@
         #:x-max x-max
         #:y-min 0
         #:y-max (* 10 (+ 1 (order-of-magnitude x-max))))))
-  (add-overhead-axis-labels (tag-pict pp 'the-plot) #true))
+  (add-overhead-axis-labels (tag-pict pp 'the-plot) legend?))
 
 (define (symbol->color e)
   (case e
@@ -798,12 +800,15 @@
      GREEN)
     ((1)
      BLUE)
+    ((H1)
+     goal-color)
     (else
       (raise-argument-error 'symbol->color "(or/c 'H 'E '1)" e))))
 
 (define (make-embedding-function e x-min x-max)
   (define pi/4 (/ 3.14 4))
   (define 3pi/4 (* 3.5 pi/4))
+  (define h-min 0.4)
   (case e
     ((H)
      (lambda (n)
@@ -813,7 +818,7 @@
          [(< n 3pi/4)
           10]
          [else
-          0.4])))
+          h-min])))
     ((E)
      (lambda (n) 1))
     ((1)
@@ -825,6 +830,15 @@
            (- (+ 1 3pi/4) (* 2/10 (- n 3pi/4)))
           ]))
      #;(lambda (n) (add1 n)))
+    ((H1)
+     (lambda (n)
+       (cond
+         [(< n pi/4)
+          (max 1 (+ 0.9 (sin n)))]
+         [(< n 3pi/4)
+          (add1 n)]
+         [else
+           h-min])))
     (else
       (raise-argument-error 'make-embedding-line "embedding?" e))))
 
@@ -916,6 +930,79 @@
     (add-rounded-border
       #:radius 5 #:y-margin 6 #:frame-width 3 #:frame-color "slategray"
       timeline)))
+
+(define q-black (hex-triplet->color% #x333333))
+
+(define q-pict
+  (cc-superimpose
+    (disk 55 #:color q-black #:draw-border? #f)
+    ((make-string->text #:font (cons 'bold code-font) #:color white #:size title-size) "?")))
+
+(define benefits-plot-w 400)
+
+(define (make-benefits-plot-pict stage-sym)
+  (if (eq? stage-sym 'A)
+    (make-overhead-plot '(H 1) benefits-plot-w #:legend? #f)
+    (let ((pp (make-overhead-plot '(H 1 H1) benefits-plot-w #:legend? #f)))
+      (case stage-sym
+        ((B)
+         pp)
+        ((C)
+         (ppict-do pp
+            #:go (coord 66/100 82/100 'cc) q-pict))
+        (else
+          (raise-argument-error 'make-benefits-plot-pict "(or/c 'A 'B 'C)" stage-sym))))))
+
+(define (symbol->node sym)
+  (case sym
+    ((U) U-node)
+    ((T) T-node)
+    (else (raise-argument-error 'symbol->node "(or/c 'U 'T)" sym))))
+
+(define (make-node-cluster tag kind*)
+  (define n0 (symbol->node (car kind*)))
+  (define n1 (symbol->node (cadr kind*)))
+  (define n2 (symbol->node (caddr kind*)))
+  (define combo
+    (vc-append tiny-y-sep (hc-append tiny-x-sep n0 n1) n2))
+  (add-hubs combo tag))
+
+(define (make-benefits-boundary-pict)
+  (let* ((lhs (make-node-cluster 'L '(U U U)))
+         (rhs (make-node-cluster 'R '(T T T)))
+         (mid (add-hubs T-node 'C))
+         (combo (hc-append med-x-sep  lhs mid rhs))
+         (arr* (list
+                 (program-arrow 'L-E rb-find 'C-W lb-find (* 85/100 turn) (* 10/100 turn) 1/4 1/4 black)
+                 (program-arrow 'C-W lt-find 'L-E rt-find (* 35/100 turn) (* 60/100 turn) 1/4 1/4 black)
+                 (program-arrow 'C-E rb-find 'R-W lb-find (* 85/100 turn) (* 10/100 turn) 1/4 1/4 black)
+                 (program-arrow 'R-W lt-find 'C-E rt-find (* 35/100 turn) (* 60/100 turn) 1/4 1/4 black))))
+    (for/fold ((acc combo))
+              ((arr (in-list arr*)))
+      (add-program-arrow acc arr #:style 'solid))))
+
+(define (make-lattice-point k0 k1)
+  (define n0 (symbol->node k0))
+  (define n1 (symbol->node k1))
+  (define top (hb-append tiny-x-sep n0 n1))
+  (define bot Lib-node)
+  (make-program-pict
+    #:x-margin 20 #:y-margin 20
+    #:bg-color white #:frame-color black
+    (vc-append tiny-y-sep top bot)))
+
+(define (make-benefits-lattice-pict)
+  (define point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
+  (define v (vc-append (* 1 small-y-sep) (car (cdddr point*)) (car point*)))
+  (hc-append pico-x-sep (cadr point*) v (caddr point*)))
+
+(define perf-illustration-coord (coord 38/100 30/100 'ct))
+(define perf-text-coord (coord slide-text-left 19/100 'lt))
+(define perf-sidebar-x 86/100)
+(define perf-sidebar-w (w%->pixels 24/100))
+
+(define (scale-perf-sidebar pp)
+  (scale-to-fit pp (- perf-sidebar-w 30) (h%->pixels 18/100)))
 
 ;; =============================================================================
 
@@ -1223,7 +1310,29 @@
       @t{- avoid the contract library}
       @t{- adapt the TR optimizer})
   (pslide
-    )
+    #:go heading-text-coord
+    @st{Q2. Are the benefits significant?}
+    #:go (coord perf-sidebar-x 0 'ct) (filled-rectangle perf-sidebar-w client-h #:color bg-accent-color #:draw-border? #f)
+    #:go (coord perf-sidebar-x 20/100 'ct) (scale-perf-sidebar (make-benefits-plot-pict 'B))
+    #:go (coord perf-sidebar-x 48/100 'ct) (scale-perf-sidebar (make-benefits-boundary-pict))
+    #:go (coord perf-sidebar-x 65/100 'ct) (scale-perf-sidebar (make-benefits-lattice-pict))
+    #:next
+    #:alt
+    [#:go perf-text-coord
+     @t{Goal: min(Natural, Transient)}
+     #:go perf-illustration-coord
+     (make-benefits-plot-pict 'B)]
+    #:next
+    #:alt
+    [#:go perf-text-coord
+     @t{Maybe: reduce cost of U/T edge}
+     #:go perf-illustration-coord
+     (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict))]
+    #:next
+    #:go perf-text-coord
+    @t{Goal: change lib, improve overall}
+    #:go perf-illustration-coord
+    (make-benefits-lattice-pict))
   (pslide
     ;; TODO list challenges
     ;; - then go into detail for each
@@ -1372,15 +1481,8 @@
 
 ;; =============================================================================
 
-;    #:go heading-text-coord
-;    @t{Q2. Are the benefits significant?}
-;    #:go (coord slide-text-left slide-text-top 'lt #:sep small-y-sep)
-;    @t{- measure performance }
-;    ;; OK this needs an image, illustrate the plan, lattice
-;    ;; can try "lazy" ... if got slow, convert last mod to Transient
-;    ;; also the library-style
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+
 
   )))))
