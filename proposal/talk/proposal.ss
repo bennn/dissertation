@@ -1064,6 +1064,8 @@
     (sec:the-question)
     (sec:design-space)
     (sec:plan)
+    (pslide)
+;;    (sec:QA)
     (void)))
 
 ;; -----------------------------------------------------------------------------
@@ -1160,18 +1162,33 @@
 
 (define (sec:design-space)
   (pslide
-    ;; been studying landscape from 2 directions: guarantees and perf
-    ;; TODO talk about method for studying?
-    ;;  ... guarantees / perf via different semantics for one language
-    ;;  ... maybe doesn't need illustration --- big question is whether N/A matter later
     #:go big-landscape-coord
-    (make-big-landscape-background)
-    #:go (coord 1/10 1/10 'lt)
+    (make-implementation-landscape)
+    #:next
+    #:go guarantees-cloud-coord
     (st-cloud "Guarantees?")
-    #:go (coord 9/10 1/10 'rt)
+    #:go performance-cloud-coord
     (st-cloud "Performance?"))
   (pslide
-    #:go heading-text-coord @st{Landscape of Formal Guarantees}
+    #:go heading-text-coord
+    @st{Research Agenda: Scientific Comparison}
+    #:go big-landscape-coord
+    (make-big-landscape-background)
+    #:next
+    #:go guarantees-cloud-coord
+    (text-cloud
+      "Guarantees"
+      (make-model-pict)
+      @t{one surface lang.,}
+      @t{many semantics})
+    #:go performance-cloud-coord
+    (text-cloud
+      "Performance"
+      (make-impl-pict)
+      @t{one language,}
+      @t{different compilers}))
+  (pslide
+    #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
     #:go big-landscape-coord (make-theorem-landscape))
   (pslide
@@ -1204,7 +1221,7 @@
     #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Absent})
   (pslide
     #:go heading-text-coord
-    @st{Landscape of Runtime Overhead}
+    (hb-append @st{Landscape: } @sbt{Performance})
     #:go big-landscape-coord
     #:alt [(make-big-landscape-background)]
     (make-performance-landscape))
@@ -1395,7 +1412,6 @@
   (void))
 
 (define (sec:QA)
-  (pslide)
   (pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
@@ -1527,8 +1543,23 @@
 
 ;; =============================================================================
 
+(define design-cloud-y 20/100)
+
+(define guarantees-cloud-coord (coord 1/10 design-cloud-y 'lt))
+(define performance-cloud-coord (coord 9/10 design-cloud-y 'rt))
+
+(define (text-cloud str label-pict . pp*)
+  (define txt-pict (apply vl-append tiny-y-sep pp*))
+  (define title-pict (st str))
+  (add-rounded-border
+    #:radius 2 #:frame-width 4
+    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
+    (vc-append
+      small-y-sep
+      (hc-append tiny-y-sep title-pict (scale-to-fit label-pict 80 80))
+      txt-pict)))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-
 
   )))))
