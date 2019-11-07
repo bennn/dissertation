@@ -4,6 +4,13 @@
 ;; /Users/ben/code/racket/gtp/shallow/gf-icfp-2018/talk/simple.ss
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
+;; TODO ...
+;; - benefits (3) along top line,
+;;   - tasks / goals along side as-is,
+;;   - combine to a summary slide?
+;; - illustrate "natural typed" vs "transient typed"
+;;   - ditto for the words "Natural" and "Transient"
+
 (require
   file/glob
   pict pict/convert pict/balloon pict/face
@@ -111,8 +118,6 @@
   (cc-superimpose
     (make-landscape-background w h #:color stamp-color)
     pp))
-
-(define racket-logo.png (build-path "src" "racket-logo2.png"))
 
 (define region-border-width 5)
 (define region-border-color black)
@@ -746,7 +751,7 @@
   (define txt-pict (if pp (vl-append (* 10/100 (pict-height lbl-pict)) (blank) pp) (blank)))
   (define bg-pict
     (filled-rounded-rectangle
-      (* (if pp 95/100 45/100) client-w)
+      (+ (* 2 tiny-x-sep) (pict-width lbl-pict))
       (* 2 (pict-height lbl-pict))
       4
       #:color color
@@ -754,7 +759,7 @@
       #:border-color black
       #:border-width region-border-width))
   (ppict-do bg-pict
-    #:go (coord 0 10/100 'lt #:abs-x 10) (ht-append tiny-x-sep lbl-pict txt-pict)))
+    #:go (coord 0 10/100 'lt #:abs-x 10) (ht-append small-x-sep lbl-pict txt-pict)))
 
 (define (descr-append . pp*)
   (descr-append* pp*))
@@ -1051,6 +1056,22 @@
 (define math-warning-pict
   (bitmap "src/array-warning.png"))
 
+(define design-cloud-y 20/100)
+
+(define guarantees-cloud-coord (coord 1/10 design-cloud-y 'lt))
+(define performance-cloud-coord (coord 9/10 design-cloud-y 'rt))
+
+(define (text-cloud str label-pict . pp*)
+  (define txt-pict (apply vl-append tiny-y-sep pp*))
+  (define title-pict (st str))
+  (add-rounded-border
+    #:radius 2 #:frame-width 4
+    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
+    (vc-append
+      small-y-sep
+      (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
+      txt-pict)))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1162,6 +1183,8 @@
 
 (define (sec:design-space)
   (pslide
+    #:go heading-text-coord
+    @st{Many Answers, Many Implementations}
     #:go big-landscape-coord
     (make-implementation-landscape)
     #:next
@@ -1215,10 +1238,10 @@
     #:go (at-find-pict complete-monitoring-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Honest}
     #:go (at-judgment-bar complete-monitoring-tag) (judgment-bar "green")
     #:next
-    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x judgment-x-sep) @st{Lying}
+    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x (* 5 judgment-x-sep)) @st{Lying}
     #:go (at-judgment-bar tag-sound-tag) (judgment-bar "red")
     #:next
-    #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Absent})
+    #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x (* 3.8 judgment-x-sep) #:abs-y judgment-y-sep) @st{Absent})
   (pslide
     #:go heading-text-coord
     (hb-append @st{Landscape: } @sbt{Performance})
@@ -1258,7 +1281,7 @@
       (list (cons (hb-append @bt{y} @t{-axis = Overhead})
                   (hb-append @bt{x} @t{-axis = Num. Types}))
             (cons (hc-append (sample-bar) @t{ = Untyped Perf.})
-                  (hc-append (sample-disk #f) @t{ = Other Perf.})))
+                  (hc-append (double-sample-disk 'H '1)  @t{ = Mixed-typed Perf.})))
       #:col-sep med-x-sep
       #:row-sep small-y-sep))
   (pslide
@@ -1273,8 +1296,9 @@
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #f)
-    #:go center-coord
-    @big-t{(Transient + Natural)})
+    #:next
+    #:go (coord 1/2 6/10 'ct)
+    @big-t{(Natural + Transient)})
   (pslide
     #:go heading-text-coord
     @st{Complementary Strengths}
@@ -1376,7 +1400,7 @@
     #:next
     @t{Implementation:}
     @t{- re-use the type checker}
-    @t{- support all(?) Racket values}
+    @t{- support all Racket values}
     @t{- avoid the contract library}
     @t{- adapt the TR optimizer}
     #:go model-illustration-coord
@@ -1543,21 +1567,13 @@
 
 ;; =============================================================================
 
-(define design-cloud-y 20/100)
-
-(define guarantees-cloud-coord (coord 1/10 design-cloud-y 'lt))
-(define performance-cloud-coord (coord 9/10 design-cloud-y 'rt))
-
-(define (text-cloud str label-pict . pp*)
-  (define txt-pict (apply vl-append tiny-y-sep pp*))
-  (define title-pict (st str))
-  (add-rounded-border
-    #:radius 2 #:frame-width 4
-    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
-    (vc-append
-      small-y-sep
-      (hc-append tiny-y-sep title-pict (scale-to-fit label-pict 80 80))
-      txt-pict)))
+(define (double-sample-disk s0 s1)
+  (define p0 (sample-disk s0))
+  (define p1 (sample-disk s1))
+  (define w (pict-width p0))
+  (define h (pict-height p0))
+  (define both (ppict-do (blank (* 2 w) (* 2 h)) #:go (coord 0 0 'lt) p0 #:go (coord 1 1 'rb) p1))
+  (scale-to-fit both w h))
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
