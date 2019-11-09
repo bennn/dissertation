@@ -12,12 +12,8 @@
 ;;   - ditto for the words "Natural" and "Transient"
 
 ;Slides:
-;- ... visual continuity bw guarantees landscape & thermometer?
-;- say more about 3^N measurement challenge
 ;- list papers up front
 ;- state agenda (done 9/10 w papers here is remainder)
-;- Add section-head slides
-;  - what done ... will do ... how do ... (approx)
 ;- Accounting slide (done A, TODO B)
 
 (require
@@ -730,12 +726,6 @@
       (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
     scale-by))
 
-(define (make-bubble pp)
-  (add-rounded-border
-    #:radius 6 #:frame-width 4
-    #:x-margin small-x-sep #:y-margin small-y-sep
-    pp))
-
 (define (add-cloud-background pp #:color [pre-color #f] #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f] #:style [pre-style #f])
   (define x-margin (or pre-x-margin pico-x-sep))
   (define y-margin (or pre-y-margin pico-y-sep))
@@ -975,9 +965,9 @@
 
 (define (symbol->node sym)
   (case sym
-    ((U) U-node)
-    ((T) T-node)
-    (else (raise-argument-error 'symbol->node "(or/c 'U 'T)" sym))))
+    ((U #f) U-node)
+    ((T #t) T-node)
+    (else (raise-argument-error 'symbol->node "(or/c 'U 'T #f #t)" sym))))
 
 (define (make-node-cluster tag kind*)
   (define n0 (symbol->node (car kind*)))
@@ -1001,12 +991,16 @@
               ((arr (in-list arr*)))
       (add-program-arrow acc arr #:style 'solid))))
 
-(define (make-lattice-point k0 k1)
-  (define n0 (symbol->node k0))
-  (define n1 (symbol->node k1))
-  (define top (hb-append tiny-x-sep n0 n1))
+(define (make-lattice-point . k*)
+  (make-lattice-point* k*))
+
+(define (make-lattice-point* k*)
+  (define x-sep 20)
+  (define y-sep 20)
+  (define n* (map symbol->node k*))
+  (define top (apply hb-append tiny-x-sep n*))
   (make-program-pict
-    #:x-margin 20 #:y-margin 20
+    #:x-margin x-sep #:y-margin y-sep
     #:bg-color white #:frame-color black
     top))
 
@@ -1033,6 +1027,9 @@
 (define perf-text-coord (coord slide-text-left model-text-y 'lt))
 (define perf-sidebar-x 86/100)
 (define perf-sidebar-w (w%->pixels 24/100))
+
+(define lattice-text-coord (coord 5/10 model-text-y 'ct))
+(define lattice-illustration-coord (coord 5/10 35/100 'ct))
 
 (define (scale-perf-sidebar pp)
   (scale-to-fit pp (- perf-sidebar-w 30) (h%->pixels 18/100)))
@@ -1082,13 +1079,17 @@
 (define (text-cloud str label-pict . pp*)
   (define txt-pict (apply vl-append tiny-y-sep pp*))
   (define title-pict (sbt str))
-  (add-rounded-border
-    #:radius 2 #:frame-width 4
-    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
+  (large-rounded-border
     (vc-append
       small-y-sep
       (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
       txt-pict)))
+
+(define (large-rounded-border pp)
+  (add-rounded-border
+    #:radius 2 #:frame-width 4
+    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
+    pp))
 
 (define (double-sample-disk s0 s1)
   (define p0 (sample-disk s0))
@@ -1097,6 +1098,56 @@
   (define h (pict-height p0))
   (define both (ppict-do (blank (* 2 w) (* 2 h)) #:go (coord 0 0 'lt) p0 #:go (coord 1 1 'rb) p1))
   (scale-to-fit both w h))
+
+(define lattice-num-bits 6)
+(define lattice-red (hex-triplet->color% #xffa8ac))
+(define lattice-orange (hex-triplet->color% #xffd9a8))
+
+(define (add-lattice-background #:color color pp)
+  (add-rounded-border
+    #:radius 12 #:x-margin tiny-x-sep #:y-margin tiny-y-sep #:background-color color
+    #:frame-color black #:frame-width 2
+    pp))
+
+(define (make-transient-lattice bits)
+  (add-lattice-background
+    #:color lattice-orange
+    (scale (make-lattice bits make-lattice-point*) 6/100)))
+
+(define (make-takikawa-lattice #:color [color lattice-red])
+  (add-lattice-background
+    #:color color
+    (scale (make-lattice lattice-num-bits make-lattice-point*) 1/5)))
+
+(define (make-greenman-lattice)
+  (define l0 (make-takikawa-lattice))
+  (define l1 (make-takikawa-lattice #:color lattice-orange))
+  (ppict-do l0 #:go (coord 58/100 10/10 'ct) l1))
+
+(define (make-3N-lattice)
+  (define l0 (make-takikawa-lattice))
+  (define l1 (scale (make-takikawa-lattice #:color lattice-orange) 3/10))
+  (ppict-do l0
+    #:go (coord 1/2 5/100 'cb) (make-transient-lattice lattice-num-bits)
+    #:go (coord 4/10 6/10 'cb) (make-transient-lattice 2)
+    #:go (coord 525/1000 47/100 'cb) (make-transient-lattice 3)))
+
+(define transition-background
+  (filled-rectangle
+    (* 3/2 client-w)
+    (* 3/2 client-h)
+    #:color (color%-update-alpha black 0.2)
+    #:draw-border? #f))
+
+(define (make-transition-slide str)
+  (pslide
+    #:go center-coord
+    transition-background
+    #:go (coord 1/2 25/100 'ct)
+    (add-landscape-background
+      #:x-margin small-x-sep
+      #:y-margin tiny-y-sep
+      (sbt str))))
 
 ;; =============================================================================
 
@@ -1107,9 +1158,12 @@
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    (sec:the-question)
+    (sec:thesis-question)
+    (sec:migratory-typing)
     (sec:design-space)
+    (sec:proposal)
     (sec:plan)
+    (sec:timeline)
     (pslide)
 ;;    (sec:QA)
     (void)))
@@ -1143,10 +1197,17 @@
 (define motivation-x-r 78/100)
 (define motivation-y 18/100)
 
-(define (sec:the-question)
+(define (sec:thesis-question)
+  (make-transition-slide
+    "Preview: Thesis Question")
   (pslide
     #:go (coord slide-text-left 10/100 'lt)
     (make-thesis-question #t))
+  (void))
+
+(define (sec:migratory-typing)
+  (make-transition-slide
+    "Migratory Typing")
   (pslide
     #:go heading-text-coord
     @sbt{Migratory Typing}
@@ -1193,7 +1254,7 @@
     (make-implementation-landscape)
     #:next
     #:go (coord 1/2 35/100 'ct)
-    (make-bubble (hb-append @st{Rich design space, due to a challenge})))
+    (large-rounded-border (hb-append @st{Rich design space, due to a challenge})))
   (pslide
     #:go heading-text-coord
     @st{Challenge = Interoperability}
@@ -1204,9 +1265,6 @@
     (hb-append @t{ interactions between})
     (hb-append @t{ } @bt{untyped values})
     (hb-append @t{ and } @bt{typed values} @t{?}))
-  (void))
-
-(define (sec:design-space)
   (pslide
     #:go heading-text-coord
     @st{Many Answers, Many Implementations}
@@ -1217,6 +1275,11 @@
     (st-cloud "Guarantees?")
     #:go performance-cloud-coord
     (st-cloud "Performance?"))
+  (void))
+
+(define (sec:design-space)
+  (make-transition-slide
+    "My Research")
   (pslide
     #:go heading-text-coord
     @st{Research Agenda: Scientific Comparison}
@@ -1249,6 +1312,7 @@
      (make-type-sound-bubble #f)
      (make-tag-sound-bubble #f)
      (make-uni-sound-bubble #f)]
+    ;; TODO right-align text
     (make-complete-monitoring-bubble
       @t{types predict behavior})
     (make-type-sound-bubble
@@ -1325,7 +1389,9 @@
     (make-scatterplots-pict))
   (void))
 
-(define (sec:plan)
+(define (sec:proposal)
+  (make-transition-slide
+    "Proposal")
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #f)
@@ -1417,6 +1483,11 @@
              "(Weak-Box T)"))
       cc-superimpose cc-superimpose small-x-sep small-y-sep)
     @t{Natural needs wrappers, Transient does not})
+  (void))
+
+(define (sec:plan)
+  (make-transition-slide
+    "To Do")
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
     (make-thesis-question #f)
@@ -1457,6 +1528,52 @@
      #:go perf-illustration-coord
      (make-benefits-plot-pict 'B)]
     #:next
+    #:go perf-text-coord
+    @t{Maybe: reduce cost of U/T edge}
+    #:go perf-illustration-coord
+    (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict))
+    #:next
+    #:go center-coord
+    (large-rounded-border
+      @t{How to measure?}))
+  (pslide
+    #:go heading-text-coord
+    @st{How to measure performance?}
+    #:alt
+    [#:go lattice-text-coord
+     @t{POPL 2016 = 2^N measurements}
+     #:go lattice-illustration-coord
+     (make-takikawa-lattice)]
+    #:alt
+    [#:go lattice-text-coord
+     (hb-append @t{ICFP 2018} @t{ = } (tag-pict @t{2} 'expt) @t{       measurements})
+     #:next
+     #:go (at-find-pict 'expt rt-find 'lc #:abs-x 4) @tcodesize{(N+1)}
+     #:go perf-illustration-coord
+     (make-greenman-lattice)]
+    #:go lattice-text-coord
+    @t{Next = 3^N measurements?}
+    #:next
+    #:go (coord 1/2 4/10 'ct)
+    (make-3N-lattice)
+    #:next
+    #:go (coord 1/2 65/100 'ct)
+    (large-rounded-border
+      (vl-append tiny-y-sep
+      @t{- may be infeasible to measure}
+      @t{- at best: "good points exist"})))
+  #;(pslide
+    ;; FUTURE WORK ... first goal is to enable interaction
+    #:go heading-text-coord
+    @st{How to measure performance?}
+    #:go lattice-text-coord
+    (vl-append small-y-sep
+    @t{- migration algorithm?}
+    @t{- boundary profiler?}))
+  (pslide
+    #:go heading-text-coord
+    @st{Q2. Are the benefits significant?}
+    #:go (coord perf-sidebar-x 0 'ct) (make-perf-sidebar)
     #:alt
     [#:go perf-text-coord
      @t{Maybe: reduce cost of U/T edge}
@@ -1468,6 +1585,12 @@
     #:go perf-illustration-coord
     #:alt [(make-small-benefits-lattice-pict)]
     (make-benefits-lattice-pict))
+  (void))
+
+(define (sec:timeline)
+  (make-transition-slide
+    "Agenda")
+  ;; TODO full done/todo list
   (pslide
     ;; OK you've seen the plans, whats to do
     #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
