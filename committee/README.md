@@ -1,6 +1,17 @@
 committee
 ===
 
+Monday / Tuesday (2019-11-12)
+- propose time, before 2pm for Fritz
+- 
+
+AFTER PROPOSAL
+- once, in summer, it looks like I'll finish then ask Carla for lecturer pos.
+- apply in Fall, visit in Spring like normal ... unless opportunity like UC Boulder appears
+- TODO should I email Frank soon?
+
+- - -
+
 Plan:
 - Matthias
 - Amal
@@ -17,6 +28,7 @@ Current:
   + teaching on W, morning and evening
 - Amal
   + NOTE meeting 2019-11-07 2:30 -- 3:00pm
+  + Max proposal Nov 18
   + PLDI deadline Nov 22, propose after that
 - Shriram
   https://cs.brown.edu/~sk/Contact/Calendar/
