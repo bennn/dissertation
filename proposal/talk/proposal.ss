@@ -11,6 +11,15 @@
 ;; - illustrate "natural typed" vs "transient typed"
 ;;   - ditto for the words "Natural" and "Transient"
 
+;Slides:
+;- ... visual continuity bw guarantees landscape & thermometer?
+;- say more about 3^N measurement challenge
+;- list papers up front
+;- state agenda (done 9/10 w papers here is remainder)
+;- Add section-head slides
+;  - what done ... will do ... how do ... (approx)
+;- Accounting slide (done A, TODO B)
+
 (require
   file/glob
   pict pict/convert pict/balloon pict/face
@@ -703,12 +712,16 @@
     (bitmap "src/parthenon-logo.png")))
 
 (define ocaml-tag 'ocaml)
+
 (define ocaml-pict (bitmap "src/ocaml-logo-small.png"))
+(define opengl-pict (bitmap "src/opengl-logo-small.png"))
+(define reasonml-pict (bitmap "src/reasonml-logo-small.png"))
+(define react-pict (bitmap "src/react-logo-small.png"))
 
 (define reuse-pict
   (make-big-tu-pict
-    (tag-pict ocaml-pict ocaml-tag)
-    (bitmap "src/opengl-logo-small.png")))
+    reasonml-pict
+    react-pict))
 
 (define (make-sample-program untyped? arrow? [scale-by 8/10])
   (scale
@@ -732,7 +745,7 @@
 
 (define (st-cloud str)
   (add-cloud-background
-    #:x-margin small-x-sep #:y-margin med-y-sep #:color sea-color (st str)))
+    #:x-margin small-x-sep #:y-margin med-y-sep #:color sea-color (sbt str)))
 
 (define (make-uni-sound-bubble pp)
   (make-property-bubble uni-sound-str uni-sound-color pp))
@@ -864,7 +877,6 @@
   (pin-arrow-line 20 p p lb-find p find-dest #:line-width 6))
 
 (define (add-overhead-axis-labels pp [legend? #t] #:margin [pre-margin #f])
-  ;; TODO icons for typed, untyped, time?
   (define margin (or pre-margin 20))
   (define y-label (t " "))
   (define x-label (tcodesize "Num. Types"))
@@ -993,16 +1005,22 @@
   (define n0 (symbol->node k0))
   (define n1 (symbol->node k1))
   (define top (hb-append tiny-x-sep n0 n1))
-  (define bot Lib-node)
   (make-program-pict
     #:x-margin 20 #:y-margin 20
     #:bg-color white #:frame-color black
-    (vc-append tiny-y-sep top bot)))
+    top))
 
 (define (make-benefits-lattice-pict)
   (define point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
-  (define v (vc-append (* 1 small-y-sep) (car (cdddr point*)) (car point*)))
-  (hc-append pico-x-sep (cadr point*) v (caddr point*)))
+  (define h (hc-append tiny-x-sep (cadr point*) (caddr point*)))
+  (define hv (vc-append tiny-y-sep (car (cdddr point*)) h (car point*) Lib-node))
+  hv)
+
+(define (make-small-benefits-lattice-pict)
+  (define point (make-lattice-point 'U 'U))
+  (define point-blank (ghost point))
+  (define hv (vc-append tiny-y-sep point-blank point-blank point Lib-node))
+  hv)
 
 (define model-sidebar-x 14/100)
 
@@ -1058,12 +1076,12 @@
 
 (define design-cloud-y 20/100)
 
-(define guarantees-cloud-coord (coord 1/10 design-cloud-y 'lt))
-(define performance-cloud-coord (coord 9/10 design-cloud-y 'rt))
+(define guarantees-cloud-coord (coord 5/100 design-cloud-y 'lt))
+(define performance-cloud-coord (coord 95/100 design-cloud-y 'rt))
 
 (define (text-cloud str label-pict . pp*)
   (define txt-pict (apply vl-append tiny-y-sep pp*))
-  (define title-pict (st str))
+  (define title-pict (sbt str))
   (add-rounded-border
     #:radius 2 #:frame-width 4
     #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
@@ -1072,13 +1090,20 @@
       (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
       txt-pict)))
 
+(define (double-sample-disk s0 s1)
+  (define p0 (sample-disk s0))
+  (define p1 (sample-disk s1))
+  (define w (pict-width p0))
+  (define h (pict-height p0))
+  (define both (ppict-do (blank (* 2 w) (* 2 h)) #:go (coord 0 0 'lt) p0 #:go (coord 1 1 'rb) p1))
+  (scale-to-fit both w h))
+
 ;; =============================================================================
 
 (define (do-show)
   (set-page-numbers-visible! #true)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-;;  (sec:outline)
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
@@ -1124,7 +1149,7 @@
     (make-thesis-question #t))
   (pslide
     #:go heading-text-coord
-    @st{Migratory Typing}
+    @sbt{Migratory Typing}
     #:next
     #:go (coord slide-text-left 14/100 'lt)
     @t{Add types to a dynamically-typed language}
@@ -1177,8 +1202,8 @@
     #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
     @t{How do types restrict}
     (hb-append @t{ interactions between})
-    (hb-append @t{ } @bt{untyped data})
-    (hb-append @t{ and } @bt{typed data} @t{?}))
+    (hb-append @t{ } @bt{untyped values})
+    (hb-append @t{ and } @bt{typed values} @t{?}))
   (void))
 
 (define (sec:design-space)
@@ -1213,9 +1238,17 @@
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
-    #:go big-landscape-coord (make-theorem-landscape))
+    #:go big-landscape-coord (make-theorem-landscape)
+    ;; TODO add slide for Kelly-Bootle "spectrum" definition
+    #:go (coord slide-text-right slide-bottom 'rb)
+    (hb-append @t{(a } @it{complete spectrum} @t{)}))
   (pslide
     #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
+    #:alt
+    [(make-complete-monitoring-bubble #f)
+     (make-type-sound-bubble #f)
+     (make-tag-sound-bubble #f)
+     (make-uni-sound-bubble #f)]
     (make-complete-monitoring-bubble
       @t{types predict behavior})
     (make-type-sound-bubble
@@ -1235,10 +1268,10 @@
     (tag-pict (make-tag-sound-bubble #f) tag-sound-tag)
     (tag-pict (make-uni-sound-bubble #f) uni-sound-tag)
     #:next
-    #:go (at-find-pict complete-monitoring-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @st{Honest}
+    #:go (at-find-pict complete-monitoring-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @sbt{Honest}
     #:go (at-judgment-bar complete-monitoring-tag) (judgment-bar "green")
     #:next
-    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x (* 5 judgment-x-sep)) @st{Lying}
+    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x (* 5 judgment-x-sep)) @sbt{Lying}
     #:go (at-judgment-bar tag-sound-tag) (judgment-bar "red")
     #:next
     #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x (* 3.8 judgment-x-sep) #:abs-y judgment-y-sep) @st{Absent})
@@ -1370,10 +1403,18 @@
       @t{Wrappers may not be available for all values})
     (table 3
       (map tcodesize
-           '("(Async-Channel T)" "(Custodian-Box T)" "(C-Mark-Key T)"
-             "(Evt T)" "(Ephemeron T)" "(Future T)"
-             "(MPair T T')" "(MList T)" "(Prompt-Tag T T')"
-             "(Syntax T)" "(Thread-Cell T)" "(Weak-Box T)"))
+           '("(Async-Channel T)"
+             "(Custodian-Box T)"
+             "(C-Mark-Key T)"
+             "(Evt T)"
+             "(Ephemeron T)"
+             "(Future T)"
+             "(MPair T T')"
+             "(MList T)"
+             "(Prompt-Tag T T')" ;; Asumu SHOULD have fixed this, but appears to be old bug in the implementation --- no tests. Issue #876
+             "(Syntax T)"
+             "(Thread-Cell T)"
+             "(Weak-Box T)"))
       cc-superimpose cc-superimpose small-x-sep small-y-sep)
     @t{Natural needs wrappers, Transient does not})
   (pslide
@@ -1393,8 +1434,8 @@
      @t{- reduce overlap in runtime checks}
      (vl-append
        tiny-y-sep
-       @t{- prove complete monitoring}
-       @t{   and tag soundnes})
+       @t{- prove old properties}
+       @t{   (complete mon., tag soundness)})
      #:go model-illustration-coord
      (scale (make-model-pict) 1/2)]
     #:next
@@ -1425,6 +1466,7 @@
     #:go perf-text-coord
     @t{Goal: change lib, improve overall}
     #:go perf-illustration-coord
+    #:alt [(make-small-benefits-lattice-pict)]
     (make-benefits-lattice-pict))
   (pslide
     ;; OK you've seen the plans, whats to do
@@ -1444,136 +1486,12 @@
     @t{- elim. form error messages})
   (void))
 
-;; -----------------------------------------------------------------------------
-
-(define (sec:outline)
-  (pslide
-    @t{Outline: Honest and Lying Types}
-    @t{Thesis Proposal}
-    @t{Ben Greenman})
-  (pslide
-    ;; this is a thesis proposal, so lets start with the thesis question
-    ;;  and then fill in background
-    ;; ... 3 things to explain
-    ;; First, migratory typing
-    @t{Thesis question:}
-    @t{Does migratory typing benefit from a combination of honest and lying types?})
-  (pslide
-    ;; use OOPSLA images
-    @t{Migratory typing adds static types to an existing language}
-    @t{dynamically-typed lang. -> mixed-typed lang.}
-    @t{Interoperability problem})
-  (pslide
-    ;; emphasize the question
-    @t{typed values and untyped values flow across boundaries ...}
-    @t{... how do types control the interactions?})
-  (pslide
-    ;; many answers via implementations
-    ;; use OOPSLA flag slide
-    @t{Many Implementations}
-    )
-  (pslide
-    ;; many answers via models
-    ;; use OOPSLA flag slide 2
-    @t{Many Models})
-  (pslide
-    ;; "blank" landscape
-    ;;  pretty sure we WANT mixed-typed over migratory ... more accurate and people will get the idea
-    @t{Landscape of Mixed-Typed Languages})
-  (pslide
-    ;; thanks to my past work, have much richer understanding
-    ;;  may want concentric circles instead of boundaries, to be clearer tag-S => type-S etc
-    ;;  maybe a hill of properties? up from Uni-sound to type-sound+CM ?
-    ;; TODO need a new picture to work toward, based on Leif + Michael's feedback
-    ;;  they're upset with the "subset" and the dots not looking like flag-models
-    ;;  and the properties being 1-1 with dots
-    @t{Prior Work: Characterizing the Landscape (2 Parts)})
-  (pslide
-    ;; want text alongside a landscape picture
-    ;; - (erasure) ignore types
-    ;; - (transient) tag-check boundaries + elim forms
-    ;; ;; - (amnesic) wrappers for tag checks (MAYBE NOT, really its a proof artifact)
-    ;; - (forgetful) wrappers, drop extras
-    ;; - (conatural) late-check all things
-    ;; - (natural) some eager some late
-    ;; all for common surface lang, run same program different ways
-    @t{Part 1: Comparable Models})
-  (pslide
-    ;; uni tag type CM ... thats all, right?
-    @t{Part 2: Formal Characterization})
-  (pslide
-    ;; on LHS types don't mean anything; everywhere else have typed code no undef ops
-    ;; so lets shrink our focus
-    @t{Remove Erasure})
-  (pslide
-    ;; full landscape again ... draw weak -> strong properties axis
-    ;; recall thesis question; RHS = honest "what I'm choosing to call honest types"
-    @t{Honest Types})
-  (pslide
-    ;; full landscape
-    ;; everything else = lying
-    @t{Lying Types})
-  (pslide
-    ;; now have basic understanding of thesis question
-    ;; but honest types apparently clear winner
-    @t{Does migratory typing benefit from a combination of honest any lying types?}
-    @t{in particular, transient})
-  (pslide
-    ;; change views, instead of looking at properties need to look at performance
-    ;; again common model pays off
-    ;; have Natural (TR) and prototype Transient
-    ;; TODO need something that's not flags ... gee should models / impls be different things instead of both flags?
-    @t{Performance Characterization})
-  (pslide
-    ;; 
-    @t{Transient perf ~ linear with types})
-  (pslide
-    @t{Natural perf ~ maybe exponential, depends on boundaries})
-  (pslide
-    @t{See now why question is compelling, complementary strenghts})
-  (pslide
-    @t{Potential Benefits}
-    @t{- lib T -> S, better overall}
-    @t{- user T -> S, better perf while mixed}
-    @t{- user S -> T, better perf near top}
-    @t{- user T -> S, run more programs}
-    @t{- user S -> T, debug incorrect program})
-  (pslide
-    @t{Challenges}
-    @t{- model interactions, suggest costs}
-    @t{- implementation}
-    @t{- evaluation})
-  (pslide
-    ;; research is when it can fail (amnesic hard, need use-site types)
-    @t{Alternative: forgetful})
-  (pslide
-    ;; easy, see document
-    @t{Timeline})
-  ;; ---
-  ;; Sam questions:
-  ;; - please explain all optimizations that do not apply
-  ;; - run on Pycket, to compare to other transient work?
-  ;; - get benchmarks where some contracts necessary
-  ;; - why not use approx-D method?
-  ;; Jan questions:
-  ;; - drop static analysis
-  ;; - 
-  (void))
-
 ;; =============================================================================
 
 (module+ main
   (do-show))
 
 ;; =============================================================================
-
-(define (double-sample-disk s0 s1)
-  (define p0 (sample-disk s0))
-  (define p1 (sample-disk s1))
-  (define w (pict-width p0))
-  (define h (pict-height p0))
-  (define both (ppict-do (blank (* 2 w) (* 2 h)) #:go (coord 0 0 'lt) p0 #:go (coord 1 1 'rb) p1))
-  (scale-to-fit both w h))
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
