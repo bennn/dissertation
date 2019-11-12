@@ -402,7 +402,7 @@
 (define (make-implementation-landscape)
   (define the-flag-base (blank 18 4))
   (for/fold ((acc (make-big-landscape-background)))
-            ((xy (in-list '((89/100 07/100) (99/100 11/100) (73/100 11/100)
+            ((xy (in-list '((89/100 07/100) (73/100 11/100)
                             (83/100 18/100) (94/100 26/100) (62/100 12/100)
                             (52/100 22/100) (42/100 13/100) (32/100 20/100)
                             (22/100 11/100) (12/100 30/100) (09/100 12/100)
@@ -1149,6 +1149,12 @@
       #:y-margin tiny-y-sep
       (sbt str))))
 
+(define (make-measurements+venue venue-str base-str expt-str)
+  (define base-pict (t base-str))
+  (define expt-pict (tcodesize expt-str))
+  (define base/expt (ht-append (vl-append (blank 0 (* 2/4 (pict-height expt-pict))) base-pict) expt-pict))
+  (hb-append (t venue-str) @t{ = } base/expt  @t{ measurements}))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1541,18 +1547,17 @@
     @st{How to measure performance?}
     #:alt
     [#:go lattice-text-coord
-     @t{POPL 2016 = 2^N measurements}
+     (make-measurements+venue "POPL 2016" "2" "N")
      #:go lattice-illustration-coord
      (make-takikawa-lattice)]
     #:alt
     [#:go lattice-text-coord
-     (hb-append @t{ICFP 2018} @t{ = } (tag-pict @t{2} 'expt) @t{       measurements})
+     (make-measurements+venue "ICFP 2018" "2" "(N+1)")
      #:next
-     #:go (at-find-pict 'expt rt-find 'lc #:abs-x 4) @tcodesize{(N+1)}
      #:go perf-illustration-coord
      (make-greenman-lattice)]
     #:go lattice-text-coord
-    @t{Next = 3^N measurements?}
+    (make-measurements+venue "Next" "3" "N")
     #:next
     #:go (coord 1/2 4/10 'ct)
     (make-3N-lattice)
@@ -1618,5 +1623,8 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+    #:go center-coord
+    (make-measurements+venue "ICFP 2018" "2" "(N+1)")
+    (make-measurements+venue "Next" "3" "N")
 
   )))))
