@@ -85,6 +85,8 @@
 (define BLUE (string->color% "cornflowerblue"))
 (define timeline-span-color (color%-update-alpha (string->color% "lightslategray") 0.9))
 (define bg-accent-color (color%-update-alpha timeline-span-color 5/10))
+(define topbar-accent-color (color%-update-alpha (string->color% "medium slate blue") 5/10))
+(define pipe-color (hex-triplet->color% #xA6AF60))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -661,7 +663,6 @@
                    #:y-margin (* (- y% (* 4/100 i)) (pict-height acc)))))
 
 (define (make-migration-arrow)
-  ;; TODO use a dc, draw more of a triangle with border?
   (colorize (arrowhead (w%->pixels 5/100) 0) (hex-triplet->color% #x333333)))
 
 (define (make-illustration-text . pp*)
@@ -1766,9 +1767,40 @@
 
 ;; =============================================================================
 
+(define topbar-h (h%->pixels 9/100))
+
+(define (make-topbar-background)
+  (filled-rectangle client-w topbar-h #:color topbar-accent-color #:draw-border? #f))
+
+(define (scale-topbar pp)
+  (scale-to-fit pp (w%->pixels 25/100) (- topbar-h 20)))
+
+(define (make-benefit-migration-pict)
+  (hc-append tiny-x-sep U-node (make-migration-arrow) T-node))
+
+(define (make-benefit-library-pict)
+  (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
+
+(define (make-benefit-compatibility-pict)
+  (define border-width 3)
+  (define pipe-end
+    (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
+  (define pipe-mid
+    (filled-rectangle (* 2 med-x-sep) 80 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
+  (lc-superimpose
+    (rc-superimpose pipe-mid pipe-end)
+    pipe-end))
+
+(define (make-benefits-topbar)
+  (define bg (make-topbar-background))
+  (ppict-do bg
+    #:go (coord 20/100 1/2 'cc) (scale-topbar (make-benefit-migration-pict))
+    #:go (coord 50/100 1/2 'cc) (scale-topbar (make-benefit-library-pict))
+    #:go (coord 80/100 1/2 'cc) (scale-topbar (make-benefit-compatibility-pict))))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
     #:go (coord 1/2 4/100 'ct)
-    (make-checklist full-checklist-data)
+    (make-benefits-topbar)
 
   )))))
