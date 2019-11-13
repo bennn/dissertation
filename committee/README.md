@@ -30,6 +30,9 @@ Current:
   + NOTE meeting 2019-11-07 2:30 -- 3:00pm
   + Max proposal Nov 18
   + PLDI deadline Nov 22, propose after that
+  + buying house, busy Nov 27 28 29
+  + Monday 25 ok, but class from 10:30 to 11:45
+  + Tuesday 26 
 - Shriram
   https://cs.brown.edu/~sk/Contact/Calendar/
 - Fritz
