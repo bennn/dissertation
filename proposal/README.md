@@ -1,7 +1,29 @@
 proposal
 ===
 
-Title: TBA
+- [X] 2019-10-01 : read over, mail to committee
+  say thank-you, PFA proposal, 3 weeks to look over, answer questions, propose by Thanksgiving
+- [X] 2019-10-25 : (right after SPLASH) send emails & knock on doors to find questions
+- [ ] 2019-11-25 13:30 = proposal datetime
+  + [ ] test remote viewing
+  + [ ] test Fritz
+  + [ ] test Shriram
+  + [ ] test Sam
+  + [ ] practice talk, MF
+  + [ ] practice, lab
+- [ ] ???? done right
+
+
+- - -
+
+Edits since proposal document:
+
+- (Jan) remove the static analysis, leave for a separate topic/dissertation
+- 
+
+- - -
+
+Title: Honest and Lying Types
 
 Section 1: my history, arrival at thesis
 - 
@@ -24,17 +46,3 @@ Section 4: schedule
 - - -
 
 Weave related work throughout the proposal
-
-- - -
-
-- 2019-10-01 : read over, mail to committee
-  say thank-you, PFA proposal, 3 weeks to look over, answer questions, propose by Thanksgiving
-- 2019-10-25 : (right after SPLASH) send emails & knock on doors to find questions
-
-- - -
-
-Edits since proposal document:
-
-- (Jan) remove the static analysis, leave for a separate topic/dissertation
-- 
-
