@@ -10,6 +10,7 @@
 ;;   - combine to a summary slide?
 ;; - illustrate "natural typed" vs "transient typed"
 ;;   - ditto for the words "Natural" and "Transient"
+;; - ugly perf characterization slides
 
 ;Slides:
 ;- list papers up front
@@ -30,6 +31,7 @@
   scribble-abbrevs/pict
   slideshow/code
   plot/no-gui (except-in plot/utils min* max*)
+  (only-in scribble-abbrevs/scribble authors*)
   (only-in images/icons/symbol check-icon x-icon)
   (only-in images/icons/misc clock-icon)
   images/icons/style
@@ -77,6 +79,7 @@
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 (define sea-color (hex-triplet->color% #x84CEB3))
+(define water-color (hex-triplet->color% #x7CCCB1))
 (define LIGHT-RED (string->color% "Tomato"))
 (define GREEN (string->color% "mediumseagreen"))
 (define BLUE (string->color% "cornflowerblue"))
@@ -195,6 +198,8 @@
 (define t (make-string->body))
 (define it (make-string->text #:font (cons 'italic body-font) #:size body-size #:color black))
 (define bt (make-string->text #:font (cons 'bold body-font) #:size body-size #:color black))
+(define btcodesize (make-string->text #:font (cons 'bold body-font) #:size code-size #:color black))
+(define itcodesize (make-string->text #:font (cons 'italic body-font) #:size code-size #:color black))
 (define ct (make-string->code))
 (define bigct (make-string->code #:size (- body-size 4)))
 (define cbt (make-string->text #:font (cons 'bold code-font) #:size code-size #:color black))
@@ -1079,15 +1084,21 @@
 (define (text-cloud str label-pict . pp*)
   (define txt-pict (apply vl-append tiny-y-sep pp*))
   (define title-pict (sbt str))
-  (large-rounded-border
+  (thin-rounded-border
     (vc-append
-      small-y-sep
+      pico-y-sep
       (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
       txt-pict)))
 
 (define (large-rounded-border pp)
+  (my-rounded-border pp 4))
+
+(define (thin-rounded-border pp)
+  (my-rounded-border pp 2))
+
+(define (my-rounded-border pp fw)
   (add-rounded-border
-    #:radius 2 #:frame-width 4
+    #:radius 2 #:frame-width fw
     #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
     pp))
 
@@ -1154,6 +1165,94 @@
   (define expt-pict (tcodesize expt-str))
   (define base/expt (ht-append (vl-append (blank 0 (* 2/4 (pict-height expt-pict))) base-pict) expt-pict))
   (hb-append (t venue-str) @t{ = } base/expt  @t{ measurements}))
+
+(define (make-short-citation str)
+  (define bg-color (venue->color (string->symbol (car (regexp-match #rx"[A-Z]+" str)))))
+  (add-rounded-border
+    #:radius 16 #:x-margin small-x-sep #:y-margin small-y-sep
+    #:frame-width 2 #:frame-color black #:background-color bg-color
+    (tcodesize str)))
+
+(define (venue->color sym)
+  (define conference-color water-color)
+  (define journal-color conference-color)
+  (define workshop-color journal-color)
+  (case sym
+    ((POPL ICFP OOPSLA PLDI) conference-color)
+    ((JFP) journal-color)
+    ((PEPM) workshop-color)
+    (else workshop-color)))
+
+(define (make-long-citation venue-str #:title title-str #:author* author-str*)
+  (ht-append
+    tiny-x-sep
+    (make-short-citation venue-str)
+    (vl-append
+      pico-y-sep
+      #;(btcodesize title-str)
+      (parameterize ((current-font-size 2))
+        (para (map tcodesize (authors* author-str*)) #:width (w%->pixels 7/10))))))
+
+(define (make-research-topic title #:background-color bg-color . cite*)
+  (make-research-topic* title cite* #:background-color bg-color))
+
+(define (make-research-topic* title cite* #:background-color bg-color)
+  (define body (apply vl-append tiny-y-sep cite*))
+  (define whole
+    (vl-append (h%->pixels 3/100) (st title) (ht-append (blank small-x-sep 0) body)))
+  (lt-superimpose
+    (filled-rectangle
+      (* 5/4 client-w)
+      (+ (h%->pixels 4/100) (pict-height whole))
+      #:color bg-color
+      #:draw-border? #true
+      #:border-width 1
+      #:border-color black)
+    (vl-append (blank 0 tiny-y-sep) (ht-append (blank med-x-sep 0) whole))))
+
+(define (make-checklist kv* #:hide? [hide? #false])
+  (define text-width (h%->pixels 86/100))
+  (define x-pict @titlet{X})
+  (define items-pict
+    (make-2table
+      #:col-sep tiny-x-sep
+      #:row-sep small-y-sep
+      (for/list ((kv (in-list kv*)))
+        (define k-data (car kv))
+        (define v-str (cdr kv))
+        (define k-pict
+          (hc-append @titlet{[} (if (and (not hide?) k-data) x-pict (ghost x-pict)) @titlet{]}))
+        (define v-pict
+          (parameterize ((current-font-size body-size))
+            (para
+              #:width text-width
+              (append
+                (map t (string-split v-str))
+                (for/list ((str (in-list (if (list? k-data) k-data '()))))
+                  (let* ((pp (scale (make-short-citation str) 7/10))
+                         (pp (ppict-do (blank (pict-width pp) small-y-sep) #:go (coord 0 0 'lt) pp))
+                         (pp (if hide? (ghost pp) pp)))
+                    pp))))))
+        (cons k-pict v-pict))))
+  ;; TODO color is a little boring, but otherwise this is OK
+  (add-rounded-border
+    #:radius 1 #:frame-width 1 #:frame-color black #:x-margin tiny-x-sep #:y-margin small-y-sep
+    #:background-color sand-color
+    items-pict))
+
+(define full-checklist-data
+  (list
+    (cons '("POPL 2016" "JFP 2019")
+          "measure the performance of honest types")
+    (cons '("OOPSLA 2018")
+          "try to directly improve performance")
+    (cons '("ICFP 2018" "OOPSLA 2019")
+          "formally classify alternative types")
+    ;;(cons #f "measure performance of other appreaches")
+    (cons #f
+          "develop a combined model, measure combined performance")))
+
+(define checklist-coord (coord 1/2 4/100 'ct))
 
 ;; =============================================================================
 
@@ -1285,6 +1384,7 @@
 
 (define (sec:design-space)
   (make-transition-slide
+    ;; TODO rename ... 
     "My Research")
   (pslide
     #:go heading-text-coord
@@ -1303,7 +1403,46 @@
       "Performance"
       (make-impl-pict)
       @t{one language,}
-      @t{different compilers}))
+      @t{different compilers})
+    #:go (coord 1/2 1/2 'ct #:sep tiny-y-sep)
+    (blank)
+    @make-short-citation{ICFP 18}
+    @make-short-citation{OOPSLA 19})
+  (pslide
+    ;; #:go heading-text-coord
+    ;; @st{My Past Work}
+;    (make-long-citation
+;      "OOPSLA 18"
+;      #:title "Collapsible Contracts: Fixing a Pathology of Gradual Typing"
+;      #:author* '("Daniel Feltey" "Ben Greenman" "Christophe Scholliers" "Robert Bruce Findler" "Vincent St-Amour"))
+    #:go (coord -2/100 05/100 'lt #:sep tiny-y-sep)
+    (make-research-topic
+     "Design Space Analysis"
+     #:background-color "palegreen"
+     (make-long-citation
+       "ICFP 18"
+       #:title "A Spectrum of Type Soundness and Performance"
+       #:author* '("Ben Greenman" "Matthias Felleisen"))
+     (make-long-citation
+       "OOPSLA 19"
+       #:title "Complete Monitors for Gradual Types"
+       #:author* '("Ben Greenman" "Matthias Felleisen" "Christos Dimoulas")))
+    #:next
+    (make-research-topic
+      "Performance Evaluation"
+      #:background-color "lightblue"
+      (make-long-citation
+        "POPL 16"
+        #:title "Is Sound Gradual Typing Dead?"
+        #:author* '("Asumu Takikawa" "Daniel Feltey" "Ben Greenman" "Max S. New" "Jan Vitek" "Matthias Felleisen"))
+      (make-long-citation
+        "JFP 19"
+        #:title "How to Evaluate the Performance of Gradual Type Systems"
+        #:author* '("Ben Greenman" "Asumu Takikawa" "Max S. New" "Daniel Feltey" "Robert Bruce Findler" "Jan Vitek" "Matthias Felleisen"))
+      (make-long-citation
+        "PEPM 18"
+        #:title "On the Cost of Type-Tag Soundness"
+        #:author* '("Ben Greenman" "Zeina Migeed"))))
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
@@ -1594,12 +1733,18 @@
 
 (define (sec:timeline)
   (make-transition-slide
-    "Agenda")
-  ;; TODO full done/todo list
+    "Toward Practical Gradual Typing")
   (pslide
-    ;; OK you've seen the plans, whats to do
+    ;; ok you've seen the plans, whats to do
+    ;; TODO seen the possible benefits / motivations
     #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
     #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar))
+  (pslide
+    #:go checklist-coord
+    (make-checklist #:hide? #true full-checklist-data))
+  (pslide
+    #:go checklist-coord
+    (make-checklist full-checklist-data))
   (pslide
     #:go heading-text-coord
     (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
@@ -1623,8 +1768,7 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go center-coord
-    (make-measurements+venue "ICFP 2018" "2" "(N+1)")
-    (make-measurements+venue "Next" "3" "N")
+    #:go (coord 1/2 4/100 'ct)
+    (make-checklist full-checklist-data)
 
   )))))
