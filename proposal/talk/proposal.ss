@@ -5,17 +5,9 @@
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
-;; - benefits (3) along top line,
-;;   - tasks / goals along side as-is,
-;;   - combine to a summary slide?
 ;; - illustrate "natural typed" vs "transient typed"
 ;;   - ditto for the words "Natural" and "Transient"
 ;; - ugly perf characterization slides
-
-;Slides:
-;- list papers up front
-;- state agenda (done 9/10 w papers here is remainder)
-;- Accounting slide (done A, TODO B)
 
 (require
   file/glob
@@ -1775,10 +1767,10 @@
   (make-transition-slide
     "Toward Practical Gradual Typing")
   (pslide
-    ;; ok you've seen the plans, whats to do
-    ;; TODO seen the possible benefits / motivations
+    ;; ok you've seen the benefits and the plans
     #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
-    #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar))
+    #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar)
+    #:go benefits-bar-coord (add-rectangle-background #:radius 2 #:draw-border? #t #:color white #:x-margin 2 #:y-margin 0 (make-benefits-topbar)))
   (pslide
     #:go checklist-coord
     (make-checklist #:hide? #true full-checklist-data))
