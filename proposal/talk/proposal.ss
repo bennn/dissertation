@@ -71,6 +71,7 @@
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 (define sea-color (hex-triplet->color% #x84CEB3))
+(define storm-color (string->color% "Dark Gray"))
 (define water-color (hex-triplet->color% #x7CCCB1))
 (define LIGHT-RED (string->color% "Tomato"))
 (define GREEN (string->color% "mediumseagreen"))
@@ -93,9 +94,9 @@
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
 
-(define uni-sound-str "Unitype Sound")
-(define tag-sound-str "Tag Sound")
-(define type-sound-str "Type Sound")
+(define uni-sound-str "Unitype Soundness")
+(define tag-sound-str "Tag Soundness")
+(define type-sound-str "Type Soundness")
 (define complete-monitoring-str "Complete Monitoring")
 
 (define uni-sound-tag 'uni-sound)
@@ -733,34 +734,27 @@
 
 (define (st-cloud str)
   (add-cloud-background
-    #:x-margin small-x-sep #:y-margin med-y-sep #:color sea-color (sbt str)))
+    #:x-margin small-x-sep #:y-margin (h%->pixels 15/100) #:color storm-color (sbt str)))
 
 (define (make-uni-sound-bubble pp)
-  (make-property-bubble uni-sound-str uni-sound-color pp))
+  (make-property-bubble uni-sound-str uni-sound-color))
 
 (define (make-tag-sound-bubble pp)
-  (make-property-bubble tag-sound-str tag-sound-color pp))
+  (make-property-bubble tag-sound-str tag-sound-color))
 
 (define (make-type-sound-bubble pp)
-  (make-property-bubble type-sound-str type-sound-color pp))
+  (make-property-bubble type-sound-str type-sound-color))
 
 (define (make-complete-monitoring-bubble pp)
-  (make-property-bubble complete-monitoring-str complete-monitoring-color pp))
+  (make-property-bubble complete-monitoring-str complete-monitoring-color))
 
-(define (make-property-bubble lbl-str color pp)
+(define (make-property-bubble lbl-str color)
   (define lbl-pict (make-region-label (t lbl-str)))
-  (define txt-pict (if pp (vl-append (* 10/100 (pict-height lbl-pict)) (blank) pp) (blank)))
-  (define bg-pict
-    (filled-rounded-rectangle
-      (+ (* 2 tiny-x-sep) (pict-width lbl-pict))
-      (* 2 (pict-height lbl-pict))
-      4
-      #:color color
-      #:draw-border? #true
-      #:border-color black
-      #:border-width region-border-width))
-  (ppict-do bg-pict
-    #:go (coord 0 10/100 'lt #:abs-x 10) (ht-append small-x-sep lbl-pict txt-pict)))
+  (add-rounded-border
+    #:radius 4 #:x-margin tiny-x-sep #:y-margin (h%->pixels 8/100)
+    #:background-color color
+    #:frame-color black #:frame-width region-border-width
+    lbl-pict))
 
 (define (descr-append . pp*)
   (descr-append* pp*))
@@ -866,14 +860,14 @@
 
 (define (add-overhead-axis-labels pp [legend? #t] #:margin [pre-margin #f])
   (define margin (or pre-margin 20))
-  (define y-label (t " "))
+  (define y-label (tcodesize "Overhead"))
   (define x-label (tcodesize "Num. Types"))
   (define fp (frame-plot pp))
   (if legend?
     (ht-append margin y-label (vr-append margin fp x-label))
     fp))
 
-(define example-plot-w 320)
+(define example-plot-w 240)
 (define example-perf-y 12/100)
 
 (define (make-scatterplots-pict)
@@ -1497,9 +1491,8 @@
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
     #:go big-landscape-coord (make-theorem-landscape)
-    ;; TODO add slide for Kelly-Bootle "spectrum" definition
     #:go (coord slide-text-right slide-bottom 'rb)
-    (hb-append @t{(a } @it{complete spectrum} @t{)}))
+    (hb-append @t{(a } @it{total spectrum} @t{)}))
   (pslide
     #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
     #:alt
@@ -1539,30 +1532,37 @@
     (hb-append @st{Landscape: } @sbt{Performance})
     #:go big-landscape-coord
     #:alt [(make-big-landscape-background)]
-    (make-performance-landscape))
+    (make-performance-landscape)
+    #:go (coord slide-text-right slide-bottom 'rb)
+    (hb-append @t{Varied space, difficult to rank alternatives}))
   (pslide
-    ;; very cluttered ... but ok
     #:go heading-text-coord
     @st{Performance Comparison}
-    #:go (coord slide-text-left example-perf-y 'lt #:sep small-y-sep)
-    (vr-append
-      pico-y-sep
-      (hb-append @sbt{Natural} @t{ semantics})
-      (make-region-label (t "Complete Mon.")))
+    #:go (coord slide-right slide-top 'rt)
+    (make-short-citation "ICFP 2018")
+    #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
+    (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
+    #:next
+    #:go (coord 40/100 4/10 'rt) (scale (make-complete-monitoring-bubble #f) 7/10)
+    #:go (coord 60/100 4/10 'lt) (scale (make-tag-sound-bubble #f) 7/10))
+  (pslide
+    #:go heading-text-coord @st{Performance Comparison}
+    #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
+    #:go (coord slide-text-left 2/10 'lt #:sep tiny-y-sep)
+    @bt{Natural}
     (vl-append
       tiny-y-sep
-      (hb-append @t{boundaries} @t{ add})
-      (hb-append @t{"large" overhead}))
+      @t{boundaries add "large"}
+      @t{overhead})
+    #:go (coord slide-text-right 2/10 'rt)
     (make-overhead-plot '(H) example-plot-w)
-    #:go (coord 1/2 example-perf-y 'lt #:sep small-y-sep)
-    (vr-append
-      pico-y-sep
-      (hb-append @sbt{Transient} @t{ semantics})
-      (make-region-label (t tag-sound-str)))
+    #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
+    @bt{Transient}
     (vl-append
       tiny-y-sep
-      (hb-append @t{types} @t{ add})
-      (hb-append @t{"small" overhead}))
+      @t{types add "small"}
+      @t{overhead})
+    #:go (coord slide-text-right 55/100 'rt)
     (make-overhead-plot '(1) example-plot-w))
   (pslide
     #:go heading-text-coord
@@ -1594,25 +1594,20 @@
     #:go (coord 1/2 6/10 'ct)
     @big-t{(Natural + Transient)})
   (pslide
-    #:go heading-text-coord
-    @st{Complementary Strengths}
-    #:go (coord 1/2 (+ example-perf-y 8/100) 'ct)
-    complement-pict
-    #:go (coord slide-text-left example-perf-y 'lt #:sep (+ (pict-height complement-pict) pico-y-sep))
-    (hb-append @sbt{Natural} @t{ semantics})
+    #:go heading-text-coord @st{Complementary Strengths}
+    #:go (coord slide-text-right 15/100 'rt) complement-pict
+    #:go (coord slide-text-left 2/10 'lt #:sep tiny-y-sep)
+    @bt{Natural}
     (vl-append
       tiny-y-sep
-      (hb-append @t{types predict full})
-      (hb-append @t{behavior, but need})
-      (hb-append @t{to avoid critical})
-      (hb-append @t{boundaries}))
-    #:go (coord 1/2 example-perf-y 'lt #:sep (+ (pict-height complement-pict) pico-y-sep))
-    (hb-append @sbt{Transient} @t{ semantics})
+      (hb-append @t{types predict full behavior, but})
+      (hb-append @t{need to avoid critical boundaries}))
+    #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
+    @bt{Transient}
     (vl-append
       tiny-y-sep
-      (hb-append @t{types predict shapes,})
-      (hb-append @t{but add overhead to})
-      (hb-append @t{all typed code})))
+      (hb-append @t{types predict shapes, but add})
+      (hb-append @t{overhead to all typed code})))
   (pslide
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go benefits-pict-coord (make-benefit-migration-pict)
@@ -1708,10 +1703,12 @@
     #:go perf-text-coord
     @t{Maybe: reduce cost of U/T edge}
     #:go perf-illustration-coord
-    (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict))
+    (tag-pict (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict)) 'bp)
     #:next
-    #:go center-coord
-    (large-rounded-border
+    #:go (at-find-pict 'bp ct-find 'ct)
+    (add-rounded-border
+      #:x-margin med-x-sep #:y-margin med-y-sep
+      #:frame-width 4 #:frame-color black #:background-color program-color
       @t{How to measure?}))
   (pslide
     #:go heading-text-coord
@@ -1724,7 +1721,6 @@
     #:alt
     [#:go lattice-text-coord
      (make-measurements+venue "ICFP 2018" "2" "(N+1)")
-     #:next
      #:go perf-illustration-coord
      (make-greenman-lattice)]
     #:go lattice-text-coord
@@ -1798,9 +1794,8 @@
 
 ;; =============================================================================
 
-; (make-benefit-compatibility-pict)
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+
 
   )))))
