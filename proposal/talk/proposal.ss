@@ -1255,6 +1255,63 @@
 
 (define checklist-coord (coord 1/2 4/100 'ct))
 
+(define topbar-h (h%->pixels 9/100))
+
+(define (make-topbar-background)
+  (filled-rectangle client-w topbar-h #:color topbar-accent-color #:draw-border? #f))
+
+(define (scale-topbar pp)
+  (scale-to-fit pp (w%->pixels 25/100) (- topbar-h 20)))
+
+(define (make-benefit-migration-pict)
+  (hc-append tiny-x-sep U-node (make-migration-arrow) T-node))
+
+(define (make-benefit-library-pict)
+  (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
+
+(define (make-benefit-compatibility-pict)
+  (define border-width 3)
+  (define pipe-end
+    (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
+  (define pipe-mid
+    (filled-rectangle (* 2 med-x-sep) 80 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
+  (lc-superimpose
+    (rc-superimpose pipe-mid pipe-end)
+    pipe-end))
+
+(define (make-benefits-topbar)
+  (define bg (make-topbar-background))
+  (ppict-do bg
+    #:go (coord 20/100 1/2 'cc) (scale-topbar (make-benefit-migration-pict))
+    #:go (coord 50/100 1/2 'cc) (scale-topbar (make-benefit-library-pict))
+    #:go (coord 80/100 1/2 'cc) (scale-topbar (make-benefit-compatibility-pict))))
+
+(define benefits-bar-coord (coord 1/2 4/100 'ct))
+(define benefits-below-bar-y 15/100)
+(define benefits-pict-coord (coord 93/100 benefits-below-bar-y 'rt))
+(define benefits-head-coord (coord slide-left (+ 3/100 benefits-below-bar-y) 'lt))
+
+(define (make-library-octopus)
+  (let* ((node*
+           (for/list ((pp (in-list (list U-node U-node T-node U-node)))
+                      (i (in-naturals)))
+             (add-hubs pp (string->symbol (format "N~a" i)))))
+         (bot-row (apply hc-append med-x-sep node*))
+         (top+bot
+           (ppict-do (vc-append med-y-sep (add-hubs Lib-node 'lib) bot-row)
+             #:go (at-find-pict 'lib cb-find 'ct)
+             (let ((arr-sep 20))
+               (ht-append (* 3/4 arr-sep) (tag-pict (blank arr-sep 0) 'lib-left) (tag-pict (blank arr-sep 0) 'lib-right)))))
+         (arr*
+           (list
+             (program-arrow 'N0-N ct-find 'lib-left lb-find (* 25/100 turn) (* 14/100 turn) 1/4 1/4 black)
+             (program-arrow 'N1-N ct-find 'lib-left rb-find (* 25/100 turn) (* 20/100 turn) 2/4 2/4 black )
+             (program-arrow 'N2-N ct-find 'lib-right lb-find (* 25/100 turn) (* 30/100 turn) 2/4 2/4 black )
+             (program-arrow 'N3-N ct-find 'lib-right rb-find (* 25/100 turn) (* 36/100 turn) 1/4 1/4 black ))))
+    (for/fold ((acc top+bot))
+              ((arr (in-list arr*)))
+      (add-program-arrow acc arr #:style 'solid))))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1294,7 +1351,7 @@
         (vc-append
           tiny-y-sep
           @t{Ben Greenman}
-          @t{2019-1X-XX}))))
+          @t{2019-11-25}))))
   (void))
 
 (define mt-code-y 80/100)
@@ -1565,11 +1622,10 @@
       (hb-append @t{but add overhead to})
       (hb-append @t{all typed code})))
   (pslide
-    #:go heading-text-coord
-    @st{Benefits (1/3): Migration}
-    #:go (coord slide-text-right slide-top 'rt)
-    (scale complement-pict 6/10)
-    #:go (coord slide-text-left 2/10 'lt #:sep med-y-sep)
+    #:go benefits-bar-coord (make-benefits-topbar)
+    #:go benefits-pict-coord (make-benefit-migration-pict)
+    #:go benefits-head-coord @st{Benefits (1/3): Migration}
+    #:go (coord slide-text-left 30/100 'lt #:sep (h%->pixels 7/100))
     @t{1. Begin with Natural types}
     @t{2. Switch to Transient to recover performance}
     @t{3. Revisit Natural for debugging}
@@ -1577,38 +1633,21 @@
     #:go (at-find-pict 'L1 lb-find 'lt #:abs-y pico-y-sep)
     @t{critical boundaries})
   (pslide
-    #:go heading-text-coord
-    @st{Benefits (2/3): Library Interaction}
-    #:go (coord 1/2 15/100 'ct #:sep med-y-sep)
+    #:go benefits-bar-coord (make-benefits-topbar)
+    #:go benefits-pict-coord (scale (make-benefit-library-pict) 8/10)
+    #:go benefits-head-coord @st{Benefits (2/3): Library Interaction}
+    #:go (coord 1/2 30/100 'ct #:sep tiny-y-sep)
     #:alt [math-warning-pict]
     (vl-append
       tiny-y-sep
       (blank)
       @t{Changing a library to Transient may improve}
-      @t{overall performance (for typed and untyped)})
-    (let* ((node*
-             (for/list ((pp (in-list (list U-node U-node T-node U-node)))
-                        (i (in-naturals)))
-               (add-hubs pp (string->symbol (format "N~a" i)))))
-           (bot-row (apply hc-append med-x-sep node*))
-           (top+bot
-             (ppict-do (vc-append med-y-sep (add-hubs Lib-node 'lib) bot-row)
-               #:go (at-find-pict 'lib cb-find 'ct)
-               (let ((arr-sep 20))
-                 (ht-append (* 3/4 arr-sep) (tag-pict (blank arr-sep 0) 'lib-left) (tag-pict (blank arr-sep 0) 'lib-right)))))
-           (arr*
-             (list
-               (program-arrow 'N0-N ct-find 'lib-left lb-find (* 25/100 turn) (* 14/100 turn) 1/4 1/4 black)
-               (program-arrow 'N1-N ct-find 'lib-left rb-find (* 25/100 turn) (* 20/100 turn) 2/4 2/4 black )
-               (program-arrow 'N2-N ct-find 'lib-right lb-find (* 25/100 turn) (* 30/100 turn) 2/4 2/4 black )
-               (program-arrow 'N3-N ct-find 'lib-right rb-find (* 25/100 turn) (* 36/100 turn) 1/4 1/4 black ))))
-      (for/fold ((acc top+bot))
-                ((arr (in-list arr*)))
-        (add-program-arrow acc arr #:style 'solid))))
+      @t{overall performance (for typed and untyped)}))
   (pslide
-    #:go heading-text-coord
-    @st{Benefits (3/3): Compatibility}
-    #:go (coord 1/2 15/100 'ct #:sep med-y-sep)
+    #:go benefits-bar-coord (make-benefits-topbar)
+    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 8/10)
+    #:go benefits-head-coord @st{Benefits (3/3): Compatibility}
+    #:go (coord 1/2 28/100 'ct #:sep (h%->pixels 7/100))
     (vl-append
       tiny-y-sep
       (blank)
@@ -1767,40 +1806,9 @@
 
 ;; =============================================================================
 
-(define topbar-h (h%->pixels 9/100))
-
-(define (make-topbar-background)
-  (filled-rectangle client-w topbar-h #:color topbar-accent-color #:draw-border? #f))
-
-(define (scale-topbar pp)
-  (scale-to-fit pp (w%->pixels 25/100) (- topbar-h 20)))
-
-(define (make-benefit-migration-pict)
-  (hc-append tiny-x-sep U-node (make-migration-arrow) T-node))
-
-(define (make-benefit-library-pict)
-  (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
-
-(define (make-benefit-compatibility-pict)
-  (define border-width 3)
-  (define pipe-end
-    (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
-  (define pipe-mid
-    (filled-rectangle (* 2 med-x-sep) 80 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
-  (lc-superimpose
-    (rc-superimpose pipe-mid pipe-end)
-    pipe-end))
-
-(define (make-benefits-topbar)
-  (define bg (make-topbar-background))
-  (ppict-do bg
-    #:go (coord 20/100 1/2 'cc) (scale-topbar (make-benefit-migration-pict))
-    #:go (coord 50/100 1/2 'cc) (scale-topbar (make-benefit-library-pict))
-    #:go (coord 80/100 1/2 'cc) (scale-topbar (make-benefit-compatibility-pict))))
+; (make-benefit-compatibility-pict)
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go (coord 1/2 4/100 'ct)
-    (make-benefits-topbar)
 
   )))))
