@@ -7,7 +7,6 @@
 ;; TODO ...
 ;; - illustrate "natural typed" vs "transient typed"
 ;;   - ditto for the words "Natural" and "Transient"
-;; - ugly perf characterization slides
 
 (require
   file/glob
@@ -483,7 +482,7 @@
   (define txt-pict
     (vl-append
       tiny-y-sep
-      (blank 0 14)
+      (blank)
       (line-append (tag-pict @big-t{Does  } 'qstart) (if bold? the-mt-b the-mt) @big-t{  benefit})
       (line-append @big-t{from a combination of  } (if bold? the-h-b the-h))
       (line-append @big-t{and  } (if bold? the-l-b the-l) @big-t{  types?})))
@@ -735,9 +734,9 @@
     (cloud (+ x-margin (pict-width pp)) (+ y-margin (pict-height pp)) (or pre-color "gray") #:style (or pre-style '(square wide)))
     pp))
 
-(define (st-cloud str)
+(define (st-cloud str #:style [pre-style #f])
   (add-cloud-background
-    #:x-margin small-x-sep #:y-margin (h%->pixels 15/100) #:color storm-color (sbt str)))
+    #:style pre-style #:x-margin (w%->pixels 10/100) #:y-margin (h%->pixels 18/100) #:color storm-color (sbt str)))
 
 (define (make-uni-sound-bubble)
   (make-property-bubble uni-sound-str uni-sound-color))
@@ -1064,7 +1063,8 @@
   (make-overhead-plot '(H 1) example-plot-w))
 
 (define math-warning-pict
-  (bitmap "src/array-warning.png"))
+  (add-rounded-border
+    #:radius 2 #:frame-width 2 (bitmap "src/array-warning.png")))
 
 (define design-cloud-y 20/100)
 
@@ -1290,10 +1290,9 @@
     #:go (coord 50/100 1/2 'cc) (scale-topbar (make-benefit-library-pict))
     #:go (coord 80/100 1/2 'cc) (scale-topbar (make-benefit-compatibility-pict))))
 
-(define benefits-bar-coord (coord 1/2 4/100 'ct))
-(define benefits-below-bar-y 15/100)
-(define benefits-pict-coord (coord 93/100 benefits-below-bar-y 'rt))
-(define benefits-head-coord (coord slide-left (+ 3/100 benefits-below-bar-y) 'lt))
+(define benefits-bar-coord (coord 1/2 18/100 'ct))
+(define benefits-below-bar-y 30/100)
+(define benefits-pict-coord (coord 93/100 slide-top 'rt))
 
 (define (make-library-octopus)
   (let* ((node*
@@ -1483,14 +1482,13 @@
     (make-implementation-landscape)
     #:next
     #:go guarantees-cloud-coord
-    (st-cloud "Guarantees?")
+    (st-cloud "Guarantees?" #:style '())
     #:go performance-cloud-coord
     (st-cloud "Performance?"))
   (void))
 
 (define (sec:design-space)
   (make-transition-slide
-    ;; TODO rename ... 
     "My Research")
   (pslide
     #:go heading-text-coord
@@ -1555,22 +1553,26 @@
     #:go big-landscape-coord (make-theorem-landscape)
     #:go (coord slide-text-right slide-bottom 'rb)
     (hb-append @t{(a } @it{total spectrum} @t{)}))
-  (pslide
-    #:go bubble-table-coord
-    #:alt [(make-bubble-table (interleave guarantee-bubble* (map (lambda (_) (blank)) guarantee-bubble*)))]
-    (make-bubble-table
-      (interleave
-        guarantee-bubble*
-        (let ((smallt (make-string->body #:size (- body-size 6))))
-          (list
-            @smallt{types predict behavior}
-            (descr-append
-              @smallt{types predict behavior in typed}
-              @smallt{code, nothing in untyped code})
-            (descr-append
-              @smallt{types predict shapes in typed}
-              @smallt{code, nothing in untyped code})
-            @smallt{types predict nothing})))))
+  (let* ((smallt (make-string->body #:size (- body-size 6)))
+         (txt-pict*
+           (list
+             @smallt{types predict behavior}
+             (descr-append
+               @smallt{types predict behavior in typed}
+               @smallt{code, nothing in untyped code})
+             (descr-append
+               @smallt{types predict shapes in typed}
+               @smallt{code, nothing in untyped code})
+             @smallt{types predict nothing})))
+    (for ((i (in-range (+ 1 (length txt-pict*)))))
+      (pslide
+        #:go bubble-table-coord
+        (make-bubble-table
+          (interleave
+            guarantee-bubble*
+            (for/list ((txt (in-list txt-pict*))
+                       (j (in-naturals)))
+              (if (< j i) txt (blank))))))))
   (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag honest-color (h%->pixels 13/100))
                       (list @bt{Lying} type-sound-tag lying-color (h%->pixels 32/100))
                       (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100)))))
@@ -1597,6 +1599,9 @@
         (if txt-list
           (make-bubble-table (interleave guarantee-bubble* txt-list))
           (blank)))))
+  (pslide
+    #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
+    #:go big-landscape-coord (make-theorem-landscape))
   (pslide
     #:go heading-text-coord
     (hb-append @st{Landscape: } @sbt{Performance})
@@ -1687,10 +1692,10 @@
       (hb-append @t{types predict shapes, but add})
       (hb-append @t{overhead to all typed code})))
   (pslide
+    #:go heading-text-coord @st{Benefits (1/3): Migration}
+    #:go benefits-pict-coord (scale (make-benefit-migration-pict) 8/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    #:go benefits-pict-coord (make-benefit-migration-pict)
-    #:go benefits-head-coord @st{Benefits (1/3): Migration}
-    #:go (coord slide-text-left 30/100 'lt #:sep (h%->pixels 7/100))
+    #:go (coord slide-text-left benefits-below-bar-y 'lt #:sep (h%->pixels 7/100))
     @t{1. Begin with Natural types}
     @t{2. Switch to Transient to recover performance}
     @t{3. Revisit Natural for debugging}
@@ -1698,20 +1703,20 @@
     #:go (at-find-pict 'L1 lb-find 'lt #:abs-y pico-y-sep)
     @t{critical boundaries})
   (pslide
+    #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
+    #:go benefits-pict-coord (scale (make-benefit-library-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    #:go benefits-pict-coord (scale (make-benefit-library-pict) 8/10)
-    #:go benefits-head-coord @st{Benefits (2/3): Library Interaction}
-    #:go (coord 1/2 30/100 'ct #:sep tiny-y-sep)
-    #:alt [math-warning-pict]
+    #:go (coord 1/2 benefits-below-bar-y 'ct #:sep tiny-y-sep)
+    #:alt [math-warning-pict]math-warning-pict
     (vl-append
       tiny-y-sep
       (blank)
       @t{Changing a library to Transient may improve}
       @t{overall performance (for typed and untyped)}))
   (pslide
+    #:go heading-text-coord @st{Benefits (3/3): Compatibility}
+    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 8/10)
-    #:go benefits-head-coord @st{Benefits (3/3): Compatibility}
     #:go (coord 1/2 28/100 'ct #:sep (h%->pixels 7/100))
     (vl-append
       tiny-y-sep
@@ -1742,8 +1747,8 @@
     #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
     (make-thesis-question #f)
     #:next
-    @t{Q1. Can honest and lying types coexist?}
-    @t{Q2. Are the benefits significant?})
+    @t{  Q1. Can honest and lying types coexist?}
+    (hb-append @t{  Q2. Are the } @t{benefits} @t{ significant?}))
   (pslide
     #:go (coord model-sidebar-x 0 'ct) (make-model-sidebar)
     #:go (coord slide-right slide-top 'rt)
@@ -1802,16 +1807,15 @@
      #:go perf-illustration-coord
      (make-greenman-lattice)]
     #:go lattice-text-coord
-    (make-measurements+venue "Next" "3" "N")
-    #:next
+    (hb-append (make-measurements+venue "Next" "3" "N") @t{?})
     #:go (coord 1/2 4/10 'ct)
     (make-3N-lattice)
     #:next
     #:go (coord 1/2 65/100 'ct)
     (large-rounded-border
       (vl-append tiny-y-sep
-      @t{- may be infeasible to measure}
-      @t{- at best: "good points exist"})))
+      @t{* may be infeasible to measure}
+      @t{* at best: "good points exist"})))
   #;(pslide
     ;; FUTURE WORK ... first goal is to enable interaction
     #:go heading-text-coord
@@ -1879,5 +1883,6 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+
 
   )))))
