@@ -736,16 +736,16 @@
   (add-cloud-background
     #:x-margin small-x-sep #:y-margin (h%->pixels 15/100) #:color storm-color (sbt str)))
 
-(define (make-uni-sound-bubble pp)
+(define (make-uni-sound-bubble)
   (make-property-bubble uni-sound-str uni-sound-color))
 
-(define (make-tag-sound-bubble pp)
+(define (make-tag-sound-bubble)
   (make-property-bubble tag-sound-str tag-sound-color))
 
-(define (make-type-sound-bubble pp)
+(define (make-type-sound-bubble)
   (make-property-bubble type-sound-str type-sound-color))
 
-(define (make-complete-monitoring-bubble pp)
+(define (make-complete-monitoring-bubble)
   (make-property-bubble complete-monitoring-str complete-monitoring-color))
 
 (define (make-property-bubble lbl-str color)
@@ -1298,6 +1298,29 @@
               ((arr (in-list arr*)))
       (add-program-arrow acc arr #:style 'solid))))
 
+(define guarantee-bubble*
+  (list
+    (tag-pict (make-complete-monitoring-bubble) complete-monitoring-tag)
+    (tag-pict (make-type-sound-bubble) type-sound-tag)
+    (tag-pict (make-tag-sound-bubble) tag-sound-tag)
+    (tag-pict (make-uni-sound-bubble) uni-sound-tag)))
+
+(define (interleave aa* bb*)
+  (let loop ((a* aa*)
+             (b* bb*))
+    (cond
+      [(and (null? a*) (null? b*))
+       '()]
+      [(and (not (null? a*)) (not (null? b*)))
+       (cons (car a*) (cons (car b*) (loop (cdr a*) (cdr b*))))]
+      [else
+        (raise-arguments-error 'interleave "lists with different length" "len0" (length aa*) "len1" (length bb*))])))
+
+(define (make-bubble-table pp*)
+  (table 2 pp* lc-superimpose cc-superimpose tiny-x-sep tiny-y-sep))
+
+(define bubble-table-coord (coord slide-left slide-top 'lt))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1494,39 +1517,47 @@
     #:go (coord slide-text-right slide-bottom 'rb)
     (hb-append @t{(a } @it{total spectrum} @t{)}))
   (pslide
-    #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
-    #:alt
-    [(make-complete-monitoring-bubble #f)
-     (make-type-sound-bubble #f)
-     (make-tag-sound-bubble #f)
-     (make-uni-sound-bubble #f)]
-    ;; TODO right-align text
-    (make-complete-monitoring-bubble
-      @t{types predict behavior})
-    (make-type-sound-bubble
-      (descr-append
-        @t{types predict behavior in typed}
-        @t{code, nothing in untyped code}))
-    (make-tag-sound-bubble
-      (descr-append
-        @t{types predict shapes in typed}
-        @t{code, nothing in untyped code}))
-    (make-uni-sound-bubble
-      @t{types predict nothing}))
-  (pslide
-    #:go (coord slide-left slide-top 'lt #:sep pico-y-sep)
-    (tag-pict (make-complete-monitoring-bubble #f) complete-monitoring-tag)
-    (tag-pict (make-type-sound-bubble #f) type-sound-tag)
-    (tag-pict (make-tag-sound-bubble #f) tag-sound-tag)
-    (tag-pict (make-uni-sound-bubble #f) uni-sound-tag)
-    #:next
-    #:go (at-find-pict complete-monitoring-tag rt-find 'lt #:abs-x judgment-x-sep #:abs-y judgment-y-sep) @sbt{Honest}
-    #:go (at-judgment-bar complete-monitoring-tag) (judgment-bar "green")
-    #:next
-    #:go (at-find-pict type-sound-tag rb-find 'lc #:abs-x (* 5 judgment-x-sep)) @sbt{Lying}
-    #:go (at-judgment-bar tag-sound-tag) (judgment-bar "red")
-    #:next
-    #:go (at-find-pict uni-sound-tag rt-find 'lt #:abs-x (* 3.8 judgment-x-sep) #:abs-y judgment-y-sep) @st{Absent})
+    #:go bubble-table-coord
+    #:alt [(make-bubble-table (interleave guarantee-bubble* (map (lambda (_) (blank)) guarantee-bubble*)))]
+    (make-bubble-table
+      (interleave
+        guarantee-bubble*
+        (let ((smallt (make-string->body #:size (- body-size 6))))
+          (list
+            @smallt{types predict behavior}
+            (descr-append
+              @smallt{types predict behavior in typed}
+              @smallt{code, nothing in untyped code})
+            (descr-append
+              @smallt{types predict shapes in typed}
+              @smallt{code, nothing in untyped code})
+            @smallt{types predict nothing})))))
+  (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag "Chartreuse" (h%->pixels 13/100))
+                      (list @bt{Lying} type-sound-tag (hex-triplet->color% #xFFEB6C) (h%->pixels 32/100))
+                      (list @bt{Vacuous} uni-sound-tag (hex-triplet->color% #xea7260) (h%->pixels 13/100)))))
+    (for ((i (in-range (+ 1 (length spec*)))))
+      (define cm-val (and (< 0 i) (list-ref spec* 0)))
+      (define t-val (and (< 1 i) (list-ref spec* 1)))
+      (define u-val (and (< 2 i) (list-ref spec* 2)))
+      (define txt-list
+        (and (< 0 i)
+             (list (if cm-val (car cm-val) (blank))
+                   (if t-val (car t-val) (blank))
+                   (blank)
+                   (if u-val (car u-val) (blank)))))
+      (pslide
+        #:go bubble-table-coord
+        (make-bubble-table (interleave guarantee-bubble* (map (lambda (_) (blank)) guarantee-bubble*)))
+        #:go (if cm-val (at-bar-find (cadr cm-val)) center-coord)
+        (if cm-val (filled-rectangle client-w (car (cdddr cm-val)) #:color (caddr cm-val)) (blank))
+        #:go (if t-val (at-bar-find (cadr t-val)) center-coord)
+        (if t-val (filled-rectangle client-w (car (cdddr t-val)) #:color (caddr t-val)) (blank))
+        #:go (if u-val (at-bar-find (cadr u-val)) center-coord)
+        (if u-val (filled-rectangle client-w (car (cdddr u-val)) #:color (caddr u-val)) (blank))
+        #:go bubble-table-coord
+        (if txt-list
+          (make-bubble-table (interleave guarantee-bubble* txt-list))
+          (blank)))))
   (pslide
     #:go heading-text-coord
     (hb-append @st{Landscape: } @sbt{Performance})
@@ -1535,16 +1566,17 @@
     (make-performance-landscape)
     #:go (coord slide-text-right slide-bottom 'rb)
     (hb-append @t{Varied space, difficult to rank alternatives}))
-  (pslide
-    #:go heading-text-coord
-    @st{Performance Comparison}
-    #:go (coord slide-right slide-top 'rt)
-    (make-short-citation "ICFP 2018")
-    #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
-    (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
-    #:next
-    #:go (coord 40/100 4/10 'rt) (scale (make-complete-monitoring-bubble #f) 7/10)
-    #:go (coord 60/100 4/10 'lt) (scale (make-tag-sound-bubble #f) 7/10))
+  (let ((do-scale (lambda (x) (scale x 8/10))))
+    (pslide
+      #:go heading-text-coord
+      @st{Performance Comparison}
+      #:go (coord slide-right slide-top 'rt)
+      (make-short-citation "ICFP 2018")
+      #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
+      (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
+      #:next
+      #:go (coord 40/100 4/10 'rt) (do-scale (make-complete-monitoring-bubble))
+      #:go (coord 60/100 4/10 'lt) (do-scale (make-tag-sound-bubble))))
   (pslide
     #:go heading-text-coord @st{Performance Comparison}
     #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
@@ -1708,7 +1740,7 @@
     #:go (at-find-pict 'bp ct-find 'ct)
     (add-rounded-border
       #:x-margin med-x-sep #:y-margin med-y-sep
-      #:frame-width 4 #:frame-color black #:background-color program-color
+      #:frame-width 5 #:frame-color black #:background-color program-color
       @t{How to measure?}))
   (pslide
     #:go heading-text-coord
@@ -1779,6 +1811,10 @@
   (void))
 
 (define (sec:QA)
+  ;; Possible "extra" slides:
+  ;; - optimizer
+  ;; - why not sampling
+  ;; - 
   (pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
@@ -1794,8 +1830,22 @@
 
 ;; =============================================================================
 
+
+(define (at-bar-find tag)
+  (at-find-pict tag lt-find 'lt #:abs-x pico-x-sep #:abs-y tiny-y-sep))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+    #:go bubble-table-coord
+    (make-bubble-table (interleave guarantee-bubble* (map (lambda (_) (blank)) guarantee-bubble*)))
+    #:go (at-bar-find complete-monitoring-tag)
+    (filled-rectangle client-w (h%->pixels 13/100) #:color "Chartreuse" #;"green")
+    #:go (at-bar-find type-sound-tag)
+    (filled-rectangle client-w (h%->pixels 32/100) #:color (hex-triplet->color% #xFFEB6C))
+    #:go (at-bar-find uni-sound-tag)
+    (filled-rectangle client-w (h%->pixels 13/100) #:color (hex-triplet->color% #xea7260) #;"Tomato" #;"red")
+    #:go bubble-table-coord
+    (make-bubble-table (interleave guarantee-bubble* (list @bt{Honest} @bt{Lying} (blank) @t{Vacuous})))
 
 
   )))))
