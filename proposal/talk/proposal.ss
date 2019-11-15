@@ -90,6 +90,9 @@
 (define tag-sound-color (hex-triplet->color% #x888888))
 (define type-sound-color (hex-triplet->color% #xBBBBBB))
 (define complete-monitoring-color (hex-triplet->color% #xFFFFFF))
+(define honest-color (string->color% "Chartreuse"))
+(define lying-color (hex-triplet->color% #xFFEB6C))
+(define vacuous-color (hex-triplet->color% #xea7260))
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -1131,11 +1134,26 @@
     #:go (coord 525/1000 47/100 'cb) (make-transient-lattice 3)))
 
 (define transition-background
-  (filled-rectangle
-    (* 3/2 client-w)
-    (* 3/2 client-h)
-    #:color (color%-update-alpha black 0.2)
-    #:draw-border? #f))
+  (let ()
+    (define w (* 3/2 client-w))
+    (define h (* 3/2 client-h))
+    (define c (color%-update-alpha black 0.2))
+    (define (draw-rect dc dx dy)
+      (define old-brush (send dc get-brush))
+      (define old-pen (send dc get-pen))
+      (send dc set-pen (new pen% [width 0] [color transparent]))
+      (send dc set-brush (new brush% [color c] [style 'bdiagonal-hatch]))
+      (define path (new dc-path%))
+      (send path rectangle 0 0 w h)
+      (send dc draw-path path dx dy)
+      (send dc set-pen old-pen)
+      (send dc set-brush old-brush))
+    (dc draw-rect w h)
+    #;(filled-rectangle
+      w
+      h
+      #:color c
+      #:draw-border? #f)))
 
 (define (make-transition-slide str)
   (pslide
@@ -1321,6 +1339,25 @@
 
 (define bubble-table-coord (coord slide-left slide-top 'lt))
 
+(define (at-bar-find tag)
+  (at-find-pict tag lt-find 'lt #:abs-x pico-x-sep #:abs-y tiny-y-sep))
+
+(define (bubble-with-bar sym)
+  (define-values [base-pict color left?]
+    (case sym
+      ((cm) (values (make-complete-monitoring-bubble) honest-color #f))
+      ((tag) (values (make-tag-sound-bubble) lying-color #t))
+      (else (raise-argument-error 'bubble-with-bar "(or/c cm tag)" sym))))
+  (define bubble
+    (scale base-pict 8/10))
+  (define rect
+    (filled-rectangle (w%->pixels 45/100) (h%->pixels 8/100) #:color color))
+  (define sep
+    (blank small-x-sep 0))
+  (if left?
+    (lc-superimpose rect (hc-append sep bubble))
+    (rc-superimpose rect (hc-append bubble sep))))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1348,15 +1385,17 @@
     #:go center-coord meeting-of-the-waters
     #:go (coord 1/2 20/100 'ct)
     (vr-append
-      tiny-y-sep
+      (h%->pixels 2/100)
       (add-landscape-background
         #:x-margin small-x-sep
         #:y-margin tiny-y-sep
         (vc-append
-          tiny-y-sep
+          small-y-sep
           @titlet{Honest and Lying Types}
           @t{Thesis Proposal}))
       (add-landscape-background
+        #:x-margin small-x-sep
+        #:y-margin tiny-y-sep
         (vc-append
           tiny-y-sep
           @t{Ben Greenman}
@@ -1532,9 +1571,9 @@
               @smallt{types predict shapes in typed}
               @smallt{code, nothing in untyped code})
             @smallt{types predict nothing})))))
-  (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag "Chartreuse" (h%->pixels 13/100))
-                      (list @bt{Lying} type-sound-tag (hex-triplet->color% #xFFEB6C) (h%->pixels 32/100))
-                      (list @bt{Vacuous} uni-sound-tag (hex-triplet->color% #xea7260) (h%->pixels 13/100)))))
+  (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag honest-color (h%->pixels 13/100))
+                      (list @bt{Lying} type-sound-tag lying-color (h%->pixels 32/100))
+                      (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100)))))
     (for ((i (in-range (+ 1 (length spec*)))))
       (define cm-val (and (< 0 i) (list-ref spec* 0)))
       (define t-val (and (< 1 i) (list-ref spec* 1)))
@@ -1566,34 +1605,41 @@
     (make-performance-landscape)
     #:go (coord slide-text-right slide-bottom 'rb)
     (hb-append @t{Varied space, difficult to rank alternatives}))
-  (let ((do-scale (lambda (x) (scale x 8/10))))
-    (pslide
-      #:go heading-text-coord
-      @st{Performance Comparison}
-      #:go (coord slide-right slide-top 'rt)
-      (make-short-citation "ICFP 2018")
-      #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
-      (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
-      #:next
-      #:go (coord 40/100 4/10 'rt) (do-scale (make-complete-monitoring-bubble))
-      #:go (coord 60/100 4/10 'lt) (do-scale (make-tag-sound-bubble))))
+  (pslide
+    #:go heading-text-coord
+    @st{Performance Comparison}
+    #:go (coord slide-right slide-top 'rt)
+    (make-short-citation "ICFP 2018")
+    #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
+    (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
+    #:next
+    #:go (coord 44/100 4/10 'rt) (bubble-with-bar 'cm)
+    #:go (coord 54/100 4/10 'lt) (bubble-with-bar 'tag))
   (pslide
     #:go heading-text-coord @st{Performance Comparison}
     #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
+    #:go (coord 1/2 26/100 'ct)
+    (filled-rectangle (* 2 client-w) (h%->pixels 16/100) #:color honest-color)
     #:go (coord slide-text-left 2/10 'lt #:sep tiny-y-sep)
     @bt{Natural}
-    (vl-append
-      tiny-y-sep
-      @t{boundaries add "large"}
-      @t{overhead})
+    (tag-pict
+      (vl-append
+        tiny-y-sep
+        @t{boundaries add "large"}
+        @t{overhead})
+      'N-txt)
     #:go (coord slide-text-right 2/10 'rt)
     (make-overhead-plot '(H) example-plot-w)
+    #:go (coord 1/2 61/100 'ct)
+    (filled-rectangle (* 2 client-w) (h%->pixels 16/100) #:color lying-color)
     #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
     @bt{Transient}
-    (vl-append
-      tiny-y-sep
-      @t{types add "small"}
-      @t{overhead})
+    (tag-pict
+      (vl-append
+        tiny-y-sep
+        @t{types add "small"}
+        @t{overhead})
+      'S-txt)
     #:go (coord slide-text-right 55/100 'rt)
     (make-overhead-plot '(1) example-plot-w))
   (pslide
@@ -1831,21 +1877,7 @@
 ;; =============================================================================
 
 
-(define (at-bar-find tag)
-  (at-find-pict tag lt-find 'lt #:abs-x pico-x-sep #:abs-y tiny-y-sep))
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-    #:go bubble-table-coord
-    (make-bubble-table (interleave guarantee-bubble* (map (lambda (_) (blank)) guarantee-bubble*)))
-    #:go (at-bar-find complete-monitoring-tag)
-    (filled-rectangle client-w (h%->pixels 13/100) #:color "Chartreuse" #;"green")
-    #:go (at-bar-find type-sound-tag)
-    (filled-rectangle client-w (h%->pixels 32/100) #:color (hex-triplet->color% #xFFEB6C))
-    #:go (at-bar-find uni-sound-tag)
-    (filled-rectangle client-w (h%->pixels 13/100) #:color (hex-triplet->color% #xea7260) #;"Tomato" #;"red")
-    #:go bubble-table-coord
-    (make-bubble-table (interleave guarantee-bubble* (list @bt{Honest} @bt{Lying} (blank) @t{Vacuous})))
-
 
   )))))
