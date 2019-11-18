@@ -5,8 +5,17 @@
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
-;; - illustrate "natural typed" vs "transient typed"
-;;   - ditto for the words "Natural" and "Transient"
+;; - MF edit checklist
+;; - Q/A slide
+;; - RUN honest types and lying types to build slides
+;;    (its in parallel of course, but should run --- use to make picture)
+
+;; Meeting of the Waters =
+;; - Manaus
+;; - dark Rio Negro
+;; - sandy Amazon River
+;; - for 6km = 4mi, run together
+;; - b/c temperature, speed, water density
 
 (require
   file/glob
@@ -1452,7 +1461,7 @@
 (define example-api-code*
   (list
     (hb-append @ct{(provide})
-    (hb-append @ct{  fold-file : (All (X) (-> Path A (-> Str A A) A)))})
+    (hb-append @ct{  fold-file : (All (A) (-> Path A (-> Str A A) A)))})
     (hb-append @ct{ })
     (hb-append @ct{(require Library)})))
 
@@ -1817,7 +1826,7 @@
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
     #:next
-    #:go (coord 1/2 6/10 'lt)
+    #:go (coord 163/1000 50/100 'lt)
     (vl-append
       tiny-y-sep
       @big-t{In particular,}
@@ -1964,26 +1973,15 @@
     #:next
     #:go (coord 1/2 65/100 'ct)
     (large-rounded-border
-      (vl-append tiny-y-sep
-      @t{- may be infeasible to measure}
-      @t{- at best: "good points exist"})))
-  #;(pslide
-    ;; FUTURE WORK ... first goal is to enable interaction
-    #:go heading-text-coord
-    @st{How to measure performance?}
-    #:go lattice-text-coord
-    (vl-append small-y-sep
-    @t{- migration algorithm?}
-    @t{- boundary profiler?}))
+      (vc-append
+        tiny-y-sep
+        @t{Need an alternative method}
+        @t{to measure performance})))
   (pslide
+    ;; for benchmarks that depend on typed libraries, try with + without Transient
     #:go heading-text-coord
     @st{Q2. Are the benefits significant?}
     #:go (coord perf-sidebar-x 0 'ct) (make-perf-sidebar)
-    #:alt
-    [#:go perf-text-coord
-     @t{Maybe: reduce cost of U/T edge}
-     #:go perf-illustration-coord
-     (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict))]
     #:next
     #:go perf-text-coord
     @t{Goal: change lib, improve overall}
@@ -2009,6 +2007,9 @@
   (pslide
     #:go heading-text-coord
     (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
+  (pslide
+    #:go center-coord
+    @st{The End})
   (void))
 
 (define (sec:QA)
@@ -2034,6 +2035,5 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go heading-text-coord
 
   )))))
