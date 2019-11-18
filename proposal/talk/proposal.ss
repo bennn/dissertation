@@ -414,26 +414,29 @@
   (define the-flag-base (blank 18 4))
   (for/fold ((acc (make-big-landscape-background)))
             ((xy (in-list '((89/100 07/100) (73/100 11/100)
-                            (83/100 18/100) (94/100 26/100) (62/100 12/100)
-                            (52/100 22/100) (42/100 13/100) (32/100 20/100)
-                            (22/100 11/100) (12/100 30/100) (09/100 12/100)
-                            (80/100 31/100) (65/100 40/100) (43/100 38/100)
+                            (83/100 18/100 "clojure.png") (94/100 26/100) (62/100 12/100)
+                            (52/100 22/100 "python.png") (42/100 13/100) (32/100 20/100)
+                            (22/100 11/100) (12/100 30/100 "javascript.png") (09/100 12/100)
+                            (80/100 31/100) (65/100 38/100 "typescript.png") (43/100 38/100)
                             (27/100 40/100) (08/100 46/100) (87/100 51/100)
                             (71/100 60/100) (49/100 52/100) (24/100 56/100)
-                            (12/100 62/100) (92/100 65/100) (75/100 75/100)
-                            (46/100 71/100) (20/100 77/100) (30/100 73/100)
-                            (87/100 76/100) (65/100 89/100) (49/100 87/100)
-                            (35/100 85/100) (11/100 87/100) (93/100 89/100)
-                            (59/100 67/100)
+                            (12/100 62/100 "lua.png") (92/100 60/100 "php.png") (75/100 75/100)
+                            (46/100 71/100) (17/100 77/100) (30/100 73/100)
+                            (87/100 76/100) (65/100 91/100 "hack.png") (49/100 83/100 "pyre.png")
+                            (36/100 53/100 "racket.png")
+                            (35/100 85/100) (93/100 89/100 "flow.png")
+                            (59/100 67/100) (11/100 92/100 "thorn.png")
                             )))
              (i (in-naturals)))
     (ppict-do acc
       #:go (coord (car xy) (cadr xy) 'cc)
-      (make-simple-flag the-flag-base
-        #:flag-background-color (rgb-triplet->color% (->pen-color i))
-        #:flag-brush-style 'horizontal-hatch
-        #:flag-border-color (rgb-triplet->color% (->pen-color i))
-        #:pole-height 70))))
+      (if (null? (cddr xy))
+        (make-simple-flag the-flag-base
+          #:flag-background-color (rgb-triplet->color% (->pen-color i))
+          #:flag-brush-style 'horizontal-hatch
+          #:flag-border-color (rgb-triplet->color% (->pen-color i))
+          #:pole-height 70)
+        (scale-to-fit (bitmap (build-path "src" "lang" (caddr xy))) 90 90)))))
 
 (define (make-theorem-landscape)
   (let* ((pp (make-big-landscape-background))
@@ -1480,6 +1483,24 @@
 (define implies-pict
   ((make-string->body #:size 70) "⇒"))
 
+(define title-pict
+  (vr-append
+    (h%->pixels 2/100)
+    (add-landscape-background
+      #:x-margin small-x-sep
+      #:y-margin tiny-y-sep
+      (vc-append
+        small-y-sep
+        @titlet{Honest and Lying Types}
+        @t{Thesis Proposal}))
+    (add-landscape-background
+      #:x-margin small-x-sep
+      #:y-margin tiny-y-sep
+      (vc-append
+        tiny-y-sep
+        @t{Ben Greenman}
+        @t{2019-11-25}))))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1492,9 +1513,9 @@
     #;(sec:thesis-question)
     (sec:migratory-typing)
     (sec:design-space)
-    (sec:proposal)
-    (sec:plan)
-    (sec:timeline)
+;    (sec:proposal)
+;    (sec:plan)
+;    (sec:timeline)
     (pslide)
 ;;    (sec:QA)
     (void)))
@@ -1505,23 +1526,13 @@
 (define (sec:title)
   (pslide
     #:go center-coord meeting-of-the-waters
-    #:go (coord 1/2 20/100 'ct)
-    (vr-append
-      (h%->pixels 2/100)
-      (add-landscape-background
-        #:x-margin small-x-sep
-        #:y-margin tiny-y-sep
-        (vc-append
-          small-y-sep
-          @titlet{Honest and Lying Types}
-          @t{Thesis Proposal}))
-      (add-landscape-background
-        #:x-margin small-x-sep
-        #:y-margin tiny-y-sep
-        (vc-append
-          tiny-y-sep
-          @t{Ben Greenman}
-          @t{2019-11-25}))))
+    #:go (coord 1/2 20/100 'ct) title-pict)
+  (pslide
+    #:go center-coord @t{Committee}
+    )
+  (pslide
+    #:go center-coord meeting-of-the-waters
+    #:go (coord 1/2 20/100 'ct) title-pict)
   (void))
 
 (define mt-code-y 80/100)
@@ -1561,25 +1572,10 @@
     #:go center-coord (make-migration-arrow))
   (pslide
     #:go heading-text-coord
-    @st{Motivations}
-    #:go (coord 1/2 20/100 'ct)
-    (filled-rectangle 1 (* 90/100 client-h) #:color black #:draw-border? #f)
-    #:go (coord 1/2 13/100 'ct)
-    (make-sample-program #f #f 5/10)
-    #:go (coord motivation-x-l motivation-y 'ct #:sep small-y-sep)
-    @t{Prototyping}
-    scripting-pict
-    (make-illustration-text
-      @t{write untyped code,}
-      @t{rely on types})
-    #:go (coord motivation-x-r motivation-y 'ct #:sep small-y-sep)
-    @t{Re-Use}
-    reuse-pict
-    (make-illustration-text
-      @t{write typed code,}
-      @t{use old libraries}))
+    @st{Motivation}
+    #:go center-coord
+    @t{Because untyped code exists.})
   (pslide
-    ;; TODO fill margin with language logos? ruby, js, etc...
     #:go heading-text-coord
     @st{Landscape of Models and Implementations}
     #:go big-landscape-coord
@@ -2035,5 +2031,6 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
+    #:go big-landscape-coord
 
   )))))
