@@ -89,9 +89,9 @@
 (define tag-sound-color (hex-triplet->color% #x888888))
 (define type-sound-color (hex-triplet->color% #xBBBBBB))
 (define complete-monitoring-color (hex-triplet->color% #xFFFFFF))
-(define honest-color (string->color% "Chartreuse"))
-(define lying-color (hex-triplet->color% #xFFEB6C))
-(define vacuous-color (hex-triplet->color% #xea7260))
+(define honest-color LIGHT-RED)
+(define lying-color BLUE)
+(define vacuous-color uni-sound-color)
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -980,10 +980,19 @@
                  (program-arrow 'L-E rb-find 'C-W lb-find (* 85/100 turn) (* 10/100 turn) 1/4 1/4 black)
                  (program-arrow 'C-W lt-find 'L-E rt-find (* 35/100 turn) (* 60/100 turn) 1/4 1/4 black)
                  (program-arrow 'C-E rb-find 'R-W lb-find (* 85/100 turn) (* 10/100 turn) 1/4 1/4 black)
-                 (program-arrow 'R-W lt-find 'C-E rt-find (* 35/100 turn) (* 60/100 turn) 1/4 1/4 black))))
-    (for/fold ((acc combo))
-              ((arr (in-list arr*)))
-      (add-program-arrow acc arr #:style 'solid))))
+                 (program-arrow 'R-W lt-find 'C-E rt-find (* 35/100 turn) (* 60/100 turn) 1/4 1/4 black)))
+         (pp
+           (for/fold ((acc combo))
+                     ((arr (in-list arr*)))
+             (add-program-arrow acc arr #:style 'solid)))
+         (pp
+           (ppict-do pp
+             #:go (at-find-pict 'C cc-find 'cc)
+             (add-spotlight-background
+               T-node
+               #:border-color lying-color #:color lying-color
+               #:border-width 1 #:x-margin pico-x-sep #:y-margin med-y-sep))))
+    pp))
 
 (define (make-lattice-point . k*)
   (make-lattice-point* k*))
@@ -998,16 +1007,22 @@
     #:bg-color white #:frame-color black
     top))
 
+(define lib/spotlight
+  (add-spotlight-background
+    #:color lying-color #:border-width 1 #:border-color lying-color
+    #:x-margin med-x-sep #:y-margin small-y-sep
+    Lib-node))
+
 (define (make-benefits-lattice-pict)
   (define point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
   (define h (hc-append tiny-x-sep (cadr point*) (caddr point*)))
-  (define hv (vc-append tiny-y-sep (car (cdddr point*)) h (car point*) Lib-node))
+  (define hv (vc-append tiny-y-sep (car (cdddr point*)) h (car point*) lib/spotlight))
   hv)
 
 (define (make-small-benefits-lattice-pict)
   (define point (make-lattice-point 'U 'U))
   (define point-blank (ghost point))
-  (define hv (vc-append tiny-y-sep point-blank point-blank point Lib-node))
+  (define hv (vc-append tiny-y-sep point-blank point-blank point lib/spotlight))
   hv)
 
 (define model-sidebar-x 14/100)
@@ -1060,7 +1075,7 @@
     #:go (coord 1/2 65/100 'ct) (scale-perf-sidebar (make-benefits-lattice-pict))))
 
 (define complement-pict
-  (make-overhead-plot '(H 1) example-plot-w))
+  (make-overhead-plot '(H 1) example-plot-w #:legend? #f))
 
 (define math-warning-pict
   (add-rounded-border
@@ -1080,16 +1095,17 @@
       (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
       txt-pict)))
 
-(define (large-rounded-border pp)
-  (my-rounded-border pp 4))
+(define (large-rounded-border pp #:bg-color [bg-color #f])
+  (my-rounded-border pp 4 #:bg-color bg-color))
 
 (define (thin-rounded-border pp)
   (my-rounded-border pp 2))
 
-(define (my-rounded-border pp fw)
+(define (my-rounded-border pp fw #:bg-color [pre-bg-color #f])
+  (define bg (or pre-bg-color white))
   (add-rounded-border
     #:radius 2 #:frame-width fw
-    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color white
+    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color bg
     pp))
 
 (define (double-sample-disk s0 s1)
@@ -1101,14 +1117,16 @@
   (scale-to-fit both w h))
 
 (define lattice-num-bits 6)
-(define lattice-red (hex-triplet->color% #xffa8ac))
-(define lattice-orange (hex-triplet->color% #xffd9a8))
+(define lattice-red honest-color)
+(define lattice-orange lying-color)
 
 (define (add-lattice-background #:color color pp)
-  (add-rounded-border
-    #:radius 12 #:x-margin tiny-x-sep #:y-margin tiny-y-sep #:background-color color
-    #:frame-color black #:frame-width 2
-    pp))
+  (add-rectangle-background
+    #:color white #:radius 12
+    (add-rounded-border
+      #:radius 12 #:x-margin tiny-x-sep #:y-margin tiny-y-sep #:background-color (color%-update-alpha color 0.5)
+      #:frame-color black #:frame-width 2
+      pp)))
 
 (define (make-transient-lattice bits)
   (add-lattice-background
@@ -1169,7 +1187,11 @@
   (define base-pict (t base-str))
   (define expt-pict (tcodesize expt-str))
   (define base/expt (ht-append (vl-append (blank 0 (* 2/4 (pict-height expt-pict))) base-pict) expt-pict))
-  (hb-append (t venue-str) @t{ = } base/expt  @t{ measurements}))
+  (define-values [venue-pict h-append]
+    (if (regexp-match? #rx"[0-9]+$" venue-str)
+      (values (make-short-citation venue-str) hc-append)
+      (values (t venue-str) hb-append)))
+  (h-append venue-pict (hb-append @t{ = } base/expt  @t{ measurements})))
 
 (define (make-short-citation str)
   (define bg-color (venue->color (string->symbol (car (regexp-match #rx"[A-Z]+" str)))))
@@ -1357,6 +1379,98 @@
     (lc-superimpose rect (hc-append sep bubble))
     (rc-superimpose rect (hc-append bubble sep))))
 
+(define (make-interaction l-node r-node str)
+  (define base
+    (hc-append med-x-sep (add-hubs l-node 'L) (add-hubs r-node 'R)))
+  (define pp
+    (add-program-arrow base (program-arrow 'L-E rt-find 'R-W lt-find (* 18/100 turn) (* 83/100 turn) 1/2 1/2 black)))
+  (vc-append pico-y-sep (t str) pp))
+
+(define (make-tu-interaction str)
+  (make-interaction T-node U-node str))
+
+(define (make-ut-interaction str)
+  (make-interaction U-node T-node str))
+
+(define example-library-x 824/1000)
+(define example-library-coord (coord example-library-x big-program-y 'ct))
+(define example-api-x 497/1000)
+(define example-api-coord (coord example-api-x big-program-y 'ct))
+(define example-client-x 178/1000)
+(define example-client-coord (coord example-client-x big-program-y 'ct))
+(define example-code-x-margin (w%->pixels 4/100))
+(define example-code-y-margin (h%->pixels 4/100))
+
+(define (make-typed-codeblock #:title [title #f] #:x-margin [x #f] #:y-margin [y #f] . pp*)
+  (make-typed-codeblock* pp* #:title title #:x-margin x #:y-margin y))
+
+(define (make-untyped-codeblock #:title [title #f] #:x-margin [x #f] #:y-margin [y #f] . pp*)
+  (make-untyped-codeblock* pp* #:title title #:x-margin x #:y-margin y))
+
+(define (make-typed-codeblock* pp* #:title [title #f] #:x-margin [x #f] #:y-margin [y #f])
+  (make-codeblock pp* #:title title #:label (scale T-node codeblock-label-scale) #:bg-color typed-color #:x-margin x #:y-margin y))
+
+(define (make-untyped-codeblock* pp* #:title [title #f] #:x-margin [x #f] #:y-margin [y #f])
+  (make-codeblock pp* #:title title #:label (scale U-node codeblock-label-scale) #:bg-color untyped-color #:x-margin x #:y-margin y))
+
+(define codeblock-label-scale 0.65)
+
+(define (make-codeblock pp* #:title [title #f] #:label [label #f] #:bg-color [pre-bg-color #f] #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f])
+  (define bg-c (or pre-bg-color (string->color% "lightgray")))
+  (define label-margin (if label (* 50/100 (pict-height label)) 0))
+  (define (add-label-margin pp [extra 0]) (vl-append (+ extra label-margin) (blank) pp))
+  (let* ((block-pict
+          (make-program-pict
+            #:frame-color bg-c
+            #:bg-color (color%-update-alpha bg-c 0.4)
+            #:x-margin pre-x-margin
+            #:y-margin pre-y-margin
+            #:radius 4
+            (add-label-margin (apply vl-append (h%->pixels 2/100) pp*))))
+         (title-pict (and title (tcodesize title))))
+    (if label
+      (let ((block-pict (add-label-margin block-pict 2)))
+        (ppict-do (if title-pict (lt-superimpose block-pict (ht-append 4 (blank) title-pict)) block-pict)
+          #:go (coord 1/2 0 'ct) label))
+      (if title-pict (vl-append 0 title-pict block-pict) block-pict))))
+
+(define (make-example-codeblocks lib api usr)
+  (values
+    (make-untyped-codeblock* lib #:title "Library" #:x-margin example-code-x-margin #:y-margin example-code-y-margin)
+    (make-typed-codeblock* api #:title "API" #:x-margin example-code-x-margin #:y-margin example-code-y-margin)
+    (make-untyped-codeblock* usr #:title "Client" #:x-margin example-code-x-margin #:y-margin example-code-y-margin)))
+
+(define example-client-code*
+  (list
+    (hb-append @ct{(define path "/tmp/file.txt")})
+    @ct{ }
+    (hb-append @ct{(define (count acc ln)})
+    (hb-append @ct{  (+ 1 acc))})
+    @ct{ }
+    (hb-append @ct{(fold-file path 0 count)})))
+
+(define example-api-code*
+  (list
+    (hb-append @ct{(provide})
+    (hb-append @ct{  fold-file : (All (X) (-> Path A (-> Str A A) A)))})
+    (hb-append @ct{ })
+    (hb-append @ct{(require Library)})))
+
+(define example-library-code*
+  (list
+    (hb-append @ct{(define (fold-file path acc f)})
+    (hb-append @ct{  ;; read `ln` from file})
+    (hb-append @ct{  ... (f ln acc) ...)})))
+
+(define-values [example-library-code example-api-code example-client-code]
+  (make-example-codeblocks example-library-code* example-api-code* example-client-code*))
+
+(define (make-x-line angl [w #f] [h #f])
+  (filled-rounded-rectangle w h 2 #:color "red" #:angle angl #:draw-border? #f))
+
+(define implies-pict
+  ((make-string->body #:size 70) "⇒"))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1366,7 +1480,7 @@
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    (sec:thesis-question)
+    #;(sec:thesis-question)
     (sec:migratory-typing)
     (sec:design-space)
     (sec:proposal)
@@ -1425,18 +1539,17 @@
     #:go (coord slide-text-left 14/100 'lt)
     @t{Add types to a dynamically-typed language}
     #:go (coord 75/100 mt-code-y 'cb)
-    (add-caption "Untyped/Typed mix" (make-sample-program #f #f))
+    (add-caption "Mixed-Typed code" (make-sample-program #f #f))
     #:alt
-    [#:go (coord 25/100 mt-code-y 'cb)
-     (add-caption "Untyped code" (make-sample-program #t #f))
-     #:go center-coord (make-migration-arrow)]
-    #:next
-    #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
-    (vl-append
-      med-y-sep
-      (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
-      (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
-      (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
+    [#:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
+     (vl-append
+       med-y-sep
+       (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
+       (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
+       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)}))]
+    #:go (coord 25/100 mt-code-y 'cb)
+    (add-caption "Untyped code" (make-sample-program #t #f))
+    #:go center-coord (make-migration-arrow))
   (pslide
     #:go heading-text-coord
     @st{Motivations}
@@ -1468,13 +1581,21 @@
   (pslide
     #:go heading-text-coord
     @st{Challenge = Interoperability}
-    #:go (coord slide-text-left 20/100 'lt)
-    (make-sample-program #f #t 9/10)
-    #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
-    @t{How do types restrict}
-    (hb-append @t{ interactions between})
-    (hb-append @t{ } @bt{untyped values})
-    (hb-append @t{ and } @bt{typed values} @t{?}))
+    #:alt
+    [#:go (coord slide-text-left 20/100 'lt)
+     (make-sample-program #f #t 9/10)
+     #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
+     @t{How do types restrict}
+     (hb-append @t{ interactions between})
+     (hb-append @t{ } @bt{untyped values})
+     (hb-append @t{ and } @bt{typed values} @t{?})]
+    #:go center-coord
+    (make-2table
+      #:col-sep (* 3/2 med-x-sep)
+      #:row-sep (h%->pixels 7/100)
+      (for/list ((ty-str '("Int" "Listof Str" "Nat -> Bool")))
+        (cons (make-ut-interaction ty-str)
+              (make-tu-interaction ty-str)))))
   (pslide
     #:go heading-text-coord
     @st{Many Answers, Many Implementations}
@@ -1500,13 +1621,13 @@
     (text-cloud
       "Guarantees"
       (make-model-pict)
-      @t{one surface lang.,}
+      @t{one syntax,}
       @t{many semantics})
     #:go performance-cloud-coord
     (text-cloud
       "Performance"
       (make-impl-pict)
-      @t{one language,}
+      @t{one syntax,}
       @t{different compilers})
     #:go (coord 1/2 1/2 'ct #:sep tiny-y-sep)
     (blank)
@@ -1575,8 +1696,9 @@
               (if (< j i) txt (blank))))))))
   (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag honest-color (h%->pixels 13/100))
                       (list @bt{Lying} type-sound-tag lying-color (h%->pixels 32/100))
-                      (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100)))))
-    (for ((i (in-range (+ 1 (length spec*)))))
+                      (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100))))
+         (len (length spec*)))
+    (for ((i (in-range (+ 1 len))))
       (define cm-val (and (< 0 i) (list-ref spec* 0)))
       (define t-val (and (< 1 i) (list-ref spec* 1)))
       (define u-val (and (< 2 i) (list-ref spec* 2)))
@@ -1598,7 +1720,28 @@
         #:go bubble-table-coord
         (if txt-list
           (make-bubble-table (interleave guarantee-bubble* txt-list))
-          (blank)))))
+          (blank)))
+      (when (= i (- len 1))
+        (pslide
+          #:go (coord 2/100 2/100 'lt) example-client-code
+          #:go (coord 50/100 50/100 'ct) example-api-code
+          #:next
+          #:go (coord 51/100 2/100 'lt) example-library-code
+          #:next
+          #:go (coord 1/2 35/100 'ct #:sep pico-y-sep)
+          (large-rounded-border
+            @t{Do the API types protect the Client?})
+          #:next
+          (ht-append
+            pico-x-sep
+            (large-rounded-border
+              #:bg-color honest-color
+              (hc-append @bt{Honest } implies-pict @t{ yes}))
+            (large-rounded-border
+              #:bg-color lying-color
+              (hc-append (cc-superimpose (ghost @bt{Honest }) @bt{Lying}) (tag-pict implies-pict 'ts-implies) @t{ yes})))
+          #:go (at-find-pict 'ts-implies cc-find 'cc)
+          (make-x-line (* 40/100 turn) 10 80)))))
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:go big-landscape-coord (make-theorem-landscape))
@@ -1624,7 +1767,7 @@
     #:go heading-text-coord @st{Performance Comparison}
     #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
     #:go (coord 1/2 26/100 'ct)
-    (filled-rectangle (* 2 client-w) (h%->pixels 16/100) #:color honest-color)
+    (filled-rectangle (* 2 client-w) pico-y-sep #:color honest-color)
     #:go (coord slide-text-left 2/10 'lt #:sep tiny-y-sep)
     @bt{Natural}
     (tag-pict
@@ -1636,7 +1779,7 @@
     #:go (coord slide-text-right 2/10 'rt)
     (make-overhead-plot '(H) example-plot-w)
     #:go (coord 1/2 61/100 'ct)
-    (filled-rectangle (* 2 client-w) (h%->pixels 16/100) #:color lying-color)
+    (filled-rectangle (* 2 client-w) pico-y-sep #:color lying-color)
     #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
     @bt{Transient}
     (tag-pict
@@ -1649,7 +1792,7 @@
     (make-overhead-plot '(1) example-plot-w))
   (pslide
     #:go heading-text-coord
-    (hb-append @st{Data: TR-Natural (} (sample-disk 'H) @st{) vs. TR-Transient (} (sample-disk '1) @st{) })
+    (hb-append @st{Data: TR-} @sbt{Natural} @st{ (} (sample-disk 'H) @st{) vs. TR-} @sbt{Transient} @st{ (} (sample-disk '1) @st{) })
     #:go (coord 1/2 slide-text-top 'ct #:sep small-y-sep)
     (make-sieve-pict)
     (make-2table
@@ -1669,22 +1812,27 @@
 
 (define (sec:proposal)
   (make-transition-slide
-    "Proposal")
+    "Thesis Question")
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
-    (make-thesis-question #f)
+    (make-thesis-question #t)
     #:next
-    #:go (coord 1/2 6/10 'ct)
-    @big-t{(Natural + Transient)})
+    #:go (coord 1/2 6/10 'lt)
+    (vl-append
+      tiny-y-sep
+      @big-t{In particular,}
+      (hb-append @big-tb{  Natural} @big-t{ + } @big-tb{Transient})))
   (pslide
     #:go heading-text-coord @st{Complementary Strengths}
-    #:go (coord slide-text-right 15/100 'rt) complement-pict
+    #:go (coord 1/2 26/100 'ct) (filled-rectangle (* 2 client-w) pico-y-sep #:color honest-color)
+    #:go (coord 97/100 06/100 'rt) complement-pict
     #:go (coord slide-text-left 2/10 'lt #:sep tiny-y-sep)
     @bt{Natural}
     (vl-append
       tiny-y-sep
       (hb-append @t{types predict full behavior, but})
       (hb-append @t{need to avoid critical boundaries}))
+    #:go (coord 1/2 61/100 'ct) (filled-rectangle (* 2 client-w) pico-y-sep #:color lying-color)
     #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
     @bt{Transient}
     (vl-append
@@ -1697,11 +1845,14 @@
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go (coord slide-text-left benefits-below-bar-y 'lt #:sep (h%->pixels 7/100))
     @t{1. Begin with Natural types}
-    @t{2. Switch to Transient to recover performance}
+    (hb-append @t{2. } (tag-pict @t{Switch to Transient to recover} 'L1))
     @t{3. Revisit Natural for debugging}
-    (hb-append @t{4. } (tag-pict @t{Return to Natural after typing all} 'L1))
+    (hb-append @t{4. } (tag-pict @t{Return to Natural after typing all} 'L2))
     #:go (at-find-pict 'L1 lb-find 'lt #:abs-y pico-y-sep)
-    @t{critical boundaries})
+    @t{performance}
+    #:go (at-find-pict 'L2 lb-find 'lt #:abs-y pico-y-sep)
+    @t{critical boundaries}
+    )
   (pslide
     #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
     #:go benefits-pict-coord (scale (make-benefit-library-pict) 7/10)
@@ -1757,11 +1908,11 @@
     #:alt
     [@t{Model:}
      (hb-append @t{- develop a combined } (tag-pict @t{model} 'model))
-     @t{- reduce overlap in runtime checks}
      (vl-append
        tiny-y-sep
        @t{- prove old properties}
        @t{   (complete mon., tag soundness)})
+     @t{- reduce overlap in runtime checks}
      #:go model-illustration-coord
      (scale (make-model-pict) 1/2)]
     #:next
@@ -1792,7 +1943,7 @@
     (add-rounded-border
       #:x-margin med-x-sep #:y-margin med-y-sep
       #:frame-width 5 #:frame-color black #:background-color program-color
-      @t{How to measure?}))
+      @t{How to find?}))
   (pslide
     #:go heading-text-coord
     @st{How to measure performance?}
@@ -1814,8 +1965,8 @@
     #:go (coord 1/2 65/100 'ct)
     (large-rounded-border
       (vl-append tiny-y-sep
-      @t{* may be infeasible to measure}
-      @t{* at best: "good points exist"})))
+      @t{- may be infeasible to measure}
+      @t{- at best: "good points exist"})))
   #;(pslide
     ;; FUTURE WORK ... first goal is to enable interaction
     #:go heading-text-coord
@@ -1848,7 +1999,7 @@
     ;; ok you've seen the benefits and the plans
     #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
     #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar)
-    #:go benefits-bar-coord (add-rectangle-background #:radius 2 #:draw-border? #t #:color white #:x-margin 2 #:y-margin 0 (make-benefits-topbar)))
+    #:go (coord 1/2 8/100 'ct) (add-rectangle-background #:radius 2 #:draw-border? #t #:color white #:x-margin 2 #:y-margin 0 (make-benefits-topbar)))
   (pslide
     #:go checklist-coord
     (make-checklist #:hide? #true full-checklist-data))
@@ -1880,9 +2031,9 @@
 
 ;; =============================================================================
 
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
+    #:go heading-text-coord
 
   )))))
