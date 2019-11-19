@@ -5,7 +5,6 @@
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
-;; - MF edit checklist
 ;; - Q/A slide
 ;; - RUN honest types and lying types to build slides
 ;;    (its in parallel of course, but should run --- use to make picture)
@@ -1209,9 +1208,14 @@
   (add-rounded-border
     #:radius 16 #:x-margin small-x-sep #:y-margin small-y-sep
     #:frame-width 2 #:frame-color black #:background-color bg-color
-    (cc-superimpose
-      (if wide? (ghost (tcodesize "OOPSLA 19")) (blank))
-      (tcodesize str))))
+    (let* ((ab (string-split str " "))
+           (a (car ab))
+           (b (cadr ab)))
+      (hb-append
+        (lc-superimpose
+          (if wide? (ghost (tcodesize "OOPSLA")) (blank))
+          (tcodesize a))
+        (tcodesize (format " ~a" b))))))
 
 (define (venue->color sym)
   (define conference-color water-color)
@@ -1309,6 +1313,7 @@
   (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
 
 (define (make-benefit-compatibility-pict)
+  ;; TODO change pipe to a bridge?
   (define border-width 3)
   (define pipe-end
     (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
@@ -1528,7 +1533,7 @@
 (define (icon-credit-pict)
   (hb-append @tcodesize{Icons made by Freepik from Flaticon.com}))
 
-(define fruit-coord (coord 1/2 58/100 'ct))
+(define fruit-coord (coord 1/2 61/100 'ct))
 
 ;; =============================================================================
 
@@ -1536,7 +1541,7 @@
   (set-page-numbers-visible! #true)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-  (sec:title)
+;  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
     #;(sec:thesis-question)
@@ -1545,8 +1550,8 @@
 ;    (sec:proposal)
 ;    (sec:plan)
 ;    (sec:timeline)
-    (pslide)
-;;    (sec:QA)
+;    (pslide)
+    (sec:QA)
     (void)))
 
 ;; -----------------------------------------------------------------------------
@@ -1667,25 +1672,26 @@
     (text-cloud
       "Guarantees"
       (make-model-pict)
-      @t{one syntax,}
-      @t{many semantics})
+      @t{one syntax, many}
+      @t{semantics for what}
+      @t{flows across channels})
     #:go performance-cloud-coord
     (text-cloud
       "Performance"
       (make-impl-pict)
-      @t{one syntax,}
-      @t{different compilers})
+      @t{one syntax, many}
+      @t{type-compilers})
     #:go fruit-coord (compare-append (apple-pict) (apple-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
   (pslide
     #:go heading-text-coord
-    @st{TODO ???}
+    @st{Research Agenda: Results so Far}
 ;    (make-long-citation
 ;      "OOPSLA 18"
 ;      #:title "Collapsible Contracts: Fixing a Pathology of Gradual Typing"
 ;      #:author* '("Daniel Feltey" "Ben Greenman" "Christophe Scholliers" "Robert Bruce Findler" "Vincent St-Amour"))
-    #:go (coord -2/100 10/100 'lt #:sep tiny-y-sep)
+    #:go (coord -2/100 12/100 'lt #:sep tiny-y-sep)
     (make-research-topic
      "Design Space Analysis"
      #:background-color "palegreen"
@@ -1706,13 +1712,13 @@
         #:title "Is Sound Gradual Typing Dead?"
         #:author* '("Asumu Takikawa" "Daniel Feltey" "Ben Greenman" "Max S. New" "Jan Vitek" "Matthias Felleisen"))
       (make-long-citation
-        "JFP 19"
-        #:title "How to Evaluate the Performance of Gradual Type Systems"
-        #:author* '("Ben Greenman" "Asumu Takikawa" "Max S. New" "Daniel Feltey" "Robert Bruce Findler" "Jan Vitek" "Matthias Felleisen"))
-      (make-long-citation
         "PEPM 18"
         #:title "On the Cost of Type-Tag Soundness"
-        #:author* '("Ben Greenman" "Zeina Migeed"))))
+        #:author* '("Ben Greenman" "Zeina Migeed"))
+      (make-long-citation
+        "JFP 19"
+        #:title "How to Evaluate the Performance of Gradual Type Systems"
+        #:author* '("Ben Greenman" "Asumu Takikawa" "Max S. New" "Daniel Feltey" "Robert Bruce Findler" "Jan Vitek" "Matthias Felleisen"))))
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
@@ -1730,7 +1736,7 @@
                @smallt{types predict shapes in typed}
                @smallt{code, nothing in untyped code})
              @smallt{types predict nothing})))
-    (for ((i (in-range (+ 1 (length txt-pict*)))))
+    (for ((i (in-range (length txt-pict*))))
       (pslide
         #:go bubble-table-coord
         (make-bubble-table
@@ -1738,7 +1744,10 @@
             guarantee-bubble*
             (for/list ((txt (in-list txt-pict*))
                        (j (in-naturals)))
-              (if (< j i) txt (blank))))))))
+              (if (= j i) txt (cellophane txt 5/10)))))))
+    (pslide
+      #:go bubble-table-coord
+      (make-bubble-table (interleave guarantee-bubble* txt-pict*))))
   (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag honest-color (h%->pixels 13/100))
                       (list @bt{Lying} type-sound-tag lying-color (h%->pixels 32/100))
                       (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100))))
@@ -1765,28 +1774,28 @@
         #:go bubble-table-coord
         (if txt-list
           (make-bubble-table (interleave guarantee-bubble* txt-list))
-          (blank)))
-      (when (= i (- len 1))
-        (pslide
-          #:go (coord 2/100 2/100 'lt) example-client-code
-          #:go (coord 50/100 50/100 'ct) example-api-code
-          #:next
-          #:go (coord 51/100 2/100 'lt) example-library-code
-          #:next
-          #:go (coord 1/2 35/100 'ct #:sep pico-y-sep)
-          (large-rounded-border
-            @t{Do the API types protect the Client?})
-          #:next
-          (ht-append
-            pico-x-sep
-            (large-rounded-border
-              #:bg-color honest-color
-              (hc-append @bt{Honest } implies-pict @t{ yes}))
-            (large-rounded-border
-              #:bg-color lying-color
-              (hc-append (cc-superimpose (ghost @bt{Honest }) @bt{Lying}) (tag-pict implies-pict 'ts-implies) @t{ yes})))
-          #:go (at-find-pict 'ts-implies cc-find 'cc)
-          (make-x-line (* 40/100 turn) 10 80)))))
+          (blank)))))
+  (pslide
+    #:go heading-text-coord (hb-append @sbt{Honest} @st{ vs. } @sbt{Lying} @st{ Types})
+    #:go (coord 2/100 12/100 'lt) example-client-code
+    #:go (coord 50/100 60/100 'ct) example-api-code
+    #:next
+    #:go (coord 51/100 12/100 'lt) example-library-code
+    #:next
+    #:go (coord 1/2 45/100 'ct #:sep pico-y-sep)
+    (large-rounded-border
+      @t{Do the API types protect the Client?})
+    #:next
+    (ht-append
+      pico-x-sep
+      (large-rounded-border
+        #:bg-color honest-color
+        (hc-append @bt{Honest } implies-pict @t{ yes}))
+      (large-rounded-border
+        #:bg-color lying-color
+        (hc-append (cc-superimpose (ghost @bt{Honest }) @bt{Lying}) (tag-pict implies-pict 'ts-implies) @t{ yes})))
+    #:go (at-find-pict 'ts-implies cc-find 'cc)
+    (make-x-line (* 40/100 turn) 10 80))
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:go big-landscape-coord (make-theorem-landscape))
@@ -1856,6 +1865,22 @@
   (void))
 
 (define (sec:proposal)
+  (pslide
+    #:go center-coord
+    #:alt
+    [(scale-to-fit
+       (ht-append
+         tiny-x-sep
+         (make-theorem-landscape)
+         (make-performance-landscape))
+       client-w client-h)
+     #:go (coord 1/2 8/100 'ct)
+     (scale (make-tree 270 220 mixed-program-code* #:arrows? #f) 7/10)]
+    (table 3
+      (list
+        @sbt{Goal} @st{=} @st{Migratory Typing}
+        @sbt{Problem} @st{=} @st{Performance})
+      lc-superimpose cc-superimpose tiny-x-sep med-y-sep))
   (make-transition-slide
     "Thesis Question")
   (pslide
@@ -1910,30 +1935,52 @@
       @t{Changing a library to Transient may improve}
       @t{overall performance (for typed and untyped)}))
   (pslide
-    #:go heading-text-coord @st{Benefits (3/3): Compatibility}
+    #:go heading-text-coord @st{Benefits (3/3): Expressiveness}
     #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    #:go (coord 1/2 28/100 'ct #:sep (h%->pixels 7/100))
-    (vl-append
+    #:go (coord 1/2 30/100 'ct #:sep (h%->pixels 7/100))
+    #:alt
+    [(ht-append
+       small-x-sep
+       (make-typed-codeblock*
+         #:title "Library" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         (list
+           @ct{(define stx}
+           @ct{  #`#,(vector 0 1))}
+           @ct{(provide stx)}))
+       (make-untyped-codeblock*
+         #:title "Client" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         (list
+           @ct{(require Library)}
+           @ct{stx})))
+     #:next
+     (hb-append ((make-string->text #:font (cons 'bold body-font) #:size body-size #:color "red")"Error")
+                @t{: could not convert type to a contract})]
+    (vc-append
       tiny-y-sep
-      (blank)
-      @t{Wrappers may not be available for all values})
-    (table 3
-      (map tcodesize
-           '("(Async-Channel T)"
-             "(Custodian-Box T)"
-             "(C-Mark-Key T)"
-             "(Evt T)"
-             "(Ephemeron T)"
-             "(Future T)"
-             "(MPair T T')"
-             "(MList T)"
-             "(Prompt-Tag T T')" ;; Asumu SHOULD have fixed this, but appears to be old bug in the implementation --- no tests. Issue #876
-             "(Syntax T)"
-             "(Thread-Cell T)"
-             "(Weak-Box T)"))
-      cc-superimpose cc-superimpose small-x-sep small-y-sep)
-    @t{Natural needs wrappers, Transient does not})
+      @t{Typed Racket provides 203 base types;}
+      @t{12 lack runtime support (wrappers)})
+     #:next
+    #:alt
+    [(table 3
+       (map tcodesize
+            '("(Async-Channel T)"
+              "(Custodian-Box T)"
+              "(C-Mark-Key T)"
+              "(Evt T)"
+              "(Ephemeron T)"
+              "(Future T)"
+              "(MPair T T')"
+              "(MList T)"
+              "(Prompt-Tag T T')" ;; Asumu SHOULD have fixed this, but appears to be old bug in the implementation --- no tests. Issue #876
+              "(Syntax T)"
+              "(Thread-Cell T)"
+              "(Weak-Box T)"))
+       cc-superimpose cc-superimpose small-x-sep small-y-sep)]
+    (vc-append
+      tiny-y-sep
+      (hb-append @bt{Transient} @t{ does not need runtime support,})
+      @t{so more code can run}))
   (void))
 
 (define (sec:plan)
@@ -1944,7 +1991,7 @@
     (make-thesis-question #f)
     #:next
     @t{  Q1. Can honest and lying types coexist?}
-    (hb-append @t{  Q2. Are the } @t{benefits} @t{ significant?}))
+    @t{  Q2. Are the benefits measurably significant?})
   (pslide
     #:go (coord model-sidebar-x 0 'ct) (make-model-sidebar)
     #:go (coord slide-right slide-top 'rt)
@@ -1953,10 +2000,7 @@
     #:alt
     [@t{Model:}
      (hb-append @t{- develop a combined } (tag-pict @t{model} 'model))
-     (vl-append
-       tiny-y-sep
-       @t{- prove old properties}
-       @t{   (complete mon., tag soundness)})
+     @t{- formally prove basic properties}
      @t{- reduce overlap in runtime checks}
      #:go model-illustration-coord
      (scale (make-model-pict) 1/2)]
@@ -1965,7 +2009,10 @@
     @t{- re-use the type checker}
     @t{- support all Racket values}
     @t{- avoid the contract library}
-    @t{- adapt the TR optimizer}
+    (vl-append
+      tiny-y-sep
+      @t{- adapt the TR optimizer to}
+      @t{   lying types})
     #:go model-illustration-coord
     (scale (make-impl-pict) 1/2))
   (pslide
@@ -2054,6 +2101,9 @@
   ;; - why not sampling
   ;; - 
   (pslide
+    #:go center-coord
+    @t{Goal, Problem})
+  #;(pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
     #:go slide-text-coord
