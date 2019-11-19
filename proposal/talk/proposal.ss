@@ -416,17 +416,16 @@
             ((xy (in-list '((89/100 07/100) (73/100 11/100)
                             (83/100 18/100 "clojure.png") (94/100 26/100) (62/100 12/100)
                             (52/100 22/100 "python.png") (42/100 13/100) (32/100 20/100)
-                            (22/100 11/100) (12/100 30/100 "javascript.png") (09/100 12/100)
+                            (22/100 11/100) (15/100 30/100 "javascript.png") (09/100 12/100)
                             (80/100 31/100) (65/100 38/100 "typescript.png") (43/100 38/100)
                             (27/100 40/100) (08/100 46/100) (87/100 51/100)
                             (71/100 60/100) (49/100 52/100) (24/100 56/100)
-                            (12/100 62/100 "lua.png") (92/100 60/100 "php.png") (75/100 75/100)
+                            (10/100 62/100 "lua.png") (92/100 60/100 "php.png") (75/100 75/100)
                             (46/100 71/100) (17/100 77/100) (30/100 73/100)
                             (87/100 76/100) (65/100 91/100 "hack.png") (49/100 83/100 "pyre.png")
                             (36/100 53/100 "racket.png")
                             (35/100 85/100) (93/100 89/100 "flow.png")
-                            (59/100 67/100) (11/100 92/100 "thorn.png")
-                            )))
+                            (59/100 67/100) (11/100 92/100 "thorn.png"))))
              (i (in-naturals)))
     (ppict-do acc
       #:go (coord (car xy) (cadr xy) 'cc)
@@ -1205,12 +1204,14 @@
       (values (t venue-str) hb-append)))
   (h-append venue-pict (hb-append @t{ = } base/expt  @t{ measurements})))
 
-(define (make-short-citation str)
+(define (make-short-citation str #:wide? [wide? #false])
   (define bg-color (venue->color (string->symbol (car (regexp-match #rx"[A-Z]+" str)))))
   (add-rounded-border
     #:radius 16 #:x-margin small-x-sep #:y-margin small-y-sep
     #:frame-width 2 #:frame-color black #:background-color bg-color
-    (tcodesize str)))
+    (cc-superimpose
+      (if wide? (ghost (tcodesize "OOPSLA 19")) (blank))
+      (tcodesize str))))
 
 (define (venue->color sym)
   (define conference-color water-color)
@@ -1225,7 +1226,7 @@
 (define (make-long-citation venue-str #:title title-str #:author* author-str*)
   (ht-append
     tiny-x-sep
-    (make-short-citation venue-str)
+    (make-short-citation venue-str #:wide? #true)
     (vl-append
       pico-y-sep
       #;(btcodesize title-str)
@@ -1247,7 +1248,7 @@
       #:draw-border? #true
       #:border-width 1
       #:border-color black)
-    (vl-append (blank 0 tiny-y-sep) (ht-append (blank med-x-sep 0) whole))))
+    (vl-append (blank 0 tiny-y-sep) (ht-append (blank (w%->pixels 6/100) 0) whole))))
 
 (define (make-checklist kv* #:hide? [hide? #false])
   (define text-width (h%->pixels 86/100))
@@ -1501,6 +1502,34 @@
         @t{Ben Greenman}
         @t{2019-11-25}))))
 
+(define (compare-append . pp*)
+  (compare-append* pp*))
+
+(define (compare-append* pp*)
+  (define eq-pict (titlet "~"))
+  (add-rounded-border
+    #:radius 4 #:frame-width 2 #:frame-color black #:x-margin tiny-x-sep #:y-margin tiny-y-sep #:background-color white
+    (for/fold ((acc (car pp*)))
+              ((pp (in-list (cdr pp*))))
+      (hc-append tiny-x-sep acc eq-pict pp))))
+
+(define (apple-pict)
+  (scale-to-fit (fruit-bitmap "apple") 120 120))
+
+(define (pear-pict)
+  (scale-to-fit (fruit-bitmap "pear") 120 120))
+
+(define (orange-pict)
+  (scale-to-fit (fruit-bitmap "orange") 120 120))
+
+(define (fruit-bitmap str)
+  (bitmap (format "src/~a.png" str)))
+
+(define (icon-credit-pict)
+  (hb-append @tcodesize{Icons made by Freepik from Flaticon.com}))
+
+(define fruit-coord (coord 1/2 58/100 'ct))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1511,8 +1540,8 @@
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
     #;(sec:thesis-question)
-    (sec:migratory-typing)
-    (sec:design-space)
+;    (sec:migratory-typing)
+;    (sec:design-space)
 ;    (sec:proposal)
 ;    (sec:plan)
 ;    (sec:timeline)
@@ -1528,11 +1557,19 @@
     #:go center-coord meeting-of-the-waters
     #:go (coord 1/2 20/100 'ct) title-pict)
   (pslide
-    #:go center-coord @t{Committee}
-    )
+    #:go center-coord
+    (vl-append
+      tiny-y-sep
+      @t{Committee:}
+      @t{1. Matthias Felleisen}
+      @t{2. Amal Ahmed}
+      @t{3. Jan Vitek}
+      @t{4. Shriram Krishnamurthi}
+      @t{5. Fritz Henglein}
+      @t{6. Sam Tobin-Hochstadt}))
   (pslide
     #:go center-coord meeting-of-the-waters
-    #:go (coord 1/2 20/100 'ct) title-pict)
+    #:alt [#:go (coord 1/2 20/100 'ct) title-pict])
   (void))
 
 (define mt-code-y 80/100)
@@ -1590,10 +1627,11 @@
     [#:go (coord slide-text-left 20/100 'lt)
      (make-sample-program #f #t 9/10)
      #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
-     @t{How do types restrict}
-     (hb-append @t{ interactions between})
-     (hb-append @t{ } @bt{untyped values})
-     (hb-append @t{ and } @bt{typed values} @t{?})]
+     (vl-append
+       tiny-x-sep
+       @t{What do types mean when}
+       (hb-append @t{ untyped values and})
+       (hb-append @t{ typed values } @bt{interact} @t{?}))]
     #:go center-coord
     (make-2table
       #:col-sep (* 3/2 med-x-sep)
@@ -1610,7 +1648,10 @@
     #:go guarantees-cloud-coord
     (st-cloud "Guarantees?" #:style '())
     #:go performance-cloud-coord
-    (st-cloud "Performance?"))
+    (st-cloud "Performance?")
+    #:go fruit-coord (compare-append (apple-pict) (pear-pict) (orange-pict))
+    #:go (coord 96/100 96/100 'rb)
+    (icon-credit-pict))
   (void))
 
 (define (sec:design-space)
@@ -1634,18 +1675,17 @@
       (make-impl-pict)
       @t{one syntax,}
       @t{different compilers})
-    #:go (coord 1/2 1/2 'ct #:sep tiny-y-sep)
-    (blank)
-    @make-short-citation{ICFP 18}
-    @make-short-citation{OOPSLA 19})
+    #:go fruit-coord (compare-append (apple-pict) (apple-pict))
+    #:go (coord 96/100 96/100 'rb)
+    (icon-credit-pict))
   (pslide
-    ;; #:go heading-text-coord
-    ;; @st{My Past Work}
+    #:go heading-text-coord
+    @st{TODO ???}
 ;    (make-long-citation
 ;      "OOPSLA 18"
 ;      #:title "Collapsible Contracts: Fixing a Pathology of Gradual Typing"
 ;      #:author* '("Daniel Feltey" "Ben Greenman" "Christophe Scholliers" "Robert Bruce Findler" "Vincent St-Amour"))
-    #:go (coord -2/100 05/100 'lt #:sep tiny-y-sep)
+    #:go (coord -2/100 10/100 'lt #:sep tiny-y-sep)
     (make-research-topic
      "Design Space Analysis"
      #:background-color "palegreen"
@@ -2031,6 +2071,5 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go big-landscape-coord
 
   )))))
