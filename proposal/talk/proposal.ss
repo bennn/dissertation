@@ -9,12 +9,15 @@
 ;; - RUN honest types and lying types to build slides
 ;;    (its in parallel of course, but should run --- use to make picture)
 
-;; Meeting of the Waters =
+;; (DONT tho) Meeting of the Waters =
 ;; - Manaus
 ;; - dark Rio Negro
 ;; - sandy Amazon River
 ;; - for 6km = 4mi, run together
 ;; - b/c temperature, speed, water density
+
+;; From MF: "... want real expressiveness as opposed to type system features
+;;  that we throw in and maybe someone needs ..."
 
 (require
   file/glob
@@ -33,6 +36,7 @@
   (only-in scribble-abbrevs/scribble authors*)
   (only-in images/icons/symbol check-icon x-icon)
   (only-in images/icons/misc clock-icon)
+  (only-in 2htdp/planetcute gem-blue)
   images/icons/style
 )
 
@@ -87,6 +91,7 @@
 (define bg-accent-color (color%-update-alpha timeline-span-color 5/10))
 (define topbar-accent-color (color%-update-alpha (string->color% "medium slate blue") 5/10))
 (define pipe-color (hex-triplet->color% #xA6AF60))
+(define city-color (hex-triplet->color% #x302E22))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -99,7 +104,7 @@
 (define complete-monitoring-color (hex-triplet->color% #xFFFFFF))
 (define honest-color LIGHT-RED)
 (define lying-color BLUE)
-(define vacuous-color uni-sound-color)
+(define vacuous-color (hex-triplet->color% #x777777))
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -108,6 +113,10 @@
 (define tag-sound-str "Tag Soundness")
 (define type-sound-str "Type Soundness")
 (define complete-monitoring-str "Complete Monitoring")
+
+;; TODO how does CM relate to GTT
+;; TODO equal-width bubble table
+;; TODO change Unitype ... Target?
 
 (define uni-sound-tag 'uni-sound)
 (define tag-sound-tag 'tag-sound)
@@ -351,7 +360,7 @@
   (make-landscape-background big-landscape-w big-landscape-h))
 
 (define hyrule-landscape
-  (cc-superimpose (make-big-landscape-background) (inset/clip (bitmap "src/hyrule.png") -1 -6)))
+  (cc-superimpose (make-big-landscape-background) @st{???} #;(inset/clip (bitmap "src/hyrule.png") -1 -6)))
 
 (define (make-performance-landscape)
   hyrule-landscape)
@@ -429,6 +438,7 @@
     (ppict-do acc
       #:go (coord (car xy) (cadr xy) 'cc)
       (if (null? (cddr xy))
+        ;; TODO why no black flags?
         (make-simple-flag the-flag-base
           #:flag-background-color (rgb-triplet->color% (->pen-color i))
           #:flag-brush-style 'horizontal-hatch
@@ -469,6 +479,7 @@
   (bitmap "src/neu-small.png"))
 
 (define meeting-of-the-waters
+  (blank) #;
   (bitmap "src/meeting-of-the-waters.jpg"))
 
 (define the-Q (hb-append 0 (huge-t "Q") (big-t ". ")))
@@ -870,13 +881,12 @@
       (else (raise-argument-error 'add-axis-arrow "(or/c 'x 'y)" 1 p xy))))
   (pin-arrow-line 20 p p lb-find p find-dest #:line-width 6))
 
-(define (add-overhead-axis-labels pp [legend? #t] #:margin [pre-margin #f])
-  (define margin (or pre-margin 20))
+(define (add-overhead-axis-labels pp [legend? #t])
   (define y-label (tcodesize "Overhead"))
   (define x-label (tcodesize "Num. Types"))
   (define fp (frame-plot pp))
   (if legend?
-    (ht-append margin y-label (vr-append margin fp x-label))
+    (ht-append pico-x-sep y-label (vr-append pico-y-sep fp x-label))
     fp))
 
 (define example-plot-w 240)
@@ -889,6 +899,7 @@
   (bitmap (clock-icon 0 15 #:height height #:face-color white #:hand-color "darkblue")))
 
 (define (make-sieve-pict)
+  ;; TODO add lattice next door
   (define plot (bitmap "src/sieve.png"))
   (ppict-do plot
     #:go (coord 0 0 'rt) (make-clock 50)
@@ -1088,6 +1099,8 @@
   (make-overhead-plot '(H 1) example-plot-w #:legend? #f))
 
 (define math-warning-pict
+  ;; TODO more screenshot screenshot
+  ;; TODO highlight 25-50x
   (add-rounded-border
     #:radius 2 #:frame-width 2 (bitmap "src/array-warning.png")))
 
@@ -1470,12 +1483,13 @@
 (define example-api-code*
   (list
     (hb-append @ct{(provide})
-    (hb-append @ct{  fold-file : (All (A) (-> Path A (-> Str A A) A)))})
-    (hb-append @ct{ })
+    (hb-append @ct{  fold-file : (All (Acc) (-> Path Acc})
+    (hb-append @ct{                           (-> Acc Str Acc) Acc)))})
     (hb-append @ct{(require Library)})))
 
 (define example-library-code*
   (list
+    ;; TODO dense code
     (hb-append @ct{(define (fold-file path acc f)})
     (hb-append @ct{  ;; read `ln` from file})
     (hb-append @ct{  ... (f ln acc) ...)})))
@@ -1535,22 +1549,36 @@
 
 (define fruit-coord (coord 1/2 61/100 'ct))
 
+(define (make-goal+problem-table [y-sep med-y-sep])
+  (table 3
+    (list
+      @sbt{Goal} @st{=} @st{Migratory Typing}
+      @sbt{Problem} @st{=} @st{Performance})
+    lc-superimpose cc-superimpose tiny-x-sep y-sep))
+
+(define (make-city-dot str #:tag [tag #f])
+  (define d
+    (let ((base-d (disk 16 #:draw-border? #f #:color city-color)))
+      (if tag (tag-pict base-d tag) base-d)))
+  (vc-append pico-y-sep d (bt str)))
+
+(define mt-code-y 80/100)
+
 ;; =============================================================================
 
 (define (do-show)
   (set-page-numbers-visible! #true)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-;  (sec:title)
+  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    #;(sec:thesis-question)
-;    (sec:migratory-typing)
-;    (sec:design-space)
-;    (sec:proposal)
-;    (sec:plan)
-;    (sec:timeline)
-;    (pslide)
+    (sec:migratory-typing)
+    (sec:design-space)
+    (sec:proposal)
+    (sec:plan)
+    (sec:timeline)
+    (pslide)
     (sec:QA)
     (void)))
 
@@ -1566,29 +1594,26 @@
     (vl-append
       tiny-y-sep
       @t{Committee:}
-      @t{1. Matthias Felleisen}
-      @t{2. Amal Ahmed}
-      @t{3. Jan Vitek}
-      @t{4. Shriram Krishnamurthi}
-      @t{5. Fritz Henglein}
-      @t{6. Sam Tobin-Hochstadt}))
+      @t{  1. Matthias Felleisen}
+      @t{  2. Amal Ahmed}
+      @t{  3. Jan Vitek}
+      @t{  4. Shriram Krishnamurthi}
+      @t{  5. Fritz Henglein}
+      @t{  6. Sam Tobin-Hochstadt}))
   (pslide
     #:go center-coord meeting-of-the-waters
-    #:alt [#:go (coord 1/2 20/100 'ct) title-pict])
-  (void))
-
-(define mt-code-y 80/100)
-
-(define motivation-x-l 22/100)
-(define motivation-x-r 78/100)
-(define motivation-y 18/100)
-
-(define (sec:thesis-question)
-  (make-transition-slide
-    "Preview: Thesis Question")
+    #:go (coord 1/2 20/100 'ct) title-pict)
   (pslide
-    #:go (coord slide-text-left 10/100 'lt)
-    (make-thesis-question #t))
+    #:go center-coord
+    (parameterize ((plot-decorations? #f))
+      (plot3d-pict
+        (list
+          (lines3d (vector (vector 0 0 0) (vector 9 0 0)))
+          (lines3d (vector (vector 0 0 0) (vector 0 9 0)))
+          (lines3d (vector (vector 0 0 0) (vector 0 0 9))))
+        #:x-min -5 #:x-max 10
+        #:y-min -5 #:y-max 10
+        #:z-min -5 #:z-max 10)))
   (void))
 
 (define (sec:migratory-typing)
@@ -1597,26 +1622,25 @@
   (pslide
     #:go heading-text-coord
     @sbt{Migratory Typing}
-    #:next
     #:go (coord slide-text-left 14/100 'lt)
     @t{Add types to a dynamically-typed language}
     #:go (coord 75/100 mt-code-y 'cb)
     (add-caption "Mixed-Typed code" (make-sample-program #f #f))
-    #:alt
-    [#:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
+    #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
      (vl-append
        med-y-sep
        (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
        (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
-       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)}))]
-    #:go (coord 25/100 mt-code-y 'cb)
-    (add-caption "Untyped code" (make-sample-program #t #f))
-    #:go center-coord (make-migration-arrow))
+       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)}))
+    ;; #:go (coord 25/100 mt-code-y 'cb)
+    ;; (add-caption "Untyped code" (make-sample-program #t #f))
+    ;; #:go center-coord (make-migration-arrow)
+    )
   (pslide
     #:go heading-text-coord
     @st{Motivation}
     #:go center-coord
-    @t{Because untyped code exists.})
+    @t{Because lots of untyped code exists.})
   (pslide
     #:go heading-text-coord
     @st{Landscape of Models and Implementations}
@@ -1654,6 +1678,8 @@
     (st-cloud "Guarantees?" #:style '())
     #:go performance-cloud-coord
     (st-cloud "Performance?")
+    #:next
+    ;; TODO lower fruit coord
     #:go fruit-coord (compare-append (apple-pict) (pear-pict) (orange-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
@@ -1670,6 +1696,7 @@
     #:next
     #:go guarantees-cloud-coord
     (text-cloud
+      ;; TODO diffeernt bg color
       "Guarantees"
       (make-model-pict)
       @t{one syntax, many}
@@ -1681,6 +1708,7 @@
       (make-impl-pict)
       @t{one syntax, many}
       @t{type-compilers})
+    #:next
     #:go fruit-coord (compare-append (apple-pict) (apple-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
@@ -1696,29 +1724,29 @@
      "Design Space Analysis"
      #:background-color "palegreen"
      (make-long-citation
-       "ICFP 18"
-       #:title "A Spectrum of Type Soundness and Performance"
-       #:author* '("Ben Greenman" "Matthias Felleisen"))
-     (make-long-citation
        "OOPSLA 19"
        #:title "Complete Monitors for Gradual Types"
-       #:author* '("Ben Greenman" "Matthias Felleisen" "Christos Dimoulas")))
+       #:author* '("Ben Greenman" "Matthias Felleisen" "Christos Dimoulas"))
+     (make-long-citation
+       "ICFP 18"
+       #:title "A Spectrum of Type Soundness and Performance"
+       #:author* '("Ben Greenman" "Matthias Felleisen")))
     #:next
     (make-research-topic
       "Performance Evaluation"
       #:background-color "lightblue"
       (make-long-citation
-        "POPL 16"
-        #:title "Is Sound Gradual Typing Dead?"
-        #:author* '("Asumu Takikawa" "Daniel Feltey" "Ben Greenman" "Max S. New" "Jan Vitek" "Matthias Felleisen"))
+        "JFP 19"
+        #:title "How to Evaluate the Performance of Gradual Type Systems"
+        #:author* '("Ben Greenman" "Asumu Takikawa" "Max S. New" "Daniel Feltey" "Robert Bruce Findler" "Jan Vitek" "Matthias Felleisen"))
       (make-long-citation
         "PEPM 18"
         #:title "On the Cost of Type-Tag Soundness"
         #:author* '("Ben Greenman" "Zeina Migeed"))
       (make-long-citation
-        "JFP 19"
-        #:title "How to Evaluate the Performance of Gradual Type Systems"
-        #:author* '("Ben Greenman" "Asumu Takikawa" "Max S. New" "Daniel Feltey" "Robert Bruce Findler" "Jan Vitek" "Matthias Felleisen"))))
+        "POPL 16"
+        #:title "Is Sound Gradual Typing Dead?"
+        #:author* '("Asumu Takikawa" "Daniel Feltey" "Ben Greenman" "Max S. New" "Jan Vitek" "Matthias Felleisen"))))
   (pslide
     #:go heading-text-coord (hb-append @st{Landscape: } @sbt{Guarantees})
     #:alt [#:go big-landscape-coord (make-big-landscape-background)]
@@ -1865,7 +1893,10 @@
   (void))
 
 (define (sec:proposal)
+  (make-transition-slide
+    "Thesis Question")
   (pslide
+    ;; TODO octopus
     #:go center-coord
     #:alt
     [(scale-to-fit
@@ -1874,15 +1905,9 @@
          (make-theorem-landscape)
          (make-performance-landscape))
        client-w client-h)
-     #:go (coord 1/2 8/100 'ct)
+     #:go (coord 1/2 4/100 'ct)
      (scale (make-tree 270 220 mixed-program-code* #:arrows? #f) 7/10)]
-    (table 3
-      (list
-        @sbt{Goal} @st{=} @st{Migratory Typing}
-        @sbt{Problem} @st{=} @st{Performance})
-      lc-superimpose cc-superimpose tiny-x-sep med-y-sep))
-  (make-transition-slide
-    "Thesis Question")
+    (make-goal+problem-table))
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
@@ -1915,13 +1940,12 @@
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go (coord slide-text-left benefits-below-bar-y 'lt #:sep (h%->pixels 7/100))
     @t{1. Begin with Natural types}
-    (hb-append @t{2. } (tag-pict @t{Switch to Transient to recover} 'L1))
+    (hb-append @t{2. } @t{Switch to Transient for performance})
     @t{3. Revisit Natural for debugging}
-    (hb-append @t{4. } (tag-pict @t{Return to Natural after typing all} 'L2))
-    #:go (at-find-pict 'L1 lb-find 'lt #:abs-y pico-y-sep)
-    @t{performance}
-    #:go (at-find-pict 'L2 lb-find 'lt #:abs-y pico-y-sep)
-    @t{critical boundaries}
+    (vl-append
+      tiny-y-sep
+      (hb-append @t{4. } @t{Return to Natural after typing all})
+      @t{    critical boundaries})
     )
   (pslide
     #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
@@ -1935,10 +1959,11 @@
       @t{Changing a library to Transient may improve}
       @t{overall performance (for typed and untyped)}))
   (pslide
-    #:go heading-text-coord @st{Benefits (3/3): Expressiveness}
+    #:go heading-text-coord @st{Benefits (3/3): Compatibility}
     #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    #:go (coord 1/2 30/100 'ct #:sep (h%->pixels 7/100))
+    ;; TODO good y value?
+    #:go (coord 1/2 35/100 'ct #:sep (h%->pixels 7/100))
     #:alt
     [(ht-append
        small-x-sep
@@ -1947,14 +1972,17 @@
          (list
            @ct{(define stx}
            @ct{  #`#,(vector 0 1))}
+           @ct{ }
            @ct{(provide stx)}))
        (make-untyped-codeblock*
          #:title "Client" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
          (list
            @ct{(require Library)}
+           @ct{ }
            @ct{stx})))
      #:next
-     (hb-append ((make-string->text #:font (cons 'bold body-font) #:size body-size #:color "red")"Error")
+     ;; TODO compile-time
+     (hb-append ((make-string->text #:font (cons 'bold body-font) #:size body-size #:color "red") "RuntimeError")
                 @t{: could not convert type to a contract})]
     (vc-append
       tiny-y-sep
@@ -2032,9 +2060,7 @@
     (tag-pict (vc-append (h%->pixels 1/10) (blank) (make-benefits-boundary-pict)) 'bp)
     #:next
     #:go (at-find-pict 'bp ct-find 'ct)
-    (add-rounded-border
-      #:x-margin med-x-sep #:y-margin med-y-sep
-      #:frame-width 5 #:frame-color black #:background-color program-color
+    (large-rounded-border
       @t{How to find?}))
   (pslide
     #:go heading-text-coord
@@ -2101,8 +2127,58 @@
   ;; - why not sampling
   ;; - 
   (pslide
-    #:go center-coord
-    @t{Goal, Problem})
+    ;; TODO make octopus? not sure
+    ;; TODO shout-outs to Grift, Nom, Pycket? ask MF
+    #:go (coord slide-text-left slide-top 'lt #:sep small-y-sep)
+    (large-rounded-border
+      (make-goal+problem-table small-y-sep))
+    #:next
+    @t{What can be done?}
+    #:next
+    (tag-pict (hb-append @t{   } @bt{A} @t{. Design a new language}) 'A)
+    (tag-pict (hb-append @t{   } @bt{B} @t{. Build a new compiler}) 'B)
+    (tag-pict (hb-append @t{   } @bt{C} @t{. Improve an existing compiler}) 'C)
+    (tag-pict (hb-append @t{   } @bt{D} @t{. Interoperate with a weaker semantics}) 'D))
+
+  (pslide
+    #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
+    (make-research-topic
+     "Expressiveness"
+     #:background-color "plum"
+     (make-long-citation
+       "DLS 18"
+       #:title "The Behavior of Gradual Types: A User Study"
+       #:author* '("Preston Tunnell Wilson" "Ben Greenman" "Justin Pombrio" "Shriram Krishnamurthi"))))
+
+  (pslide
+    #:go big-landscape-coord
+    #:alt
+    [(make-big-landscape-background)]
+    #:alt
+    [(ppict-do
+       (make-big-landscape-background)
+       #:go (coord 4/100 14/100 'lc)
+       (vc-append (bitmap gem-blue) @t{GTT}))]
+    (ppict-do
+      (make-big-landscape-background)
+      #:go (coord 4/100 10/100 'lt)
+      (make-city-dot "Natural" #:tag 'natural)
+      #:go (coord 26/100 50/100 'ct)
+      (make-city-dot "")
+      #:go (coord 40/100 44/100 'ct)
+      (make-city-dot "")
+      #:go (coord 34/100 64/100 'ct)
+      (make-city-dot "")
+      #:go (coord 80/100 28/100 'ct)
+      (make-city-dot "Transient" #:tag 'transient)
+      #:go (coord 90/100 1 'rb)
+      (make-city-dot ""))
+    #:next
+    #:set (let ((pp ppict-do-state))
+            (add-program-arrow pp (program-arrow 'natural rc-find 'transient lc-find 0 0 7/10 7/10 black) #:hide? #true)))
+  (pslide
+    ;; TODO show code that built a slide, with honest and lying
+    )
   #;(pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
