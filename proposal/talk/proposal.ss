@@ -5,7 +5,6 @@
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
-;; - Q/A slide
 ;; - RUN honest types and lying types to build slides
 ;;    (its in parallel of course, but should run --- use to make picture)
 
@@ -109,14 +108,10 @@
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
 
-(define uni-sound-str "Unitype Soundness")
+(define uni-sound-str "Dyn Soundness")
 (define tag-sound-str "Tag Soundness")
 (define type-sound-str "Type Soundness")
 (define complete-monitoring-str "Complete Monitoring")
-
-;; TODO how does CM relate to GTT
-;; TODO equal-width bubble table
-;; TODO change Unitype ... Target?
 
 (define uni-sound-tag 'uni-sound)
 (define tag-sound-tag 'tag-sound)
@@ -218,7 +213,7 @@
 (define bigct (make-string->code #:size (- body-size 4)))
 (define cbt (make-string->text #:font (cons 'bold code-font) #:size code-size #:color black))
 (define ckwdt cbt)
-(define ctypet ct) ;; TODO pict type color (make-string->text #:font (cons 'bold code-font) #:size code-size #:color racket-blue))
+(define ctypet ct)
 (define tcodesize (make-string->body #:size code-size))
 (define tsmaller (make-string->body #:size (- body-size 4)))
 (define lang-text (make-string->code #:size 32))
@@ -390,7 +385,6 @@
     (define old-brush (send dc get-brush))
     (define old-pen (send dc get-pen))
     (send dc set-pen (new pen% [width 0] [color c]))
-    ;; TODO better way to draw curves
     (for ((brush (in-list
                    (list
                      (new brush% [style 'solid] [color white])
@@ -420,6 +414,7 @@
 
 (define (make-implementation-landscape)
   (define the-flag-base (blank 18 4))
+  (define num-colors 7)
   (for/fold ((acc (make-big-landscape-background)))
             ((xy (in-list '((89/100 07/100) (73/100 11/100)
                             (83/100 18/100 "clojure.png") (94/100 26/100) (62/100 12/100)
@@ -438,11 +433,10 @@
     (ppict-do acc
       #:go (coord (car xy) (cadr xy) 'cc)
       (if (null? (cddr xy))
-        ;; TODO why no black flags?
         (make-simple-flag the-flag-base
-          #:flag-background-color (rgb-triplet->color% (->pen-color i))
+          #:flag-background-color (rgb-triplet->color% (->pen-color (modulo i num-colors)))
           #:flag-brush-style 'horizontal-hatch
-          #:flag-border-color (rgb-triplet->color% (->pen-color i))
+          #:flag-border-color (rgb-triplet->color% (->pen-color (modulo i num-colors)))
           #:pole-height 70)
         (scale-to-fit (bitmap (build-path "src" "lang" (caddr xy))) 90 90)))))
 
@@ -771,13 +765,20 @@
 (define (make-complete-monitoring-bubble)
   (make-property-bubble complete-monitoring-str complete-monitoring-color))
 
+(define widest-region-label
+  (make-region-label
+    (t
+      (for/fold ((acc #f))
+                ((str (in-list (list uni-sound-str tag-sound-str type-sound-str complete-monitoring-str))))
+        (if (or (not acc) (< (string-length acc) (string-length str))) str acc)))))
+
 (define (make-property-bubble lbl-str color)
   (define lbl-pict (make-region-label (t lbl-str)))
   (add-rounded-border
     #:radius 4 #:x-margin tiny-x-sep #:y-margin (h%->pixels 8/100)
     #:background-color color
     #:frame-color black #:frame-width region-border-width
-    lbl-pict))
+    (lc-superimpose (ghost widest-region-label) lbl-pict)))
 
 (define (descr-append . pp*)
   (descr-append* pp*))
@@ -899,11 +900,17 @@
   (bitmap (clock-icon 0 15 #:height height #:face-color white #:hand-color "darkblue")))
 
 (define (make-sieve-pict)
-  ;; TODO add lattice next door
   (define plot (bitmap "src/sieve.png"))
+  ;; TODO add lattice? idk ... try practice without first
+  ;(hc-append
+  ;  small-x-sep
+  ;  (let* ((point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
+  ;         (v (vc-append tiny-y-sep (cadr point*) (caddr point*)))
+  ;         (hv (hc-append tiny-x-sep (car point*) v (car (cdddr point*)))))
+  ;    (scale hv 1/2)))
   (ppict-do plot
-    #:go (coord 0 0 'rt) (make-clock 50)
-    #:go (coord 1 1 'lb) (scale T-node 55/100)))
+    #:go (coord -1/100 0 'rt) (make-clock 50)
+    #:go (coord 101/100 1 'lb) (scale T-node 55/100)))
 
 (define (sample-disk sym)
   (define color (if sym (symbol->color sym) "dark gray"))
@@ -1099,10 +1106,7 @@
   (make-overhead-plot '(H 1) example-plot-w #:legend? #f))
 
 (define math-warning-pict
-  ;; TODO more screenshot screenshot
-  ;; TODO highlight 25-50x
-  (add-rounded-border
-    #:radius 2 #:frame-width 2 (bitmap "src/array-warning.png")))
+  (scale-to-fit (bitmap "src/array-warning.png") (w%->pixels 9/10) client-h))
 
 (define design-cloud-y 20/100)
 
@@ -1952,7 +1956,9 @@
     #:go benefits-pict-coord (scale (make-benefit-library-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go (coord 1/2 benefits-below-bar-y 'ct #:sep tiny-y-sep)
-    #:alt [math-warning-pict]math-warning-pict
+    #:alt
+    [(hb-append @bigct{math/array} @t{: "25 to 50 times slower"})
+     math-warning-pict]
     (vl-append
       tiny-y-sep
       (blank)
@@ -2185,6 +2191,10 @@
     #:go slide-text-coord
     @t{- lack of synergy ... ST too slow}
     @t{- elim. form error messages})
+  #;(pslide
+    how does cm relate to gtt? conjecture "equal"
+    if sat. cm, then can model gtt
+    if model, then can prove cm for the semantics)
   (void))
 
 ;; =============================================================================
@@ -2197,5 +2207,6 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
+    #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
 
   )))))
