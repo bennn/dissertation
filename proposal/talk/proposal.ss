@@ -1,5 +1,7 @@
 #lang at-exp slideshow
 
+(define PREVIEW #t)
+
 ;; image-color.com
 ;; /Users/ben/code/racket/gtp/shallow/gf-icfp-2018/talk/simple.ss
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
@@ -106,7 +108,7 @@
 (define vacuous-color (hex-triplet->color% #x777777))
 
 (define no-box-color (hex-triplet->color% #xCCCCCC))
-(define yes-box-color (hex-triplet->color% #x69f547) #;"lime green")
+(define yes-box-color white #;(hex-triplet->color% #x69f547) #;"lime green")
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -223,7 +225,7 @@
 (define blang-text (make-string->text #:font (cons 'bold code-font) #:size 32 #:color black))
 (define captiont (make-string->body #:size caption-size #:color black))
 (define (ownership-text str #:color [color black]) ((make-string->text #:font "PilGi" #:size 40 #:color color) str))
-(define huge-t (make-string->body #:size 80))
+(define huge-t (make-string->text #:font tu-font #:size 80 #:color black))
 (define big-t (make-string->body #:size big-body-size))
 (define big-tb (make-string->text #:font (cons 'bold body-font) #:size big-body-size #:color black))
 
@@ -358,7 +360,7 @@
   (make-landscape-background big-landscape-w big-landscape-h))
 
 (define hyrule-landscape
-  (cc-superimpose (make-big-landscape-background) @st{???} #;(inset/clip (bitmap "src/hyrule.png") -1 -6)))
+  (cc-superimpose (make-big-landscape-background) (if PREVIEW @st{???} (inset/clip (bitmap "src/hyrule.png") -1 -6))))
 
 (define (make-performance-landscape)
   hyrule-landscape)
@@ -476,8 +478,7 @@
   (bitmap "src/neu-small.png"))
 
 (define meeting-of-the-waters
-  (blank) #;
-  (bitmap "src/meeting-of-the-waters.jpg"))
+  (if PREVIEW (blank) (bitmap "src/meeting-of-the-waters.jpg")))
 
 (define the-Q (hb-append 0 (huge-t "Q") (big-t ". ")))
 
@@ -496,11 +497,9 @@
   (apply hb-append 0 pp*))
 
 (define (make-thesis-question bold?)
-  ;; TODO prettier ... maybe use fancy Q
   (define txt-pict
     (vl-append
       tiny-y-sep
-      (blank)
       (line-append (tag-pict @big-t{Does  } 'qstart) (if bold? the-mt-b the-mt) @big-t{  benefit})
       (line-append @big-t{from a combination of  } (if bold? the-h-b the-h))
       (line-append @big-t{and  } (if bold? the-l-b the-l) @big-t{  types?})))
@@ -937,7 +936,6 @@
     #:go (coord 98/100 48/100 'rc) (tcodesize ".")))
 
 (define (make-timeline-span h label)
-  ;; TODO maybe a gradient for these?
   (define span-radius 7)
   (define bar-pict (filled-rounded-rectangle 25 h span-radius #:color timeline-span-color #:draw-border? #f))
   (define label-pict (ct label))
@@ -1609,6 +1607,7 @@
 (define (make-origin-coord align [abs-x 0] [abs-y 0]) (coord 40/100 6/10 align #:abs-x abs-x #:abs-y abs-y))
 
 (define (make-outline-square)
+  ;; TODO cube
   (define c (string->color% "LightSkyBlue"))
   (define w (w%->pixels 15/100))
   (filled-rectangle w w #:color (color%-update-alpha c 8/10) #:draw-border? #f #;(#:border-width 4 #:border-color c)))
@@ -1631,10 +1630,36 @@
 (define (add-research-arrow pp spec #:style [style 'solid])
   (add-program-arrow pp spec #:style style #:line-width 6 #:arrow-size 20))
 
+(define (honest-lying-rect w h)
+  (define c0 honest-color)
+  (define c1 white)
+  (define c2 lying-color)
+  (define (draw-rect dc dx dy)
+    (define old-brush (send dc get-brush))
+    (define old-pen (send dc get-pen))
+    (define x-mid (+ dx (* w 1/2)))
+    (send dc set-pen (new pen% [width 1] [color black]))
+    (send dc set-brush
+          (new brush%
+               [gradient
+                 (new linear-gradient%
+                      [x0 x-mid] [y0 dy]
+                      [x1 x-mid] [y1 (+ dy h)]
+                      [stops `((0 ,c0)
+                               (55/100 ,c1)
+                               (65/100 ,c1)
+                               (1 ,c2))])]))
+    (define path (new dc-path%))
+    (send path rectangle 0 0 w h)
+    (send dc draw-path path dx dy)
+    (send dc set-pen old-pen)
+    (send dc set-brush old-brush))
+  (dc draw-rect w h))
+
 ;; =============================================================================
 
 (define (do-show)
-  (set-page-numbers-visible! #true)
+  (set-page-numbers-visible! PREVIEW)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
   (sec:title)
@@ -1708,7 +1733,7 @@
     @sbt{Migratory Typing}
     #:go (coord slide-text-left 14/100 'lt)
     @t{Add types to a dynamically-typed language}
-    #:go (coord 75/100 mt-code-y 'cb)
+    #:go (coord 75/100 (+ 4/100 mt-code-y) 'cb)
     (add-caption "Mixed-Typed code" (make-sample-program #f #f 1))
     #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
      (vl-append
@@ -2011,6 +2036,8 @@
                               (program-arrow 'problem-S lb-find 'weak-lang-N ct-find (* 55/100 turn) (* 3/4 turn) 80/100 25/100 black)
                               #:style 'dot))
   (pslide
+    #:go (coord 1/2 6/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 65/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
     #:next
@@ -2118,6 +2145,8 @@
   (make-transition-slide
     "To Do")
   (pslide
+    #:go (coord 1/2 6/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
     (make-thesis-question #f)
     #:next
@@ -2263,7 +2292,12 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-
-
+    #:go (coord 1/2 6/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
+    #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
+    (make-thesis-question #f)
+    #:next
+    @t{  Q1. Can honest and lying types coexist?}
+    @t{  Q2. Are the benefits measurably significant?}
 
   )))))
