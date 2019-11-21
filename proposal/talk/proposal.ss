@@ -81,12 +81,12 @@
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 (define sea-color (hex-triplet->color% #x84CEB3))
-(define storm-color (string->color% "Dark Gray"))
+(define storm-color (hex-triplet->color% #xBBBBBB) #;(string->color% "Dark Gray"))
 (define water-color (hex-triplet->color% #x7CCCB1))
 (define LIGHT-RED (string->color% "Tomato"))
 (define GREEN (string->color% "mediumseagreen"))
 (define BLUE (string->color% "cornflowerblue"))
-(define timeline-span-color (color%-update-alpha (string->color% "lightslategray") 0.9))
+(define timeline-span-color (color%-update-alpha (string->color% "cadetblue") 0.8))
 (define bg-accent-color (color%-update-alpha timeline-span-color 5/10))
 (define topbar-accent-color (color%-update-alpha (string->color% "medium slate blue") 5/10))
 (define pipe-color (hex-triplet->color% #xA6AF60))
@@ -104,6 +104,9 @@
 (define honest-color LIGHT-RED)
 (define lying-color BLUE)
 (define vacuous-color (hex-triplet->color% #x777777))
+
+(define no-box-color (hex-triplet->color% #xCCCCCC))
+(define yes-box-color (hex-triplet->color% #x69f547) #;"lime green")
 
 (define (tagof str) (string-append "⌊" str "⌋"))
 (define tag-T (tagof "T"))
@@ -320,8 +323,8 @@
 (define untyped-program-code* '(#f #f #f #f #f))
 (define mixed-program-code* '(#f #t #f #f #t))
 
-(define program-w (w%->pixels 35/100))
-(define program-h (h%->pixels 45/100))
+(define program-w (w%->pixels 30/100))
+(define program-h (h%->pixels 40/100))
 
 (define big-landscape-w (* 7/10 client-w))
 (define big-landscape-h (* 55/100 client-h))
@@ -552,6 +555,10 @@
 (define (make-untyped-icon  #:font-size [font-size #f] #:width [w #f] #:height [h #f])
   (make-tu-icon "U" #:font-size font-size #:width w #:height h))
 
+(define (make-lang-pict str)
+  (define pp (make-tu-icon str))
+  (make-module-pict pp #:radius 60 #:bg-color "peachpuff" #:x-margin small-x-sep #:y-margin tiny-x-sep))
+
 (define (make-tu-icon str #:font-size [pre-font-size #f] #:width [pre-w #f] #:height [pre-h #f])
   (define font-size (or pre-font-size tu-size))
   (define w (or pre-w 70))
@@ -736,11 +743,11 @@
     react-pict))
 
 (define (make-sample-program untyped? arrow? [scale-by 8/10])
-  (scale
-    (make-program-pict
-      #:bg-color white #:frame-color black
-      (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?))
-    scale-by))
+  (make-program-pict
+    #:bg-color white #:frame-color black
+    (scale
+      (make-tree program-w program-h (if untyped? untyped-program-code* mixed-program-code*) #:arrows? arrow?)
+      scale-by)))
 
 (define (add-cloud-background pp #:color [pre-color #f] #:x-margin [pre-x-margin #f] #:y-margin [pre-y-margin #f] #:style [pre-style #f])
   (define x-margin (or pre-x-margin pico-x-sep))
@@ -900,17 +907,19 @@
   (bitmap (clock-icon 0 15 #:height height #:face-color white #:hand-color "darkblue")))
 
 (define (make-sieve-pict)
-  (define plot (bitmap "src/sieve.png"))
-  ;; TODO add lattice? idk ... try practice without first
-  ;(hc-append
-  ;  small-x-sep
-  ;  (let* ((point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
-  ;         (v (vc-append tiny-y-sep (cadr point*) (caddr point*)))
-  ;         (hv (hc-append tiny-x-sep (car point*) v (car (cdddr point*)))))
-  ;    (scale hv 1/2)))
-  (ppict-do plot
-    #:go (coord -1/100 0 'rt) (make-clock 50)
-    #:go (coord 101/100 1 'lb) (scale T-node 55/100)))
+  (define base-plot (bitmap "src/sieve.png"))
+  (define full-plot
+    (ppict-do base-plot
+      #:go (coord -1/100 0 'rt) (make-clock 50)
+      #:go (coord 101/100 1 'lb) (scale T-node 55/100)))
+  (define mini-w (w%->pixels 2/10))
+  (define mini-h (h%->pixels 3/10))
+  (define lattice-pict
+    (let* ((point* (for*/list ((a (in-list '(U T))) (b (in-list '(U T)))) (make-lattice-point a b)))
+           (h (hc-append small-x-sep (car point*) (car (cdddr point*))))
+           (hv (vc-append tiny-y-sep (cadr point*) h (caddr point*))))
+      (scale-to-fit hv mini-w mini-h)))
+  (hb-append small-x-sep (cc-superimpose (blank mini-w mini-h) lattice-pict) full-plot))
 
 (define (sample-disk sym)
   (define color (if sym (symbol->color sym) "dark gray"))
@@ -1116,11 +1125,17 @@
 (define (text-cloud str label-pict . pp*)
   (define txt-pict (apply vl-append tiny-y-sep pp*))
   (define title-pict (sbt str))
-  (thin-rounded-border
-    (vc-append
-      pico-y-sep
-      (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
-      txt-pict)))
+  (define radius 8)
+  (add-rounded-border
+      #:frame-width 0 #:frame-color black #:background-color white #:radius radius
+      #:x-margin 0 #:y-margin 0
+    (add-rounded-border
+      #:frame-width 3 #:frame-color black #:background-color bg-accent-color
+      #:radius radius #:x-margin small-x-sep #:y-margin small-y-sep
+      (vc-append
+        pico-y-sep
+        (hc-append small-y-sep title-pict (scale-to-fit label-pict 80 80))
+        txt-pict))))
 
 (define (large-rounded-border pp #:bg-color [bg-color #f])
   (my-rounded-border pp 4 #:bg-color bg-color))
@@ -1295,7 +1310,6 @@
                          (pp (if hide? (ghost pp) pp)))
                     pp))))))
         (cons k-pict v-pict))))
-  ;; TODO color is a little boring, but otherwise this is OK
   (add-rounded-border
     #:radius 1 #:frame-width 1 #:frame-color black #:x-margin tiny-x-sep #:y-margin small-y-sep
     #:background-color sand-color
@@ -1348,7 +1362,7 @@
     #:go (coord 80/100 1/2 'cc) (scale-topbar (make-benefit-compatibility-pict))))
 
 (define benefits-bar-coord (coord 1/2 18/100 'ct))
-(define benefits-below-bar-y 30/100)
+(define benefits-below-bar-y 34/100)
 (define benefits-pict-coord (coord 93/100 slide-top 'rt))
 
 (define (make-library-octopus)
@@ -1493,10 +1507,10 @@
 
 (define example-library-code*
   (list
-    ;; TODO dense code
     (hb-append @ct{(define (fold-file path acc f)})
-    (hb-append @ct{  ;; read `ln` from file})
-    (hb-append @ct{  ... (f ln acc) ...)})))
+    (hb-append @ct{  ... ; read `ln` from `path`})
+    (hb-append @ct{  ... (f ln acc) ...})
+    (hb-append @ct{  ...)})))
 
 (define-values [example-library-code example-api-code example-client-code]
   (make-example-codeblocks example-library-code* example-api-code* example-client-code*))
@@ -1551,7 +1565,7 @@
 (define (icon-credit-pict)
   (hb-append @tcodesize{Icons made by Freepik from Flaticon.com}))
 
-(define fruit-coord (coord 1/2 61/100 'ct))
+(define fruit-coord (coord 1/2 68/100 'ct))
 
 (define (make-goal+problem-table [y-sep med-y-sep])
   (table 3
@@ -1568,6 +1582,55 @@
 
 (define mt-code-y 80/100)
 
+(define (color-text str #:color color)
+  ((make-string->text #:font (cons 'bold body-font) #:size body-size #:color color) str))
+
+(define stx-compile-txt
+  (hb-append @t{Type Check: } (color-text "Ok" #:color "ForestGreen")))
+
+(define stx-run-txt
+  (hb-append @t{Runtime: } (color-text "Error" #:color "red") @t{ could not convert type to a contract}))
+
+(define (make-thesis-proposal name day)
+  (define pp
+    (frame
+      (bitmap (build-path "src" (format "~a.jpg" name)))
+      #:line-width 4))
+  (define txt
+    (vl-append tiny-y-sep
+               (t "Thesis Proposal: \"Gradual Typing\"")
+               (t (format "November ~a, 2019" day))))
+  (ht-append small-x-sep pp txt))
+
+(define (add-outline-axis-arrow pp src-tag find-src tgt-tag find-tgt)
+  (define arr-spec (program-arrow src-tag find-src tgt-tag find-tgt #f #f #f #f black))
+  (add-program-arrow pp arr-spec #:arrow-size 20 #:line-width 6 #:style 'solid))
+
+(define (make-origin-coord align [abs-x 0] [abs-y 0]) (coord 40/100 6/10 align #:abs-x abs-x #:abs-y abs-y))
+
+(define (make-outline-square)
+  (define c (string->color% "LightSkyBlue"))
+  (define w (w%->pixels 15/100))
+  (filled-rectangle w w #:color (color%-update-alpha c 8/10) #:draw-border? #f #;(#:border-width 4 #:border-color c)))
+
+(define (make-no-box . pp*)
+  (make-no-box* pp*))
+
+(define (make-no-box* pp*)
+  (large-rounded-border #:bg-color no-box-color (apply vc-append tiny-y-sep pp*)))
+
+(define (make-yes-box . pp*)
+  (make-yes-box* pp*))
+
+(define (make-yes-box* pp*)
+  (add-rounded-border
+    #:x-margin small-x-sep #:y-margin small-y-sep #:background-color yes-box-color
+    #:radius 10 #:frame-width 4
+    (apply vc-append tiny-y-sep pp*)))
+
+(define (add-research-arrow pp spec #:style [style 'solid])
+  (add-program-arrow pp spec #:style style #:line-width 6 #:arrow-size 20))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1577,6 +1640,7 @@
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
+    (sec:gtt-compare)
     (sec:migratory-typing)
     (sec:design-space)
     (sec:proposal)
@@ -1607,17 +1671,33 @@
   (pslide
     #:go center-coord meeting-of-the-waters
     #:go (coord 1/2 20/100 'ct) title-pict)
+  (void))
+
+(define (sec:gtt-compare)
   (pslide
-    #:go center-coord
-    (parameterize ((plot-decorations? #f))
-      (plot3d-pict
-        (list
-          (lines3d (vector (vector 0 0 0) (vector 9 0 0)))
-          (lines3d (vector (vector 0 0 0) (vector 0 9 0)))
-          (lines3d (vector (vector 0 0 0) (vector 0 0 9))))
-        #:x-min -5 #:x-max 10
-        #:y-min -5 #:y-max 10
-        #:z-min -5 #:z-max 10)))
+    #:go (coord slide-text-left 2/10 'lt #:sep med-y-sep)
+    (make-thesis-proposal "max_new" 18)
+    (make-thesis-proposal "ben_greenman" 25))
+  (pslide
+    #:go (make-origin-coord 'cc) (tag-pict (blank 0 0) 'origin)
+    #:go (make-origin-coord 'rt) (tag-pict (blank (h%->pixels 1/10) (h%->pixels 5/100)) 'q3)
+    #:go (make-origin-coord 'lb) (tag-pict (blank (h%->pixels 4/10) (h%->pixels (* 4 5/100))) 'q1)
+    #:go (make-origin-coord 'lb) (tag-pict (blank (w%->pixels 4/10) 0) 'x-max)
+    #:go (make-origin-coord 'rt) (tag-pict (blank 0 (h%->pixels 1/10)) 'y-min)
+    #:go (make-origin-coord 'cb) (tag-pict (blank 0 (h%->pixels 4/10)) 'y-max)
+    #:set (add-outline-axis-arrow ppict-do-state 'y-min cb-find 'y-max ct-find)
+    #:go (at-find-pict 'y-max lt-find 'rt #:abs-x (- tiny-x-sep)) @bt{Proofs}
+    #:go heading-text-coord
+    #:alt [@st{Last Week:}]
+    @st{Today:}
+    #:set (add-outline-axis-arrow ppict-do-state 'q3 lt-find 'x-max rc-find)
+    #:go (at-find-pict 'x-max rb-find 'ct #:abs-y pico-y-sep) @bt{Performance}
+    #:next
+    #:set (add-outline-axis-arrow ppict-do-state 'q3 lb-find 'q1 rt-find)
+    #:go (at-find-pict 'q1 rt-find 'lc #:abs-x pico-x-sep) @bt{People}
+    #:next
+    #:go (make-origin-coord 'lb 3 (- 4)) (make-outline-square)
+    )
   (void))
 
 (define (sec:migratory-typing)
@@ -1629,17 +1709,13 @@
     #:go (coord slide-text-left 14/100 'lt)
     @t{Add types to a dynamically-typed language}
     #:go (coord 75/100 mt-code-y 'cb)
-    (add-caption "Mixed-Typed code" (make-sample-program #f #f))
+    (add-caption "Mixed-Typed code" (make-sample-program #f #f 1))
     #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
      (vl-append
        med-y-sep
        (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
        (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
-       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)}))
-    ;; #:go (coord 25/100 mt-code-y 'cb)
-    ;; (add-caption "Untyped code" (make-sample-program #t #f))
-    ;; #:go center-coord (make-migration-arrow)
-    )
+       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
   (pslide
     #:go heading-text-coord
     @st{Motivation}
@@ -1650,28 +1726,29 @@
     @st{Landscape of Models and Implementations}
     #:go big-landscape-coord
     (make-implementation-landscape)
-    #:next
-    #:go (coord 1/2 35/100 'ct)
-    (large-rounded-border (hb-append @st{Rich design space, due to a challenge})))
+    ;;#:next
+    ;;#:go (coord 1/2 35/100 'ct)
+    #;(large-rounded-border (hb-append @st{Rich design space, due to a challenge})))
   (pslide
     #:go heading-text-coord
     @st{Challenge = Interoperability}
     #:alt
     [#:go (coord slide-text-left 20/100 'lt)
-     (make-sample-program #f #t 9/10)
+     (make-sample-program #f #t 1)
      #:go (coord 48/100 20/100 'lt #:sep tiny-x-sep)
      (vl-append
        tiny-x-sep
        @t{What do types mean when}
        (hb-append @t{ untyped values and})
        (hb-append @t{ typed values } @bt{interact} @t{?}))]
-    #:go center-coord
-    (make-2table
-      #:col-sep (* 3/2 med-x-sep)
-      #:row-sep (h%->pixels 7/100)
-      (for/list ((ty-str '("Int" "Listof Str" "Nat -> Bool")))
-        (cons (make-ut-interaction ty-str)
-              (make-tu-interaction ty-str)))))
+    #:go (coord 25/100 1/2 'cc)
+    (vl-append
+      (h%->pixels 15/100)
+      (make-ut-interaction "Int")
+      (make-ut-interaction "Listof Str"))
+    #:next
+    #:go (coord 75/100 1/2 'cc)
+    (make-tu-interaction "Nat -> Bool"))
   (pslide
     #:go heading-text-coord
     @st{Many Answers, Many Implementations}
@@ -1683,7 +1760,6 @@
     #:go performance-cloud-coord
     (st-cloud "Performance?")
     #:next
-    ;; TODO lower fruit coord
     #:go fruit-coord (compare-append (apple-pict) (pear-pict) (orange-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
@@ -1700,7 +1776,6 @@
     #:next
     #:go guarantees-cloud-coord
     (text-cloud
-      ;; TODO diffeernt bg color
       "Guarantees"
       (make-model-pict)
       @t{one syntax, many}
@@ -1889,9 +1964,6 @@
       #:col-sep med-x-sep
       #:row-sep small-y-sep))
   (pslide
-    ;; TODO the cached pict is ugly, rebuild and ...
-    ;; - remove titles, crunch together, draw axis arrows, U T time icons?
-    ;;  (removing titles is difficult)
     #:go (coord 1/2 0 'ct)
     (make-scatterplots-pict))
   (void))
@@ -1900,18 +1972,44 @@
   (make-transition-slide
     "Thesis Question")
   (pslide
-    ;; TODO octopus
     #:go center-coord
-    #:alt
-    [(scale-to-fit
-       (ht-append
-         tiny-x-sep
-         (make-theorem-landscape)
-         (make-performance-landscape))
-       client-w client-h)
-     #:go (coord 1/2 4/100 'ct)
-     (scale (make-tree 270 220 mixed-program-code* #:arrows? #f) 7/10)]
-    (make-goal+problem-table))
+    (scale-to-fit
+      (ht-append
+        tiny-x-sep
+        (make-theorem-landscape)
+        (make-performance-landscape))
+      client-w client-h)
+    #:go (coord 1/2 4/100 'ct)
+    (scale (make-tree 270 220 mixed-program-code* #:arrows? #f) 7/10))
+  (pslide
+    #:go (coord 1/2 slide-top 'ct #:sep small-y-sep)
+    (add-hubs (large-rounded-border (make-goal+problem-table tiny-y-sep)) 'problem)
+    #:go (at-find-pict 'problem rc-find 'cc #:abs-x small-x-sep)
+    (make-lang-pict "L")
+    #:next
+    #:go (coord 15/100 57/100 'ct)
+    (add-hubs (make-no-box @t{Improve the} @t{compiler}) 'improve-compiler)
+    #:set (add-research-arrow ppict-do-state
+                             (program-arrow 'problem-S lb-find 'improve-compiler-N ct-find (* 55/100 turn) (* 3/4 turn) 30/100 30/100 black))
+    #:next
+    #:go (coord 45/100 60/100 'ct)
+    (add-hubs (make-no-box @t{Build a new} @t{compiler}) 'new-compiler)
+    @st{Pycket}
+    #:set (add-research-arrow ppict-do-state
+                              (program-arrow 'problem-S cb-find 'new-compiler-N ct-find (* 3/4 turn) (* 3/4 turn) 50/100 50/100 black))
+    #:next
+    #:go (coord 75/100 56/100 'ct)
+    (add-hubs (make-no-box @t{Build a new} @t{language}) 'new-lang)
+    @st{Grift, Nom}
+    #:go (at-find-pict 'new-lang rc-find 'cc #:abs-x small-x-sep) (make-lang-pict "L'")
+    #:set (add-research-arrow ppict-do-state
+                              (program-arrow 'problem-S rb-find 'new-lang-N ct-find (* 95/100 turn) (* 3/4 turn) 50/100 50/100 black))
+    #:next
+    #:go (coord 24/100 33/100 'ct)
+    (add-hubs (make-yes-box @t{Interoperate with a} @t{weaker semantics}) 'weak-lang)
+    #:set (add-research-arrow ppict-do-state
+                              (program-arrow 'problem-S lb-find 'weak-lang-N ct-find (* 55/100 turn) (* 3/4 turn) 80/100 25/100 black)
+                              #:style 'dot))
   (pslide
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
@@ -1959,6 +2057,7 @@
     #:alt
     [(hb-append @bigct{math/array} @t{: "25 to 50 times slower"})
      math-warning-pict]
+    #:go (coord 1/2 40/100 'ct)
     (vl-append
       tiny-y-sep
       (blank)
@@ -1968,8 +2067,7 @@
     #:go heading-text-coord @st{Benefits (3/3): Compatibility}
     #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
-    ;; TODO good y value?
-    #:go (coord 1/2 35/100 'ct #:sep (h%->pixels 7/100))
+    #:go (coord 1/2 benefits-below-bar-y 'ct #:sep (h%->pixels 7/100))
     #:alt
     [(ht-append
        small-x-sep
@@ -1987,14 +2085,13 @@
            @ct{ }
            @ct{stx})))
      #:next
-     ;; TODO compile-time
-     (hb-append ((make-string->text #:font (cons 'bold body-font) #:size body-size #:color "red") "RuntimeError")
-                @t{: could not convert type to a contract})]
+     #:alt [stx-compile-txt]
+     (vc-append tiny-y-sep stx-compile-txt stx-run-txt)]
     (vc-append
       tiny-y-sep
       @t{Typed Racket provides 203 base types;}
       @t{12 lack runtime support (wrappers)})
-     #:next
+    #:next
     #:alt
     [(table 3
        (map tcodesize
@@ -2133,19 +2230,8 @@
   ;; - why not sampling
   ;; - 
   (pslide
-    ;; TODO make octopus? not sure
-    ;; TODO shout-outs to Grift, Nom, Pycket? ask MF
-    #:go (coord slide-text-left slide-top 'lt #:sep small-y-sep)
-    (large-rounded-border
-      (make-goal+problem-table small-y-sep))
-    #:next
-    @t{What can be done?}
-    #:next
-    (tag-pict (hb-append @t{   } @bt{A} @t{. Design a new language}) 'A)
-    (tag-pict (hb-append @t{   } @bt{B} @t{. Build a new compiler}) 'B)
-    (tag-pict (hb-append @t{   } @bt{C} @t{. Improve an existing compiler}) 'C)
-    (tag-pict (hb-append @t{   } @bt{D} @t{. Interoperate with a weaker semantics}) 'D))
-
+    ;; TODO show code that built a slide, with honest and lying
+    )
   (pslide
     #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
     (make-research-topic
@@ -2155,36 +2241,6 @@
        "DLS 18"
        #:title "The Behavior of Gradual Types: A User Study"
        #:author* '("Preston Tunnell Wilson" "Ben Greenman" "Justin Pombrio" "Shriram Krishnamurthi"))))
-
-  (pslide
-    #:go big-landscape-coord
-    #:alt
-    [(make-big-landscape-background)]
-    #:alt
-    [(ppict-do
-       (make-big-landscape-background)
-       #:go (coord 4/100 14/100 'lc)
-       (vc-append (bitmap gem-blue) @t{GTT}))]
-    (ppict-do
-      (make-big-landscape-background)
-      #:go (coord 4/100 10/100 'lt)
-      (make-city-dot "Natural" #:tag 'natural)
-      #:go (coord 26/100 50/100 'ct)
-      (make-city-dot "")
-      #:go (coord 40/100 44/100 'ct)
-      (make-city-dot "")
-      #:go (coord 34/100 64/100 'ct)
-      (make-city-dot "")
-      #:go (coord 80/100 28/100 'ct)
-      (make-city-dot "Transient" #:tag 'transient)
-      #:go (coord 90/100 1 'rb)
-      (make-city-dot ""))
-    #:next
-    #:set (let ((pp ppict-do-state))
-            (add-program-arrow pp (program-arrow 'natural rc-find 'transient lc-find 0 0 7/10 7/10 black) #:hide? #true)))
-  (pslide
-    ;; TODO show code that built a slide, with honest and lying
-    )
   #;(pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
@@ -2207,6 +2263,7 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
+
+
 
   )))))
