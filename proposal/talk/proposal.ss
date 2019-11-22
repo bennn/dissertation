@@ -82,6 +82,9 @@
 (define racket-blue (hex-triplet->color% #x3E5BA9))
 (define ice-color (hex-triplet->color% #xF3F1F2))
 (define sand-color (hex-triplet->color% #xFFF7C2))
+(define opt-orange (string->color% "Orange"))
+(define opt-yellow (string->color% "cadet blue"))
+(define opt-green (string->color% "MediumAquamarine"))
 (define stamp-color (hex-triplet->color% #xDCCC90))
 (define cliff-color (hex-triplet->color% #x3A3B27))
 (define sea-color (hex-triplet->color% #x84CEB3))
@@ -95,6 +98,9 @@
 (define topbar-accent-color (color%-update-alpha (string->color% "medium slate blue") 5/10))
 (define pipe-color (hex-triplet->color% #xA6AF60))
 (define city-color (hex-triplet->color% #x302E22))
+(define flag-blue (hex-triplet->color% #x6AB2E7))
+(define flag-green (hex-triplet->color% #x12AD2B))
+(define flag-red (hex-triplet->color% #xD7141A))
 
 (define typed-color   (hex-triplet->color% #xF19C4D)) ;; orange
 ;; #xE59650 #xEF9036
@@ -1642,6 +1648,58 @@
           #;(pp (make-code-underline pp (program-arrow-tgt-tag arr))))
     (add-program-arrow pp arr #:arrow-size 22 #:style style #:line-width 5)))
 
+(define *opt-color-level* (make-parameter 0))
+
+(define (make-optimization-arrow [angle #f])
+  (arrowhead (w%->pixels 5/100) (or angle (* 3/4 turn))))
+
+(define (danger-opt str [level #f])
+  (make-opt str (and (< 0 (or level (*opt-color-level*))) flag-red)))
+
+(define (risk-opt str [level #f])
+  (make-opt str (and (< 1 (or level (*opt-color-level*))) opt-orange)))
+
+(define (tag-opt str [level #f])
+  (make-opt str (and (< 2 (or level (*opt-color-level*))) opt-yellow)))
+
+(define (fun-opt str [level #f])
+  (make-opt str (and (< 3 (or level (*opt-color-level*))) opt-green)))
+
+(define (safe-opt str)
+  (make-opt str))
+
+(define (make-opt str [pre-color #f])
+  (define color (or pre-color black))
+  (add-rounded-border
+    #:radius 10 #:x-margin small-x-sep #:y-margin small-y-sep
+    #:frame-width (if pre-color 14 4) #:frame-color color #:background-color white
+    (t str)))
+
+(define (make-optimization-table [color-level 0])
+  (parameterize ((*opt-color-level* color-level))
+    (table
+      4
+      (list
+        (risk-opt "apply")
+        (safe-opt "box")
+        (danger-opt "dead-code")
+        (safe-opt "extflonum")
+        (safe-opt "fixnum")
+        (safe-opt "float-complex")
+        (fun-opt "float")
+        (tag-opt "list")
+        (fun-opt "number")
+        (danger-opt "pair")
+        (tag-opt "sequence")
+        (safe-opt "string")
+        (safe-opt "struct")
+        (fun-opt "unboxed-let")
+        (safe-opt "vector")
+        (blank))
+      cc-superimpose cc-superimpose tiny-x-sep small-y-sep)))
+
+(define opt-y 20/100)
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1656,10 +1714,11 @@
 ;    (sec:design-space)
 ;    (sec:proposal)
 ;    (sec:plan)
-    (sec:timeline)
-    (pslide)
+;    (sec:timeline)
+;    (pslide)
     (sec:QA)
-    (void)))
+    (void))
+  (sec:tropt))
 
 ;; -----------------------------------------------------------------------------
 ;; title
@@ -2287,9 +2346,6 @@
        "DLS 18"
        #:title "The Behavior of Gradual Types: A User Study"
        #:author* '("Preston Tunnell Wilson" "Ben Greenman" "Justin Pombrio" "Shriram Krishnamurthi"))))
-  (pslide
-    ;; TODO optimization slides
-    )
   #;(pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
@@ -2297,9 +2353,150 @@
     @t{- lack of synergy ... ST too slow}
     @t{- elim. form error messages})
   #;(pslide
-    how does cm relate to gtt? conjecture "equal"
+    why no dynamic type? because its extra knob that we don't need
+    gives more flexibility for static type checking, but otherwise our work
+    applies to the cast calculus that you use in "refined" GT anyway)
+  #;(pslide
+    how does cm relate to gtt? conjecture "equal" for SIMPLE types
     if sat. cm, then can model gtt
-    if model, then can prove cm for the semantics)
+    if model, then can prove cm for the semantics
+    different story for polymorphism --- parametric vs non)
+  (void))
+
+(define (sec:tropt)
+  (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color sand-color)])
+    (pslide
+      #:go heading-text-coord
+      @st{TR Optimizations}
+      #:go (coord 1/2 45/100 'cc)
+      (scale-to-fit (make-optimization-table 4) (w%->pixels 95/100) (h%->pixels 9/10)))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (danger-opt "dead-code" 4) @st{ = unsafe for Transient})
+      #:go (coord 4/100 opt-y 'lt #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(: g (-> Str Str))}
+          @tt{(define g}
+          @tt{  (case-lambda}
+          @tt{   [(x) x]}
+          @tt{   [(x y) y]))}))
+      #:go (coord 1/2 45/100 'ct)
+      (make-optimization-arrow (* 9/10 turn))
+      #:go (coord 55/100 36/100 'lt)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(define g}
+          @tt{  (case-lambda}
+          @tt{   [(x) x]}
+          @tt{   [(x y) (void)]))}))
+      #:go (coord 1/2 75/100 'ct)
+      (hb-append @t{Problem: untyped code can call } @tt{(g 0 1)}))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (danger-opt "pair" 4) @st{ = unsound for Transient})
+      #:go (coord 1/2 opt-y 'ct #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(: x (Pairof (Pairof Nat Int) Str))}
+          @tt{(cdar x)}))
+      (make-optimization-arrow)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(unsafe-cdr (unsafe-car x))}))
+      #:go (coord 1/2 75/100 'ct)
+      (hb-append @t{Problem: no guarantee } @tt{(car x)} @t{ is a pair}))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (risk-opt "apply" 4) @st{ = safe but risky for Transient})
+      #:go (coord 1/2 opt-y 'ct #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(: h (-> Str Str))}
+          @tt{(: xs (Listof Str))}
+          @tt{(apply + (map h xs))}))
+      (make-optimization-arrow)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(+ (h (unsafe-car xs))}
+          @tt{   (h (unsafe-car (unsafe-cdr xs))) ...)}))
+      #:go (coord 1/2 83/100 'ct)
+      (hb-append @t{Caution: } @tt{h} @t{ must check inputs}))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (tag-opt "list" 4) (blank tiny-x-sep 0) (tag-opt "sequence" 4) @st{ = force choice for } (st tag-T))
+      #:go (coord 1/2 opt-y 'ct #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(: xs (List Str Str))}
+          @tt{(list-ref xs 1)}))
+      (make-optimization-arrow)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(unsafe-list-ref xs 1)}))
+      #:go (coord 1/2 80/100 'ct)
+      (hb-append @t{Note: } (tt (tagof "List Str Str")) @t{ needs more than a tag check}))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (fun-opt "number" 4) @st{ = } (st tag-T) @st{ is more than a tag check})
+      #:go (coord 1/2 25/100 'ct #:sep med-y-sep)
+      @t{Natural}
+      @t{Exact-Nonnegative-Integer}
+      @t{Nonpositive-Inexact-Real}
+      @t{ExtFlonum-Negative-Zero})
+    (pslide
+      #:go heading-text-coord
+      (hc-append (fun-opt "unboxed-let" 4) @st{ = safe with escape analysis})
+      #:go (coord 1/2 opt-y 'ct #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(: f (-> Float-Complex Any))}
+          @tt{(define (f n)}
+          @tt{  ....)}))
+      (make-optimization-arrow)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(define (f n-real n-imag)}
+          @tt{  ....)})))
+    (pslide
+      #:go heading-text-coord
+      (hc-append (fun-opt "float" 4) @st{ = false alarm})
+      #:go (coord 1/2 opt-y 'ct #:sep tiny-y-sep)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(flrandom)}))
+      (make-optimization-arrow)
+      (make-program-pict
+        #:bg-color white
+        (vl-append
+          tiny-y-sep
+          @tt{(unsafe-flrandom}
+          @tt{  (current-pseudo-random-generator))}))
+      #:go (coord 1/2 75/100 'ct)
+      (hb-append @t{Ok because the PRNG parameter checks inputs}))
+    (void))
   (void))
 
 ;; =============================================================================
