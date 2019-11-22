@@ -1082,8 +1082,14 @@
 (define complement-pict
   (make-overhead-plot '(H 1) example-plot-w #:legend? #f))
 
+(define (scale-browser-screenshot str)
+  (scale-to-fit (bitmap str) (w%->pixels 9/10) client-h))
+
 (define math-warning-pict
-  (scale-to-fit (bitmap "src/array-warning.png") (w%->pixels 9/10) client-h))
+  (scale-browser-screenshot "src/array-warning.png"))
+
+(define syntaxof-issue-pict
+  (scale-browser-screenshot "src/syntaxof-any.png"))
 
 (define design-cloud-y 20/100)
 
@@ -1706,16 +1712,16 @@
   (set-page-numbers-visible! PREVIEW)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-;  (sec:title)
+  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-;    (sec:gtt-compare)
-;    (sec:migratory-typing)
-;    (sec:design-space)
-;    (sec:proposal)
-;    (sec:plan)
-;    (sec:timeline)
-;    (pslide)
+    (sec:gtt-compare)
+    (sec:migratory-typing)
+    (sec:design-space)
+    (sec:proposal)
+    (sec:plan)
+    (sec:timeline)
+    (pslide)
     (sec:QA)
     (void))
   (sec:tropt))
@@ -2115,7 +2121,7 @@
     (vl-append
       tiny-y-sep
       (hb-append @t{types predict full behavior, but})
-      (hb-append @t{need to avoid critical boundaries}))
+      (hb-append @t{need to avoid certain boundaries}))
     #:go (coord 1/2 61/100 'ct) (filled-rectangle (* 2 client-w) pico-y-sep #:color lying-color)
     #:go (coord slide-text-left 55/100 'lt #:sep tiny-y-sep)
     @bt{Transient}
@@ -2174,6 +2180,8 @@
      #:next
      #:alt [stx-compile-txt]
      (vc-append tiny-y-sep stx-compile-txt stx-run-txt)]
+    #:alt
+    [syntaxof-issue-pict]
     (vc-append
       tiny-y-sep
       @t{Typed Racket provides 203 base types;}
@@ -2294,13 +2302,13 @@
 (define the-timeline (make-timeline (* 95/100 client-w) (* 86/100 client-h) timeline-span-color ct tcodesize))
 
 (define (sec:timeline)
-  (make-transition-slide
-    "Toward Practical Gradual Typing")
   (pslide
     ;; ok you've seen the benefits and the plans
     #:go (coord (+ model-sidebar-x 2/10) 0 'ct) (make-model-sidebar)
     #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar)
     #:go (coord 1/2 8/100 'ct) (add-rectangle-background #:radius 2 #:draw-border? #t #:color white #:x-margin 2 #:y-margin 0 (make-benefits-topbar)))
+  (make-transition-slide
+    "Toward Practical Gradual Typing")
   (pslide
     #:go checklist-coord
     (make-checklist #:hide? #true full-checklist-data))

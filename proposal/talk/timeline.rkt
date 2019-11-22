@@ -56,7 +56,7 @@
            (ppict
              base
              (list
-               (cons (coord 14/100 0 'lt) (make-timeline-span (make-span-h 6) "model" ct timeline-span-color))
+               (cons (coord 14/100 (make-span-%  1) 'lt) (make-timeline-span (make-span-h 5) "model" ct timeline-span-color))
                (cons (coord 29/100 0 'lt) (make-timeline-span (make-span-h 12) "implementation" ct timeline-span-color))
                (cons (coord 44/100 (make-span-%  7) 'lt) (make-timeline-span (make-span-h 8) "evaluation" ct timeline-span-color))
                (cons (coord 59/100 (make-span-% 11) 'lt) (make-timeline-span (make-span-h 4) "paper" ct timeline-span-color))
