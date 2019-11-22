@@ -7,7 +7,6 @@
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
-;; - bridge pict
 ;; - RUN honest types and lying types to build slides
 ;;    (its in parallel of course, but should run --- use to make picture)
 
@@ -1321,11 +1320,11 @@
 
 (define full-checklist-data
   (list
-    (cons '("POPL 2016" "JFP 2019")
+    (cons '("JFP 2019" "POPL 2016")
           "measure the performance of honest types")
     (cons '("OOPSLA 2018")
           "try to directly improve performance")
-    (cons '("ICFP 2018" "OOPSLA 2019")
+    (cons '("OOPSLA 2019" "ICFP 2018")
           "formally classify alternative types")
     ;;(cons #f "measure performance of other appreaches")
     (cons #f
@@ -1348,8 +1347,9 @@
   (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
 
 (define (make-benefit-compatibility-pict)
-  (bitmap "src/bridge.png"))
-  #;(
+  (clip-descent (values (huge-t "+"))))
+
+(define (mario-pipe)
   (define border-width 3)
   (define pipe-end
     (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
@@ -1519,7 +1519,7 @@
 
 (define example-library-code*
   (list
-    (hb-append @ct{(define (} (tag-pict @ct{fold-file path acc f)} lib-def-tag))
+    (hb-append @ct{(define (} (tag-pict @ct{u:fold-file path acc f)} lib-def-tag))
     (hb-append @ct{  ... ; read `ln` from `path`})
     (hb-append @ct{  ... } (tag-pict @ct{(f ln acc)} callback-tag) @ct{ ...})
     (hb-append @ct{  ...)})))
@@ -1669,6 +1669,20 @@
     (send dc set-brush old-brush))
   (dc draw-rect w h))
 
+(define code-underline-size 5)
+(define code-highlight-color racket-blue)
+
+(define (make-code-underline pp tag)
+  (pin-code-line pp (find-tag pp tag) lb-find (find-tag pp tag) rb-find))
+
+(define (pin-code-line pp src find-src tgt find-tgt #:label [label (blank)] #:color [pre-color #f])
+  (pin-line pp src find-src tgt find-tgt #:line-width code-underline-size #:color (or pre-color code-highlight-color) #:label label))
+
+(define (add-hl-arrow pp arr #:style [style 'solid])
+  (let* ( #;(pp (make-code-underline pp (program-arrow-src-tag arr)))
+          #;(pp (make-code-underline pp (program-arrow-tgt-tag arr))))
+    (add-program-arrow pp arr #:arrow-size 22 #:style style #:line-width 5)))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1678,9 +1692,9 @@
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-;    (sec:gtt-compare)
-;    (sec:migratory-typing)
-;    (sec:design-space)
+    (sec:gtt-compare)
+    (sec:migratory-typing)
+    (sec:design-space)
     (sec:proposal)
     (sec:plan)
     (sec:timeline)
@@ -1748,13 +1762,11 @@
     @t{Add types to a dynamically-typed language}
     #:go (coord 75/100 (+ 4/100 mt-code-y) 'cb)
     (add-caption "Mixed-Typed code" (make-sample-program #f #f 1))
-    #:go (coord (+ 2/100 slide-text-left) mt-code-y 'lb)
+    #:go (coord (+ 2/100 slide-text-left) 25/100 'lt)
      (vl-append
        med-y-sep
        (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
-       (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
-       ;; TODO maybe cut Dynamic
-       (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
+       (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))))
   (pslide
     #:go heading-text-coord
     @st{Motivation}
@@ -1825,17 +1837,12 @@
       (make-impl-pict)
       @t{one syntax, many}
       @t{type-compilers})
-    #:next
     #:go fruit-coord (compare-append (apple-pict) (apple-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
   (pslide
     #:go heading-text-coord
     @st{Research Agenda: Results so Far}
-;    (make-long-citation
-;      "OOPSLA 18"
-;      #:title "Collapsible Contracts: Fixing a Pathology of Gradual Typing"
-;      #:author* '("Daniel Feltey" "Ben Greenman" "Christophe Scholliers" "Robert Bruce Findler" "Vincent St-Amour"))
     #:go (coord -2/100 12/100 'lt #:sep tiny-y-sep)
     (make-research-topic
      "Design Space Analysis"
@@ -1923,12 +1930,12 @@
   (pslide
     #:go heading-text-coord (hb-append @sbt{Honest} @st{ vs. } @sbt{Lying} @st{ Types})
     #:next
-    #:go (coord 2/100 12/100 'lt) example-client-code
+    #:go (coord 15/1000 12/100 'lt) example-client-code
     #:go (coord 50/100 60/100 'ct) example-api-code
     #:set (add-hl-arrow ppict-do-state (program-arrow client-fold-tag lb-find api-fold-tag lc-find (* 3/4 turn) (* 0 turn) 3/4 1/4 code-highlight-color))
     #:next
-    #:go (coord 51/100 12/100 'lt) example-library-code
-    #:set (add-hl-arrow ppict-do-state (program-arrow api-lib-tag cb-find lib-def-tag rb-find (* 99/100 turn) (* 27/100 turn) 90/100 1/4 code-highlight-color))
+    #:go (coord 495/1000 12/100 'lt) example-library-code
+    #:set (add-hl-arrow ppict-do-state (program-arrow api-lib-tag cb-find lib-def-tag rb-find (* 99/100 turn) (* 25/100 turn) 90/100 2/4 code-highlight-color))
     #:next
     #:set (add-hl-arrow ppict-do-state (program-arrow callback-tag lc-find client-f-tag rc-find(* 45/100 turn)  (* 55/100 turn) 1/4 1/4 code-highlight-color) #:style 'dot)
     #:next
@@ -1968,7 +1975,7 @@
     #:go (coord 44/100 4/10 'rt #:sep small-y-sep) (bubble-with-bar 'cm)
     (vl-append
       tiny-y-sep
-      @t{guard boundaries}
+      @t{guard all boundaries}
       @t{with deep checks})
     #:go (coord 54/100 4/10 'lt #:sep small-y-sep) (bubble-with-bar 'tag)
     (vl-append
@@ -2071,8 +2078,8 @@
                               (program-arrow 'problem-S lb-find 'weak-lang-N ct-find (* 55/100 turn) (* 3/4 turn) 80/100 25/100 black)
                               #:style 'dot))
   (pslide
-    #:go (coord 1/2 6/100 'ct)
-    (honest-lying-rect (* 3/2 client-w) (* 65/100 client-h))
+    #:go (coord 1/2 3/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 75/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
     #:next
@@ -2127,7 +2134,7 @@
       @t{overall performance}))
   (pslide
     #:go heading-text-coord @st{Benefits (3/3): Compatibility}
-    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
+    #:go benefits-pict-coord (make-benefit-compatibility-pict)
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go (coord 1/2 benefits-below-bar-y 'ct #:sep (h%->pixels 7/100))
     #:alt
@@ -2300,9 +2307,6 @@
   ;; - why not sampling
   ;; - 
   (pslide
-    ;; TODO show code that built a slide, with honest and lying
-    )
-  (pslide
     #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
     (make-research-topic
      "Expressiveness"
@@ -2333,70 +2337,8 @@
 
 ;; =============================================================================
 
-(define code-underline-size 5)
-(define code-highlight-color racket-blue)
-
-(define (make-code-underline pp tag)
-  (pin-code-line pp (find-tag pp tag) lb-find (find-tag pp tag) rb-find))
-
-(define (pin-code-line pp src find-src tgt find-tgt #:label [label (blank)] #:color [pre-color #f])
-  (pin-line pp src find-src tgt find-tgt #:line-width code-underline-size #:color (or pre-color code-highlight-color) #:label label))
-
-(define (add-hl-arrow pp arr #:style [style 'solid])
-  (let* ( #;(pp (make-code-underline pp (program-arrow-src-tag arr)))
-          #;(pp (make-code-underline pp (program-arrow-tgt-tag arr))))
-    (add-program-arrow pp arr #:arrow-size 22 #:style style #:line-width 5)))
-
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go heading-text-coord @st{Benefits (3/3): Compatibility}
-    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
-    #:go benefits-bar-coord (make-benefits-topbar)
-    #:go (coord 1/2 benefits-below-bar-y 'ct #:sep (h%->pixels 7/100))
-    #:alt
-    [(ht-append
-       small-x-sep
-       (make-typed-codeblock*
-         #:title "A" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
-         (list
-           @ct{(define stx}
-           @ct{  #`#,(vector 0 1))}
-           @ct{ }
-           @ct{(provide stx)}))
-       (make-untyped-codeblock*
-         #:title "B" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
-         (list
-           @ct{(require Library)}
-           @ct{ }
-           @ct{stx})))
-     #:next
-     #:alt [stx-compile-txt]
-     (vc-append tiny-y-sep stx-compile-txt stx-run-txt)]
-    (vc-append
-      tiny-y-sep
-      @t{Typed Racket provides 203 base types;}
-      @t{12 lack runtime support (wrappers)})
-    #:next
-    #:alt
-    [(table 3
-       (map tcodesize
-            '("(Async-Channel T)"
-              "(Custodian-Box T)"
-              "(C-Mark-Key T)"
-              "(Evt T)"
-              "(Ephemeron T)"
-              "(Future T)"
-              "(MPair T T')"
-              "(MList T)"
-              "(Prompt-Tag T T')" ;; Asumu SHOULD have fixed this, but appears to be old bug in the implementation --- no tests. Issue #876
-              "(Syntax T)"
-              "(Thread-Cell T)"
-              "(Weak-Box T)"))
-       cc-superimpose cc-superimpose small-x-sep small-y-sep)]
-    (vc-append
-      tiny-y-sep
-      (hb-append @bt{Transient} @t{ does not need runtime support,})
-      @t{so more code can run})
 
   )))))
