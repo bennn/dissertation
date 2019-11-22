@@ -27,6 +27,7 @@
   pict-abbrevs pict-abbrevs/slideshow gtp-pict
   ppict/2
   "lightbulb.rkt"
+  "timeline.rkt"
   racket/draw
   racket/list
   racket/string
@@ -930,48 +931,6 @@
   (define color (symbol->color 'E))
   (cellophane (filled-rectangle 50 8 #:color color #:draw-border? #f) 8/10))
 
-(define (make-timeline-bar w h label)
-  (define color (if label gray white))
-  (define bar (filled-rounded-rectangle w h 1 #:color color #:draw-border? #f))
-  (ppict-do bar
-    #:go (coord 2/100 48/100 'lc) (tcodesize (or label "."))
-    #:go (coord 98/100 48/100 'rc) (tcodesize ".")))
-
-(define (make-timeline-span h label)
-  (define span-radius 7)
-  (define bar-pict (filled-rounded-rectangle 25 h span-radius #:color timeline-span-color #:draw-border? #f))
-  (define label-pict (ct label))
-  (ht-append 10 bar-pict label-pict))
-
-(define (make-timeline w h)
-  (let* ((month*
-           '("Nov" "Dec" "Jan'20" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug"))
-         (bar-h
-           (/ h (* 2 (length month*))))
-         (make-span-h
-           (lambda (i) (* i bar-h)))
-         (make-span-%
-           (lambda (i) (/ (make-span-h i) h)))
-         (base
-           (for/fold ((acc (blank)))
-                     ((m (in-list month*)))
-             (vl-append 0 acc (make-timeline-bar w bar-h m) (make-timeline-bar w bar-h #f))))
-         (timeline
-           (ppict-do base
-             #:go (coord 14/100 0 'lt)
-             (make-timeline-span (make-span-h 6) "model")
-             #:go (coord 29/100 0 'lt)
-             (make-timeline-span (make-span-h 12) "implementation")
-             #:go (coord 44/100 (make-span-%  7) 'lt)
-             (make-timeline-span (make-span-h 8) "evaluation")
-             #:go (coord 59/100 (make-span-% 11) 'lt)
-             (make-timeline-span (make-span-h 4) "paper")
-             #:go (coord 74/100 (make-span-% 13) 'lt)
-             (make-timeline-span (make-span-h 7) "dissertation"))))
-    (add-rounded-border
-      #:radius 5 #:y-margin 6 #:frame-width 3 #:frame-color "slategray"
-      timeline)))
-
 (define q-black (hex-triplet->color% #x333333))
 
 (define q-pict
@@ -1689,14 +1648,14 @@
   (set-page-numbers-visible! PREVIEW)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha highlight-brush-color 0.6))
   ;; --
-  (sec:title)
+;  (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    (sec:gtt-compare)
-    (sec:migratory-typing)
-    (sec:design-space)
-    (sec:proposal)
-    (sec:plan)
+;    (sec:gtt-compare)
+;    (sec:migratory-typing)
+;    (sec:design-space)
+;    (sec:proposal)
+;    (sec:plan)
     (sec:timeline)
     (pslide)
     (sec:QA)
@@ -2273,6 +2232,8 @@
     (make-benefits-lattice-pict))
   (void))
 
+(define the-timeline (make-timeline (* 95/100 client-w) (* 86/100 client-h) timeline-span-color ct tcodesize))
+
 (define (sec:timeline)
   (make-transition-slide
     "Toward Practical Gradual Typing")
@@ -2289,13 +2250,24 @@
     (make-checklist full-checklist-data))
   (pslide
     #:go heading-text-coord
-    (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
-  (pslide
-    ;; TODO lying code, behind timeline
-    )
-  (pslide
-    #:go heading-text-coord
-    (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
+    #:alt [the-timeline]
+    #:alt
+    [#:go (coord 5/100 5/100 'lt)
+     (let* ((pp (scale the-timeline 4/10))
+            (shadow (filled-rectangle (pict-width pp) (pict-height pp) #:color (color%-update-alpha black 0.6) #:draw-border? #f)))
+       (lt-superimpose (vl-append (blank 0 pico-y-sep) (ht-append (blank pico-y-sep 0) shadow)) pp))
+     #:next
+     #:go (coord 98/100 2/100 'rt)
+     (add-spotlight-background
+       #:border-color lying-color #:color lying-color #:border-width 1 #:x-margin med-x-sep #:y-margin small-y-sep
+       (scale-to-fit
+         (make-typed-codeblock*
+           #:title "Timeline" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+           (with-input-from-file "timeline.rkt"
+             (lambda ()
+               (for/list ((ln (in-lines))) (ct ln)))))
+         (w%->pixels 9/10) (h%->pixels 9/10)))]
+    the-timeline)
   (pslide
     #:go center-coord
     @st{The End})
@@ -2339,6 +2311,7 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
+
 
 
   )))))
