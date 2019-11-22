@@ -1,12 +1,13 @@
 #lang at-exp slideshow
 
-(define PREVIEW #t)
+(define PREVIEW #f)
 
 ;; image-color.com
 ;; /Users/ben/code/racket/gtp/shallow/gf-icfp-2018/talk/simple.ss
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
 ;; TODO ...
+;; - bridge pict
 ;; - RUN honest types and lying types to build slides
 ;;    (its in parallel of course, but should run --- use to make picture)
 
@@ -37,6 +38,7 @@
   (only-in scribble-abbrevs/scribble authors*)
   (only-in images/icons/symbol check-icon x-icon)
   (only-in images/icons/misc clock-icon)
+  (only-in 2htdp/image star)
   (only-in 2htdp/planetcute gem-blue)
   images/icons/style
 )
@@ -426,19 +428,20 @@
                             (52/100 22/100 "python.png") (42/100 13/100) (32/100 20/100)
                             (22/100 11/100) (15/100 30/100 "javascript.png") (09/100 12/100)
                             (80/100 31/100) (65/100 38/100 "typescript.png") (43/100 38/100)
+                            (75/100 66/100 "racket.png")
                             (27/100 40/100) (08/100 46/100) (87/100 51/100)
                             (71/100 60/100) (49/100 52/100) (24/100 56/100)
                             (10/100 62/100 "lua.png") (92/100 60/100 "php.png") (75/100 75/100)
                             (46/100 71/100) (17/100 77/100) (30/100 73/100)
                             (87/100 76/100) (65/100 91/100 "hack.png") (49/100 83/100 "pyre.png")
-                            (36/100 53/100 "racket.png")
+                            (36/100 53/100 "dart.png")
                             (35/100 85/100) (93/100 89/100 "flow.png")
                             (59/100 67/100) (11/100 92/100 "thorn.png"))))
              (i (in-naturals)))
     (ppict-do acc
       #:go (coord (car xy) (cadr xy) 'cc)
       (if (null? (cddr xy))
-        (make-simple-flag the-flag-base
+        (blank) #;(make-simple-flag the-flag-base
           #:flag-background-color (rgb-triplet->color% (->pen-color (modulo i num-colors)))
           #:flag-brush-style 'horizontal-hatch
           #:flag-border-color (rgb-triplet->color% (->pen-color (modulo i num-colors)))
@@ -926,7 +929,7 @@
 
 (define (sample-bar)
   (define color (symbol->color 'E))
-  (cellophane (filled-rectangle 30 8 #:color color #:draw-border? #f) 8/10))
+  (cellophane (filled-rectangle 50 8 #:color color #:draw-border? #f) 8/10))
 
 (define (make-timeline-bar w h label)
   (define color (if label gray white))
@@ -1008,7 +1011,10 @@
 
 (define (make-benefits-boundary-pict)
   (let* ((lhs (make-node-cluster 'L '(U U U)))
-         (rhs (make-node-cluster 'R '(T T T)))
+         (rhs (add-spotlight-background
+                (make-node-cluster 'R '(T T T))
+                #:border-color honest-color #:color honest-color
+                #:border-width 1 #:x-margin pico-x-sep #:y-margin pico-y-sep))
          (mid (add-hubs T-node 'C))
          (combo (hc-append med-x-sep  lhs mid rhs))
          (arr* (list
@@ -1342,7 +1348,8 @@
   (hc-append tiny-x-sep Lib-node (scale (vc-append pico-y-sep U-node T-node) 8/10)))
 
 (define (make-benefit-compatibility-pict)
-  ;; TODO change pipe to a bridge?
+  (bitmap "src/bridge.png"))
+  #;(
   (define border-width 3)
   (define pipe-end
     (filled-rounded-rectangle small-x-sep 100 4 #:color pipe-color #:draw-border? #t #:border-width border-width #:border-color black))
@@ -1487,27 +1494,34 @@
     (make-typed-codeblock* api #:title "API" #:x-margin example-code-x-margin #:y-margin example-code-y-margin)
     (make-untyped-codeblock* usr #:title "Client" #:x-margin example-code-x-margin #:y-margin example-code-y-margin)))
 
+(define client-f-tag 'client-f)
+(define client-fold-tag 'client-fold)
+(define api-fold-tag 'api-fold)
+(define api-lib-tag 'api-lib)
+(define lib-def-tag 'lib-def)
+(define callback-tag 'callback)
+
 (define example-client-code*
   (list
     (hb-append @ct{(define path "/tmp/file.txt")})
     @ct{ }
-    (hb-append @ct{(define (count acc ln)})
+    (hb-append @ct{(define } (tag-pict @ct{(count acc ln)} client-f-tag))
     (hb-append @ct{  (+ 1 acc))})
     @ct{ }
-    (hb-append @ct{(fold-file path 0 count)})))
+    (hb-append @ct{(} (tag-pict @ct{t:fold-file} client-fold-tag) @ct{ path 0 count)})))
 
 (define example-api-code*
   (list
     (hb-append @ct{(provide})
-    (hb-append @ct{  fold-file : (All (Acc) (-> Path Acc})
+    (hb-append @ct{  } (tag-pict @ct{t:fold-file} api-fold-tag) @ct{ : (All (Acc) (-> Path Acc})
     (hb-append @ct{                           (-> Acc Str Acc) Acc)))})
-    (hb-append @ct{(require Library)})))
+    (hb-append @ct{(define t:fold-file } (tag-pict @ct{u:fold-file} api-lib-tag) @ct{)})))
 
 (define example-library-code*
   (list
-    (hb-append @ct{(define (fold-file path acc f)})
+    (hb-append @ct{(define (} (tag-pict @ct{fold-file path acc f)} lib-def-tag))
     (hb-append @ct{  ... ; read `ln` from `path`})
-    (hb-append @ct{  ... (f ln acc) ...})
+    (hb-append @ct{  ... } (tag-pict @ct{(f ln acc)} callback-tag) @ct{ ...})
     (hb-append @ct{  ...)})))
 
 (define-values [example-library-code example-api-code example-client-code]
@@ -1607,9 +1621,8 @@
 (define (make-origin-coord align [abs-x 0] [abs-y 0]) (coord 40/100 6/10 align #:abs-x abs-x #:abs-y abs-y))
 
 (define (make-outline-square)
-  ;; TODO cube
   (define c (string->color% "LightSkyBlue"))
-  (define w (w%->pixels 15/100))
+  (define w (w%->pixels 20/100))
   (filled-rectangle w w #:color (color%-update-alpha c 8/10) #:draw-border? #f #;(#:border-width 4 #:border-color c)))
 
 (define (make-no-box . pp*)
@@ -1665,9 +1678,9 @@
   (sec:title)
   (parameterize ([current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color ice-color)])
     (void)
-    (sec:gtt-compare)
-    (sec:migratory-typing)
-    (sec:design-space)
+;    (sec:gtt-compare)
+;    (sec:migratory-typing)
+;    (sec:design-space)
     (sec:proposal)
     (sec:plan)
     (sec:timeline)
@@ -1712,17 +1725,17 @@
     #:go (make-origin-coord 'cb) (tag-pict (blank 0 (h%->pixels 4/10)) 'y-max)
     #:set (add-outline-axis-arrow ppict-do-state 'y-min cb-find 'y-max ct-find)
     #:go (at-find-pict 'y-max lt-find 'rt #:abs-x (- tiny-x-sep)) @bt{Proofs}
-    #:go heading-text-coord
-    #:alt [@st{Last Week:}]
-    @st{Today:}
+    #:alt
+    [#:go heading-text-coord @st{Last Week:}
+     #:go (at-find-pict 'y-max ct-find 'cb #:abs-y pico-y-sep) (bitmap (star 40 "solid" "goldenrod"))]
     #:set (add-outline-axis-arrow ppict-do-state 'q3 lt-find 'x-max rc-find)
     #:go (at-find-pict 'x-max rb-find 'ct #:abs-y pico-y-sep) @bt{Performance}
-    #:next
+    #:alt
+    [#:go heading-text-coord @st{Today:}
+     #:go (make-origin-coord 'lb 2 (- 3)) (make-outline-square)]
+    #:go heading-text-coord @st{Future:}
     #:set (add-outline-axis-arrow ppict-do-state 'q3 lb-find 'q1 rt-find)
-    #:go (at-find-pict 'q1 rt-find 'lc #:abs-x pico-x-sep) @bt{People}
-    #:next
-    #:go (make-origin-coord 'lb 3 (- 4)) (make-outline-square)
-    )
+    #:go (at-find-pict 'q1 rt-find 'lc #:abs-x pico-x-sep) @bt{People})
   (void))
 
 (define (sec:migratory-typing)
@@ -1740,6 +1753,7 @@
        med-y-sep
        (vl-append small-y-sep (blank) (hc-append tiny-x-sep U-node @t{= untyped code}))
        (hc-append tiny-x-sep T-node (hc-append @t{= } (tag-pict @t{simply-typed} 't-line)))
+       ;; TODO maybe cut Dynamic
        (vl-append small-y-sep (blank) @t{(no 'Dynamic' type)})))
   (pslide
     #:go heading-text-coord
@@ -1784,7 +1798,6 @@
     (st-cloud "Guarantees?" #:style '())
     #:go performance-cloud-coord
     (st-cloud "Performance?")
-    #:next
     #:go fruit-coord (compare-append (apple-pict) (pear-pict) (orange-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
@@ -1909,10 +1922,15 @@
           (blank)))))
   (pslide
     #:go heading-text-coord (hb-append @sbt{Honest} @st{ vs. } @sbt{Lying} @st{ Types})
+    #:next
     #:go (coord 2/100 12/100 'lt) example-client-code
     #:go (coord 50/100 60/100 'ct) example-api-code
+    #:set (add-hl-arrow ppict-do-state (program-arrow client-fold-tag lb-find api-fold-tag lc-find (* 3/4 turn) (* 0 turn) 3/4 1/4 code-highlight-color))
     #:next
     #:go (coord 51/100 12/100 'lt) example-library-code
+    #:set (add-hl-arrow ppict-do-state (program-arrow api-lib-tag cb-find lib-def-tag rb-find (* 99/100 turn) (* 27/100 turn) 90/100 1/4 code-highlight-color))
+    #:next
+    #:set (add-hl-arrow ppict-do-state (program-arrow callback-tag lc-find client-f-tag rc-find(* 45/100 turn)  (* 55/100 turn) 1/4 1/4 code-highlight-color) #:style 'dot)
     #:next
     #:go (coord 1/2 45/100 'ct #:sep pico-y-sep)
     (large-rounded-border
@@ -1947,8 +1965,16 @@
     #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
     (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
     #:next
-    #:go (coord 44/100 4/10 'rt) (bubble-with-bar 'cm)
-    #:go (coord 54/100 4/10 'lt) (bubble-with-bar 'tag))
+    #:go (coord 44/100 4/10 'rt #:sep small-y-sep) (bubble-with-bar 'cm)
+    (vl-append
+      tiny-y-sep
+      @t{guard boundaries}
+      @t{with deep checks})
+    #:go (coord 54/100 4/10 'lt #:sep small-y-sep) (bubble-with-bar 'tag)
+    (vl-append
+      tiny-y-sep
+      @t{rewrite typed code to}
+      @t{tag-check inputs}))
   (pslide
     #:go heading-text-coord @st{Performance Comparison}
     #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
@@ -1976,7 +2002,7 @@
       'S-txt)
     #:go (coord slide-text-right 55/100 'rt)
     (make-overhead-plot '(1) example-plot-w))
-  (pslide
+  #;(pslide
     #:go heading-text-coord
     (hb-append @st{Data: TR-} @sbt{Natural} @st{ (} (sample-disk 'H) @st{) vs. TR-} @sbt{Transient} @st{ (} (sample-disk '1) @st{) })
     #:go (coord 1/2 slide-text-top 'ct #:sep small-y-sep)
@@ -1989,8 +2015,13 @@
       #:col-sep med-x-sep
       #:row-sep small-y-sep))
   (pslide
-    #:go (coord 1/2 0 'ct)
-    (make-scatterplots-pict))
+    #:go (coord 1/2 0 'ct #:sep pico-y-sep)
+    (make-scatterplots-pict)
+    (hc-append
+      small-x-sep
+      (hc-append (sample-bar) @t{ = Untyped Perf.})
+      (hc-append (scale (sample-disk 'H) 6/10) @t{ = Natural})
+      (hc-append (scale (sample-disk '1) 6/10) @t{ = Transient})))
   (void))
 
 (define (sec:proposal)
@@ -2009,8 +2040,8 @@
   (pslide
     #:go (coord 1/2 slide-top 'ct #:sep small-y-sep)
     (add-hubs (large-rounded-border (make-goal+problem-table tiny-y-sep)) 'problem)
-    #:go (at-find-pict 'problem rc-find 'cc #:abs-x small-x-sep)
-    (make-lang-pict "L")
+    #:go (at-find-pict 'problem rc-find 'cc #:abs-x small-x-sep) (make-lang-pict "L")
+    #:alt [#:go (coord 1/2 1/2 'cb) @t{What to do?}]
     #:next
     #:go (coord 15/100 57/100 'ct)
     (add-hubs (make-no-box @t{Improve the} @t{compiler}) 'improve-compiler)
@@ -2019,16 +2050,20 @@
     #:next
     #:go (coord 45/100 60/100 'ct)
     (add-hubs (make-no-box @t{Build a new} @t{compiler}) 'new-compiler)
-    @st{Pycket}
     #:set (add-research-arrow ppict-do-state
                               (program-arrow 'problem-S cb-find 'new-compiler-N ct-find (* 3/4 turn) (* 3/4 turn) 50/100 50/100 black))
     #:next
     #:go (coord 75/100 56/100 'ct)
     (add-hubs (make-no-box @t{Build a new} @t{language}) 'new-lang)
-    @st{Grift, Nom}
     #:go (at-find-pict 'new-lang rc-find 'cc #:abs-x small-x-sep) (make-lang-pict "L'")
     #:set (add-research-arrow ppict-do-state
                               (program-arrow 'problem-S rb-find 'new-lang-N ct-find (* 95/100 turn) (* 3/4 turn) 50/100 50/100 black))
+    #:next
+    #:go (at-find-pict 'improve-compiler-S cb-find 'ct #:abs-y pico-y-sep) (scale (make-short-citation "OOPSLA 18") 9/10)
+    #:next
+    #:go (at-find-pict 'new-compiler-S cb-find 'ct #:abs-y pico-y-sep) @st{Pycket}
+    #:next
+    #:go (at-find-pict 'new-lang-S cb-find 'ct #:abs-y pico-y-sep) @st{Grift, Nom}
     #:next
     #:go (coord 24/100 33/100 'ct)
     (add-hubs (make-yes-box @t{Interoperate with a} @t{weaker semantics}) 'weak-lang)
@@ -2068,12 +2103,12 @@
     #:go benefits-pict-coord (scale (make-benefit-migration-pict) 8/10)
     #:go benefits-bar-coord (make-benefits-topbar)
     #:go (coord slide-text-left benefits-below-bar-y 'lt #:sep (h%->pixels 7/100))
-    @t{1. Begin with Natural types}
-    (hb-append @t{2. } @t{Switch to Transient for performance})
-    @t{3. Revisit Natural for debugging}
+    (hb-append @t{1. Begin with } @bt{Natural} @t{ types})
+    (hb-append @t{2. } @t{Switch to } @bt{Transient} @t{ for performance})
+    (hb-append @t{3. Revisit } @bt{Natural} @t{ for debugging})
     (vl-append
       tiny-y-sep
-      (hb-append @t{4. } @t{Return to Natural after typing all})
+      (hb-append @t{4. } @t{Return to } @bt{Natural} @t{ after typing all})
       @t{    critical boundaries})
     )
   (pslide
@@ -2085,11 +2120,11 @@
     [(hb-append @bigct{math/array} @t{: "25 to 50 times slower"})
      math-warning-pict]
     #:go (coord 1/2 40/100 'ct)
-    (vl-append
+    (vc-append
       tiny-y-sep
       (blank)
       @t{Changing a library to Transient may improve}
-      @t{overall performance (for typed and untyped)}))
+      @t{overall performance}))
   (pslide
     #:go heading-text-coord @st{Benefits (3/3): Compatibility}
     #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
@@ -2099,14 +2134,14 @@
     [(ht-append
        small-x-sep
        (make-typed-codeblock*
-         #:title "Library" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         #:title "A" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
          (list
            @ct{(define stx}
            @ct{  #`#,(vector 0 1))}
            @ct{ }
            @ct{(provide stx)}))
        (make-untyped-codeblock*
-         #:title "Client" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         #:title "B" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
          (list
            @ct{(require Library)}
            @ct{ }
@@ -2249,6 +2284,12 @@
     #:go heading-text-coord
     (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
   (pslide
+    ;; TODO lying code, behind timeline
+    )
+  (pslide
+    #:go heading-text-coord
+    (make-timeline (* 95/100 client-w) (* 86/100 client-h)))
+  (pslide
     #:go center-coord
     @st{The End})
   (void))
@@ -2270,6 +2311,9 @@
        "DLS 18"
        #:title "The Behavior of Gradual Types: A User Study"
        #:author* '("Preston Tunnell Wilson" "Ben Greenman" "Justin Pombrio" "Shriram Krishnamurthi"))))
+  (pslide
+    ;; TODO optimization slides
+    )
   #;(pslide
     #:go heading-text-coord
     @st{but, Research can Fail}
@@ -2289,15 +2333,70 @@
 
 ;; =============================================================================
 
+(define code-underline-size 5)
+(define code-highlight-color racket-blue)
+
+(define (make-code-underline pp tag)
+  (pin-code-line pp (find-tag pp tag) lb-find (find-tag pp tag) rb-find))
+
+(define (pin-code-line pp src find-src tgt find-tgt #:label [label (blank)] #:color [pre-color #f])
+  (pin-line pp src find-src tgt find-tgt #:line-width code-underline-size #:color (or pre-color code-highlight-color) #:label label))
+
+(define (add-hl-arrow pp arr #:style [style 'solid])
+  (let* ( #;(pp (make-code-underline pp (program-arrow-src-tag arr)))
+          #;(pp (make-code-underline pp (program-arrow-tgt-tag arr))))
+    (add-program-arrow pp arr #:arrow-size 22 #:style style #:line-width 5)))
+
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go (coord 1/2 6/100 'ct)
-    (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
-    #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
-    (make-thesis-question #f)
+    #:go heading-text-coord @st{Benefits (3/3): Compatibility}
+    #:go benefits-pict-coord (scale (make-benefit-compatibility-pict) 7/10)
+    #:go benefits-bar-coord (make-benefits-topbar)
+    #:go (coord 1/2 benefits-below-bar-y 'ct #:sep (h%->pixels 7/100))
+    #:alt
+    [(ht-append
+       small-x-sep
+       (make-typed-codeblock*
+         #:title "A" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         (list
+           @ct{(define stx}
+           @ct{  #`#,(vector 0 1))}
+           @ct{ }
+           @ct{(provide stx)}))
+       (make-untyped-codeblock*
+         #:title "B" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
+         (list
+           @ct{(require Library)}
+           @ct{ }
+           @ct{stx})))
+     #:next
+     #:alt [stx-compile-txt]
+     (vc-append tiny-y-sep stx-compile-txt stx-run-txt)]
+    (vc-append
+      tiny-y-sep
+      @t{Typed Racket provides 203 base types;}
+      @t{12 lack runtime support (wrappers)})
     #:next
-    @t{  Q1. Can honest and lying types coexist?}
-    @t{  Q2. Are the benefits measurably significant?}
+    #:alt
+    [(table 3
+       (map tcodesize
+            '("(Async-Channel T)"
+              "(Custodian-Box T)"
+              "(C-Mark-Key T)"
+              "(Evt T)"
+              "(Ephemeron T)"
+              "(Future T)"
+              "(MPair T T')"
+              "(MList T)"
+              "(Prompt-Tag T T')" ;; Asumu SHOULD have fixed this, but appears to be old bug in the implementation --- no tests. Issue #876
+              "(Syntax T)"
+              "(Thread-Cell T)"
+              "(Weak-Box T)"))
+       cc-superimpose cc-superimpose small-x-sep small-y-sep)]
+    (vc-append
+      tiny-y-sep
+      (hb-append @bt{Transient} @t{ does not need runtime support,})
+      @t{so more code can run})
 
   )))))
