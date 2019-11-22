@@ -2211,7 +2211,7 @@
 
 (define (sec:plan)
   (make-transition-slide
-    "To Do")
+    "Plan")
   (pslide
     #:go (coord 1/2 6/100 'ct)
     (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
@@ -2308,7 +2308,7 @@
     #:go (coord (- perf-sidebar-x 2/10) 0 'ct) (make-perf-sidebar)
     #:go (coord 1/2 8/100 'ct) (add-rectangle-background #:radius 2 #:draw-border? #t #:color white #:x-margin 2 #:y-margin 0 (make-benefits-topbar)))
   (make-transition-slide
-    "Toward Practical Gradual Typing")
+    "Timeline")
   (pslide
     #:go checklist-coord
     (make-checklist #:hide? #true full-checklist-data))
