@@ -1784,6 +1784,11 @@
     @t{Add types to a dynamically-typed language}
     #:go (coord 75/100 (+ 4/100 mt-code-y) 'cb)
     (add-caption "Mixed-Typed code" (make-sample-program #f #f 1))
+    #:alt
+    [#:go (coord 25/100 (+ 4/100 mt-code-y) 'cb)
+     (add-caption "Untyped code" (make-sample-program #t #f 1))
+     #:go center-coord
+     (make-migration-arrow)]
     #:go (coord (+ 2/100 slide-text-left) 25/100 'lt)
      (vl-append
        med-y-sep
@@ -2336,9 +2341,13 @@
 
 (define (sec:QA)
   ;; Possible "extra" slides:
-  ;; - optimizer
   ;; - why not sampling
   ;; - 
+  (pslide
+    #:go (coord 1/2 6/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
+    #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
+    (make-thesis-question #f))
   (pslide
     #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
     (make-research-topic
