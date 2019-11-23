@@ -6,10 +6,6 @@
 ;; /Users/ben/code/racket/gtp/shallow/gf-icfp-2018/talk/simple.ss
 ;; /Users/ben/code/racket/gtp/rrc/oopsla-2019/talk/splash.ss
 
-;; TODO ...
-;; - RUN honest types and lying types to build slides
-;;    (its in parallel of course, but should run --- use to make picture)
-
 ;; (DONT tho) Meeting of the Waters =
 ;; - Manaus
 ;; - dark Rio Negro
@@ -426,6 +422,7 @@
   (dc draw-region w h))
 
 (define (make-implementation-landscape)
+  ;; pyret logo
   (define the-flag-base (blank 18 4))
   (define num-colors 7)
   (for/fold ((acc (make-big-landscape-background)))
@@ -440,6 +437,7 @@
                             (10/100 62/100 "lua.png") (92/100 60/100 "php.png") (75/100 75/100)
                             (46/100 71/100) (17/100 77/100) (30/100 73/100)
                             (87/100 76/100) (65/100 91/100 "hack.png") (49/100 83/100 "pyre.png")
+                            (33/100 15/100 "pyret.png")
                             (36/100 53/100 "dart.png")
                             (35/100 85/100) (93/100 89/100 "flow.png")
                             (59/100 67/100) (11/100 92/100 "thorn.png"))))
@@ -1476,7 +1474,7 @@
   (list
     (hb-append @ct{(define path "/tmp/file.txt")})
     @ct{ }
-    (hb-append @ct{(define } (tag-pict @ct{(count acc ln)} client-f-tag))
+    (hb-append @ct{(define } (tag-pict @ct{(count acc str)} client-f-tag))
     (hb-append @ct{  (+ 1 acc))})
     @ct{ }
     (hb-append @ct{(} (tag-pict @ct{t:fold-file} client-fold-tag) @ct{ path 0 count)})))
@@ -1485,14 +1483,14 @@
   (list
     (hb-append @ct{(provide})
     (hb-append @ct{  } (tag-pict @ct{t:fold-file} api-fold-tag) @ct{ : (All (Acc) (-> Path Acc})
-    (hb-append @ct{                           (-> Acc Str Acc) Acc)))})
+    (hb-append @ct{                               (-> Acc Str Acc) Acc)))})
     (hb-append @ct{(define t:fold-file } (tag-pict @ct{u:fold-file} api-lib-tag) @ct{)})))
 
 (define example-library-code*
   (list
     (hb-append @ct{(define (} (tag-pict @ct{u:fold-file path acc f)} lib-def-tag))
-    (hb-append @ct{  ... ; read `ln` from `path`})
-    (hb-append @ct{  ... } (tag-pict @ct{(f ln acc)} callback-tag) @ct{ ...})
+    (hb-append @ct{  ... ; read `str` from `path`})
+    (hb-append @ct{  ... } (tag-pict @ct{(f str acc)} callback-tag) @ct{ ...})
     (hb-append @ct{  ...)})))
 
 (define-values [example-library-code example-api-code example-client-code]
@@ -1832,8 +1830,10 @@
     #:next
     #:go guarantees-cloud-coord
     (st-cloud "Guarantees?" #:style '())
+    #:next
     #:go performance-cloud-coord
     (st-cloud "Performance?")
+    #:next
     #:go fruit-coord (compare-append (apple-pict) (pear-pict) (orange-pict))
     #:go (coord 96/100 96/100 'rb)
     (icon-credit-pict))
@@ -2090,19 +2090,13 @@
     #:set (add-research-arrow ppict-do-state
                               (program-arrow 'problem-S rb-find 'new-lang-N ct-find (* 95/100 turn) (* 3/4 turn) 50/100 50/100 black))
     #:next
-    #:go (at-find-pict 'improve-compiler-S cb-find 'ct #:abs-y pico-y-sep) (scale (make-short-citation "OOPSLA 18") 9/10)
-    #:next
-    #:go (at-find-pict 'new-compiler-S cb-find 'ct #:abs-y pico-y-sep) @st{Pycket}
-    #:next
-    #:go (at-find-pict 'new-lang-S cb-find 'ct #:abs-y pico-y-sep) @st{Grift, Nom}
-    #:next
     #:go (coord 24/100 33/100 'ct)
     (add-hubs (make-yes-box @t{Interoperate with a} @t{weaker semantics}) 'weak-lang)
     #:set (add-research-arrow ppict-do-state
                               (program-arrow 'problem-S lb-find 'weak-lang-N ct-find (* 55/100 turn) (* 3/4 turn) 80/100 25/100 black)
                               #:style 'dot))
   (pslide
-    #:go (coord 1/2 3/100 'ct)
+    #:go (coord 1/2 2/100 'ct)
     (honest-lying-rect (* 3/2 client-w) (* 75/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
@@ -2517,6 +2511,7 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
+    #:go big-landscape-coord (make-implementation-landscape)
 
 
   )))))
