@@ -1590,7 +1590,7 @@
 (define (make-origin-coord align [abs-x 0] [abs-y 0]) (coord 40/100 6/10 align #:abs-x abs-x #:abs-y abs-y))
 
 (define (make-outline-square)
-  (define c (string->color% "LightSkyBlue"))
+  (define c stamp-color)
   (define w (w%->pixels 20/100))
   (filled-rectangle w w #:color (color%-update-alpha c 8/10) #:draw-border? #f #;(#:border-width 4 #:border-color c)))
 
@@ -1768,7 +1768,7 @@
     #:go (at-find-pict 'x-max rb-find 'ct #:abs-y pico-y-sep) @bt{Performance}
     #:alt
     [#:go heading-text-coord @st{Today:}
-     #:go (make-origin-coord 'lb 2 (- 3)) (make-outline-square)]
+     #:go (make-origin-coord 'lb 2 -4) (make-outline-square)]
     #:go heading-text-coord @st{Future:}
     #:set (add-outline-axis-arrow ppict-do-state 'q3 lb-find 'q1 rt-find)
     #:go (at-find-pict 'q1 rt-find 'lc #:abs-x pico-x-sep) @bt{People})
