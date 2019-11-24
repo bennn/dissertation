@@ -22,7 +22,6 @@
   (prefix-in pict: pict/shadow)
   pict-abbrevs pict-abbrevs/slideshow gtp-pict
   ppict/2
-  "lightbulb.rkt"
   "timeline.rkt"
   racket/draw
   racket/list
@@ -726,27 +725,6 @@
   (ppict-do (blank (- w (* 2 x-offset)) (- h (* 2 y-offset)))
     #:go (coord 1/2 1/2 bottom-placer #:abs-x (* x-b-sign x-offset) #:abs-y (* y-b-sign y-offset)) bottom-pict
     #:go (coord 1/2 1/2 top-placer #:abs-x (* x-t-sign x-offset) #:abs-y (* y-t-sign y-offset)) top-pict))
-
-(define scripting-pict
-  (make-big-ut-pict
-    (lightbulb
-      #:border-width 1
-      #:bulb-radius 45
-      #:stem-width-radians (* 1/10 turn)
-      #:stem-height 12)
-    (bitmap "src/parthenon-logo.png")))
-
-(define ocaml-tag 'ocaml)
-
-(define ocaml-pict (bitmap "src/ocaml-logo-small.png"))
-(define opengl-pict (bitmap "src/opengl-logo-small.png"))
-(define reasonml-pict (bitmap "src/reasonml-logo-small.png"))
-(define react-pict (bitmap "src/react-logo-small.png"))
-
-(define reuse-pict
-  (make-big-tu-pict
-    reasonml-pict
-    react-pict))
 
 (define (make-sample-program untyped? arrow? [scale-by 8/10])
   (make-program-pict
@@ -1704,6 +1682,20 @@
 
 (define opt-y 20/100)
 
+(define guarantee-txt-pict*
+  (let* ((smallt (make-string->body #:size (- body-size 6)))
+         (txt-pict*
+           (list
+             @smallt{types predict behavior}
+             (descr-append
+               @smallt{types predict behavior in typed}
+               @smallt{code, nothing in untyped code})
+             (descr-append
+               @smallt{types predict shapes in typed}
+               @smallt{code, nothing in untyped code})
+             @smallt{types predict nothing})))
+    txt-pict*))
+
 ;; =============================================================================
 
 (define (do-show)
@@ -1906,29 +1898,18 @@
     #:go big-landscape-coord (make-theorem-landscape)
     #:go (coord slide-text-right slide-bottom 'rb)
     (hb-append @t{(a } @it{total spectrum} @t{)}))
-  (let* ((smallt (make-string->body #:size (- body-size 6)))
-         (txt-pict*
-           (list
-             @smallt{types predict behavior}
-             (descr-append
-               @smallt{types predict behavior in typed}
-               @smallt{code, nothing in untyped code})
-             (descr-append
-               @smallt{types predict shapes in typed}
-               @smallt{code, nothing in untyped code})
-             @smallt{types predict nothing})))
-    (for ((i (in-range (length txt-pict*))))
-      (pslide
-        #:go bubble-table-coord
-        (make-bubble-table
-          (interleave
-            guarantee-bubble*
-            (for/list ((txt (in-list txt-pict*))
-                       (j (in-naturals)))
-              (if (= j i) txt (cellophane txt 5/10)))))))
+  (for ((i (in-range (length guarantee-txt-pict*))))
     (pslide
       #:go bubble-table-coord
-      (make-bubble-table (interleave guarantee-bubble* txt-pict*))))
+      (make-bubble-table
+        (interleave
+          guarantee-bubble*
+          (for/list ((txt (in-list guarantee-txt-pict*))
+                     (j (in-naturals)))
+            (if (= j i) txt (cellophane txt 5/10)))))))
+  (pslide
+    #:go bubble-table-coord
+    (make-bubble-table (interleave guarantee-bubble* guarantee-txt-pict*)))
   (let* ((spec* (list (list @bt{Honest} complete-monitoring-tag honest-color (h%->pixels 13/100))
                       (list @bt{Lying} type-sound-tag lying-color (h%->pixels 32/100))
                       (list @bt{Vacuous} uni-sound-tag vacuous-color (h%->pixels 13/100))))
@@ -2145,6 +2126,7 @@
     #:go heading-text-coord @st{Benefits (2/3): Library Interaction}
     #:go benefits-pict-coord (scale (make-benefit-library-pict) 7/10)
     #:go benefits-bar-coord (make-benefits-topbar)
+    #:next
     #:go (coord 1/2 benefits-below-bar-y 'ct #:sep tiny-y-sep)
     #:alt
     [(hb-append @bigct{math/array} @t{: "25 to 50 times slower"})
@@ -2173,7 +2155,7 @@
        (make-untyped-codeblock*
          #:title "B" #:x-margin example-code-x-margin #:y-margin example-code-y-margin
          (list
-           @ct{(require Library)}
+           @ct{(require A)}
            @ct{ }
            @ct{stx})))
      #:next
@@ -2204,7 +2186,7 @@
        cc-superimpose cc-superimpose small-x-sep small-y-sep)]
     (vc-append
       tiny-y-sep
-      (hb-append @bt{Transient} @t{ does not need runtime support,})
+      (hb-append @bt{Transient} @t{ does not need wrappers,})
       @t{so more code can run}))
   (void))
 
@@ -2348,6 +2330,12 @@
     (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep med-y-sep)
     (make-thesis-question #f))
+  (pslide
+    #:go big-landscape-coord
+    (make-implementation-landscape))
+  (pslide
+    #:go bubble-table-coord
+    (make-bubble-table (interleave guarantee-bubble* guarantee-txt-pict*)))
   (pslide
     #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
     (make-research-topic
