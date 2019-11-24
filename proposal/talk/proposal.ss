@@ -1239,6 +1239,9 @@
 (define (make-checklist kv* #:hide? [hide? #false])
   (define text-width (h%->pixels 86/100))
   (define x-pict @titlet{X})
+  (define x-ghost (ghost x-pict))
+  (define check-pict
+    (ppict-do x-ghost #:go center-coord (bitmap (check-icon #:material metal-icon-material #:height 45))))
   (define items-pict
     (make-2table
       #:col-sep tiny-x-sep
@@ -1247,7 +1250,7 @@
         (define k-data (car kv))
         (define v-str (cdr kv))
         (define k-pict
-          (hc-append @titlet{[} (if (and (not hide?) k-data) x-pict (ghost x-pict)) @titlet{]}))
+          (hc-append @titlet{[} (if (and (not hide?) k-data) check-pict x-ghost) @titlet{]}))
         (define v-pict
           (parameterize ((current-font-size body-size))
             (para
@@ -2082,8 +2085,10 @@
                               (program-arrow 'problem-S lb-find 'weak-lang-N ct-find (* 55/100 turn) (* 3/4 turn) 80/100 25/100 black)
                               #:style 'dot))
   (pslide
-    #:go (coord 1/2 2/100 'ct)
-    (honest-lying-rect (* 3/2 client-w) (* 75/100 client-h))
+    ;;#:go (coord 1/2 2/100 'ct)
+    ;;(honest-lying-rect (* 3/2 client-w) (* 75/100 client-h))
+    #:go (coord 1/2 6/100 'ct)
+    (honest-lying-rect (* 3/2 client-w) (* 33/100 client-h))
     #:go (coord slide-text-left 10/100 'lt #:sep small-y-sep)
     (make-thesis-question #t)
     #:next
@@ -2508,7 +2513,7 @@
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
 
-    #:go big-landscape-coord (make-implementation-landscape)
+    #:go checklist-coord (make-checklist #:hide? #false full-checklist-data)
 
 
   )))))
