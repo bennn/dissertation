@@ -1458,18 +1458,18 @@
     (hb-append @ct{(define } (tag-pict @ct{(count acc str)} client-f-tag))
     (hb-append @ct{  (+ 1 acc))})
     @ct{ }
-    (hb-append @ct{(} (tag-pict @ct{t:fold-file} client-fold-tag) @ct{ path 0 count)})))
+    (hb-append @ct{(} (tag-pict @ct{t-fold-file} client-fold-tag) @ct{ path 0 count)})))
 
 (define example-api-code*
   (list
     (hb-append @ct{(provide})
-    (hb-append @ct{  } (tag-pict @ct{t:fold-file} api-fold-tag) @ct{ : (All (Acc) (-> Path Acc})
-    (hb-append @ct{                               (-> Acc Str Acc) Acc)))})
-    (hb-append @ct{(define t:fold-file } (tag-pict @ct{u:fold-file} api-lib-tag) @ct{)})))
+    (hb-append @ct{  } (tag-pict @ct{t-fold-file} api-fold-tag) @ct{ : (-> Path Num})
+    (hb-append @ct{                    (-> Num Str Num) Num)))})
+    (hb-append @ct{(define t-fold-file } (tag-pict @ct{u-fold-file} api-lib-tag) @ct{)})))
 
 (define example-library-code*
   (list
-    (hb-append @ct{(define (} (tag-pict @ct{u:fold-file path acc f)} lib-def-tag))
+    (hb-append @ct{(define (} (tag-pict @ct{u-fold-file path acc f)} lib-def-tag))
     (hb-append @ct{  ... ; read `str` from `path`})
     (hb-append @ct{  ... } (tag-pict @ct{(f str acc)} callback-tag) @ct{ ...})
     (hb-append @ct{  ...)})))
@@ -1985,16 +1985,20 @@
     #:go (coord 50/100 3/10 'ct #:sep small-y-sep)
     (hb-append @bt{Natural} @t{ vs. } @bt{Transient})
     #:next
-    #:go (coord 44/100 4/10 'rt #:sep small-y-sep) (bubble-with-bar 'cm)
+    #:go (coord 44/100 4/10 'rt #:sep small-y-sep)
+    (bubble-with-bar 'cm)
     (vl-append
       tiny-y-sep
       @t{guard all boundaries}
       @t{with deep checks})
-    #:go (coord 54/100 4/10 'lt #:sep small-y-sep) (bubble-with-bar 'tag)
+    @ct{(listof int?)}
+    #:go (coord 54/100 4/10 'lt #:sep small-y-sep)
+    (bubble-with-bar 'tag)
     (vl-append
       tiny-y-sep
       @t{rewrite typed code to}
-      @t{tag-check inputs}))
+      @t{tag-check inputs})
+    @ct{list?})
   (pslide
     #:go heading-text-coord @st{Performance Comparison}
     #:go (coord slide-right slide-top 'rt) (make-short-citation "ICFP 2018")
@@ -2140,7 +2144,7 @@
     (vc-append
       tiny-y-sep
       (blank)
-      @t{Changing a library to Transient may improve}
+      (hb-append @t{Changing a library to } @bt{Transient} @t{ may improve})
       @t{overall performance}))
   (pslide
     #:go heading-text-coord @st{Benefits (3/3): Compatibility}
@@ -2512,8 +2516,6 @@
 
 (module+ raco-pict (provide raco-pict) (define raco-pict (add-rectangle-background #:x-margin 40 #:y-margin 40 (begin (blank 800 600)
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color ice-color)
-
-    #:go checklist-coord (make-checklist #:hide? #false full-checklist-data)
 
 
   )))))
