@@ -2346,6 +2346,14 @@
     #:go bubble-table-coord
     (make-bubble-table (interleave guarantee-bubble* guarantee-txt-pict*)))
   (pslide
+    #:go (coord 1/2 0 'ct #:sep pico-y-sep)
+    (make-scatterplots-pict)
+    (hc-append
+      small-x-sep
+      (hc-append (sample-bar) @t{ = Untyped Perf.})
+      (hc-append (scale (sample-disk 'H) 6/10) @t{ = Natural})
+      (hc-append (scale (sample-disk '1) 6/10) @t{ = Transient})))
+  (pslide
     #:go (coord -2/100 24/100 'lt #:sep tiny-y-sep)
     (make-research-topic
      "Expressiveness"
