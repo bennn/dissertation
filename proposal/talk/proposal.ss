@@ -1755,7 +1755,7 @@
     #:go (make-origin-coord 'rt) (tag-pict (blank 0 (h%->pixels 1/10)) 'y-min)
     #:go (make-origin-coord 'cb) (tag-pict (blank 0 (h%->pixels 4/10)) 'y-max)
     #:set (add-outline-axis-arrow ppict-do-state 'y-min cb-find 'y-max ct-find)
-    #:go (at-find-pict 'y-max lt-find 'rt #:abs-x (- tiny-x-sep)) @bt{Proofs}
+    #:go (at-find-pict 'y-max lt-find 'rt #:abs-x (- tiny-x-sep)) @bt{Properties}
     #:alt
     [#:go heading-text-coord @st{Last Week:}
      #:go (at-find-pict 'y-max ct-find 'cb #:abs-y pico-y-sep) (bitmap (star 40 "solid" "goldenrod"))]
