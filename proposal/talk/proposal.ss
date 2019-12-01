@@ -474,14 +474,8 @@
          )
     pp))
 
-(define small-PLT-pict
-  (vl-append 2 (bitmap "src/racket-small.png") (blank)))
-
 (define med-PLT-pict
   (bitmap "src/racket-med.png"))
-
-(define neu-pict
-  (bitmap "src/neu-small.png"))
 
 (define meeting-of-the-waters
   (if PREVIEW (blank) (bitmap "src/meeting-of-the-waters.jpg")))
