@@ -1,0 +1,22 @@
+\newcommand{\sfont}[1]{\mathsf{#1}}
+\newcommand{\sdyn}{\sfont{dyn}}
+\newcommand{\ssta}{\sfont{stat}}
+\newcommand{\spair}{\times}
+\newcommand{\sfun}{\Rightarrow}
+\newcommand{\stypeenv}{\Gamma}
+
+\newcommand{\typefont}[1]{\mathsf{#1}}
+\newcommand{\lowersym}[1]{\raisebox{-0.7ex}{$#1$}}
+\newcommand{\tfloor}[1]{\lowersym{\llcorner}\!\!#1\!\!\lowersym{\lrcorner}}
+\newcommand{\tdyn}{\mathcal{U}}
+\newcommand{\tnat}{\typefont{Nat}}
+\newcommand{\tint}{\typefont{Int}}
+\newcommand{\tpair}[2]{#1\!\spair\!#2}
+\newcommand{\tfun}[2]{#1\!\sfun\!#2}
+\newcommand{\tann}[2]{(#1\!:\!#2)}
+\newcommand{\toptional}{{\stype{\scriptstyle ?}}}
+
+\newcommand{\makebnd}[3]{#1\,#2~#3}
+\newcommand{\edyn}[1]{\makebnd{\sdyn}{\tdyn}{#1}}
+\newcommand{\estas}[2]{\makebnd{\ssta}{\tfloor{#1}}{#2}}
+\newcommand{\estat}[2]{\makebnd{\ssta}{#1}{#2}}
