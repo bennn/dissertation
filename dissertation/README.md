@@ -1,7 +1,11 @@
 dissertation
 ===
 
-Thesis: TBA
+Thesis:
+- Q0. Does migratory typing benefit from a combination of honest and lying types?
+- A1. Honest and lying types can coexist in a way that yields significant
+      performance benefits.
+      (coexist to acheive significant performance benefits)
 
 Title: TBA
 
