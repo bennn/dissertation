@@ -2,6 +2,276 @@
 \input{def.tex}
 \begin{document}
 
-$\edyn{2} \qquad \estas{\tint}{e} \qquad \estat{\tint}{e}$
+
+\section{Compilation Model}
+
+Simple model, one surface language, one evaluation language, ``three'' compilers,
+ one reduction relation.
+The question is: if we remove types and boundary info, can the result satisfy
+ TS and CM?
+
+Grammar
+
+\[
+  s := x \mid \eint \mid \epair{s}{s}
+       \mid \elam{\evar}{s}
+       \mid \elam{\tann{\evar}{\stype}}{s}
+       \mid \elam{\tann{\evar}{\tfloor{\stype}}}{s}
+       \mid \eunop{s} \mid \ebinop{s}{s} \mid \eapp{s}{s}
+       \mid \emod{\slang}{s}
+
+  e := x \mid \eint \mid \epair{e}{e}
+       \mid \elam{\evar}{e}
+       \mid \elam{\tann{\evar}{\stype}}{e}
+       \mid \elam{\tann{\evar}{\sshape}}{e}
+       \mid \emon{\stype}{e}
+       \mid \eunop{e} \mid \ebinop{e}{e} \mid \eapp{e}{e}
+       \mid \eguard{\stype}{e}
+       \mid \echeck{\sshape}{e}
+       \mid \enoop{e}
+\]
+
+Surface Typing
+
+\[
+  \inferrule*{
+    \tann{\svar_0}{\tdyn} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sST \svar_0 : \tdyn
+  }
+
+  \inferrule*{
+    \tann{\svar_0}{\stype_0} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sST \svar_0 : \stype_0
+  }
+
+  \inferrule*{
+    \tann{\svar_0}{\tfloor{\stype_0}} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sST \svar_0 : \tfloor{\stype_0}
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \sint_0 : \tdyn
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \sint_0 : \tint
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \sint_0 : \tfloor{\tint}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\tdyn}}{\stypeenv_0} \sST \sexpr_0 : \tdyn
+  }{
+    \stypeenv_0 \sST \elam{\svar_0}{\sexpr_0} : \tdyn
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1
+  }{
+    \stypeenv_0 \sST \elam{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1}
+  }{
+    \stypeenv_0 \sST \elam{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0}
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0}
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0
+  }
+
+\]
+
+Completion aka Compilation
+
+\[
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \svar_0 : \tdyn \compilesto \svar_0
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \svar_0 : \stype_0 \compilesto \svar_0
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \svar_0 : \tfloor{\stype_0} \compilesto \svar_0
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\tdyn}}{\stypeenv_0} \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \efun{\svar_0}{\sexpr_0} : \tdyn \compilesto \efun{\svar_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \compilesto \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \compilesto \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1} \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}} \compilesto \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \tdyn \compilesto \sexpr_3
+  }{
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tdyn \compilesto \eapp{\sexpr_2}{\sexpr_3}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfun{\stype_1}{\stype_0} \compilesto \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \stype_1 \compilesto \sexpr_3
+  }{
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \stype_0 \compilesto \eapp{\sexpr_2}{\sexpr_3}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\tfun{\stype_1}{\stype_0}} \compilesto \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \compilesto \sexpr_3
+  }{
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \compilesto \echeck{\sshape_0}{\eapp{\sexpr_2}{\sexpr_3}}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tdyn \compilesto \enoop{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn \compilesto \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tdyn \compilesto \echeck{\sshape_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0 \compilesto \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \stype_0 \compilesto \enoop{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0 \compilesto \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \echeck{\sshape_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \enoop{\sexpr_1}
+  }
+
+\]
+
+
+Reduction Relation
+
+\[
+  \eunop{\svalue_0} \srr \stagerror
+  \eunop{\svalue_0} \srr \sdelta({\sunop}{\svalue_0})
+  \ebinop{\svalue_0}{\svalue_1} \srr \stagerror
+  \ebinop{\svalue_0}{\svalue_1} \srr \sdelta(\sbinop, \svalue_0, \svalue_1)
+  \eapp{\svalue_0}{\svalue_1} \srr \stagerror
+  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} \srr \scheckerror
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} \srr \eguard{\stype_1}{(\eapp{\svalue_0}{(\eguard{\stype_0}{\svalue_1})})}
+  \enoop{\svalue_0} \srr \svalue_0
+  \echeck{\sshape_0}{\svalue_0} \srr \echeckerror
+  \echeck{\sshape_0}{\svalue_0} \srr \svalue_0
+  \eguard{\stype_0}{\svalue_0} \srr \eguarderror
+  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} \srr \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
+  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} \srr \epair{\eguard{\stype_0}{\svalue_0}}{\eguard{\stype_1}{\svalue_1}}
+  \eguard{\sshape_0}{\svalue_0} \srr \svalue_0
+\]
+
+Label Consistency
+
+\[
+  simple, allowed to switch in S U contexts
+\]
 
 \end{document}
