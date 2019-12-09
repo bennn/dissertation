@@ -18,8 +18,11 @@ Programs
 - jpeg : (yes) untyped configurations from benchmark, uses part of math library
 - lnm : (no) only uses 'mean' from math/statistics not worth it
 - funkytown : (no) Vincent's original synth code ... difficult b/c need a benchmark input ... may be good to just update the math codes for synth
-- determinance : 
+- determinance : (no) does not use math library
+- array-map : micro-benchmark using array-andmap / ormap ... needs work!
 - stamps
+
+Surely there must be others!
 
 
 Results
