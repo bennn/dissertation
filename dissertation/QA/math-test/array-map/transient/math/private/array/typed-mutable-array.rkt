@@ -1,4 +1,4 @@
-#lang typed/racket
+#lang typed/racket #:locally-defensive
 
 (require "../unsafe.rkt"
          "array-struct.rkt"

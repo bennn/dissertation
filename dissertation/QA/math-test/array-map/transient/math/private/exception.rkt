@@ -1,4 +1,4 @@
-#lang typed/racket
+#lang typed/racket #:locally-defensive
 
 (provide raise-length-error)
 

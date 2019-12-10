@@ -1,4 +1,4 @@
-#lang typed/racket
+#lang typed/racket #:locally-defensive
 
 (require (prefix-in : racket/unsafe/ops)
          racket/flonum

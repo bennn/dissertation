@@ -19,22 +19,26 @@ Programs
 - lnm : (no) only uses 'mean' from math/statistics not worth it
 - funkytown : (no) Vincent's original synth code ... difficult b/c need a benchmark input ... may be good to just update the math codes for synth
 - determinance : (no) does not use math library
-- array-map : micro-benchmark using array-andmap / ormap ... needs work!
-- stamps
+- array-map : micro-benchmark using array-andmap / ormap
+- stamps : 
 
 Surely there must be others!
+
 
 
 Results
 ---
 
+TODO adapt math library code to use "locally defensive", can't currently
+ at least because of `require/untyped-contract`
+
 Natural = racket/typed racket master, 8e88408 / e90a2b9e
 Transient = racket master / TR adbf3f
 
 | benchmark | natural | transient
-|     synth |   12689 | 1511
-|      jpeg |     778 | 227
-
+|     synth |   12689 |      1511
+|      jpeg |     778 |       227
+| array-map |    2877 |        27
 
 
 

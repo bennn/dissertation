@@ -1,4 +1,4 @@
-#lang typed/racket
+#lang typed/racket #:locally-defensive
 
 (require racket/vector
          "../unsafe.rkt"
