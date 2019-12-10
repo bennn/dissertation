@@ -32,13 +32,18 @@ Results
 TODO adapt math library code to use "locally defensive", can't currently
  at least because of `require/untyped-contract`
 
+TODO use one copy of math!!! no sense doubling array & then matrix
+
 Natural = racket/typed racket master, 8e88408 / e90a2b9e
 Transient = racket master / TR adbf3f
 
 | benchmark | natural | transient
+|---
 |     synth |   12689 |      1511
 |      jpeg |     778 |       227
 | array-map |    2877 |        27
-
+| s:anemone |  195700 |      9170
+|   s:penta |    3720 |      1440
+|  s:branch |    9470 |      4840
 
 
