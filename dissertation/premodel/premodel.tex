@@ -68,12 +68,23 @@ Surface expresssions $\ssurface$,
     \mid \efun{\svar}{\sexpr}
     \mid \efun{\tann{\svar}{\stype}}{\sexpr}
     \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
-    \mid \emon{\stype}{\sexpr}
+    \mid \emon{\stype}{\svalue}
     \mid \eunop{\sexpr} \mid \ebinop{\sexpr}{\sexpr} \mid \eapp{\sexpr}{\sexpr}
     \mid \eguard{\stype}{\sexpr}
     \mid \echeck{\sshape}{\sexpr}
     \mid \enoop{\sexpr}
+  \\
+  \svalue & \slangeq &
+    \sint \mid \epair{\svalue}{\svalue}
+    \mid \efun{\svar}{\sexpr}
+    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
+    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
+    \mid \emon{\stype}{\svalue}
+  \\
+  \serror & \slangeq &
+    \stagerror \mid \scheckerror \mid \sguarderror \mid \sdivzeroerror
 \end{langarray}
+
 
 \subsection{Surface Typing}
 
@@ -371,55 +382,55 @@ Replace module boundaries with guards, checks, and no-ops
 one simple reduction relation for everyone
 
 \begin{rrarray}
-  \eunop{\svalue_0} & \srr
+  \eunop{\svalue_0} & \snr
   & \stagerror
   \\
-  \eunop{\svalue_0} & \srr
+  \eunop{\svalue_0} & \snr
   & \sdelta({\sunop}{\svalue_0})
   \\
-  \ebinop{\svalue_0}{\svalue_1} & \srr
+  \ebinop{\svalue_0}{\svalue_1} & \snr
   & \stagerror
   \\
-  \ebinop{\svalue_0}{\svalue_1} & \srr
+  \ebinop{\svalue_0}{\svalue_1} & \snr
   & \sdelta(\sbinop, \svalue_0, \svalue_1)
   \\
-  \eapp{\svalue_0}{\svalue_1} & \srr &
+  \eapp{\svalue_0}{\svalue_1} & \snr &
   \stagerror
   \\
-  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \srr
+  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \srr
+  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \srr
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \scheckerror
   \\
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \srr
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \srr
+  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \snr
   & \eguard{\stype_1}{(\eapp{\svalue_0}{(\eguard{\stype_0}{\svalue_1})})}
   \\
-  \enoop{\svalue_0} & \srr
+  \enoop{\svalue_0} & \snr
   & \svalue_0
   \\
-  \echeck{\sshape_0}{\svalue_0} & \srr
+  \echeck{\sshape_0}{\svalue_0} & \snr
   & \scheckerror
   \\
-  \echeck{\sshape_0}{\svalue_0} & \srr
+  \echeck{\sshape_0}{\svalue_0} & \snr
   & \svalue_0
   \\
-  \eguard{\stype_0}{\svalue_0} & \srr
+  \eguard{\stype_0}{\svalue_0} & \snr
   & \sguarderror
   \\
-  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \srr
+  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \snr
   & \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
   \\
-  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \srr
+  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
   & \epair{\eguard{\stype_0}{\svalue_0}}{\eguard{\stype_1}{\svalue_1}}
   \\
-  \eguard{\sshape_0}{\svalue_0} & \srr
+  \eguard{\sshape_0}{\svalue_0} & \snr
   & \svalue_0
 \end{rrarray}
 
@@ -825,10 +836,45 @@ all T-owners distinct from S/U (the latter can mix)
 \end{mathpar}
 
 
-%Theorems
-%
-%type soundness
-%
-%prog / pres of ownering
+\subsection{Properties}
+
+\subsubsection{Notation}
+
+$\ssurface_0 \srr \sexpr_0
+ \sdefeq
+ \vdash \ssurface_0 : \stspec
+  \mbox{ and } \vdash \ssurface_0 : \stspec \scompile \sexpr_1
+  \mbox{ and } \sexpr_1 \srr \sexpr_0$
+
+
+\subsubsection{Theorems}
+
+\begin{theorem}[TS$(\sX,\stypemap)$]
+  Language\ $\sX$
+  satisfies\ $\fTS{\stypemap}$
+  if for all\ $\ssurface_0$
+  such that\ $\vdash \ssurface_0 : \stspec$
+  holds, one of the following holds:
+  \begin{itemize}
+    \item $\ssurface_0 \srr \svalue_0$ and\ $\sWTX \svalue_0 : \ftypemap{\stspec}$
+    \item $\ssurface_0 \srr \serror$
+    \item $\ssurface_0 \srr$ diverges
+  \end{itemize}
+\end{theorem}
+
+\begin{theorem}[type soundness]\leavevmode
+  \begin{itemize}
+    \item $\sU$ satisfies\ $\fTS{\stypemapzero}$
+    \item $\sS$ satisfies\ $\fTS{\stypemapshape}$
+    \item $\sT$ satisfies\ $\fTS{\stypemapone}$
+  \end{itemize}
+\end{theorem}
+
+\begin{theorem}[complete monitoring]
+  If\ $\vdash \ssurface_0 : \stspec$
+  and\ $\sowner_0 \Vdash \ssurface_0$
+  and\ $\ssurface_0 \srr \sexpr_0$
+  then\ $\sowner_0 \Vdash \sexpr_0$
+\end{theorem}
 
 \end{document}

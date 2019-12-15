@@ -1,10 +1,12 @@
 \newcommand{\sfont}[1]{\mathsf{#1}}
+\newcommand{\propfont}[1]{\mathbf{#1}}
 
 % --- symbols
 
 \newcommand{\sT}{\sfont{T}}
 \newcommand{\sS}{\sfont{S}}
 \newcommand{\sU}{\sfont{U}}
+\newcommand{\sX}{\sfont{X}}
 \newcommand{\stlang}{\sT}
 \newcommand{\sslang}{\sS}
 \newcommand{\sulang}{\sU}
@@ -24,6 +26,7 @@
 \newcommand{\sDelta}{\Delta}
 \newcommand{\svar}{x}
 \newcommand{\slangeq}{=}
+\newcommand{\sdefeq}{\stackrel{\footnotesize def}{=}}
 \newcommand{\sint}{i}
 \newcommand{\snat}{n}
 \newcommand{\slang}{L}
@@ -35,15 +38,21 @@
 \newcommand{\ssum}{\sfont{sum}}
 \newcommand{\squotient}{\sfont{quotient}}
 \newcommand{\smod}{\sfont{module}}
-\newcommand{\sST}{\vdash_{\ssurface}}
-\newcommand{\sWTU}{\vdash_{\sU}}
-\newcommand{\sWTS}{\vdash_{\sS}}
-\newcommand{\sWTT}{\vdash_{\sT}}
+\newcommand{\mkvdash}[1]{\vdash_{#1}}
+\newcommand{\sST}{\mkvdash{\ssurface}}
+\newcommand{\sWTU}{\mkvdash{\sU}}
+\newcommand{\sWTS}{\mkvdash{\sS}}
+\newcommand{\sWTT}{\mkvdash{\sT}}
+\newcommand{\sWTX}{\mkvdash{\sX}}
 \newcommand{\scompile}{\rightsquigarrow}
-\newcommand{\srr}{\vartriangleright}
+\newcommand{\snr}{\vartriangleright}
+\newcommand{\scc}{\rightarrow}
+\newcommand{\srr}{\scc^{*}}
+\newcommand{\serror}{\sfont{Err}}
 \newcommand{\stagerror}{\sfont{TagErr}}
 \newcommand{\scheckerror}{\sfont{CheckErr}}
 \newcommand{\sguarderror}{\sfont{GuardErr}}
+\newcommand{\sdivzeroerror}{\sfont{DivZeroErr}}
 \newcommand{\sshapecheck}{\sfont{shape}}
 \newcommand{\sdyn}{\mathcal{U}}
 \newcommand{\ssubt}{\mathrel{<:}}
@@ -54,6 +63,10 @@
 \newcommand{\sWL}{\Vdash}
 \newcommand{\sownerenv}{\mathcal{L}}
 \newcommand{\sbndcomma}{\raisebox{0.2ex}{$\scriptscriptstyle\blacktriangleleft$}}
+\newcommand{\stypemap}{\sfont{F}}
+\newcommand{\stypemapzero}{\propfont{0}}
+\newcommand{\stypemapshape}{\propfont{0}}
+\newcommand{\stypemapone}{\sshapecheck}
 
 
 % --- types etc
@@ -71,7 +84,7 @@
 \newcommand{\kint}{\tint}
 \newcommand{\kpair}{\typefont{Pair}}
 \newcommand{\kfun}{\typefont{Fun}}
-\newcommand{\stspec}{X}
+\newcommand{\stspec}{\sX}
 
 
 % --- expressions
@@ -104,8 +117,9 @@
 \newcommand{\fcons}[2]{#1,#2}
 \newcommand{\fsubt}[2]{#1 \ssubt #2}
 \newcommand{\fdeclare}[1]{\forall~#1}
-\newcommand{\fshape}[1]{\mktwoapp{\sshapecheck}{#1}}
-
+\newcommand{\fshape}[1]{\mktwoapp{\sshapecheck}{(#1)}}
+\newcommand{\ftypemap}[1]{\mktwoapp{\stypemap}{(#1)}}
+\newcommand{\fTS}[1]{\mktwoapp{\propfont{TS}}{(#1)}}
 
 % --- environments
 
