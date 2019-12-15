@@ -1,39 +1,90 @@
-\documentclass[10pt]{acmart}
+\documentclass[nonacm,10pt]{acmart}
+
+\input{package.tex}
 \input{def.tex}
+
+\title{Model: 3-typed, compile away}
+\author{Ben Greenman}
+
 \begin{document}
+\maketitle
 
 
 \section{Compilation Model}
 
-Simple model, one surface language, one evaluation language, ``three'' compilers,
- one reduction relation.
-The question is: if we remove types and boundary info, can the result satisfy
- TS and CM?
+Ingredients:
 
-Grammar
+\begin{itemize}
+\item 1 surface language
+\item 1 evaluation language + semantics
+\item 3 linked surface type judgments
+\item 3 linked surface-to-evaluation compilers
+\item 3 linked evaluation type judgments
+\item 1 consistent ownering judgment
+\end{itemize}
 
-\[
-  s := x \mid \eint \mid \epair{s}{s}
-       \mid \elam{\evar}{s}
-       \mid \elam{\tann{\evar}{\stype}}{s}
-       \mid \elam{\tann{\evar}{\tfloor{\stype}}}{s}
-       \mid \eunop{s} \mid \ebinop{s}{s} \mid \eapp{s}{s}
-       \mid \emod{\slang}{s}
+The question is: can the language satisfy ``complete monitoring''
+ if the compilers remove type and boundary info?
 
-  e := x \mid \eint \mid \epair{e}{e}
-       \mid \elam{\evar}{e}
-       \mid \elam{\tann{\evar}{\stype}}{e}
-       \mid \elam{\tann{\evar}{\sshape}}{e}
-       \mid \emon{\stype}{e}
-       \mid \eunop{e} \mid \ebinop{e}{e} \mid \eapp{e}{e}
-       \mid \eguard{\stype}{e}
-       \mid \echeck{\sshape}{e}
-       \mid \enoop{e}
-\]
+In the end, we need no types and three kinds of cast expression in the
+ evaluation language.
+Each kind of cast represents the ``most-concerned'' party:
+ T and anyone gives T, U to S gives S, and S to U gives U.
+The three evaluation sub-languages can mix via the cast expressions and the
+ result satisfies both type soundness (exact guarantee varies by surface sub-lang)
+ and complete monitoring (for ``honest'' types only).
 
-Surface Typing
 
-\[
+\subsection{Grammar}
+
+Surface expresssions $\ssurface$,
+ types $\stype$,
+ type-shapes $\sshape$,
+ evaluation expressions $\sexpr$.
+
+\begin{langarray}
+  \ssurface & \slangeq &
+    \svar \mid \sint \mid \epair{\ssurface}{\ssurface}
+    \mid \efun{\svar}{\ssurface}
+    \mid \efun{\tann{\svar}{\stype}}{\ssurface}
+    \mid \efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}
+    \mid \eunop{\ssurface} \mid \ebinop{\ssurface}{\ssurface} \mid \eapp{\ssurface}{\ssurface}
+    \mid \emod{\slang}{\ssurface}
+  \\
+  \stype & \slangeq &
+    \tnat \mid \tint \mid \tpair{\stype}{\stype} \mid \tfun{\stype}{\stype}
+  \\
+  \sshape & \slangeq &
+    \knat \mid \kint \mid \kpair \mid \kfun
+  \\
+  \stspec & \slangeq &
+    \stype \mid \tfloor{\stype} \mid \tdyn
+  \\
+  \slang & \slangeq &
+    \sT \mid \sS \mid \sU
+  \\
+  \sexpr & \slangeq &
+    \svar \mid \sint \mid \epair{\sexpr}{\sexpr}
+    \mid \efun{\svar}{\sexpr}
+    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
+    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
+    \mid \emon{\stype}{\sexpr}
+    \mid \eunop{\sexpr} \mid \ebinop{\sexpr}{\sexpr} \mid \eapp{\sexpr}{\sexpr}
+    \mid \eguard{\stype}{\sexpr}
+    \mid \echeck{\sshape}{\sexpr}
+    \mid \enoop{\sexpr}
+\end{langarray}
+
+\subsection{Surface Typing}
+
+Module expressions separate different surface languages.
+
+A $\tfloor{\stype_0}$ is a (decorated) full type, not a shape.
+The typing rules for these decorated types are similar to the rules
+ for normal types, but these types give weaker guarantees; the notation
+ is meant to illustrate the weaker-ness.
+
+\begin{mathpar}
   \inferrule*{
     \tann{\svar_0}{\tdyn} \in \stypeenv_0
   }{
@@ -59,6 +110,16 @@ Surface Typing
 
   \inferrule*{
   }{
+    \stypeenv_0 \sST \snat_0 : \tnat
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sST \snat_0 : \tfloor{\tnat}
+  }
+
+  \inferrule*{
+  }{
     \stypeenv_0 \sST \sint_0 : \tint
   }
 
@@ -70,19 +131,19 @@ Surface Typing
   \inferrule*{
     \fcons{\tann{\svar_0}{\tdyn}}{\stypeenv_0} \sST \sexpr_0 : \tdyn
   }{
-    \stypeenv_0 \sST \elam{\svar_0}{\sexpr_0} : \tdyn
+    \stypeenv_0 \sST \efun{\svar_0}{\sexpr_0} : \tdyn
   }
 
   \inferrule*{
     \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1
   }{
-    \stypeenv_0 \sST \elam{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}
   }
 
   \inferrule*{
     \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1}
   }{
-    \stypeenv_0 \sST \elam{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}}
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}}
   }
 
   \inferrule*{
@@ -121,157 +182,653 @@ Surface Typing
     \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0
   }
 
-\]
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0}
+  }
 
-Completion aka Compilation
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0}
+  }
 
-\[
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0}
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tfloor{\stype_0}
+  }
+\end{mathpar}
+
+
+\subsection{Completion (aka Compilation)}
+
+Replace module boundaries with guards, checks, and no-ops
+
+\begin{mathpar}
   \inferrule*{
   }{
-    \stypeenv_0 \sST \svar_0 : \tdyn \compilesto \svar_0
+    \stypeenv_0 \sST \svar_0 : \tdyn \scompile \svar_0
   }
 
   \inferrule*{
   }{
-    \stypeenv_0 \sST \svar_0 : \stype_0 \compilesto \svar_0
+    \stypeenv_0 \sST \svar_0 : \stype_0 \scompile \svar_0
   }
 
   \inferrule*{
   }{
-    \stypeenv_0 \sST \svar_0 : \tfloor{\stype_0} \compilesto \svar_0
+    \stypeenv_0 \sST \svar_0 : \tfloor{\stype_0} \scompile \svar_0
   }
 
   \inferrule*{
-    \fcons{\tann{\svar_0}{\tdyn}}{\stypeenv_0} \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
   }{
-    \stypeenv_0 \sST \efun{\svar_0}{\sexpr_0} : \tdyn \compilesto \efun{\svar_0}{\sexpr_1}
+    \stypeenv_0 \sST \sint_0 : \tdyn \scompile \sint_0
   }
 
   \inferrule*{
-    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \compilesto \sexpr_1
   }{
-    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \compilesto \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
+    \stypeenv_0 \sST \sint_0 : \stype_0 \scompile \sint_0
   }
 
   \inferrule*{
-    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \compilesto \sexpr_1
   }{
-    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \compilesto \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
+    \stypeenv_0 \sST \sint_0 : \tfloor{\stype_0} \scompile \sint_0
   }
 
   \inferrule*{
-    \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1} \compilesto \sexpr_1
-  }{
-    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}} \compilesto \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_1}
-  }
-
-  \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_2
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_2
     \\
-    \stypeenv_0 \sST \sexpr_1 : \tdyn \compilesto \sexpr_3
+    \stypeenv_0 \sST \sexpr_1 : \tdyn \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tdyn \compilesto \eapp{\sexpr_2}{\sexpr_3}
+    \stypeenv_0 \sST \epair{\sexpr_0}{\sexpr_1} : \tdyn \scompile \epair{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tfun{\stype_1}{\stype_0} \compilesto \sexpr_2
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_2
     \\
-    \stypeenv_0 \sST \sexpr_1 : \stype_1 \compilesto \sexpr_3
+    \stypeenv_0 \sST \sexpr_1 : \stype_1 \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \stype_0 \compilesto \eapp{\sexpr_2}{\sexpr_3}
+    \stypeenv_0 \sST \epair{\sexpr_0}{\sexpr_1} : \tpair{\stype_0}{\stype_1} \scompile \epair{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tfloor{\tfun{\stype_1}{\stype_0}} \compilesto \sexpr_2
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_2
     \\
-    \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \compilesto \sexpr_3
+    \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \compilesto \echeck{\sshape_0}{\eapp{\sexpr_2}{\sexpr_3}}
+    \stypeenv_0 \sST \epair{\sexpr_0}{\sexpr_1} : \tfloor{\tpair{\stype_0}{\stype_1}} \scompile \epair{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+    \fcons{\tann{\svar_0}{\tdyn}}{\stypeenv_0} \sST \sexpr_0 : \tdyn \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tdyn \compilesto \enoop{\sexpr_1}
+    \stypeenv_0 \sST \efun{\svar_0}{\sexpr_0} : \tdyn \scompile \efun{\svar_0}{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn \compilesto \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \scompile \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sST \sexpr_0 : \stype_1 \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tdyn \compilesto \echeck{\sshape_0}{\sexpr_1}
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1} \scompile \efun{\tann{\svar_0}{\stype_0}}{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+    \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1} \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0 \compilesto \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \efun{\tann{\svar_0}{\tfloor{\stype_0}}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}} \scompile \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \tdyn \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \stype_0 \compilesto \enoop{\sexpr_1}
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tdyn \scompile \eapp{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+    \stypeenv_0 \sST \sexpr_0 : \tfun{\stype_1}{\stype_0} \scompile \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \stype_1 \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0 \compilesto \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \stype_0 \scompile \eapp{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tdyn \compilesto \sexpr_1
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\tfun{\stype_1}{\stype_0}} \scompile \sexpr_2
+    \\
+    \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \echeck{\sshape_0}{\sexpr_1}
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \echeck{\sshape_0}{(\eapp{\sexpr_2}{\sexpr_3})}
+  }
+
+  (unop, binop)
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tdyn \scompile \enoop{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \stype_0 \compilesto \sexpr_1
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn \scompile \eguard{\stype_0}{\sexpr_1}
   }
 
   \inferrule*{
-    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \compilesto \sexpr_1
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tfloor{\stype_0} \compilesto \enoop{\sexpr_1}
+    \stypeenv_0 \sST \emod{\sslang}{\sexpr_0} : \tdyn \scompile \echeck{\sshape_0}{\sexpr_1}
   }
 
-\]
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0 \scompile \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \stype_0 \scompile \enoop{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0 \scompile \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0} \scompile \echeck{\sshape_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0} \scompile \eguard{\stype_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
+  }{
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tfloor{\stype_0} \scompile \enoop{\sexpr_1}
+  }
+\end{mathpar}
 
 
-Reduction Relation
+\subsection{Reduction Relation}
+one simple reduction relation for everyone
 
-\[
-  \eunop{\svalue_0} \srr \stagerror
-  \eunop{\svalue_0} \srr \sdelta({\sunop}{\svalue_0})
-  \ebinop{\svalue_0}{\svalue_1} \srr \stagerror
-  \ebinop{\svalue_0}{\svalue_1} \srr \sdelta(\sbinop, \svalue_0, \svalue_1)
-  \eapp{\svalue_0}{\svalue_1} \srr \stagerror
-  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} \srr \scheckerror
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} \srr \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} \srr \eguard{\stype_1}{(\eapp{\svalue_0}{(\eguard{\stype_0}{\svalue_1})})}
-  \enoop{\svalue_0} \srr \svalue_0
-  \echeck{\sshape_0}{\svalue_0} \srr \echeckerror
-  \echeck{\sshape_0}{\svalue_0} \srr \svalue_0
-  \eguard{\stype_0}{\svalue_0} \srr \eguarderror
-  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} \srr \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
-  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} \srr \epair{\eguard{\stype_0}{\svalue_0}}{\eguard{\stype_1}{\svalue_1}}
-  \eguard{\sshape_0}{\svalue_0} \srr \svalue_0
-\]
+\begin{rrarray}
+  \eunop{\svalue_0} & \srr
+  & \stagerror
+  \\
+  \eunop{\svalue_0} & \srr
+  & \sdelta({\sunop}{\svalue_0})
+  \\
+  \ebinop{\svalue_0}{\svalue_1} & \srr
+  & \stagerror
+  \\
+  \ebinop{\svalue_0}{\svalue_1} & \srr
+  & \sdelta(\sbinop, \svalue_0, \svalue_1)
+  \\
+  \eapp{\svalue_0}{\svalue_1} & \srr &
+  \stagerror
+  \\
+  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \srr
+  & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \\
+  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \srr
+  & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \\
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \srr
+  & \scheckerror
+  \\
+  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \srr
+  & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
+  \\
+  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \srr
+  & \eguard{\stype_1}{(\eapp{\svalue_0}{(\eguard{\stype_0}{\svalue_1})})}
+  \\
+  \enoop{\svalue_0} & \srr
+  & \svalue_0
+  \\
+  \echeck{\sshape_0}{\svalue_0} & \srr
+  & \scheckerror
+  \\
+  \echeck{\sshape_0}{\svalue_0} & \srr
+  & \svalue_0
+  \\
+  \eguard{\stype_0}{\svalue_0} & \srr
+  & \sguarderror
+  \\
+  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \srr
+  & \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
+  \\
+  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \srr
+  & \epair{\eguard{\stype_0}{\svalue_0}}{\eguard{\stype_1}{\svalue_1}}
+  \\
+  \eguard{\sshape_0}{\svalue_0} & \srr
+  & \svalue_0
+\end{rrarray}
 
-Label Consistency
 
-\[
-  simple, allowed to switch in S U contexts
-\]
+\subsection{Evaluation Typing}
+
+three rules, one for each kind of surface expression
+
+\begin{mathpar}
+  \inferrule*{
+    \tann{\svar_0}{\sdyn} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sWTU \svar_0 : \sdyn
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sWTU \sint_0 : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+    \\
+    \stypeenv_0 \sWTU \sexpr_1 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \epair{\sexpr_0}{\sexpr_1} : \sdyn
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\sdyn}}{\stypeenv_0} \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \efun{\svar_0}{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\sshape_0}}{\stypeenv_0} \sWTS \sexpr_0 : \sshape_1
+  }{
+    \stypeenv_0 \sWTU \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \svalue_0 : \stype_0
+  }{
+    \stypeenv_0 \sWTU \emon{\stype_0}{\svalue_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \eunop{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+    \\
+    \stypeenv_0 \sWTU \sexpr_1 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \ebinop{\sexpr_0}{\sexpr_1} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+    \\
+    \stypeenv_0 \sWTU \sexpr_1 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \eapp{\sexpr_0}{\sexpr_1} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \enoop{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+  }{
+    \stypeenv_0 \sWTU \enoop{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+  }{
+    \stypeenv_0 \sWTU \eguard{\stype_0}{\sexpr_0} : \sdyn
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \inferrule*{
+    \tann{\svar_0}{\sshape_0} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sWTS \svar_0 : \sshape_0
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sWTS \snat_0 : \tnat
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sWTS \sint_0 : \tint
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+    \\
+    \stypeenv_0 \sWTS \sexpr_1 : \sshape_1
+  }{
+    \stypeenv_0 \sWTS \epair{\sexpr_0}{\sexpr_1} : \spair
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\sdyn}}{\stypeenv_0} \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTS \efun{\svar_0}{\sexpr_0} : \sfun
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\sshape_0}}{\stypeenv_0} \sWTS \sexpr_0 : \sshape_1
+  }{
+    \stypeenv_0 \sWTS \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \sfun
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \svalue_0 : \stype_0
+  }{
+    \stypeenv_0 \sWTS \emon{\stype_0}{\svalue_0} : \sfun
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+    \\
+    \fdeclare{\sshape_1}
+  }{
+    \stypeenv_0 \sWTS \eunop{\sexpr_0} : \sshape_1
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+    \\
+    \stypeenv_0 \sWTS \sexpr_1 : \sshape_1
+    \\
+    \fdeclare{\sshape_2}
+  }{
+    \stypeenv_0 \sWTS \ebinop{\sexpr_0}{\sexpr_1} : \sshape_2
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sfun
+    \\
+    \stypeenv_0 \sWTS \sexpr_1 : \sshape_0
+    \\
+    \fdeclare{\sshape_1}
+  }{
+    \stypeenv_0 \sWTS \eapp{\sexpr_0}{\sexpr_1} : \sshape_1
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+  }{
+    \stypeenv_0 \sWTS \enoop{\sexpr_0} : \sshape_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTS \echeck{\sshape_0}{\sexpr_0} : \sshape_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_1
+  }{
+    \stypeenv_0 \sWTS \echeck{\sshape_0}{\sexpr_0} : \sshape_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+    \\
+    \fshape{\stype_0} = \sshape_0
+  }{
+    \stypeenv_0 \sWTS \eguard{\stype_0}{\sexpr_0} : \sshape_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+    \\
+    \fsubt{\sshape_0}{\sshape_1}
+  }{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_1
+  }
+\end{mathpar}
+
+\begin{mathpar}
+  \inferrule*{
+    \tann{\svar_0}{\stype_0} \in \stypeenv_0
+  }{
+    \stypeenv_0 \sWTT \svar_0 : \stype_0
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sWTT \snat_0 : \tnat
+  }
+
+  \inferrule*{
+  }{
+    \stypeenv_0 \sWTT \sint_0 : \tint
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+    \\
+    \stypeenv_0 \sWTT \sexpr_1 : \stype_1
+  }{
+    \stypeenv_0 \sWTT \epair{\sexpr_0}{\sexpr_1} : \tpair{\stype_0}{\stype_1}
+  }
+
+  \inferrule*{
+    \fcons{\tann{\svar_0}{\stype_0}}{\stypeenv_0} \sWTT \sexpr_0 : \stype_1
+  }{
+    \stypeenv_0 \sWTT \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \svalue_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTT \emon{\stype_0}{\svalue_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \svalue_0 : \sshape_0
+  }{
+    \stypeenv_0 \sWTT \emon{\stype_0}{\svalue_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+    \\
+    \sDelta(\sunop, \stype_0) = \stype_1
+  }{
+    \stypeenv_0 \sWTT \eunop{\sexpr_0} : \stype_1
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+    \\
+    \stypeenv_0 \sWTT \sexpr_1 : \stype_1
+    \\
+    \sDelta(\sbinop, \stype_0, \stype_1) = \stype_2
+  }{
+    \stypeenv_0 \sWTT \ebinop{\sexpr_0}{\sexpr_1} : \stype_2
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \tfun{\stype_0}{\stype_1}
+    \\
+    \stypeenv_0 \sWTT \sexpr_1 : \stype_0
+  }{
+    \stypeenv_0 \sWTT \eapp{\sexpr_0}{\sexpr_1} : \stype_1
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+  }{
+    \stypeenv_0 \sWTT \enoop{\sexpr_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTT \eguard{\stype_0}{\sexpr_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+  }{
+    \stypeenv_0 \sWTT \eguard{\stype_0}{\sexpr_0} : \stype_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_0
+    \\
+    \fsubt{\stype_0}{\stype_1}
+  }{
+    \stypeenv_0 \sWTT \sexpr_0 : \stype_1
+  }
+\end{mathpar}
+
+
+\subsection{Label Consistency}
+
+all T-owners distinct from S/U (the latter can mix)
+
+\begin{mathpar}
+  \inferrule*{
+    \tann{\svar_0}{\sowner_0} \in \sownerenv_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \svar_0
+  }
+
+  \inferrule*{
+  }{
+    \sowner_0; \sownerenv_0 \sWL \sint_0
+  }
+
+  \inferrule*{
+    \sowner_0; \sownerenv_0 \sWL \sexpr_0
+    \\
+    \sowner_0; \sownerenv_0 \sWL \sexpr_1
+  }{
+    \sowner_0; \sownerenv_0 \sWL \epair{\sexpr_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \sowner_0; \fcons{\tann{\svar_0}{\sowner_0}}{\sownerenv_0} \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \efun{\svar_0}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_0; \fcons{\tann{\svar_0}{\sowner_0}}{\sownerenv_0} \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_0; \fcons{\tann{\svar_0}{\sowner_0}}{\sownerenv_0} \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_0; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \eunop{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_0; \sownerenv_0 \sWL \sexpr_0
+    \\
+    \sowner_0; \sownerenv_0 \sWL \sexpr_1
+  }{
+    \sowner_0; \sownerenv_0 \sWL \ebinop{\sexpr_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \sowner_0; \sownerenv_0 \sWL \sexpr_0
+    \\
+    \sowner_0; \sownerenv_0 \sWL \sexpr_1
+  }{
+    \sowner_0; \sownerenv_0 \sWL \eapp{\sexpr_0}{\sexpr_1}
+  }
+
+  \inferrule*{
+    \sowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \enoop{\obnd{\sowner_0}{}{\sowner_1}}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \echeck{\obnd{\sowner_0}{\sshape_0}{\sowner_1}}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \sowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \eguard{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\sexpr_0}
+  }
+
+  \inferrule*{
+    \stowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \stowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\stowner_1}
+  }
+
+  \inferrule*{
+    \ssowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \ssowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\ssowner_1}
+  }
+
+  \inferrule*{
+    \suowner_0; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \ssowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\suowner_0}
+  }
+
+  \inferrule*{
+    \suowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \suowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\suowner_1}
+  }
+
+  \inferrule*{
+    \ssowner_0; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \suowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\ssowner_0}
+  }
+
+\end{mathpar}
+
+
+%Theorems
+%
+%type soundness
+%
+%prog / pres of ownering
 
 \end{document}

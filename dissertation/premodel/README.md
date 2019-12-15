@@ -5,7 +5,8 @@ Early thoughts on the model, Natural + Transient
 
 - [ ] simple 3-semantics,
   - [X] draft
-  - [ ] prove US, TS, CM
+  - [X] prove US, TS, CM
+  - [ ] typeset
 
 Idea (2019-12-04):
 ---

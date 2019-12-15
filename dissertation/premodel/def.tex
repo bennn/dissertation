@@ -1,22 +1,116 @@
 \newcommand{\sfont}[1]{\mathsf{#1}}
-\newcommand{\sdyn}{\sfont{dyn}}
-\newcommand{\ssta}{\sfont{stat}}
+
+% --- symbols
+
+\newcommand{\sT}{\sfont{T}}
+\newcommand{\sS}{\sfont{S}}
+\newcommand{\sU}{\sfont{U}}
+\newcommand{\stlang}{\sT}
+\newcommand{\sslang}{\sS}
+\newcommand{\sulang}{\sU}
+\newcommand{\snoop}{\sfont{noop}}
+\newcommand{\scheck}{\sfont{check}}
+\newcommand{\sguard}{\sfont{guard}}
+\newcommand{\smon}{\sfont{mon}}
 \newcommand{\spair}{\times}
 \newcommand{\sfun}{\Rightarrow}
 \newcommand{\stypeenv}{\Gamma}
+\newcommand{\stype}{\tau}
+\newcommand{\sshape}{\sigma}
+\newcommand{\ssurface}{s}
+\newcommand{\sexpr}{e}
+\newcommand{\svalue}{v}
+\newcommand{\sdelta}{\delta}
+\newcommand{\sDelta}{\Delta}
+\newcommand{\svar}{x}
+\newcommand{\slangeq}{=}
+\newcommand{\sint}{i}
+\newcommand{\snat}{n}
+\newcommand{\slang}{L}
+\newcommand{\sapp}{\sfont{app}}
+\newcommand{\sunop}{\textit{unop}}
+\newcommand{\sfst}{\sfont{fst}}
+\newcommand{\ssnd}{\sfont{snd}}
+\newcommand{\sbinop}{\textit{binop}}
+\newcommand{\ssum}{\sfont{sum}}
+\newcommand{\squotient}{\sfont{quotient}}
+\newcommand{\smod}{\sfont{module}}
+\newcommand{\sST}{\vdash_{\ssurface}}
+\newcommand{\sWTU}{\vdash_{\sU}}
+\newcommand{\sWTS}{\vdash_{\sS}}
+\newcommand{\sWTT}{\vdash_{\sT}}
+\newcommand{\scompile}{\rightsquigarrow}
+\newcommand{\srr}{\vartriangleright}
+\newcommand{\stagerror}{\sfont{TagErr}}
+\newcommand{\scheckerror}{\sfont{CheckErr}}
+\newcommand{\sguarderror}{\sfont{GuardErr}}
+\newcommand{\sshapecheck}{\sfont{shape}}
+\newcommand{\sdyn}{\mathcal{U}}
+\newcommand{\ssubt}{\mathrel{<:}}
+\newcommand{\sowner}{\ell}
+\newcommand{\suowner}{\sU}
+\newcommand{\ssowner}{\sS}
+\newcommand{\stowner}{\sT}
+\newcommand{\sWL}{\Vdash}
+\newcommand{\sownerenv}{\mathcal{L}}
+\newcommand{\sbndcomma}{\raisebox{0.2ex}{$\scriptscriptstyle\blacktriangleleft$}}
 
+
+% --- types etc
+
+\newcommand{\tdyn}{\sdyn}
 \newcommand{\typefont}[1]{\mathsf{#1}}
 \newcommand{\lowersym}[1]{\raisebox{-0.7ex}{$#1$}}
 \newcommand{\tfloor}[1]{\lowersym{\llcorner}\!\!#1\!\!\lowersym{\lrcorner}}
-\newcommand{\tdyn}{\mathcal{U}}
 \newcommand{\tnat}{\typefont{Nat}}
 \newcommand{\tint}{\typefont{Int}}
 \newcommand{\tpair}[2]{#1\!\spair\!#2}
 \newcommand{\tfun}[2]{#1\!\sfun\!#2}
 \newcommand{\tann}[2]{(#1\!:\!#2)}
-\newcommand{\toptional}{{\stype{\scriptstyle ?}}}
+\newcommand{\knat}{\tnat}
+\newcommand{\kint}{\tint}
+\newcommand{\kpair}{\typefont{Pair}}
+\newcommand{\kfun}{\typefont{Fun}}
+\newcommand{\stspec}{X}
 
-\newcommand{\makebnd}[3]{#1\,#2~#3}
-\newcommand{\edyn}[1]{\makebnd{\sdyn}{\tdyn}{#1}}
-\newcommand{\estas}[2]{\makebnd{\ssta}{\tfloor{#1}}{#2}}
-\newcommand{\estat}[2]{\makebnd{\ssta}{#1}{#2}}
+
+% --- expressions
+
+\newcommand{\mktwoapp}[2]{#1\,#2}
+\newcommand{\mkthreeapp}[3]{#1\,#2\,#3}
+\newcommand{\makebnd}[3]{\mktwoapp{#1}{#2~#3}}
+\newcommand{\enoop}[1]{\makebnd{\snoop}{\tdyn}{#1}}
+\newcommand{\echeck}[2]{\makebnd{\scheck}{#1}{#2}}
+\newcommand{\eguard}[2]{\makebnd{\sguard}{#1}{#2}}
+\newcommand{\emon}[2]{\makebnd{\smon}{#1}{#2}}
+\newcommand{\efun}[2]{\lambda #1.\, #2}
+\newcommand{\epair}[2]{\langle #1,#2 \rangle}
+\newcommand{\eapp}[2]{\mktwoapp{\sapp}{#1~#2}}
+\newcommand{\eunop}[1]{\mktwoapp{\sunop}{#1}}
+\newcommand{\efst}[1]{\mktwoapp{\sfst}{#1}}
+\newcommand{\esnd}[1]{\mktwoapp{\ssnd}{#1}}
+\newcommand{\ebinop}[2]{\mkthreeapp{\sbinop}{#1}{#2}}
+\newcommand{\esum}[2]{\mkthreeapp{\ssum}{#1}{#2}}
+\newcommand{\equotient}[2]{\mkthreeapp{\squotient}{#1}{#2}}
+\newcommand{\emod}[2]{\mktwoapp{\smod}{#1~#2}}
+\newcommand{\emodule}[2]{\emod{#1}{#2}}
+\newcommand{\esubst}[3]{#1[#2\!\leftarrow\!#3]}
+\newcommand{\ownedby}[2]{{#1}^{#2}}
+\newcommand{\obnd}[3]{(#1 \sbndcomma\,#2 \sbndcomma\,#3)}
+
+
+% --- metafunctions
+
+\newcommand{\fcons}[2]{#1,#2}
+\newcommand{\fsubt}[2]{#1 \ssubt #2}
+\newcommand{\fdeclare}[1]{\forall~#1}
+\newcommand{\fshape}[1]{\mktwoapp{\sshapecheck}{#1}}
+
+
+% --- environments
+
+\newenvironment{langarray}{\(\begin{array}[t]{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)}
+\newenvironment{mfarray}{\(\begin{array}{l@{~~}c@{~}l}}{\end{array}\)}
+\newenvironment{rrarray}{\(\begin{array}{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)}
+
+\newcommand{\sidecond}[1]{\multicolumn{3}{l}{\mbox{\quad #1}}}
