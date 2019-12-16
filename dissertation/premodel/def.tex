@@ -1,5 +1,7 @@
 \newcommand{\sfont}[1]{\mathsf{#1}}
 \newcommand{\propfont}[1]{\mathbf{#1}}
+\newcommand{\mffont}[1]{\textit{#1}}
+\mathchardef\mhyphen="2D
 
 % --- symbols
 
@@ -26,6 +28,7 @@
 \newcommand{\sDelta}{\Delta}
 \newcommand{\svar}{x}
 \newcommand{\slangeq}{=}
+\newcommand{\sexpreq}{=}
 \newcommand{\sdefeq}{\stackrel{\footnotesize def}{=}}
 \newcommand{\sint}{i}
 \newcommand{\snat}{n}
@@ -53,7 +56,8 @@
 \newcommand{\scheckerror}{\sfont{CheckErr}}
 \newcommand{\sguarderror}{\sfont{GuardErr}}
 \newcommand{\sdivzeroerror}{\sfont{DivZeroErr}}
-\newcommand{\sshapecheck}{\sfont{shape}}
+\newcommand{\sshapecheck}{\mffont{shape}}
+\newcommand{\sshapematch}{\mffont{shape-match}}
 \newcommand{\sdyn}{\mathcal{U}}
 \newcommand{\ssubt}{\mathrel{<:}}
 \newcommand{\sowner}{\ell}
@@ -67,6 +71,8 @@
 \newcommand{\stypemapzero}{\propfont{0}}
 \newcommand{\stypemapshape}{\propfont{0}}
 \newcommand{\stypemapone}{\sshapecheck}
+\newcommand{\sctx}{E}
+\newcommand{\sctxhole}{\bullet}
 
 
 % --- types etc
@@ -119,7 +125,11 @@
 \newcommand{\fdeclare}[1]{\forall~#1}
 \newcommand{\fshape}[1]{\mktwoapp{\sshapecheck}{(#1)}}
 \newcommand{\ftypemap}[1]{\mktwoapp{\stypemap}{(#1)}}
+\newcommand{\ftypemapshape}[1]{\mktwoapp{\stypemapshape}{(#1)}}
 \newcommand{\fTS}[1]{\mktwoapp{\propfont{TS}}{(#1)}}
+\newcommand{\finhole}[2]{#1[#2]}
+\newcommand{\fdefined}[1]{#1 \mbox{ is defined}}
+\newcommand{\fshapematch}[2]{\mktwoapp{\sshapematch}{(#1, #2)}}
 
 % --- environments
 
