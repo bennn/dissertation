@@ -911,7 +911,7 @@ $\ssurface_0 \srr \sexpr_0
 \end{theorem}
 
 \begin{theorem}[complete monitoring]
-  If\ $\vdash \ssurface_0 : \stspec$
+  If\ $~\vdash \ssurface_0 : \stspec$
   and\ $\sowner_0 \Vdash \ssurface_0$
   and\ $\ssurface_0 \srr \sexpr_0$
   then\ $\sowner_0 \Vdash \sexpr_0$
@@ -921,7 +921,7 @@ $\ssurface_0 \srr \sexpr_0
 \subsubsection{Lemmas}
 
 \begin{lemma}[$\stypemap$-compile]
-  If\ $\vdash \ssurface_0 : \stspec$
+  If\ $~\vdash \ssurface_0 : \stspec$
   then\ $\vdash \ssurface_0 : \stspec \scompile \sexpr_0$
   and\ $\sWTX \sexpr_0 : \ftypemap{\stspec}$
 \end{lemma}
@@ -933,13 +933,13 @@ $\ssurface_0 \srr \sexpr_0
 \end{lemma}
 
 \begin{lemma}[type progress]
-  If\ $\vdash \sexpr_0 : \stspec$
+  If\ $~\vdash \sexpr_0 : \stspec$
   then either\ $\sexpr_0 \in \svalue \cup \serror$
   or\ $\sexpr_0 \scc \sexpr_1$
 \end{lemma}
 
 \begin{lemma}[type preservation]
-  If\ $\vdash \sexpr_0 : \stspec$
+  If\ $~\vdash \sexpr_0 : \stspec$
   and\ $\sexpr_0 \scc \sexpr_1$
   then\ $\vdash \sexpr_1 : \stspec$
 \end{lemma}
@@ -947,23 +947,23 @@ $\ssurface_0 \srr \sexpr_0
 \begin{lemma}[$\sdelta, \sDelta$ agreement]\leavevmode
   \begin{itemize}
     \item
-      If\ $\sDelta(\sunop, \sdyn) = \sdyn$
+      If\ $~\sDelta(\sunop, \sdyn) = \sdyn$
       and\ $\vdash \svalue_0 : \sdyn$
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
       then\ $\vdash \sdelta(\sunop, \svalue_0) : \sdyn$
     \item
-      If\ $\sDelta(\sunop, \sshape_0) = \sshape_1$
+      If\ $~\sDelta(\sunop, \sshape_0) = \sshape_1$
       and\ $\vdash \svalue_0 : \sshape_0$
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
       then\ $\vdash \sdelta(\sunop, \svalue_0) : \sshape_1$
     \item
-      If\ $\sDelta(\sbinop, \sdyn, \sdyn) = \sdyn$
+      If\ $~\sDelta(\sbinop, \sdyn, \sdyn) = \sdyn$
       and\ $\vdash \svalue_0 : \sdyn$
       and\ $\vdash \svalue_1 : \sdyn$
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
       then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \sdyn$
     \item
-      If\ $\sDelta(\sbinop, \sshape_0, \sshape_1) = \sshape_2$
+      If\ $~\sDelta(\sbinop, \sshape_0, \sshape_1) = \sshape_2$
       and\ $\vdash \svalue_0 : \sshape_0$
       and\ $\vdash \svalue_1 : \sshape_1$
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
@@ -974,51 +974,51 @@ $\ssurface_0 \srr \sexpr_0
 \begin{lemma}[type substitution]\leavevmode
   \begin{itemize}
     \item
-      If\ $\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
+      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
       and\ $\vdash \svalue_0 : \tdyn$
       then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
     \item
-      If\ $\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
+      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
       and\ $\vdash \svalue_0 : \tdyn$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
       then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
     \item
-      If\ $\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
+      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
       and\ $\vdash \svalue_0 : \sshape_0$
       then\ $\fexists{\sshape_1} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_1$
     \item
-      If\ $\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
+      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
       and\ $\vdash \svalue_0 : \sshape_1$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
       then\ $\fexists{\sshape_2} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_2$
     \item
-      If\ $\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
+      If\ $~\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
       and\ $\vdash \svalue_0 : \stype_0$
       then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
   \end{itemize}
 \end{lemma}
 
 \begin{lemma}[S to U]
-  If\ $\vdash \sexpr_0 : \sshape_0$
+  If\ $~\vdash \sexpr_0 : \sshape_0$
   then\ $\vdash \sexpr_0 : \sdyn$
 \end{lemma}
 
 \begin{lemma}[U to S]
-  If\ $\vdash \sexpr_0 : \sdyn$
+  If\ $~\vdash \sexpr_0 : \sdyn$
   then\ $\vdash \sexpr_0 : \sshape_0$
 \end{lemma}
 
 \begin{lemma}[boundary]\leavevmode
   \begin{itemize}
     \item
-      If\ $\vdash \svalue_0 : \stspec$
+      If\ $~\vdash \svalue_0 : \stspec$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
       then\ $\vdash \svalue_0 : \sshape_0$
     \item
-      If\ $\vdash \svalue_0 : \sshape_0$
+      If\ $~\vdash \svalue_0 : \sshape_0$
       then\ $\vdash \svalue_0 : \sdyn$
     \item
-      If\ $\vdash \svalue_0 : \stype_0$
+      If\ $~\vdash \svalue_0 : \stype_0$
       and\ $\eguard{\stype_0}{\svalue_0} \snr \svalue_1$
       then\ $\vdash \svalue_1 : \ftypemapshape{\stype_0}$
       and\ $\vdash \svalue_1 : \tdyn$
@@ -1026,7 +1026,7 @@ $\ssurface_0 \srr \sexpr_0
 \end{lemma}
 
 \begin{lemma}[owner preservation]
-  If\ $\vdash \sexpr_0 : \stspec$
+  If\ $~\vdash \sexpr_0 : \stspec$
   and\ $\sowner_0 \Vdash \sexpr_0$
   and\ $\sexpr_0 \scc \sexpr_1$
   then\ $\sowner_0 \Vdash \sexpr_1$
