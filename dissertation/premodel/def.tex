@@ -98,7 +98,7 @@
 \newcommand{\mktwoapp}[2]{#1\,#2}
 \newcommand{\mkthreeapp}[3]{#1\,#2\,#3}
 \newcommand{\makebnd}[3]{\mktwoapp{#1}{#2~#3}}
-\newcommand{\enoop}[1]{\makebnd{\snoop}{\tdyn}{#1}}
+\newcommand{\enoop}[1]{\makebnd{\snoop}{}{#1}}
 \newcommand{\echeck}[2]{\makebnd{\scheck}{#1}{#2}}
 \newcommand{\eguard}[2]{\makebnd{\sguard}{#1}{#2}}
 \newcommand{\emon}[2]{\makebnd{\smon}{#1}{#2}}
@@ -130,6 +130,7 @@
 \newcommand{\finhole}[2]{#1[#2]}
 \newcommand{\fdefined}[1]{#1 \mbox{ is defined}}
 \newcommand{\fshapematch}[2]{\mktwoapp{\sshapematch}{(#1, #2)}}
+\newcommand{\fexists}[1]{\exists\,#1~.~}
 
 % --- environments
 

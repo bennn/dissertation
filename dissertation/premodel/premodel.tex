@@ -517,6 +517,18 @@ three rules, one for each kind of surface expression
   }
 
   \inferrule*{
+    \stypeenv_0 \sWTU \sexpr_0 : \sdyn
+  }{
+    \stypeenv_0 \sWTU \echeck{\sshape_0}{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sshape_1
+  }{
+    \stypeenv_0 \sWTU \echeck{\sshape_0}{\sexpr_0} : \sdyn
+  }
+
+  \inferrule*{
     \stypeenv_0 \sWTT \sexpr_0 : \stype_0
   }{
     \stypeenv_0 \sWTU \eguard{\stype_0}{\sexpr_0} : \sdyn
@@ -550,25 +562,25 @@ three rules, one for each kind of surface expression
     \\
     \stypeenv_0 \sWTS \sexpr_1 : \sshape_1
   }{
-    \stypeenv_0 \sWTS \epair{\sexpr_0}{\sexpr_1} : \spair
+    \stypeenv_0 \sWTS \epair{\sexpr_0}{\sexpr_1} : \kpair
   }
 
   \inferrule*{
     \fcons{\tann{\svar_0}{\sdyn}}{\stypeenv_0} \sWTU \sexpr_0 : \sdyn
   }{
-    \stypeenv_0 \sWTS \efun{\svar_0}{\sexpr_0} : \sfun
+    \stypeenv_0 \sWTS \efun{\svar_0}{\sexpr_0} : \kfun
   }
 
   \inferrule*{
     \fcons{\tann{\svar_0}{\sshape_0}}{\stypeenv_0} \sWTS \sexpr_0 : \sshape_1
   }{
-    \stypeenv_0 \sWTS \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \sfun
+    \stypeenv_0 \sWTS \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun
   }
 
   \inferrule*{
     \stypeenv_0 \sWTT \svalue_0 : \stype_0
   }{
-    \stypeenv_0 \sWTS \emon{\stype_0}{\svalue_0} : \sfun
+    \stypeenv_0 \sWTS \emon{\stype_0}{\svalue_0} : \kfun
   }
 
   \inferrule*{
@@ -590,7 +602,7 @@ three rules, one for each kind of surface expression
   }
 
   \inferrule*{
-    \stypeenv_0 \sWTS \sexpr_0 : \sfun
+    \stypeenv_0 \sWTS \sexpr_0 : \kfun
     \\
     \stypeenv_0 \sWTS \sexpr_1 : \sshape_0
     \\
@@ -601,6 +613,14 @@ three rules, one for each kind of surface expression
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
+  }{
+    \stypeenv_0 \sWTS \enoop{\sexpr_0} : \sshape_0
+  }
+
+  \inferrule*{
+    \stypeenv_0 \sWTS \sexpr_0 : \sdyn
+    \\
+    \fdeclare{\sshape_0}
   }{
     \stypeenv_0 \sWTS \enoop{\sexpr_0} : \sshape_0
   }
@@ -952,8 +972,6 @@ $\ssurface_0 \srr \sexpr_0
 \end{lemma}
 
 \begin{lemma}[type substitution]\leavevmode
-  %% TODO something not right ... how to tell apart apps in S vs U code?
-  %%  we do need to tell apart for preservation right? maybe ok bc lack of tag error?
   \begin{itemize}
     \item
       If\ $\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
@@ -963,21 +981,31 @@ $\ssurface_0 \srr \sexpr_0
       If\ $\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
       and\ $\vdash \svalue_0 : \tdyn$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_1$
+      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
     \item
       If\ $\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
       and\ $\vdash \svalue_0 : \sshape_0$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+      then\ $\fexists{\sshape_1} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_1$
     \item
       If\ $\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
       and\ $\vdash \svalue_0 : \sshape_1$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_2$
+      then\ $\fexists{\sshape_2} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_2$
     \item
       If\ $\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
       and\ $\vdash \svalue_0 : \stype_0$
       then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
   \end{itemize}
+\end{lemma}
+
+\begin{lemma}[S to U]
+  If\ $\vdash \sexpr_0 : \sshape_0$
+  then\ $\vdash \sexpr_0 : \sdyn$
+\end{lemma}
+
+\begin{lemma}[U to S]
+  If\ $\vdash \sexpr_0 : \sdyn$
+  then\ $\vdash \sexpr_0 : \sshape_0$
 \end{lemma}
 
 \begin{lemma}[boundary]\leavevmode
