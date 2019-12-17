@@ -55,7 +55,7 @@ Surface expresssions $\ssurface$,
     \tnat \mid \tint \mid \tpair{\stype}{\stype} \mid \tfun{\stype}{\stype}
   \\
   \sshape & \slangeq &
-    \knat \mid \kint \mid \kpair \mid \kfun
+    \knat \mid \kint \mid \kpair \mid \kfun \mid \kany
   \\
   \stspec & \slangeq &
     \stype \mid \tfloor{\stype} \mid \tdyn
@@ -91,6 +91,7 @@ Surface expresssions $\ssurface$,
 \end{langarray}
 
 
+\newpage
 \subsection{Surface Typing}
 
 Module expressions separate different surface languages.
@@ -218,6 +219,7 @@ The typing rules for these decorated types are similar to the rules
 \end{mathpar}
 
 
+\newpage
 \subsection{Completion (aka Compilation)}
 
 Replace module boundaries with guards, checks, and no-ops
@@ -383,6 +385,7 @@ Replace module boundaries with guards, checks, and no-ops
 \end{mathpar}
 
 
+\newpage
 \subsection{Reduction Relation}
 one simple reduction relation for everyone
 
@@ -585,30 +588,24 @@ three rules, one for each kind of surface expression
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
-    \\
-    \fdeclare{\sshape_1}
   }{
-    \stypeenv_0 \sWTS \eunop{\sexpr_0} : \sshape_1
+    \stypeenv_0 \sWTS \eunop{\sexpr_0} : \kany
   }
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
     \\
     \stypeenv_0 \sWTS \sexpr_1 : \sshape_1
-    \\
-    \fdeclare{\sshape_2}
   }{
-    \stypeenv_0 \sWTS \ebinop{\sexpr_0}{\sexpr_1} : \sshape_2
+    \stypeenv_0 \sWTS \ebinop{\sexpr_0}{\sexpr_1} : \kany
   }
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \kfun
     \\
     \stypeenv_0 \sWTS \sexpr_1 : \sshape_0
-    \\
-    \fdeclare{\sshape_1}
   }{
-    \stypeenv_0 \sWTS \eapp{\sexpr_0}{\sexpr_1} : \sshape_1
+    \stypeenv_0 \sWTS \eapp{\sexpr_0}{\sexpr_1} : \kany
   }
 
   \inferrule*{
@@ -619,10 +616,8 @@ three rules, one for each kind of surface expression
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sdyn
-    \\
-    \fdeclare{\sshape_0}
   }{
-    \stypeenv_0 \sWTS \enoop{\sexpr_0} : \sshape_0
+    \stypeenv_0 \sWTS \enoop{\sexpr_0} : \kany
   }
 
   \inferrule*{
@@ -761,6 +756,7 @@ three rules, one for each kind of surface expression
 \end{mathpar}
 
 
+\newpage
 \subsection{Label Consistency}
 
 all T-owners distinct from S/U (the latter can mix)
@@ -975,26 +971,26 @@ $\ssurface_0 \srr \sexpr_0
   \begin{itemize}
     \item
       If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
-      and\ $\vdash \svalue_0 : \tdyn$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+      and\ $~\vdash \svalue_0 : \tdyn$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
     \item
       If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
-      and\ $\vdash \svalue_0 : \tdyn$
+      and\ $~\vdash \svalue_0 : \tdyn$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
     \item
       If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
-      and\ $\vdash \svalue_0 : \sshape_0$
-      then\ $\fexists{\sshape_1} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_1$
+      and\ $~\vdash \svalue_0 : \sshape_0$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \kany$
     \item
       If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
-      and\ $\vdash \svalue_0 : \sshape_1$
+      and\ $~\vdash \svalue_0 : \sshape_1$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $\fexists{\sshape_2} \vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sshape_2$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \kany$
     \item
       If\ $~\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
-      and\ $\vdash \svalue_0 : \stype_0$
-      then\ $\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
+      and\ $~\vdash \svalue_0 : \stype_0$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
   \end{itemize}
 \end{lemma}
 
@@ -1005,7 +1001,19 @@ $\ssurface_0 \srr \sexpr_0
 
 \begin{lemma}[U to S]
   If\ $~\vdash \sexpr_0 : \sdyn$
-  then\ $\vdash \sexpr_0 : \sshape_0$
+  then\ $\vdash \sexpr_0 : \kany$
+\end{lemma}
+
+\begin{lemma}[type in-hole]
+  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
+  then\ $\fexists{\stspec_1} \vdash \sexpr_0 : \stspec_1$
+\end{lemma}
+
+\begin{lemma}[type replace]
+  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
+  and\ $~\vdash \sexpr_0 : \stspec_1$
+  and\ $~\vdash \sexpr_1 : \stspec_1$
+  then\ $~\vdash \finhole{\sctx_0}{\sexpr_1} : \stspec_0$
 \end{lemma}
 
 \begin{lemma}[boundary]\leavevmode
@@ -1028,9 +1036,32 @@ $\ssurface_0 \srr \sexpr_0
 \begin{lemma}[owner preservation]
   If\ $~\vdash \sexpr_0 : \stspec$
   and\ $\sowner_0 \Vdash \sexpr_0$
-  and\ $\sexpr_0 \scc \sexpr_1$
+  and\ $\sexpr_0 \snr \sexpr_1$
   then\ $\sowner_0 \Vdash \sexpr_1$
 \end{lemma}
+
+\begin{lemma}[label in-hole]
+  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
+  then\ $\fexists{\sowner_1} \sowner_1 \Vdash \sexpr_0$
+\end{lemma}
+
+\begin{lemma}[label replace]
+  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
+  and\ $\sowner_1 \Vdash \sexpr_0$
+  and\ $\sowner_1 \Vdash \sexpr_1$
+  then\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_1}$
+\end{lemma}
+
+
+\subsection{Notes}
+
+\begin{itemize}
+  \item
+    Might be able to prove a ``tag error'' lemma, but the elimination forms
+     currently don't tell between static-typed and untyped
+  \item
+    \ 
+\end{itemize}
 
 
 \end{document}
