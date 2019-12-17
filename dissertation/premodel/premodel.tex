@@ -981,7 +981,7 @@ $\ssurface_0 \srr \sexpr_0
     \item
       If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
       and\ $~\vdash \svalue_0 : \sshape_0$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \kany$
+      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sdyn$
     \item
       If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
       and\ $~\vdash \svalue_0 : \sshape_1$
@@ -996,12 +996,7 @@ $\ssurface_0 \srr \sexpr_0
 
 \begin{lemma}[S to U]
   If\ $~\vdash \sexpr_0 : \sshape_0$
-  then\ $\vdash \sexpr_0 : \sdyn$
-\end{lemma}
-
-\begin{lemma}[U to S]
-  If\ $~\vdash \sexpr_0 : \sdyn$
-  then\ $\vdash \sexpr_0 : \kany$
+  then\ $~\vdash \sexpr_0 : \sdyn$
 \end{lemma}
 
 \begin{lemma}[type in-hole]
