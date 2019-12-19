@@ -3,9 +3,13 @@ premodel
 
 Early thoughts on the model, Natural + Transient
 
-- [ ] simple 3-semantics,
+- [X] simple 3-semantics (simple.tex),
   - [X] draft
   - [X] prove US, TS, CM
+  - [X] typeset
+- [ ] add / keep boundary info ... can we use to remove checks?
+  - [ ] draft
+  - [ ] prove US TS CM
   - [ ] typeset
 
 Idea (2019-12-04):
