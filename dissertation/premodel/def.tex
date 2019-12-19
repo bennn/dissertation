@@ -99,10 +99,16 @@
 \newcommand{\mktwoapp}[2]{#1\,#2}
 \newcommand{\mkthreeapp}[3]{#1\,#2\,#3}
 \newcommand{\makebnd}[3]{\mktwoapp{#1}{#2~#3}}
+\newcommand{\addlangs}[3]{{#1}^{#2}_{#3}}
+
 \newcommand{\enoop}[1]{\makebnd{\snoop}{}{#1}}
 \newcommand{\escan}[2]{\makebnd{\sscan}{#1}{#2}}
 \newcommand{\ewrap}[2]{\makebnd{\swrap}{#1}{#2}}
 \newcommand{\emon}[2]{\makebnd{\smon}{#1}{#2}}
+\newcommand{\ebnoop}[3]{\makebnd{\addlangs{\snoop}{#1}{#2}}{}{#3}}
+\newcommand{\ebscan}[4]{\makebnd{\addlangs{\sscan}{#1}{#2}}{#3}{#4}}
+\newcommand{\ebwrap}[4]{\makebnd{\addlangs{\swrap}{#1}{#2}}{#3}{#4}}
+\newcommand{\ebmon}[4]{\makebnd{\addlangs{\smon}{#1}{#2}}{#3}{#4}}
 \newcommand{\efun}[2]{\lambda #1.\, #2}
 \newcommand{\epair}[2]{\langle #1,#2 \rangle}
 \newcommand{\eapp}[2]{\mktwoapp{\sapp}{#1~#2}}
