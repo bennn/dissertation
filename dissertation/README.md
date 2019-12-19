@@ -21,6 +21,78 @@ Acknowledgments:
 
 - - -
 
+update 2019-12-18
+---
+
+Hello committee,
+
+Since last month, I've drafted a new thesis statement, made progress on the
+model, and found some library-using programs that seem to run faster with
+Transient.
+
+
+## thesis statement
+
+> Honest and lying types can coexist in a way that retains the formal
+> properties of each and yields measurably significant performance benefits.
+
+Let me know if this statement is still too vague.
+
+
+## model
+
+I developed a model with:
+
+- three surface languages (honest, lying, untyped)
+- one evaluation language
+- one surface-to-evaluation compiler that inserts runtime checks
+
+The semantics of the evaluation language does not rely on type or language
+information; it simply executes the checks inserted by the compiler.
+
+I then sketched proofs of type soundness (for all 3 surface langs) and complete
+monitoring (for honest types). It looks like the properties hold.
+
+The reason for starting with this model is that it reflects what we can
+easily implement in Racket --- we can insert runtime checks during compilation,
+but we don't yet have a way to attach type & language info to the checks. It's
+good to know this works. But I suspect we could insert fewer checks if the
+semantics could see what languages a value is coming from / going to.
+
+So the next step is to add language information to the runtime checks.
+
+A little more precisely, the current model has 3 kinds of check:
+
+1. guard = check full type and wrap higher-order values
+2. check = check value shape
+3. noop  = do nothing
+
+The next model will keep these kinds of checks and annotate each check in a
+program with two languages. So if H = honest, L = lying, and U = untyped, we
+have at least these 6 checks:
+
+1. H -> guard -> U
+2. U -> guard -> H
+3. H -> guard -> L
+4. L -> guard -> H
+5. U -> check -> L
+6. L -> noop  -> U
+
+
+## transient, math library
+
+I've found 6 untyped programs (from various Racket packages) that use the math
+library. When I recompile the math library to use the transient prototype,
+these programs get 2x to 10x faster.
+
+I'll keep looking for more case studies like these, and hope to convert some
+into full benchmarks.
+
+
+Ben
+
+
+
 2019-11-25
 ---
 
