@@ -75,8 +75,8 @@ Surface expresssions $\ssurface$,
     \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
     \mid \emon{\stype}{\svalue}
     \mid \eunop{\sexpr} \mid \ebinop{\sexpr}{\sexpr} \mid \eapp{\sexpr}{\sexpr}
-    \mid \eguard{\stype}{\sexpr}
-    \mid \echeck{\sshape}{\sexpr}
+    \mid \ewrap{\stype}{\sexpr}
+    \mid \escan{\sshape}{\sexpr}
     \mid \enoop{\sexpr}
   \\
   \svalue & \slangeq &
@@ -87,12 +87,12 @@ Surface expresssions $\ssurface$,
     \mid \emon{\stype}{\svalue}
   \\
   \serror & \slangeq &
-    \stagerror \mid \scheckerror \mid \sguarderror \mid \sdivzeroerror
+    \stagerror \mid \sscanerror \mid \swraperror \mid \sdivzeroerror
   \\
   \sctx & \slangeq &
     \sctxhole \mid \eunop{\sctx} \mid \ebinop{\sctx}{\sexpr} \mid \ebinop{\svalue}{\sctx}
     \mid \eapp{\sctx}{\sexpr} \mid \eapp{\svalue}{\sctx} \mid \enoop{\sctx}
-    \mid \echeck{\sshape}{\sctx} \mid \eguard{\stype}{\sctx}
+    \mid \escan{\sshape}{\sctx} \mid \ewrap{\stype}{\sctx}
 \end{langarray}
 
 
@@ -227,7 +227,7 @@ The typing rules for these decorated types are similar to the rules
 \newpage
 \subsection{Completion (aka Compilation)}
 
-Replace module boundaries with guards, checks, and no-ops
+Replace module boundaries with wraps, scans, and no-ops
 
 \begin{mathpar}
   \inferrule*{
@@ -329,7 +329,7 @@ Replace module boundaries with guards, checks, and no-ops
     \\
     \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \echeck{\sshape_0}{(\eapp{\sexpr_2}{\sexpr_3})}
+    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{(\eapp{\sexpr_2}{\sexpr_3})}
   }
 
   (unop, binop)
@@ -343,19 +343,19 @@ Replace module boundaries with guards, checks, and no-ops
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn \scompile \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tdyn \scompile \ewrap{\stype_0}{\sexpr_1}
   }
 
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emod{\sslang}{\sexpr_0} : \tdyn \scompile \echeck{\sshape_0}{\sexpr_1}
+    \stypeenv_0 \sST \emod{\sslang}{\sexpr_0} : \tdyn \scompile \escan{\sshape_0}{\sexpr_1}
   }
 
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0 \scompile \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \stype_0 \scompile \ewrap{\stype_0}{\sexpr_1}
   }
 
   \inferrule*{
@@ -367,19 +367,19 @@ Replace module boundaries with guards, checks, and no-ops
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0 \scompile \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \stype_0 \scompile \ewrap{\stype_0}{\sexpr_1}
   }
 
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \tdyn \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0} \scompile \echeck{\sshape_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\sulang}{\sexpr_0} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{\sexpr_1}
   }
 
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \stype_0 \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0} \scompile \eguard{\stype_0}{\sexpr_1}
+    \stypeenv_0 \sST \emodule{\stlang}{\sexpr_0} : \tfloor{\stype_0} \scompile \ewrap{\stype_0}{\sexpr_1}
   }
 
   \inferrule*{
@@ -417,33 +417,33 @@ one simple reduction relation for everyone
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
   \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
-  & \scheckerror
+  & \sscanerror
   \\
   \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
   \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \snr
-  & \eguard{\stype_1}{(\eapp{\svalue_0}{(\eguard{\stype_0}{\svalue_1})})}
+  & \ewrap{\stype_1}{(\eapp{\svalue_0}{(\ewrap{\stype_0}{\svalue_1})})}
   \\
   \enoop{\svalue_0} & \snr
   & \svalue_0
   \\
-  \echeck{\sshape_0}{\svalue_0} & \snr
-  & \scheckerror
+  \escan{\sshape_0}{\svalue_0} & \snr
+  & \sscanerror
   \\
-  \echeck{\sshape_0}{\svalue_0} & \snr
+  \escan{\sshape_0}{\svalue_0} & \snr
   & \svalue_0
   \\
-  \eguard{\stype_0}{\svalue_0} & \snr
-  & \sguarderror
+  \ewrap{\stype_0}{\svalue_0} & \snr
+  & \swraperror
   \\
-  \eguard{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \snr
+  \ewrap{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \snr
   & \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
   \\
-  \eguard{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
-  & \epair{\eguard{\stype_0}{\svalue_0}}{\eguard{\stype_1}{\svalue_1}}
+  \ewrap{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
+  & \epair{\ewrap{\stype_0}{\svalue_0}}{\ewrap{\stype_1}{\svalue_1}}
   \\
-  \eguard{\sshape_0}{\svalue_0} & \snr
+  \ewrap{\sshape_0}{\svalue_0} & \snr
   & \svalue_0
 \end{rrarray}
 
@@ -527,19 +527,19 @@ three rules, one for each kind of surface expression
   \inferrule*{
     \stypeenv_0 \sWTU \sexpr_0 : \sdyn
   }{
-    \stypeenv_0 \sWTU \echeck{\sshape_0}{\sexpr_0} : \sdyn
+    \stypeenv_0 \sWTU \escan{\sshape_0}{\sexpr_0} : \sdyn
   }
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_1
   }{
-    \stypeenv_0 \sWTU \echeck{\sshape_0}{\sexpr_0} : \sdyn
+    \stypeenv_0 \sWTU \escan{\sshape_0}{\sexpr_0} : \sdyn
   }
 
   \inferrule*{
     \stypeenv_0 \sWTT \sexpr_0 : \stype_0
   }{
-    \stypeenv_0 \sWTU \eguard{\stype_0}{\sexpr_0} : \sdyn
+    \stypeenv_0 \sWTU \ewrap{\stype_0}{\sexpr_0} : \sdyn
   }
 
   \inferrule*{
@@ -628,13 +628,13 @@ three rules, one for each kind of surface expression
   \inferrule*{
     \stypeenv_0 \sWTU \sexpr_0 : \sdyn
   }{
-    \stypeenv_0 \sWTS \echeck{\sshape_0}{\sexpr_0} : \sshape_0
+    \stypeenv_0 \sWTS \escan{\sshape_0}{\sexpr_0} : \sshape_0
   }
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_1
   }{
-    \stypeenv_0 \sWTS \echeck{\sshape_0}{\sexpr_0} : \sshape_0
+    \stypeenv_0 \sWTS \escan{\sshape_0}{\sexpr_0} : \sshape_0
   }
 
   \inferrule*{
@@ -642,7 +642,7 @@ three rules, one for each kind of surface expression
     \\
     \fshape{\stype_0} = \sshape_0
   }{
-    \stypeenv_0 \sWTS \eguard{\stype_0}{\sexpr_0} : \sshape_0
+    \stypeenv_0 \sWTS \ewrap{\stype_0}{\sexpr_0} : \sshape_0
   }
 
   \inferrule*{
@@ -737,13 +737,13 @@ three rules, one for each kind of surface expression
   \inferrule*{
     \stypeenv_0 \sWTU \sexpr_0 : \sdyn
   }{
-    \stypeenv_0 \sWTT \eguard{\stype_0}{\sexpr_0} : \stype_0
+    \stypeenv_0 \sWTT \ewrap{\stype_0}{\sexpr_0} : \stype_0
   }
 
   \inferrule*{
     \stypeenv_0 \sWTS \sexpr_0 : \sshape_0
   }{
-    \stypeenv_0 \sWTT \eguard{\stype_0}{\sexpr_0} : \stype_0
+    \stypeenv_0 \sWTT \ewrap{\stype_0}{\sexpr_0} : \stype_0
   }
 
   \inferrule*{
@@ -835,13 +835,13 @@ all T-owners distinct from S/U (the latter can mix)
   \inferrule*{
     \sowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \sowner_0; \sownerenv_0 \sWL \echeck{\obnd{\sowner_0}{\sshape_0}{\sowner_1}}{\sexpr_0}
+    \sowner_0; \sownerenv_0 \sWL \escan{\obnd{\sowner_0}{\sshape_0}{\sowner_1}}{\sexpr_0}
   }
 
   \inferrule*{
     \sowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \sowner_0; \sownerenv_0 \sWL \eguard{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\sexpr_0}
+    \sowner_0; \sownerenv_0 \sWL \ewrap{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\sexpr_0}
   }
 
   \inferrule*{
@@ -1027,7 +1027,7 @@ $\ssurface_0 \srr \sexpr_0
       then\ $\vdash \svalue_0 : \sdyn$
     \item
       If\ $~\vdash \svalue_0 : \stype_0$
-      and\ $\eguard{\stype_0}{\svalue_0} \snr \svalue_1$
+      and\ $\ewrap{\stype_0}{\svalue_0} \snr \svalue_1$
       then\ $\vdash \svalue_1 : \ftypemapshape{\stype_0}$
       and\ $\vdash \svalue_1 : \tdyn$
   \end{itemize}

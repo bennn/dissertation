@@ -13,8 +13,8 @@
 \newcommand{\sslang}{\sS}
 \newcommand{\sulang}{\sU}
 \newcommand{\snoop}{\sfont{noop}}
-\newcommand{\scheck}{\sfont{check}}
-\newcommand{\sguard}{\sfont{guard}}
+\newcommand{\sscan}{\sfont{scan}}
+\newcommand{\swrap}{\sfont{wrap}}
 \newcommand{\smon}{\sfont{mon}}
 \newcommand{\spair}{\times}
 \newcommand{\sfun}{\Rightarrow}
@@ -53,8 +53,8 @@
 \newcommand{\srr}{\scc^{*}}
 \newcommand{\serror}{\sfont{Err}}
 \newcommand{\stagerror}{\sfont{TagErr}}
-\newcommand{\scheckerror}{\sfont{CheckErr}}
-\newcommand{\sguarderror}{\sfont{GuardErr}}
+\newcommand{\sscanerror}{\sfont{ScanErr}}
+\newcommand{\swraperror}{\sfont{WrapErr}}
 \newcommand{\sdivzeroerror}{\sfont{DivZeroErr}}
 \newcommand{\sshapecheck}{\mffont{shape}}
 \newcommand{\sshapematch}{\mffont{shape-match}}
@@ -100,8 +100,8 @@
 \newcommand{\mkthreeapp}[3]{#1\,#2\,#3}
 \newcommand{\makebnd}[3]{\mktwoapp{#1}{#2~#3}}
 \newcommand{\enoop}[1]{\makebnd{\snoop}{}{#1}}
-\newcommand{\echeck}[2]{\makebnd{\scheck}{#1}{#2}}
-\newcommand{\eguard}[2]{\makebnd{\sguard}{#1}{#2}}
+\newcommand{\escan}[2]{\makebnd{\sscan}{#1}{#2}}
+\newcommand{\ewrap}[2]{\makebnd{\swrap}{#1}{#2}}
 \newcommand{\emon}[2]{\makebnd{\smon}{#1}{#2}}
 \newcommand{\efun}[2]{\lambda #1.\, #2}
 \newcommand{\epair}[2]{\langle #1,#2 \rangle}
