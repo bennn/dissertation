@@ -47,6 +47,7 @@ Transient = racket master / TR adbf3f
 |  s:branch |    9470 |      4840 |   2 |
 | rilou-xor |  152000 |      5370 |  30 |
 | 7 wavelet }   40000 |      3000 |  10 |
+|  aoc-2015 | timeout |     10489 |     |
 
 | l:3d-with }    3170 |      3000 |   0 |
 | 5 wavelet }    3000 |      2250 |   0 |
@@ -78,9 +79,9 @@ All Math
 
 ```
 data-frame : MAYBE https://github.com/alex-hhh/data-frame https://github.com/alex-hhh/ActivityLog2
-drbayes : MAYBE, distributions
-j : maybe, array, now get a benchmark
 
+drbayes : maybe/no, distributions ... cannot find slow test
+j : maybe/no, array, now get a benchmark NOT enough tests
 rilouworld : yes matrix-transpose https://github.com/euhmeuh/rilouworld/tree/master
 ruckus : maybe/no, matrix, lang/interpolation https://github.com/cbiffle/ruckus/tree/master
 lindenmayer : maybe/no, matrix in 3d file ... nogood for 3d-with-leaves
