@@ -62,8 +62,8 @@ Surface expresssions $\ssurface$,
     %\mid \efun{\tann{\svar}{\sshape}}{\sexpr}
     %\mid \emon{\stype}{\svalue}
     %\mid \eunop{\sexpr} \mid \ebinop{\sexpr}{\sexpr} \mid \eapp{\sexpr}{\sexpr}
-    %\mid \eguard{\stype}{\sexpr}
-    %\mid \echeck{\sshape}{\sexpr}
+    %\mid \ewrap{\stype}{\sexpr}
+    %\mid \escan{\sshape}{\sexpr}
     %\mid \enoop{\sexpr}
   \\
   \svalue & \slangeq &
@@ -74,12 +74,12 @@ Surface expresssions $\ssurface$,
     \mid \emon{\stype}{\svalue}
   \\
   \serror & \slangeq &
-    \stagerror \mid \scheckerror \mid \sguarderror \mid \sdivzeroerror
+    \stagerror \mid \sscanerror \mid \swraperror \mid \sdivzeroerror
   \\
   \sctx & \slangeq &
     \sctxhole \mid \eunop{\sctx} \mid \ebinop{\sctx}{\sexpr} \mid \ebinop{\svalue}{\sctx}
     \mid \eapp{\sctx}{\sexpr} \mid \eapp{\svalue}{\sctx} \mid \enoop{\sctx}
-    \mid \echeck{\sshape}{\sctx} \mid \eguard{\stype}{\sctx}
+    \mid \escan{\sshape}{\sctx} \mid \ewrap{\stype}{\sctx}
 \end{langarray}
 
 
