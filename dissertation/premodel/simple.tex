@@ -351,7 +351,7 @@ Replace module boundaries with wraps, scans, and no-ops
   \inferrule*{
     \stypeenv_0 \sST \sexpr_0 : \tfloor{\stype_0} \scompile \sexpr_1
   }{
-    \stypeenv_0 \sST \emod{\sslang}{\sexpr_0} : \tdyn \scompile \escan{\sshape_0}{\sexpr_1}
+    \stypeenv_0 \sST \emod{\sslang}{\sexpr_0} : \tdyn \scompile \enoop{\sshape_0}{\sexpr_1}
   }
 
   \inferrule*{
@@ -401,7 +401,7 @@ one simple reduction relation for everyone
   & \stagerror
   \\
   \eunop{\svalue_0} & \snr
-  & \sdelta({\sunop}{\svalue_0})
+  & \sdelta(\sunop, \svalue_0)
   \\
   \ebinop{\svalue_0}{\svalue_1} & \snr
   & \stagerror
