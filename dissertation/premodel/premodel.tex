@@ -9,6 +9,75 @@
 \begin{document}
 \maketitle
 
+% \section{Notes 2020-02-04}
+% 
+% Looks bleak.
+% 
+% Current status (before this document):
+% 
+% Self-edges:
+%   - T => T = noop
+%   - S => S = noop
+%   - U => U = noop
+% 
+% T/U:
+%   - T => U = wrap
+%   - U => T = wrap
+% 
+% T/S S/U:
+%   - T => S = wrap
+%   - S => U = noop
+%   - U => S = scan
+%   - S => T = wrap
+% 
+% The ideal seems to be weakening the S/T boundary:
+% 
+%   - T => S = noop
+%   - S => T = noop
+% 
+% Well we can't do exactly that because the S-value might have come from untyped,
+% or gone out and in before entering T. And we can't just send T to S because
+% S might send it to untyped. We might do this:
+% 
+%   - T => S = noop
+%   - S => U = noop, or wrap if originally-typed value
+%   - U => S = scan
+%   - S => T = noop, or wrap if originally-typed (or wrong S-typed) value
+% 
+% But then ....
+% 
+% - to install the "if" at every S => U boundary, we need wrappers on U values
+%   to find the indirection points
+% 
+% - ditto, to install at every S => T boundary we need wrappers on S values
+% 
+% - seems best to put those wrappers around U alone .... [[T -- S] -- U] ... but
+%   that's not transient anymore, more like forgetful
+% 
+% So that looks bleak for Transient.
+% 
+% Anyway, once we have these wrappers, need to dynamically check the
+% boundary-lang against the value-lang (and value type maybe). That is going to
+% be some work and may not pay off.
+
+
+%\section{Notes 2020-02-05}
+%
+%Ok, what if we put wrappers on the T = S boundary?
+%
+%They cannot be "lite" wrappers. A lite wrapper could maybe skip shape checks,
+%but needs to be upgraded for S => U jumps. Impractical.
+%
+%If we have real wrappers, then we still can't do anything without RTTI.
+%
+%- T cannot drop wrappers, ever. Thats not CM
+%
+%- once we have wrappers, need to inspect them to do anything ... can't
+%  look at the boundary and check only "wrapped or not"
+%
+%:/
+
+
 
 \section{Model}
 
