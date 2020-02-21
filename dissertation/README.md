@@ -21,6 +21,103 @@ Acknowledgments:
 
 - - -
 
+update 2020-02-21
+---
+
+Dear committee members,
+
+This update brings:
+- a new thesis statement,
+- negative results on the model,
+- and positive notes on the implementation.
+
+
+## new thesis statement
+
+Honest and lying types can coexist
+ in a way that retains the formal properties of each
+ and yields measurably significant performance benefits.
+
+
+blg; It's a benefit over the pre-coexistence world --- honest or lying
+     alone, with conventional compiler technology.
+
+jvj; Perhaps you need to add one bit that explains how you are going to measure
+     and what is “significant”.
+
+; jan's advice is pretty good, better than appending the blg comment ... if
+  we can say what kind of combination and what kind of benefit.
+
+
+## model
+
+We currently have a model that combines honest & lying types in a simple way
+and keeps the formal properties of each. The simple combination enforces all
+honest types with wrappers and all lying types with shape checks.
+
+If we split a program into 3 worlds --- H = honest, L = lying, U = untyped ---
+then the diagram below shows the checks that currently happen at every boundary.
+"wrap" = fully check & wrap. "scan" = shape-check. "noop" = do nothing.
+
+  Current status:
+
+      +--[wrap]-->  H  <--[wrap]--+
+      |                           |
+      v                           v
+         >-------[noop]-------->
+      L                           U
+         <-------[scan]--------<
+
+The question was, can we get away with fewer wraps & scans if every boundary
+comes with labels for the languages on either side?
+
+If lying types = transient, then the answer is usually no. For special cases
+we can avoid wrapping an L value that enters an H context, but in general we
+need to decorate a value with its original type + language to know what's safe
+at a boundary. (That might be a good future project.)
+
+If lying types != transient, and we use a kind of wrappers instead, then we
+can make the H <-> L boundary a noop.
+
+
+  Potential, if L creates wrappers:
+
+      +--[noop]-->  H  <--[wrap]--+
+      |                           |
+      v                           v
+         >-------[noop]-------->
+      L                           U
+         <-------[scan/wrap]---<
+
+But then we lose all the benefits of the transient approach. Also, implementing
+these "lying wrappers" is going to take some time.
+
+So we decided to stay with the simple model and get moving on the implementation
+and evaluation.
+
+
+## implementation
+
+I've been making progress fixing bugs and getting benchmarks to run with a
+Transient Typed Racket. Right now all of the benchmarks [1] can run, but I
+need to do more testing to make sure they're running correctly. Also, a few
+are running slower now than with my ICFP'18 prototype and I wonder why.
+
+Here is a patch that shows the changes to base typed racket:
+
+  TODO
+
+
+## next
+
+For next time, the plan is a high-confidence implementation with some numbers.
+
+Optimizer too?
+
+
+Ben
+
+
 update 2019-12-18
 ---
 
