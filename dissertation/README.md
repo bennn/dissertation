@@ -48,18 +48,17 @@ jvj; Perhaps you need to add one bit that explains how you are going to measure
 ; jan's advice is pretty good, better than appending the blg comment ... if
   we can say what kind of combination and what kind of benefit.
 
+; ... coexist ... symbiotic ... better together ...
+
+
 
 ## model
 
-We currently have a model that combines honest & lying types in a simple way
-and keeps the formal properties of each. The simple combination enforces all
-honest types with wrappers and all lying types with shape checks.
-
+We currently have a model that combines honest & lying types in a simple way.
 If we split a program into 3 worlds --- H = honest, L = lying, U = untyped ---
 then the diagram below shows the checks that currently happen at every boundary.
-"wrap" = fully check & wrap. "scan" = shape-check. "noop" = do nothing.
-
-  Current status:
+A "wrap" is a wrapper or deep check, a "scan" is a shape check, and a "noop"
+is no check.
 
       +--[wrap]-->  H  <--[wrap]--+
       |                           |
@@ -68,52 +67,52 @@ then the diagram below shows the checks that currently happen at every boundary.
       L                           U
          <-------[scan]--------<
 
-The question was, can we get away with fewer wraps & scans if every boundary
-comes with labels for the languages on either side?
+     Current status
+
+The question from last update was whether we can get away with fewer wraps
+and scans by adding labels to every boundary.
 
 If lying types = transient, then the answer is usually no. For special cases
-we can avoid wrapping an L value that enters an H context, but in general we
-need to decorate a value with its original type + language to know what's safe
-at a boundary. (That might be a good future project.)
+we can avoid wrapping an L value that enters an H context, but in general
+boundary labels aren't enough. So the picture above doesn't change. We need to
+decorate a value with its original type to know whats safe. That may be a good
+future project, but I think adding metadata to the runtime is out of scope for
+my dissertation.
 
-If lying types != transient, and we use a kind of wrappers instead, then we
+If lying types != transient and we use a kind of wrappers instead, then we
 can make the H <-> L boundary a noop.
-
-
-  Potential, if L creates wrappers:
 
       +--[noop]-->  H  <--[wrap]--+
       |                           |
       v                           v
-         >-------[noop]-------->
+         >-----[noop/wrap]----->
       L                           U
-         <-------[scan/wrap]---<
+         <-----[scan/wrap]-----<
 
-But then we lose all the benefits of the transient approach. Also, implementing
-these "lying wrappers" is going to take some time.
+     Potential, if L creates wrappers
 
-So we decided to stay with the simple model and get moving on the implementation
-and evaluation.
+But now we lose the benefits of transient. Implementing "lying wrappers" is
+also a big project, out of scope.
+
+So we'we decided to stay with the simple model and get moving on the
+implementation and evaluation.
 
 
 ## implementation
 
 I've been making progress fixing bugs and getting benchmarks to run with a
-Transient Typed Racket. Right now all of the benchmarks [1] can run, but I
-need to do more testing to make sure they're running correctly. Also, a few
-are running slower now than with my ICFP'18 prototype and I wonder why.
+Transient Typed Racket. Right now all of the benchmarks can run, but I need to
+do more testing to make sure they're running correctly and efficiently.
 
-Here is a patch that shows the changes to base typed racket:
+Here is a patch that shows the changes to base Typed Racket:
 
   TODO
 
 
 ## next
 
-For next time, the plan is a high-confidence implementation with some numbers.
-
-Optimizer too?
-
+For next time, the goal is to report some lessons and measurements about the
+implementation.
 
 Ben
 
