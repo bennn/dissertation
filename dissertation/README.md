@@ -26,30 +26,20 @@ update 2020-02-21
 
 Dear committee members,
 
-This update brings:
+This update has:
 - a new thesis statement,
 - negative results on the model,
 - and positive notes on the implementation.
 
-
-## new thesis statement
-
-Honest and lying types can coexist
- in a way that retains the formal properties of each
- and yields measurably significant performance benefits.
+Overall I'm stopping work on the model and focusing on the implementation.
 
 
-blg; It's a benefit over the pre-coexistence world --- honest or lying
-     alone, with conventional compiler technology.
+## revised thesis statement
 
-jvj; Perhaps you need to add one bit that explains how you are going to measure
-     and what is “significant”.
-
-; jan's advice is pretty good, better than appending the blg comment ... if
-  we can say what kind of combination and what kind of benefit.
-
-; ... coexist ... symbiotic ... better together ...
-
+Honest and lying types can coexist in a way that preserves their formal
+properties; programmers can combine these types to strengthen lying-type
+guarantees, avoid unimportant honest-type runtime errors, and reduce the
+performance cost of typed/untyped interaction.
 
 
 ## model
@@ -70,7 +60,8 @@ is no check.
      Current status
 
 The question from last update was whether we can get away with fewer wraps
-and scans by adding labels to every boundary.
+and scans by adding labels to every boundary. For example, a `wrap` boundary
+could turn into `wrap(from H to L)`.
 
 If lying types = transient, then the answer is usually no. For special cases
 we can avoid wrapping an L value that enters an H context, but in general
@@ -91,8 +82,8 @@ can make the H <-> L boundary a noop.
 
      Potential, if L creates wrappers
 
-But now we lose the benefits of transient. Implementing "lying wrappers" is
-also a big project, out of scope.
+But now we lose the benefits of transient and need to implement a new kind of
+wrapper.
 
 So we'we decided to stay with the simple model and get moving on the
 implementation and evaluation.
