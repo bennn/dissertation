@@ -106,7 +106,7 @@ do more testing to make sure they're running correctly and efficiently.
 
 Here is a patch that shows the changes to base Typed Racket:
 
-  TODO
+  https://gist.github.com/bennn/e2971f65448adaa5831288d585861f43
 
 
 ## next
