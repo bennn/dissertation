@@ -26,23 +26,49 @@ update 2020-02-21
 
 Dear committee members,
 
-This update has:
-- a new thesis statement,
-- negative results on the model,
-- and positive notes on the implementation.
-
-Overall I'm stopping work on the model and focusing on the implementation.
+Since last time, I've stopped work on the model and switched focus to
+an implementation of Transient Typed Racket.
 
 
 ## revised thesis statement
 
 Honest and lying types can coexist in a way that preserves their formal
 properties; programmers can combine these types to strengthen lying-type
-guarantees, avoid unimportant honest-type runtime errors, and reduce the
-performance cost of typed/untyped interaction.
+guarantees, avoid unimportant honest-type runtime errors, and lower the
+running time of typed/untyped interactions.
 
 
 ## model
+
+In January / February, I worked to reduce the number of run-time checks
+that the previous model required. This work has been unsuccessful in general;
+see the bottom of this message for details.
+
+I've decided to stick with the model from last time and base the
+implementation on that.
+
+
+## implementation
+
+I've been making progress fixing bugs and getting benchmarks to run with a
+Transient Typed Racket. Right now all of the benchmarks can run, but I need to
+do more testing to make sure they're running correctly and efficiently.
+
+Here is a patch that shows the changes to base Typed Racket:
+
+  https://gist.github.com/bennn/e2971f65448adaa5831288d585861f43
+
+
+## next
+
+For next time, the goal is to report some lessons and measurements about the
+implementation.
+
+Ben
+
+- - -
+
+## extra notes on the model
 
 We currently have a model that combines honest & lying types in a simple way.
 If we split a program into 3 worlds --- H = honest, L = lying, U = untyped ---
@@ -85,27 +111,6 @@ can make the H <-> L boundary a noop.
 But now we lose the benefits of transient and need to implement a new kind of
 wrapper.
 
-So we'we decided to stay with the simple model and get moving on the
-implementation and evaluation.
-
-
-## implementation
-
-I've been making progress fixing bugs and getting benchmarks to run with a
-Transient Typed Racket. Right now all of the benchmarks can run, but I need to
-do more testing to make sure they're running correctly and efficiently.
-
-Here is a patch that shows the changes to base Typed Racket:
-
-  https://gist.github.com/bennn/e2971f65448adaa5831288d585861f43
-
-
-## next
-
-For next time, the goal is to report some lessons and measurements about the
-implementation.
-
-Ben
 
 
 update 2019-12-18
