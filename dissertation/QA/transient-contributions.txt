@@ -1,0 +1,73 @@
+
+
+Bugs found in development
+---
+
+What bugs did we find and fix in TR and other codebases?
+
+1. check-expect type error
+  <https://github.com/racket/htdp/pull/98>
+  Ran Transient on typed-racket-test/succeed/check-expect.rkt,
+   got error expected Void found Boolean
+
+2. Channel any-wrap
+  <https://github.com/racket/typed-racket/pull/919>
+  Forget how found ... but Transient was creating unnecessary any-wraps
+  A perfect Transient would not have found this bug.
+
+3. Share sc cache
+  <https://github.com/racket/typed-racket/pull/917>
+  Found by reading core.rkt code
+
+4. Run ignored tests
+  <https://github.com/racket/typed-racket/pull/916>
+  Found by converting unit tests to Transient (reading all test files)
+
+5. Add any-wrap for hash-top type
+  <https://github.com/racket/typed-racket/pull/914>
+  Found by reading type-contract.rkt
+
+6. Missing type annotation
+  <https://github.com/racket/typed-racket/pull/912>
+  Found by defender.rkt, it needs type annotations
+
+7. Make list/sc
+  <https://github.com/racket/typed-racket/pull/911>
+  Found by reading type-contract.rkt
+
+8. Fix require/untyped-contract for submod paths
+  <https://github.com/racket/typed-racket/pull/907>
+  Found by writing a 1-file test
+
+9. Fix pict struct type
+  <https://github.com/racket/typed-racket/pull/923>
+  Ran Transient on typed-racket-test/succeed/pict.rkt
+
+10. Fix byte-regexp? contract
+  <https://github.com/racket/typed-racket/pull/921>
+  Ran Transient on a function that expected a byte-regexp; unlike TR, the
+  function triggers contract-generation
+
+11. Add case to values type
+  <https://github.com/racket/typed-racket/pull/918>
+  Wrote test that unexpectedly failed, I think
+
+12. Remove sc cache (orig = fix empty cache typo)
+  <https://github.com/racket/typed-racket/pull/913>
+  Ran type-contract.rkt code expecting improvement / hits
+
+13. Pict type-env keyword args
+  <https://github.com/racket/typed-racket/pull/884>
+  Used transient to create a pict for thesis proposal
+
+14. Sequence bad inference
+  <https://github.com/racket/typed-racket/pull/855>
+  Ran Transient on plot, I think (maybe from immutable-vector effort)
+
+15. Add function type annotations
+  <https://github.com/racket/typed-racket/pull/612>
+  Ran defender.rkt
+
+16. Fix list-length/sc
+  <https://github.com/racket/typed-racket/pull/600/files>
+  Read static-contracts/combinators/lengths.rkt (maybe from immutable-vector effort)
