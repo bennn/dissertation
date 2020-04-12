@@ -71,3 +71,21 @@ What bugs did we find and fix in TR and other codebases?
 16. Fix list-length/sc
   <https://github.com/racket/typed-racket/pull/600/files>
   Read static-contracts/combinators/lengths.rkt (maybe from immutable-vector effort)
+
+17. Add static check for #:struct clauses
+  <https://github.com/racket/typed-racket/pull/925>
+  Inspired by 9 above, TR#923
+
+18. Reorder pict struct fields
+  <https://github.com/racket/pict/pull/60>
+  Found by testing 17 above, TR#925
+
+19. Provide struct info through require/typed
+  <https://github.com/racket/typed-racket/pull/926>
+  Found in gregor by mixing guarded and transient, a match-define failed with
+  a syntax error.
+
+20. Allow type-environment to provide the constructor
+  <https://github.com/racket/typed-racket/pull/927>
+  Found by writing tests for 17 but ignored, got suspicious reading code while
+  working on 19.
