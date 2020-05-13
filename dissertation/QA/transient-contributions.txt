@@ -89,3 +89,8 @@ What bugs did we find and fix in TR and other codebases?
   <https://github.com/racket/typed-racket/pull/927>
   Found by writing tests for 17 but ignored, got suspicious reading code while
   working on 19.
+
+21. Fix method optional / keyword expansion
+  <https://github.com/racket/racket/pull/3182>
+  Found when fsmoo benchmarks failed a Transient check; expected `Real` got
+   `#<unsafe-undefined>`
