@@ -6,6 +6,10 @@ Thesis:
 - A1. Honest and lying types can coexist in a way that yields significant
       performance benefits.
       (coexist to acheive significant performance benefits)
+- A2. Honest and lying types can coexist in a way that preserves their formal
+      properties; programmers can combine these types to strengthen lying-type
+      guarantees, avoid unimportant honest-type runtime errors, and lower the
+      running time of typed/untyped interactions.
 
 Title: TBA
 
