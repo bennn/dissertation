@@ -19,3 +19,83 @@
  5. threats, other concerns (survey)
  6. related work
  7. 
+
+Ben's dissertation outline:
+
+1. intro, up to thesis,
+   contributions that led to thesis
+   - perf. evaluation method
+     sampling,
+     apply to TR, Retic
+   - theory analysis
+     compromise semantics (TS not enough)
+     CM distinguishes honest vs lying
+     blame soundness + completeness
+   - transient racket (without TR)
+     generalize to richer type system (unions, subtyping, ...)
+     remove type dynamic
+     ... generalize what's needed to insert check?
+   - integrating transient + TR
+     generalizes smoothly, no surprises
+   [[ chapter outline:
+      begin with thesis statement (<=1.5 pages),
+      short intro to GT, assumptions (migratory vs "gradual"),
+      contributions that led to thesis, see above, co-influences,
+      chapters outline ]]
+2. performance analysis method (goal: fair relative perf, ....)
+   - systematic, data collection
+     - sampling,
+   - visualization
+   - apply to TR & retic, validate method
+     - suggestion: order of mag. difference, intrinsic!, different shape/curve
+     - question: can port transient to racket & reproduce?
+3. design analysis method
+   - thesis: use standard theory + some new theory to organize design space,
+   - tools:
+     - parameterized TS
+     - complete monitoring
+     - blame S + C
+   - apply to TR, Retic, Amnesic, Erasure, ....
+4. transient racket, implementation (transient + untyped Racket, that's all, can be standalone paper)
+   (inherit types + checker from TR but nothing more)
+   scale transient to real language, richer type system, 10x gone,
+   - theory generalization, to racket types
+   - eng. adaptation, to racket lang
+   - perf. properties
+   - blame, more accessors + manipulators, compromises, huge allocation,
+     circularity type at runtime
+5. natural + transient + untyped
+   (meaning: what are we giving to programmers)
+   - simple model
+     - no worries, properties still hold
+     - failed attempts at natural/transient cooperation to reduce checks,
+       possible futures (forgetful)
+   - expressiveness
+     - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
+   - implementation
+     - require/untyped-contract
+     - define-typed/untyped-id
+     - ....
+   - evaluation
+     - ?? 2-way lattice? 3-way
+     - ?? programs where mix is better than natural-only or transient-only
+     - threats: no blame in transient, 
+6. related work soup
+   chap 2 - evaluation method
+   chap 3 - GTT, KafKa, gradual guarantee?, other analysis
+   chap 4 - other impls of transient
+   chap 5 - (new)
+7. new questions
+  - transient + JIT, really fast!? on Pycket, apples-to-apples AOT Racket vs JIT
+  - static analysis for transient checks, minimize ala Henglein?
+  - transient + blame, practical alternative?
+  - need wrappers? forgetful/amnesic instead of transient
+8. conclusion
+  - summarize chapters, what did
+  - revisited fundamental questions (TS, what do types mean at runtime)
+
+
+
+
+
+
