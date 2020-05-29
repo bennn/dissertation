@@ -20,7 +20,7 @@
  6. related work
  7. 
 
-Ben's dissertation outline:
+Ben's dissertation outline (2020-05-29):
 
 1. intro, up to thesis,
    contributions that led to thesis
