@@ -1,3 +1,14 @@
+TODO
+- [ ] intro : assumptions about gradual / migratory typing,
+  see oopsla19 jfp20 proposal
+- [ ] performance chapter (2), adapt jfp19
+- [ ] transient-racket chapter (4), committe update email
+- [ ] theory chapter (3)
+- [ ] full intro (1)
+
+
+
+#### outlines
 
 2020-02-03 :
  Matthias says, the two journal papers will be approx. two chapters so we can
