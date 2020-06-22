@@ -1,16 +1,20 @@
 #lang classicthesis/include
 
-@title{Introduction}
+@title{What It's All About}
 
-Thesis statement: 
+Short intro to gradual typing, assumptions, gradual versus migratory.
+
+Thesis statement:
+
+@nested[#:style 'inset]{
  Honest and lying types can coexist in a way that preserves their formal
  properties; programmers can combine these types to strengthen lying-type
  guarantees, avoid unimportant honest-type runtime errors, and lower the
  running time of typed/untyped interactions.
-
-Short intro to gradual typing, assumptions, gradual versus migratory.
+}
 
 Contributions that led to thesis:
+@; don't really use an itemize in the end!
 
 @itemlist[
 @item{

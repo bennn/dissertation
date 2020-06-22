@@ -1,11 +1,26 @@
 TODO
 - [ ] intro : assumptions about gradual / migratory typing,
-  see oopsla19 jfp20 proposal
+  see jfp19=X oopsla19=? jfp20=? proposal=X
+  - [ ] hang on, assumptions must go in extra chapter,
+        they're not critical for theory work,
+        they only set stage for performance ---- again not critical,
+        it's just a gradual essay for why we picked this
+        chapter2 = why
+        chapter1 = what it's all about
+        ... maybe DO want that TS Eliot quote to explain the writing experiment
 - [ ] performance chapter (2), adapt jfp19
 - [ ] transient-racket chapter (4), committe update email
 - [ ] theory chapter (3)
 - [ ] full intro (1)
 
+- [ ] ABC00 cite style, like theory papers
+
+- [ ] start every chapter with acks, papers, people
+
+
+#### dear diary
+
+2020-06-18 : need to get moving, spend 2 hours/day or more cmon now
 
 
 #### outlines
