@@ -41,28 +41,86 @@
 
 @; -----------------------------------------------------------------------------
 
-@title{Why Migratory Typing}
+@title{Motivation = Migratory Typing}
+
+My thesis contributes to the research area of migratory typing.
+The methods, experiments, and proofs that support the thesis
+ provide new insights about known migratory typing systems
+ and offer starting points into the unknown.
+
+Besides motivation, migratory typing adds constraints.
+Need to introduce before we present the work ahead.
+Tell the MT story via steps.
 
 
+@section{Observation: untyped code exists}
 
-This dissertation contributes to the world of mixed-typed languages.
-Any programming language that combines statically-typed and dynamically-typed
- code can benefit from the results below.
-My motivation, however, is the vision of migratory typing---one
- particular way of mixing typed and untyped code.
+Programmers like it.
+Don't care why.
+Scripting, familiarity, ease-of-learning/use, culture, libraries.
 
-Since migratory typing is the motivation behind my work,
- @section-ref{sec:mt} introduces and motivates migratory typing.
-The discussion is based on @~a[num-mt-principle] defining principles.
-
-For context, @section-ref{sec:non-mt} surveys other ways of making mixed-typed
- programs.
-Each has something in common with migratory typing;
- they almost all satisfy basic principles motivating typed/untyped mixtures.
-But they fail one or the other MT principle.
+Python JavaScript Clojure perfect settings.
+Racket too, thats what we use.
 
 
-@section[#:tag "sec:mt"]{Why Migratory Typing}
+@subsection{Why Racket?}
+
+Mature implementation, start from non-zero really best place to start
+ actively maintained and several users already in the wild.
+Far advanced type system, easy to test whether solutions scale up.
+
+Flexible language.
+Clojure, impossible, realistically need to fork the JVM for the experiment.
+
+Local expertise.
+Whatever the host need to know it very well, helps to have support on hand,
+ immersion.
+
+
+@section{Observation: types offer benefits}
+
+Types offer readability and maintenance, IDE tools, checks, catch errors
+quickly.
+Communicate intent.
+
+Sound types help debugging.
+Predict behavior.
+May improve performance ... well, they do otherthingsequal but
+otherthings are not equal there are undermining challenges ahead.
+
+
+@section{Observation: smooth interop >>> FFI}
+
+Previous motivate untyped and typed.
+Clearly want both.
+One way to achieve is FFI, multi-language.
+Well why stop there?
+
+Converting painful, invites bugs.
+Loose FFI ties undermine type soundness.
+
+By contrast, gradual.
+Can improve legacy code incrementally.
+Find bug, add types, fix bug, future payoff with little work simply taking
+ notes and not-throwing-away that work you had to do.
+
+
+@section{Checkpoint MT}
+
+Want to mix.
+Great, many other teams want to mix and have solutions for mixed-typed code.
+
+Additional requirements, separate from the rest.
+
+@; awkward digression to have
+
+
+@section{Requirement: expressive types}
+@section{Requirement: sound types}
+@section{Requirement: explicit annotations}
+@section{Requirement: explicit boundaries}
+@; any more from above principles?
+
 
 @define-mt-principle['new-tool-for-new-code]{Enable Improvements}
 
