@@ -47,88 +47,111 @@
 @; -----------------------------------------------------------------------------
 
 @title{Migratory Typing}
+@; why / where-from
 
+@; summary:
+@; Migratory typing is a principled way to mix typed and untyped code.
+@; This dissertation helps improve MT,
+@;  and MT is the guiding motivation.
+@; MT axioms and principles influence work.
+@; ... purpose statement ...
 
-
-
-The research area of @emph{migratory typing} provides motivation and
- constraints for my thesis.
+@;There are several ways to mixed-typed.
+@;
+@;The research area of @emph{migratory typing} provides motivation and
+@; constraints for my thesis.
 
 My thesis contributes to the research area of migratory typing.
-
-
 The methods, experiments, and proofs that support the thesis
  provide new insights about known migratory typing systems
  and offer starting points into the unknown.
+Before we can present the results, we need to establish the context
+ of migratory typing.
 
-Besides motivation, migratory typing adds constraints.
-Need to introduce before we present the work ahead.
-Tell the MT story via steps.
-
-
-@section{Observation: untyped code exists}
-
-Programmers like it.
-Don't care why.
-Scripting, familiarity, ease-of-learning/use, culture, libraries.
-
-Python JavaScript Clojure perfect settings.
-Racket too, thats what we use.
+@;Besides motivation, migratory typing adds constraints.
+@;Need to introduce before we present the work ahead.
+@;Tell the MT story via steps.
 
 
-@subsection{Why Racket?}
+@section{MT Observations}
 
-Mature implementation, start from non-zero really best place to start
- actively maintained and several users already in the wild.
-Far advanced type system, easy to test whether solutions scale up.
-
-Flexible language.
-Clojure, impossible, realistically need to fork the JVM for the experiment.
-
-Local expertise.
-Whatever the host need to know it very well, helps to have support on hand,
- immersion.
+Migratory typing stems from three observations about the practice of
+ programming.
+At face value, these basic facts show a need for mixing typed and untyped code.
+Between the lines, details suggest extra requirements.
 
 
-@section{Observation: types offer benefits}
+@subsection{Observation 1: untyped code exists}
 
-Types offer readability and maintenance, IDE tools, checks, catch errors
-quickly.
-Communicate intent.
+@; where is the untyped code?
+@; why is it good?
+@; 
 
-Sound types help debugging.
-Predict behavior.
-May improve performance ... well, they do otherthingsequal but
-otherthings are not equal there are undermining challenges ahead.
+The world is full of good untyped code.
+Many prolific languages on GitHub are untyped.
+These languages are home to useful, unique libraries.
 
-
-@section{Observation: smooth interop >>> FFI}
-
-Previous motivate untyped and typed.
-Clearly want both.
-One way to achieve is FFI, multi-language.
-Well why stop there?
-
-Converting painful, invites bugs.
-Loose FFI ties undermine type soundness.
-
-By contrast, gradual.
-Can improve legacy code incrementally.
-Find bug, add types, fix bug, future payoff with little work simply taking
- notes and not-throwing-away that work you had to do.
+Exactly how this code came to be is unimportant.
+The fact is, untyped code exists and programmers must be able to use it
+ as-is to continue being productive.
 
 
-@section{Checkpoint MT}
+@subsection{Observation 2: types offer benefits}
 
-Want to mix.
-Great, many other teams want to mix and have solutions for mixed-typed code.
+@; ps writing may be harder, don't know. Once written, clear benefits.
 
-Additional requirements, separate from the rest.
+Typed code has several advantages over untyped code.
+The static type checker provides assurance against simple logical mistakes.
+Any explicit type annotations communicate the intent of the original author.
+All types on an interface serve as a usage guide to future clients.
 
-@; awkward digression to have
+Sound types come with additional benefits because they predict behaviors.
+Clients can trust sound types as they design new code.
+These types can speed up debugging tasks because they guarantee certain errors
+ cannot occur.
+A compiler can use the type predictions to generate efficient run-time code
+ from easy-to-read sources.
 
 
-@section{Requirement: sound types}
+@subsection{Observation 3: boundaries matter}
+
+If untyped code exists and types offer benefits, then clearly the ideal
+ language must stitch together typed and untyped code.
+A careless stitching, however, may be worst of all.
+Indeed, the boundaries between typed and untyped code are key to the success of
+ the whole idea.
+
+To see the pitfalls of loose coupling, consider a standard foreign-function
+ interface (FFI) that translates values in one language into values of
+ another.
+Suppose we have an FFI between an untyped language and a sound typed language.
+The combined language has two major problems.
+First, untyped code can supply any input to typed code, breaking soundness.
+Second, the FFI invites untyped-to-typed conversion but requires wholesale
+ rewrites, risking mistakes.
+
+By contrast, a mixed-typed language that uses the same base syntax for typed
+ and untyped code offers more than the sum of two languages.
+Programmers can move from untyped to typed by adding annotations, nothing
+ more; the conversion does not risk behavior-changing mistakes.
+Untyped programmers may be more motivated to learn these types than a
+ new language.
+Debugging in untyped code can gradually strengthen it with new type annotations.
+
+@; A language needs to take care at boundaries, both to protect against
+@;  miscommunications and to leverage new strengths.
+
+
+@section{MT Design Choices}
+
+The observations 
+
+@subsection{Requirement 1: sound types}
+
+
+
+
+@; sound types
 
 
 @section{Requirement: descriptive types}
