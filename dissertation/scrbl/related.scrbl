@@ -11,3 +11,27 @@ New related work about the combination, other hybrids, like types, Pyret.
 
 
 
+@;@subsection{Soft Typing}
+@;
+@;Infer types for any untyped program.
+@;
+@;Cons: does not reject, no explicit annotations
+@;
+@;
+@;@subsection{Lump Type-Dynamic}
+@;
+@;Special type, embedding / projection.
+@;
+@;Cons: rewrite code when adding types, classic con of memorize proj-path ... this
+@;one is really more related work
+@;
+@;
+@;@subsection{Quasi-Static Typing}
+@;
+@;Generalize GT?
+@;
+@;Cons: lack boundaries,
+@;
+@;very related work, point out the design alternatives from Thatte
+@;
+@;

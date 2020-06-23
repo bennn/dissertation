@@ -43,6 +43,8 @@
 
 @title{Why Migratory Typing}
 
+
+
 This dissertation contributes to the world of mixed-typed languages.
 Any programming language that combines statically-typed and dynamically-typed
  code can benefit from the results below.
@@ -107,34 +109,17 @@ Cons: catch-all type hides errors, inhibits blame
 Conjecture reading vs writing tradeoff
 
 
+@subsection{Optional Typing}
+
+Aiming for something more than static analysis.
+Nobody will if not academics.
+
+
+
 @subsection{Dart 2}
 
 New top type, accepts any method call.
 
 Cons: untyped code does not exist, no reuse
-
-
-@subsection{Soft Typing}
-
-Infer types for any untyped program.
-
-Cons: does not reject, no explicit annotations
-
-
-@subsection{Lump Type-Dynamic}
-
-Special type, embedding / projection.
-
-Cons: rewrite code when adding types, classic con of memorize proj-path ... this
-one is really more related work
-
-
-@subsection{Quasi-Static Typing}
-
-Generalize GT?
-
-Cons: lack boundaries,
-
-very related work, point out the design alternatives from Thatte
 
 
