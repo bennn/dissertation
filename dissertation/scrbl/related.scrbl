@@ -35,3 +35,12 @@ New related work about the combination, other hybrids, like types, Pyret.
 @;very related work, point out the design alternatives from Thatte
 @;
 @;
+@;@subsection{Dart 2}
+@;
+@;New top type, accepts any method call.
+@;
+@;Cons: untyped code does not exist, no reuse
+@;
+@;@subsection{Pyret}
+@;@subsection{Like Types}
+@;

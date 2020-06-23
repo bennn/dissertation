@@ -38,12 +38,25 @@
          (unless (null? (unbox undefined-mt*))
            (log-bg-thesis-error "missing definition for MT principles: ~s" (unbox undefined-mt*)))))))
 
+@(define (mt-observation . str*)
+   (apply section (cons "Observation: " str*)))
+
+@(define (mt-requirement . str*)
+   (apply section (cons "Requirement: " str*)))
 
 @; -----------------------------------------------------------------------------
 
-@title{Motivation = Migratory Typing}
+@title{Migratory Typing}
+
+
+
+
+The research area of @emph{migratory typing} provides motivation and
+ constraints for my thesis.
 
 My thesis contributes to the research area of migratory typing.
+
+
 The methods, experiments, and proofs that support the thesis
  provide new insights about known migratory typing systems
  and offer starting points into the unknown.
@@ -115,28 +128,26 @@ Additional requirements, separate from the rest.
 @; awkward digression to have
 
 
-@section{Requirement: expressive types}
 @section{Requirement: sound types}
-@section{Requirement: explicit annotations}
-@section{Requirement: explicit boundaries}
-@; any more from above principles?
 
 
-@define-mt-principle['new-tool-for-new-code]{Enable Improvements}
+@section{Requirement: descriptive types}
 
-Types are a useful technology.
-Want the option of using types.
-
-
-@define-mt-principle['no-catchall]{Flexibility via Subtyping}
-
-Type system must have subtyping to give choice of precision.
-
-Nothing more, no dynamic type for flexibility because plausibility check
-makes types too weak.
+Able to describe untyped behavior,
+no changes to code,
+flexibility via subtyping
 
 
-@define-mt-principle['clear-boundary]{Clear Boundaries}
+@section{Requirement: user-supplied annotations}
+
+conversation between user and type system,
+notes for future readers,
+tune descriptiveness of types
+
+led to success where other approaches failed usability
+
+
+@section{Requirement: clear boundaries}
 
 Because untyped code exists, miscommunications are possible.
 Need to trace back to typed/untyped interfaces.
@@ -172,12 +183,5 @@ Conjecture reading vs writing tradeoff
 Aiming for something more than static analysis.
 Nobody will if not academics.
 
-
-
-@subsection{Dart 2}
-
-New top type, accepts any method call.
-
-Cons: untyped code does not exist, no reuse
 
 
