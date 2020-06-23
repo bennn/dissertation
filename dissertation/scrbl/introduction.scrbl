@@ -2,6 +2,15 @@
 
 @title{What It's All About}
 
+@; summary:
+@; Languages that can mix typed and untyped code must come with a way to
+@;  fine-tune the strength of types.
+@; Part 1 = Performance analysis demonstrates the need for tuning.
+@; Part 2 = Design-space analysis shows possible strengths.
+@; Part 3 = Implements one tunable language, demonstrates benefits.
+@;
+@; ... gee do we want parts in this book after all?
+
 Short intro to gradual typing, assumptions, gradual versus migratory.
 
 Thesis statement:
