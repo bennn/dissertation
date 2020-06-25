@@ -7,6 +7,7 @@
   "gtp-util"
   "scribble-abbrevs"
   "scribble-lib"
+  "reprovide-lang"
 ))
 (define build-deps '(
   "racket-doc"

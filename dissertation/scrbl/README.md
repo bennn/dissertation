@@ -9,7 +9,7 @@ TODO
         chapter1 = what it's all about
         ... maybe DO want that TS Eliot quote to explain the writing experiment
 - [ ] performance chapter (2), adapt jfp19
-- [ ] transient-racket chapter (4), committe update email
+- [ ] transient-racket chapter (4), committee update email
 - [ ] theory chapter (3)
 - [ ] full intro (1)
 

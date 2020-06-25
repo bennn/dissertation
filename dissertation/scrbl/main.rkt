@@ -5,6 +5,7 @@
     scribble-abbrevs
     classicthesis/lang
     gtp-util
+    greenman-thesis/gtp-benchmarks
     scriblib/figure
     scribble/example)
 
@@ -13,6 +14,7 @@
   citet
 
   jointwork
+  summary
 
 )
 
@@ -24,6 +26,7 @@
   racket/format
   racket/string
   gtp-util
+  greenman-thesis/gtp-benchmarks
   scribble/example
   scribble-abbrevs
   scriblib/figure
@@ -39,8 +42,14 @@
   (exact (list "\\citet{" txt* "}")))
 
 (define (jointwork #:people* people* #:paper* [paper* '()])
-  (nested #:style 'inset
-          (emph (list
-                  "This chapter is based on joint work with: "
-                  (oxfordize people*)
-                  (~cite (string-join paper* ","))))))
+  (nested-inset
+    (emph (list
+            "This chapter is based on joint work with: "
+            (oxfordize people*)
+            (~cite (string-join paper* ","))))))
+
+(define (summary . txt*)
+  (nested-inset txt*))
+
+(define (nested-inset . content)
+  (nested #:style 'inset content))
