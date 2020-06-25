@@ -1,4 +1,4 @@
-#lang classicthesis/include
+#lang greenman-thesis/include
 
 @title{Conclusion}
 

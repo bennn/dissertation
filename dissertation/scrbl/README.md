@@ -1,7 +1,7 @@
 TODO
 - [ ] intro : assumptions about gradual / migratory typing,
   see jfp19=X oopsla19=? jfp20=? proposal=X
-  - [ ] hang on, assumptions must go in extra chapter,
+  - [X] hang on, assumptions must go in extra chapter,
         they're not critical for theory work,
         they only set stage for performance ---- again not critical,
         it's just a gradual essay for why we picked this

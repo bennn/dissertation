@@ -1,4 +1,4 @@
-#lang classicthesis/include
+#lang greenman-thesis/include
 
 @title{Guarded and Transient, Combined}
 

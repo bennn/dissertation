@@ -1,4 +1,4 @@
-#lang classicthesis/include
+#lang greenman-thesis/include
 
 @(require racket/format)
 
@@ -46,6 +46,19 @@
 
 @; -----------------------------------------------------------------------------
 
+@; --- MF
+@; So I have read it a couple of times.
+@; 
+@; — I think all the thoughts are there that you need for the rest of the
+@; dissertation and perhaps a few more.
+@; — They are presented with occasional lapses in category. (This is a
+@; so-called categorical mistake.)
+@; — Your style is quite uneven in many different ways (for example,
+@; inspect
+@; “I” vs “we” or look for “inanimate things that do”).
+@; — The biggest technical problem is your discussion of FFIs. I think it
+@; doesn’t come across what you want.
+
 @title{Migratory Typing}
 @; why / where-from
 
@@ -66,7 +79,7 @@ The methods, experiments, and proofs that support the thesis
  provide new insights about known migratory typing systems
  and offer starting points into the unknown.
 Before we can present the results, we need to establish the context
- of migratory typing.
+ of migratory typing@~cite{tfffgksst-snapl-2017}.
 
 @;Besides motivation, migratory typing adds constraints.
 @;Need to introduce before we present the work ahead.
@@ -144,67 +157,89 @@ Debugging in untyped code can gradually strengthen it with new type annotations.
 
 @section{MT Design Choices}
 
-The observations 
+The goal of migratory typing is to begin with an untyped language and
+ incrementally add benefits of static types.
+My work is based on additional design constraints intended to maximize the
+ benefits of the typed/untyped combination.
+
 
 @subsection{Requirement 1: sound types}
 
+Well-typed code must satisfy a non-trivial soundness guarantee.
+Static types must predict some aspect of the values that flow though
+ a program, beyond the baseline guarantee that every value is well-formed.
+
+A typical soundness theorem helps programmers debug and helps compilers to
+ generate efficient code.
+MT soundness must provide similar benefits, but perhaps to a lesser extent
+ if the cost of enforcing ``typical'' soundness is overwhelming.
 
 
+@subsection{Requirement 2: descriptive types}
 
-@; sound types
-
-
-@section{Requirement: descriptive types}
-
-Able to describe untyped behavior,
-no changes to code,
-flexibility via subtyping
-
-
-@section{Requirement: user-supplied annotations}
-
-conversation between user and type system,
-notes for future readers,
-tune descriptiveness of types
-
-led to success where other approaches failed usability
+The language of static types must be able to describe idioms from the untyped
+ code.
+Untyped code comes first.
+Types must be versatile enough to explain the reasoning behind a well-reasoned
+ piece of untyped code without any sort of rewrites.
+ML-style tagging and untagging is not acceptable.
 
 
-@section{Requirement: clear boundaries}
+@subsection{Requirement 3: user-supplied annotations}
 
-Because untyped code exists, miscommunications are possible.
-Need to trace back to typed/untyped interfaces.
-These interfaces need to be clear in the source code for meaningful errors.
-Such errors are critical, analogy to static type errors.
+Programmers must write type annotations.
+These annotations serve three purposes.
+First, they establish the intended level of detail.
+Descriptive types offer a choice between several valid types for one expression.
+Instead of asking the language to pick a level via type inference, which may
+ not be feasible, we ask the programmer.
+Second, they help the type checker reject code.
+Types are supposed to help find bugs, but flexible type inference may miss
+ errors due to a lack of guidance.
+Third, explicit types help human readers navigate a codebase.
+
+
+@subsection{Requirement 4: clear typed/untyped boundaries}
+
+Every boundary between typed and untyped code is a potential channel
+ for a communication error.
+If such an error occurs, the programmer needs to find the relevant channels.
+The language should help with this debugging challenge.
+In order to help, though, boundaries must be clearly stated in source code.
+Programmers need to know where these boundaries are as they write the program,
+ and the language needs to track them when it runs.
 
 
 @; ---
-@assert-mt-principle[]
 @section[#:tag "sec:non-mt"]{Other Mixed-Typed Methods}
 
-There are several other methods, besides migratory typing, for mixing typed
-and untyped code.
-Here we review the main ones.
-
-
-@subsection{Gradual Typing}
-
-Gradual typing includes a special dynamic type.
-Satisfies guarantees.
-
-PS No guarantee that untyped code exists, maybe cannot reuse.
-
-Pros: easy to use
-
-Cons: catch-all type hides errors, inhibits blame 
-
-Conjecture reading vs writing tradeoff
+Beyond migratory typing, there are several ways to mix typed and untyped
+ code.
+The main competing alternatives are optional typing and gradual typing.
 
 
 @subsection{Optional Typing}
 
-Aiming for something more than static analysis.
-Nobody will if not academics.
+An optional typing system provides types without soundness.
+Unsound types are still useful.
+Many languages follow this design.
 
+My goal is soundness.
+Benefits listed above.
+If academics do not pursue, then nobody will.
+
+
+@subsection{Gradual Typing}
+
+Gradual typing is not necessarily migratory,
+ non-migratory is addressing a dubious problem.
+
+Includes a special dynamic type.
+The type makes it easy to add types to code, no insistence on detail.
+This makes it harder to detect static type errors ... but not much worse
+ than free use of a top type.
+More importantly, the dynamic type obscures the boundaries between typed
+ and untyped code.
+@; easy to get many boundaries, hard to point to these
 
 

@@ -1,4 +1,4 @@
-#lang classicthesis @parts @pdfspacing
+#lang greenman-thesis @parts @pdfspacing
 
 @;  How about this for a title: 
 @;  
@@ -26,6 +26,8 @@
 @approval{src/approval.pdf}
 @; TODO allow - in name
 
+@exact|{\bibliographystyle{plainnat}}|
+
 @include-abstract{abstract.scrbl}
 
 @; need newline above
@@ -45,24 +47,4 @@
 @include-section{conclusion.scrbl}
 
 
-
-@;\input{package}
-@;\begin{document}
-@;\input{def}
-@;\maketitle
-@;
-@;\begin{abstract}
-@;\input{abstract}
-@;\end{abstract}
-@;
-@;
-@;\newcommand{\mksec}[3]{\section{#3} \label{#1} \input{#2}}
-@;
-@;\mksec{sec:introduction}{introduction}{Introduction}
-@;
-@;
-@;\footnotesize
-@;\bibliographystyle{ACM-Reference-Format}
-@;\bibliography{bib}
-@;
-@;\end{document}
+@exact|{\bibliography{bg}}|

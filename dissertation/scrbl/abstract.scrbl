@@ -1,4 +1,4 @@
-#lang classicthesis
+#lang greenman-thesis
 
 All the programmers want to mix typed and untyped code.
 Researchers have provided a zoo of solutions, each different.

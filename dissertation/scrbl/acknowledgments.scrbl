@@ -1,3 +1,3 @@
-#lang classicthesis
+#lang greenman-thesis
 
 Thanks
