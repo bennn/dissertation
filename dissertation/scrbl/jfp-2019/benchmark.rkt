@@ -99,7 +99,7 @@
   (define bm-str (if (eq? bm 'zordoz) (string-append str "." v) str))
   (define fname (format "~a-~a.rktd" bm-str tag))
   (define full-path (simplify-path (glob-first (path->string (build-path HERE "data" v fname)))))
-  (path->string (find-relative-path (simplify-path HERE) full-path)))
+  (path->string full-path))
 
 ;; Resolve a list of unique modulegraphs to a single one.
 (define (choose-modulegraph M* #:src name*)

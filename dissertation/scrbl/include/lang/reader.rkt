@@ -4,4 +4,4 @@
   #:whole-body-readers? #t
   #:language 'greenman-thesis/include
 
-  (require (only-in scribble/reader read-inside read-syntax-inside)))
+  (require greenman-thesis (only-in scribble/reader read-inside read-syntax-inside)))

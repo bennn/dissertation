@@ -4,8 +4,13 @@
   (all-from-out
     scribble-abbrevs
     classicthesis/lang
+    gtp-plot/configuration-info
+    gtp-plot/typed-racket-info
+    gtp-plot/performance-info
+    gtp-plot/plot
     gtp-util
     greenman-thesis/gtp-benchmarks
+    racket/format
     scriblib/figure
     scribble/example)
 
@@ -15,6 +20,7 @@
 
   jointwork
   summary
+  bm
 
 )
 
@@ -22,9 +28,14 @@
   (only-in racket/list
     add-between
     partition)
+  racket/format
   classicthesis/lang
   racket/format
   racket/string
+  gtp-plot/configuration-info
+  gtp-plot/typed-racket-info
+  gtp-plot/performance-info
+  gtp-plot/plot
   gtp-util
   greenman-thesis/gtp-benchmarks
   scribble/example
@@ -53,3 +64,5 @@
 
 (define (nested-inset . content)
   (nested #:style 'inset content))
+
+(define bm tt)
