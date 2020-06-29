@@ -21,6 +21,7 @@
   jointwork
   summary
   bm
+  id
 
 )
 
@@ -66,3 +67,6 @@
   (nested #:style 'inset content))
 
 (define bm tt)
+
+(define id ~a)
+
