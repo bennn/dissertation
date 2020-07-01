@@ -166,80 +166,80 @@ Practically speaking, users of a gradual type system explore configuration latti
 @; -----------------------------------------------------------------------------
 @section[#:tag "sec:measurements"]{Performance Metrics}
 
-@;The most basic question, and least important, about a gradually typed language is
-@; how fast fully-typed programs are in comparison to their fully untyped relative.
-@;In principle and in Typed Racket, static types enable optimizations and can serve in place of runtime tag checks.
-@;The net effect of such improvements may, however, be offset by the runtime cost of enforcing type soundness.
-@;Relative performance is therefore best described as a ratio, to capture the possibility of speedups and slowdowns.@;
-@;@;
-@;    @def[#:term "typed/untyped ratio"]{
-@;     The typed/untyped ratio of a performance
-@;      lattice is the time needed to run the top (fully typed) configuration divided by the
-@;      time needed to run the bottom (untyped) configuration.
-@;    }@;
-@;@;
-@;For users of a gradual type system, the important performance
-@; question is how much overhead their current configuration suffers.
-@; @; RELATIVE TO previous version (standardized as "untyped program")
-@;If the performance overhead is low enough, programmers can release the
-@; configuration to clients.
-@;Depending on the nature of the application, some developers might not accept any performance overhead.
-@;Others may be willing to tolerate an order-of-magnitude slowdown.
-@;The following parameterized definition of a deliverable configuration accounts for these varying requirements.@;
-@;@;
-@;    @def[#:term @list{@deliverable{}}]{
-@;     A configuration
-@;      is @deliverable{} if its performance is no worse than a
-@;      factor of @math{D} slowdown compared to the untyped configuration.
-@;     @;A program is @deliverable{} if all its configurations are @deliverable{}.
-@;    }@;
-@;@;
-@;@; NOTE: really should be using %, but Sec 4 shows why stick to x
-@;@;
-@;If an application is currently in a non-@deliverable[] configuration,
-@; the next question is how much work a team must invest to reach a
-@; @deliverable[] configuration.
-@;One coarse measure of ``work'' is the number of additional modules that must be annotated with types before performance improves.@;
-@;@;
-@;    @def[#:term @list{@step{}}]{
-@;     A configuration @exact{$c_1$} is @step[] if @exact{$c_1 \rightarrow_k c_2$}
-@;      and @exact{$c_2$} is @deliverable{}.
-@;    }@;
-@;@; @profile-point{sec:method:example}
-@;The number of @step[] configurations captures the experience of a prescient programmer that converts the @exact{$k$} modules that maximize the performance improvement.
+The most basic question, and least important, about a gradually typed language is
+ how fast fully-typed programs are in comparison to their fully untyped relative.
+In principle and in Typed Racket, static types enable optimizations and can serve in place of runtime tag checks.
+The net effect of such improvements may, however, be offset by the runtime cost of enforcing type soundness.
+Relative performance is therefore best described as a ratio, to capture the possibility of speedups and slowdowns.@;
+
+    @definition["typed/untyped ratio"]{
+     The typed/untyped ratio of a performance
+      lattice is the time needed to run the top (fully typed) configuration divided by the
+      time needed to run the bottom (untyped) configuration.
+    }
+
+For users of a gradual type system, the important performance
+ question is how much overhead their current configuration suffers.
+ @; RELATIVE TO previous version (standardized as "untyped program")
+If the performance overhead is low enough, programmers can release the
+ configuration to clients.
+Depending on the nature of the application, some developers might not accept any performance overhead.
+Others may be willing to tolerate an order-of-magnitude slowdown.
+The following parameterized definition of a deliverable configuration accounts for these varying requirements.@;
+
+    @definition[@list{@ddeliverable{}}]{
+     A configuration
+      is @ddeliverable{} if its performance is no worse than a
+      factor of @${D} slowdown compared to the untyped configuration.
+     @;A program is @ddeliverable{} if all its configurations are @ddeliverable{}.
+    }
+
+@; NOTE: really should be using %, but Sec 4 shows why stick to x
 @;
-@;@(define sample-data
-@;  (let* ([rng (vector->pseudo-random-generator (vector 0 1 2 3 4 5))]
-@;         [approx (lambda (n) (let ([offset (/ n (random 1 10 rng))]) (if (zero? (random 0 1 rng)) (+ n offset) (- n offset))))]
-@;         [mean+std* `#((20 . 0)
-@;                       (50 . 0) (,(approx 50) . 0) (,(approx 50) . 0)
-@;                       (30 . 0) (,(approx 30) . 0) (,(approx 30) . 0)
-@;                       (10 . 0))]
-@;         [mean (lambda (i) (car (vector-ref mean+std* i)))])
-@;    (lambda (tag)
-@;      (case tag
-@;       [(c000) (mean 0)]
-@;       [(c001) (mean 1)]
-@;       [(c010) (mean 2)]
-@;       [(c100) (mean 3)]
-@;       [(c011) (mean 4)]
-@;       [(c101) (mean 5)]
-@;       [(c110) (mean 6)]
-@;       [(c111) (mean 7)]
-@;       [(all) mean+std*]
-@;       [else (raise-user-error 'sample-data "Invalid configuration '~a'. Use e.g. c000 for untyped." tag)]))))
-@;@(define (sample-overhead cfg)
-@;  (ceiling (/ (sample-data cfg) (sample-data 'c000))))
-@;
+If an application is currently in a non-@ddeliverable[] configuration,
+ the next question is how much work a team must invest to reach a
+ @ddeliverable[] configuration.
+One coarse measure of ``work'' is the number of additional modules that must be annotated with types before performance improves.@;
+
+    @definition[@list{@kstep{}}]{
+     A configuration @exact{$c_1$} is @kstep[] if @exact{$c_1 \rightarrow_k c_2$}
+      and @exact{$c_2$} is @ddeliverable{}.
+    }
+
+The number of @kstep[] configurations captures the experience of a prescient programmer that converts the @exact{$k$} modules that maximize the performance improvement.
+
+@(define sample-data
+  (let* ([rng (vector->pseudo-random-generator (vector 0 1 2 3 4 5))]
+         [approx (lambda (n) (let ([offset (/ n (random 1 10 rng))]) (if (zero? (random 0 1 rng)) (+ n offset) (- n offset))))]
+         [mean+std* `#((20 . 0)
+                       (50 . 0) (,(approx 50) . 0) (,(approx 50) . 0)
+                       (30 . 0) (,(approx 30) . 0) (,(approx 30) . 0)
+                       (10 . 0))]
+         [mean (lambda (i) (car (vector-ref mean+std* i)))])
+    (lambda (tag)
+      (case tag
+       [(c000) (mean 0)]
+       [(c001) (mean 1)]
+       [(c010) (mean 2)]
+       [(c100) (mean 3)]
+       [(c011) (mean 4)]
+       [(c101) (mean 5)]
+       [(c110) (mean 6)]
+       [(c111) (mean 7)]
+       [(all) mean+std*]
+       [else (raise-user-error 'sample-data "Invalid configuration '~a'. Use e.g. c000 for untyped." tag)]))))
+@(define (sample-overhead cfg)
+  (ceiling (/ (sample-data cfg) (sample-data 'c000))))
+
 @;    @figure["fig:demo-lattice" "Sample performance lattice"
-@;      (parameterize ([*LATTICE-CONFIG-MARGIN* 30]
-@;                     [*LATTICE-LEVEL-MARGIN* 8]
-@;                     [*LATTICE-BOX-SEP* 0]
+@;      (parameterize ([*LATTICE-CONFIG-X-MARGIN* 30]
+@;                     [*LATTICE-CONFIG-Y-MARGIN* 8]
+@;                     [*LATTICE-UNIT-X-MARGIN* 0]
 @;                     [*LATTICE-LINE-ALPHA* 0.8])
-@;        (make-performance-lattice (sample-data 'all)))
+@;        (performance-lattice (sample-data 'all))) @; TODO sample data =/= perf-info struct
 @;    ]
-@;
-@;
+
+
 @;Let us illustrate these terms with an example.
 @;Suppose there is a project with
 @; three modules where the untyped configuration runs in @id[(sample-data 'c000)]
@@ -258,24 +258,24 @@ Practically speaking, users of a gradual type system explore configuration latti
 @;    The typed/untyped ratio is @id[tu-ratio],
 @;     indicating a performance improvement due to adding types.
 @;    The typed configuration is also
-@;      @deliverable[t-str]
+@;      @ddeliverable[t-str]
 @;      because it runs within a @elem[t-str]x
 @;      slowdown relative to the untyped configuration.
 @;    All mixed configurations are
-@;      @deliverable[@id[max-g]], but only three are, e.g.,
-@;      @deliverable[@id[min-g]].
-@;    Lastly, the mixed configurations are all @step["2" t-str]
+@;      @ddeliverable[@id[max-g]], but only three are, e.g.,
+@;      @ddeliverable[@id[min-g]].
+@;    Lastly, the mixed configurations are all @kstep["2" t-str]
 @;     because they can reach the typed configuration in at most two type conversion steps.
 @;  })
 @;
-@;The ratio of @deliverable{D} configurations in a performance lattice is a measure of
+@;The ratio of @ddeliverable{D} configurations in a performance lattice is a measure of
 @; the overall feasibility of gradual typing.
 @;When this ratio is high, then no matter how the application evolves, performance
 @; is likely to remain acceptable.
 @;Conversely, a low ratio implies that a team may struggle to recover performance after
 @; typing a few modules.
-@;Practitioners with a fixed performance requirement @math{D} can therefore use the number
-@; of @deliverable[] configurations to extrapolate the performance of a gradual type system.
+@;Practitioners with a fixed performance requirement @${D} can therefore use the number
+@; of @ddeliverable[] configurations to extrapolate the performance of a gradual type system.
 @;
 @;
 @;@; -----------------------------------------------------------------------------
@@ -299,25 +299,25 @@ Practically speaking, users of a gradual type system explore configuration latti
 @;        It is difficult to tell, at a glance, whether a program has good or bad performance relative to its users' requirements.
 @;        Comparing the relative performance of two or more lattices is also difficult and is in practice limited to programs with an extremely small number of modules.
 @;
-@;        The main lesson to extract from a performance lattice is the proportion of @step{} configurations for various @math{k} and @math{D}.
-@;        In other words, this proportion describes the number of configurations (out of the entire lattice) that are at most @math{k} upward steps from a @deliverable{D} configuration.
-@;        One way to plot this information is to fix a value for @math{k}, say @math{k=0}, and consider a set of values @exact{$d_0,\ldots,d_{n-1}$} for @math{D}.
-@;        The set of proportions of @step["0" "d_i"] configurations defines a cumulative distribution function with the value of @math{D} on the independent axis and the proportion of configurations on the dependent axis.
+@;        The main lesson to extract from a performance lattice is the proportion of @kstep{} configurations for various @${k} and @${D}.
+@;        In other words, this proportion describes the number of configurations (out of the entire lattice) that are at most @${k} upward steps from a @ddeliverable{D} configuration.
+@;        One way to plot this information is to fix a value for @${k}, say @${k=0}, and consider a set of values @exact{$d_0,\ldots,d_{n-1}$} for @${D}.
+@;        The set of proportions of @kstep["0" "d_i"] configurations defines a cumulative distribution function with the value of @${D} on the independent axis and the proportion of configurations on the dependent axis.
 @;
 @;        @Figure-ref{fig:suffixtree-plot} demonstrates two such @emph{overhead plots}, summarizing the data in @figure-ref{fig:suffixtree-lattice}.
 @;        @; TODO awkward
 @;        Specifically, each plots the @|suffixtree-num-configs-str| configurations of a program called @bm[suffixtree] using data measured on Racket v@|suffixtree-lattice-version|.
-@;        The plot on the left fixes @math{k=0} and plots the proportion of @step["0" "D"] configurations.
-@;        The plot on the right fixes @math{k=1} and plots the proportion of @step["1" "D"] configurations.
-@;        Both plots consider @math{@id[ALOT]} values of @math{D} evenly spaced between 1x and 20x.
+@;        The plot on the left fixes @${k=0} and plots the proportion of @kstep["0" "D"] configurations.
+@;        The plot on the right fixes @${k=1} and plots the proportion of @kstep["1" "D"] configurations.
+@;        Both plots consider @${@id[ALOT]} values of @${D} evenly spaced between 1x and 20x.
 @;        The line on each plot represents the cumulative distribution function.
 @;        The x-axis is log scaled to focus on low overheads.
 @;
-@;        The plot on the left, in which @math{k=0}, confirms the observation made in @secref{sec:method:lattice} that @(id (round (* 100 (/ suffixtree-num-D suffixtree-num-configs))))% of the @|suffixtree-num-configs-str| configurations (@|suffixtree-num-D-str| configurations) run within a @id[suffixtree-sample-D]x overhead.
-@;        For values of @math{D} larger than 2x, the proportion of @deliverable{D} configurations is slightly larger, but even at a @id[MAX-OVERHEAD]x overhead, this proportion is only @(id (round (* 100 (/ suffixtree-num-D-max suffixtree-num-configs))))%.
-@;        The plot on the right shows that the proportion of @step["1" "D"] is typically twice as high as the proportion of @deliverable{} configurations for this benchmark.
+@;        The plot on the left, in which @${k=0}, confirms the observation made in @secref{sec:method:lattice} that @(id (round (* 100 (/ suffixtree-num-D suffixtree-num-configs))))% of the @|suffixtree-num-configs-str| configurations (@|suffixtree-num-D-str| configurations) run within a @id[suffixtree-sample-D]x overhead.
+@;        For values of @${D} larger than 2x, the proportion of @ddeliverable{D} configurations is slightly larger, but even at a @id[MAX-OVERHEAD]x overhead, this proportion is only @(id (round (* 100 (/ suffixtree-num-D-max suffixtree-num-configs))))%.
+@;        The plot on the right shows that the proportion of @kstep["1" "D"] is typically twice as high as the proportion of @ddeliverable{} configurations for this benchmark.
 @;
-@;        This presentation scales to arbitrarily large programs because the @math{y}-axis plots the proportion of @deliverable{D} configurations; in contrast, a performance lattice contains exponentially many nodes.
+@;        This presentation scales to arbitrarily large programs because the @${y}-axis plots the proportion of @ddeliverable{D} configurations; in contrast, a performance lattice contains exponentially many nodes.
 @;        Furthermore, plotting the overhead for multiple implementations of a gradual type system on the same set of axes conveys their relative performance.
 @;      }
 @;)))
@@ -350,9 +350,9 @@ Practically speaking, users of a gradual type system explore configuration latti
 @;The one exception is the fully-typed configuration; its overhead is given explicitly through the typed/untyped ratio above the left plot.
 @;
 @;@; - limit: angelic choice
-@;The @emph{second limitation} is that the @step{1} plot does not show how we
+@;The @emph{second limitation} is that the @kstep{1} plot does not show how we
 @; optimistically chose the best type conversion step.
-@;In a program with @math{N} modules, a programmer has at most @math{N} type conversion steps to choose from,
-@; some of which may not lead to a @deliverable[] configuration.
-@;For example, there are six configurations with exactly one typed module in @figure-ref{fig:suffixtree-lattice} but only one of these is @deliverable{1}.
+@;In a program with @${N} modules, a programmer has at most @${N} type conversion steps to choose from,
+@; some of which may not lead to a @ddeliverable[] configuration.
+@;For example, there are six configurations with exactly one typed module in @figure-ref{fig:suffixtree-lattice} but only one of these is @ddeliverable{1}.
 @;

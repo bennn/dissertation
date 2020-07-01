@@ -1,4 +1,4 @@
-#lang racket/base
+#lang at-exp racket/base
 
 (provide
   (all-from-out
@@ -23,6 +23,10 @@
   bm
   id
 
+  definition
+  ddeliverable
+  kstep
+
 )
 
 (require
@@ -41,6 +45,11 @@
   greenman-thesis/gtp-benchmarks
   scribble/example
   scribble-abbrevs
+  (only-in scribble/core
+    make-element
+    make-paragraph
+    plain
+    element)
   scriblib/figure
   setup/main-collects
   (for-syntax racket/base syntax/parse))
@@ -69,4 +78,26 @@
 (define bm tt)
 
 (define id ~a)
+
+(define (definition term . defn*)
+  (make-paragraph plain
+    (list
+      (exact "\\vspace{1ex}\n")
+      (bold "Definition")
+      (cons (element #f (list " (" (emph term) ") ")) defn*)
+      (exact "\\vspace{1ex}\n"))))
+
+(define (ddeliverable [D "D"])
+  (define d-str
+    (cond
+     [(string? D)
+      D]
+     [(and (real? D) (positive? D))
+      (number->string D)]
+     [else
+      (raise-argument-error 'ddeliverable "(or/c positive-real? string?)" D)]))
+  (elem ($ d-str) "-deliverable"))
+
+(define (kstep [k "k"] [d "D"])
+  (make-element plain @list{@${k}-step @${d}-deliverable}))
 
