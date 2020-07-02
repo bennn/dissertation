@@ -11,6 +11,7 @@
     gtp-util
     greenman-thesis/gtp-benchmarks
     racket/format
+    racket/list
     scriblib/figure
     scribble/example)
 
@@ -24,6 +25,7 @@
   id
 
   definition
+  sraapproximation
   ddeliverable
   kstep
 
@@ -32,7 +34,8 @@
 (require
   (only-in racket/list
     add-between
-    partition)
+    partition
+    take)
   racket/format
   classicthesis/lang
   racket/format
@@ -100,4 +103,15 @@
 
 (define (kstep [k "k"] [d "D"])
   (make-element plain @list{@${k}-step @${d}-deliverable}))
+
+(define (sraapproximation r s [pct #f])
+  (define pct-elem
+    (if pct
+      (elem ($ (~a pct)) "%-")
+      (elem)))
+  (define r-elem
+    (if (real? r) (~a r) r))
+  (define s-elem
+    (if (real? s) (~a s) s))
+  (elem pct-elem ($ r-elem ", " s-elem) "-approximation"))
 
