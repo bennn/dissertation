@@ -5,6 +5,13 @@
 @;   - [ ] fun, other visualizations from JFP that fell by the wayside
 @; - [ ] app TR : benchmarks, protocol, data
 @; - [ ] app RP : benchmarks, protocol, data
+@;
+@; special acknowledgment to Asumu, for visualizations in POPL paper,
+@;  because my dissertation has overlap with his
+@;
+@; do NOT need summary (abstract) and intro paragraph
+@;
+@; explain that JFP benchmarks are buggy, point to gtp-benchmarks release notes
 
 
 @(require
@@ -13,26 +20,7 @@
    gtp-plot/typed-racket-info
    gtp-plot/performance-info)
 
-@title{Performance}
-
-@summary{
-  A sound gradual type system ensures that untyped components of a program can
-   never break the guarantees of statically typed components.
-  This assurance relies on runtime checks, which in turn impose performance
-   overhead in proportion to the frequency and nature of interaction between
-   typed and untyped components.
-
-  This chapter presents the first systematic method for evaluating the
-   performance of sound gradual type systems.
-  The method quantifies both the absolute performance of a gradual type system
-   and the relative performance of two implementations of the same gradual type
-   system.
-  To validate the method, the chapter reports on its application to
-   @integer->word[(*NUM-BENCHMARKS*)] programs and @integer->word[(length (*RKT-VERSIONS*))]
-   implementations of Typed Racket.
-  Also many Reticulated programs.
-}
-
+@title{Performance Analysis Method}
 @jointwork[
   #:people* '(
     "Asumu Takikawa"
@@ -46,15 +34,80 @@
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
 ]
 
-Gradual types have a cost,
- evident for soundness --- though different levels ---
- programmers can stumble upon.
-How to systematically measure, for language designers.
+Sound gradual types come with performance overhead.
+A soundness theorem guarantees that static types are valid claims about the
+ run-time behavior of a program.
+Gradual types can mix with untyped code.
+Therefore, a gradual typing system needs run-time checks to protect typed
+ code from invalid untyped values.
+These run-time checks impose a cost in proportion to the frequency
+ of typed/untyped interactions, the nature of the data that crosses
+ these type boundaries, and the strength of the soundness guarantee.
 
-@section{Method}
+Language designers must measure the overhead of gradual types to
+ predict the overhead that a language user might experience.
+Such measurements can show improvements across two versions
+ of one gradual typing system,
+ and demonstrate the usefulness of new approaches.
 
 
-@subsection{Definitions}
+
+Language designers need to measure this overhead, both to predict the
+ adveres
+
+Soundness is a guarantee that static types are valid claims about the
+ behavior of a program, no matter what.
+If untyped code sends a value to typed code, then the gradual typing system
+ must check that this value matches the expected type.
+ 
+ values untyped code sends to
+ typed code.
+To enforce this guarantee, a gradual typing system must check untyped
+ values at run-time.
+
+ to validate [
+
+A sound gradual typing system ensures that dynamicially-typed parts of
+ a program cannot break the guarantees of statically-typed parts.
+This assurance requires run-time checks,
+
+
+A sound gradual type system ensures that untyped components of a program can
+ never break the guarantees of statically typed components.
+This assurance relies on runtime checks. which impose performance
+ overhead in proportion to the frequency and nature of interaction between
+ typed and untyped components.
+
+This chapter presents the first systematic method for evaluating the
+ performance of sound gradual type systems.
+The method quantifies both the absolute performance of a gradual type system
+ and the relative performance of two implementations of the same gradual type
+ system.
+To validate the method, the chapter reports on its application to
+ @integer->word[(*NUM-BENCHMARKS*)] programs and @integer->word[(length (*RKT-VERSIONS*))]
+ implementations of Typed Racket.
+Also many Reticulated programs.
+
+
+@section{Design Criteria}
+@; are there good words, from Asumu?, we can use to talk about criteria/requirements?
+
+@; - space = all configurations, visualize as lattice
+@;  > complication, granularity
+@; - baseline = no gradual typing (untyped, depends on context)
+@; - too much data need to present
+@;   what's important = deliverable
+@; - ... sample ...
+@; - ... relative ...
+
+
+
+
+@section{Evaluation Method}
+
+The method = 2 methods = exhaustive and approximate
+how to do it, what parameters
+includes benchmark adaptation
 
 @citet{tfgnvf-popl-2016} introduce a three-step method for evaluating the performance of
  a gradual typing system:
@@ -73,111 +126,7 @@ The following subsections therefore generalize the Takikawa method (@section-ref
  and describe the protocol we use to evaluate Reticulated (@section-ref{sec:protocol}).
 
 
-@subsection[#:tag "sec:method:adapt"]{Generalizing the Takikawa Method}
-
-A gradual typing system enriches a dynamically typed language with a notion of static typing;
- that is, some pieces of a program can be statically typed.
-The @emph{granularity} of a gradual typing system defines the minimum size of
- such pieces in terms of abstract syntax.
-A performance evaluation must define its own granularity to systematically
- explore the ways that a programmer may write type annotations, subject to
- practical constraints.
-
-@definition["granularity"]{
-  The @emph{granularity} of an evaluation is the syntactic unit at which
-   the evaluation adds or removes type annotations.
-}
-
-For example, the evaluation in @citet{tfgnvf-popl-2016} is at the granularity
- of modules.
-The evaluation in @citet{vss-popl-2017} is at the granularity
- of whole programs.
-@Section-ref{sec:protocol} defines the @emph{function and class-fields} granularity, which we use for this evaluation.
-
-After defining a granularity, a performance evaluation must define a suite of
- programs to measure.
-A potential complication is that such programs may depend on external libraries
- or other modules that lie outside the scope of the evaluation.
-It is important to distinguish these so-called @emph{fixed modules} from the
- focus of the experiment.
-
-@definition["experimental, fixed"]{
-  The @emph{experimental modules} in a program define its configurations.
-  The @emph{fixed modules} in a program are common across all configurations.
-}
-
-The granularity and experimental modules define the
- @emph{configurations} of a fully-typed program.
-
-@definition["configurations"]{
-  Let @${P \tcstep P'}
-   if and only if program @${P'} can be obtained from
-   @${P} by annotating one syntactic unit in an experimental module.
-  Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
-   relation.
-  {The @${\tcstep} relation expresses the notion of a
-   @emph{type conversion step}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
-   The @${\tcmulti} relation expresses the notion of @emph{term precision}@~cite{svcb-snapl-2015}.}
-  @; note^2: `e0 -->* e1` if and only if `e1 <= e0`
-  The @emph{configurations} of a fully-typed program @${P^\tau} are all
-   programs @${P} such that @${P\!\tcmulti P^\tau}.
-  Furthermore, @${P^\tau} is a so-called @emph{fully-typed configuration};
-   an @emph{untyped configuration} @${P^\lambda} has the property @${P^\lambda\!\tcmulti P}
-   for all configurations @${P}.
-}
-
-An evaluation must measure the performance overhead of these configurations
- relative to some default.
-A natural baseline is the performance of the original program, distinct from the
- gradual typing system.
-
-@definition["baseline"]{
- The @emph{baseline performance} of a program is its running time in the absence
-  of gradual typing.
-}
-
-In Typed Racket, the baseline is the performance of Racket running the
- untyped configuration.
-In Reticulated, the baseline is Python running the untyped configuration.
-This is not the same as Reticulated running the untyped configuration
- because Reticulated inserts checks in untyped code@~cite{vksb-dls-2014}.
-
-@definition["performance ratio"]{
-  A @emph{performance ratio} is the running time of a configuration
-   divided by the baseline performance of the untyped configuration.
-}
-
-An @emph{exhaustive} performance evaluation measures the performance of every
- configuration.
-The natural way to interpret this data is to choose a notion of
- ``good performance'' and count the proportion of ``good'' configurations.
-In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
- performance overhead they could deliver to clients.
-
-@definition[@ddeliverable{D}]{
-  For @$|{D \in \mathbb{R}^{+}}|, a configuration is @emph{@ddeliverable{D}}
-   if its performance ratio is no greater than @${D}.
-}
-
-If an exhaustive performance evaluation is infeasible, an alternative is
- to select configurations via simple random sampling and measure the
- proportion of @ddeliverable{D} configurations in the sample.
-Repeating this sampling experiment yields a @emph{simple random approximation}
- of the true proportion of @ddeliverable{D} configurations.
-
-@definition[@sraapproximation["r" "s" "95"]]{
-  Given @${r} samples each containing @${s} configurations chosen uniformly at random,
-   a @emph{@sraapproximation["r" "s" "95"]} is a @${95\%} confidence interval for
-   the proportion of @ddeliverable{D} configurations in each sample.
-}
-
-The appendix contains mathematical and
- empirical justification for the simple random approximation method.
-
-
-
-
-
+@; -----------------------------------------------------------------------------
 @subsection{Exhaustive Evaluation Method}
 
 A performance evaluation of gradual type systems must reflect how programmers
@@ -521,6 +470,118 @@ In a program with @${N} modules, a programmer has at most @${N} type conversion
  steps to choose from, some of which may not lead to a @ddeliverable[] configuration.
 For example, there are six configurations with exactly one typed module in
  @figure-ref{fig:suffixtree-lattice} but only one of these is @ddeliverable{1}.
+
+
+
+
+
+@; -----------------------------------------------------------------------------
+@subsection{Definitions}
+
+
+@; @subsection[#:tag "sec:method:adapt"]{Generalizing the Takikawa Method}
+
+A gradual typing system enriches a dynamically typed language with a notion of static typing;
+ that is, some pieces of a program can be statically typed.
+The @emph{granularity} of a gradual typing system defines the minimum size of
+ such pieces in terms of abstract syntax.
+A performance evaluation must define its own granularity to systematically
+ explore the ways that a programmer may write type annotations, subject to
+ practical constraints.
+
+@definition["granularity"]{
+  The @emph{granularity} of an evaluation is the syntactic unit at which
+   the evaluation adds or removes type annotations.
+}
+
+For example, the evaluation in @citet{tfgnvf-popl-2016} is at the granularity
+ of modules.
+The evaluation in @citet{vss-popl-2017} is at the granularity
+ of whole programs.
+@Section-ref{sec:protocol} defines the @emph{function and class-fields} granularity, which we use for this evaluation.
+
+After defining a granularity, a performance evaluation must define a suite of
+ programs to measure.
+A potential complication is that such programs may depend on external libraries
+ or other modules that lie outside the scope of the evaluation.
+It is important to distinguish these so-called @emph{contextual modules} from the
+ focus of the experiment.
+
+@definition["migratable, contextual"]{
+  The @emph{migratable modules} in a program define its configurations.
+  The @emph{contextual modules} in a program are common across all configurations.
+}
+
+The granularity and migratable modules define the
+ @emph{configurations} of a fully-typed program.
+
+@definition["configurations"]{
+  Let @${P \tcstep P'}
+   if and only if program @${P'} can be obtained from
+   @${P} by annotating one syntactic unit in an migratable module.
+  Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
+   relation.
+  {The @${\tcstep} relation expresses the notion of a
+   @emph{type conversion step}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
+   The @${\tcmulti} relation expresses the notion of @emph{term precision}@~cite{svcb-snapl-2015}.}
+  @; note^2: `e0 -->* e1` if and only if `e1 <= e0`
+  The @emph{configurations} of a fully-typed program @${P^\tau} are all
+   programs @${P} such that @${P\!\tcmulti P^\tau}.
+  Furthermore, @${P^\tau} is a so-called @emph{fully-typed configuration};
+   an @emph{untyped configuration} @${P^\lambda} has the property @${P^\lambda\!\tcmulti P}
+   for all configurations @${P}.
+}
+
+An evaluation must measure the performance overhead of these configurations
+ relative to some default.
+A natural baseline is the performance of the original program, distinct from the
+ gradual typing system.
+
+@definition["baseline"]{
+ The @emph{baseline performance} of a program is its running time in the absence
+  of gradual typing.
+}
+
+In Typed Racket, the baseline is the performance of Racket running the
+ untyped configuration.
+In Reticulated, the baseline is Python running the untyped configuration.
+This is not the same as Reticulated running the untyped configuration
+ because Reticulated inserts checks in untyped code@~cite{vksb-dls-2014}.
+
+@definition["performance ratio"]{
+  A @emph{performance ratio} is the running time of a configuration
+   divided by the baseline performance of the untyped configuration.
+}
+
+An @emph{exhaustive} performance evaluation measures the performance of every
+ configuration.
+The natural way to interpret this data is to choose a notion of
+ ``good performance'' and count the proportion of ``good'' configurations.
+In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
+ performance overhead they could deliver to clients.
+
+@definition[@ddeliverable{D}]{
+  For @$|{D \in \mathbb{R}^{+}}|, a configuration is @emph{@ddeliverable{D}}
+   if its performance ratio is no greater than @${D}.
+}
+
+If an exhaustive performance evaluation is infeasible, an alternative is
+ to select configurations via simple random sampling and measure the
+ proportion of @ddeliverable{D} configurations in the sample.
+Repeating this sampling experiment yields a @emph{simple random approximation}
+ of the true proportion of @ddeliverable{D} configurations.
+
+@definition[@sraapproximation["r" "s" "95"]]{
+  Given @${r} samples each containing @${s} configurations chosen uniformly at random,
+   a @emph{@sraapproximation["r" "s" "95"]} is a @${95\%} confidence interval for
+   the proportion of @ddeliverable{D} configurations in each sample.
+}
+
+The appendix contains mathematical and
+ empirical justification for the simple random approximation method.
+
+
+
 
 
 @;@; -----------------------------------------------------------------------------
@@ -998,8 +1059,8 @@ For example, there are six configurations with exactly one typed module in
 @; (1) build a driver module that runs the program and collects timing information;
 @; (2) remove any non-determinism or I/O actions;
 @;@;footnote{@Integer->word[(length '(aespython futen http2 slowSHA))] benchmarks inadvertantly perform I/O actions, see @section-ref{sec:threats}.}
-@; (3) partition the program into experimental and fixed modules; and
-@; (4) add type annotations to the experimental modules.
+@; (3) partition the program into migratable and contextual modules; and
+@; (4) add type annotations to the migratable modules.
 @;We modify any Python code that Reticulated's type
 @; system cannot validate, such as code that requires untagged unions or polymorphism.
 @;
@@ -1059,7 +1120,7 @@ For example, there are six configurations with exactly one typed module in
 @;        [num-col @integer->word[(length column-descr*)]]
 @;       ) @elem{
 @;  @Figure-ref{fig:static-benchmark} tabulates information about the size and
-@;   structure of the @defn{experimental} portions of these benchmarks.
+@;   structure of the @defn{migratable} portions of these benchmarks.
 @;  The @|num-col| columns report the @|column-descr*|
 @;  @Section-ref{sec:appendix:benchmarks} of the appendix
 @;   describes the benchmarks' origin and purpose.
@@ -1513,7 +1574,7 @@ For example, there are six configurations with exactly one typed module in
 @;})
 @;
 @;The following descriptions credit each benchmark's original author,
-@; state whether the benchmark depends on any fixed modules,
+@; state whether the benchmark depends on any contextual modules,
 @; and briefly summarize its purpose.
 @;
 @;@; -----------------------------------------------------------------------------
@@ -1616,8 +1677,8 @@ For example, there are six configurations with exactly one typed module in
 @;  "two untyped modules"
 @;]]{
 @;  Implements the game @hyperlink["https://en.wikipedia.org/wiki/Go_(game)"]{Go}.
-@;  This benchmark is split across three files: an @defn{experimental} module that implements
-@;  the game board, a @defn{fixed} module that defines constants, and a @defn{fixed} module
+@;  This benchmark is split across three files: a @defn{migratable} module that implements
+@;  the game board, a @defn{contextual} module that defines constants, and a @defn{contextual} module
 @;  that implements an AI and drives the benchmark.
 @;  @; 2 iterations
 @;}
