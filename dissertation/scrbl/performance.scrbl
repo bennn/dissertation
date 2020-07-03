@@ -44,49 +44,30 @@ These run-time checks impose a cost in proportion to the frequency
  of typed/untyped interactions, the nature of the data that crosses
  these type boundaries, and the strength of the soundness guarantee.
 
-Language designers must measure the overhead of gradual types to
- predict the overhead that a language user might experience.
-Such measurements can show improvements across two versions
- of one gradual typing system,
- and demonstrate the usefulness of new approaches.
+Language designers must measure the overhead of gradual types
+ to judge the overall usefulness of a gradual typing system.
+ @; ... benefits vs costs
+Such measuments must systematically explore the mixed-typed space that
+ a language offers to language users.
+The data tells users what kind of performance to expect.
+Furthermore, language designers can employ the data to justify improvements
+ and alternative gradual typing approaches.
+
+This chapter presents a systematic and scalable evaluation method that I
+ developed with several collaborators---notably Asumu Takikawa and Zeina
+ Migeed.
+...... ...... ..... explain that sentence
 
 
-
-Language designers need to measure this overhead, both to predict the
- adveres
-
-Soundness is a guarantee that static types are valid claims about the
- behavior of a program, no matter what.
-If untyped code sends a value to typed code, then the gradual typing system
- must check that this value matches the expected type.
- 
- values untyped code sends to
- typed code.
-To enforce this guarantee, a gradual typing system must check untyped
- values at run-time.
-
- to validate [
-
-A sound gradual typing system ensures that dynamicially-typed parts of
- a program cannot break the guarantees of statically-typed parts.
-This assurance requires run-time checks,
-
-
-A sound gradual type system ensures that untyped components of a program can
- never break the guarantees of statically typed components.
-This assurance relies on runtime checks. which impose performance
- overhead in proportion to the frequency and nature of interaction between
- typed and untyped components.
-
-This chapter presents the first systematic method for evaluating the
- performance of sound gradual type systems.
-The method quantifies both the absolute performance of a gradual type system
- and the relative performance of two implementations of the same gradual type
- system.
-To validate the method, the chapter reports on its application to
- @integer->word[(*NUM-BENCHMARKS*)] programs and @integer->word[(length (*RKT-VERSIONS*))]
- implementations of Typed Racket.
-Also many Reticulated programs.
+@; This chapter presents the first systematic method for evaluating the
+@;  performance of sound gradual type systems.
+@; The method quantifies both the absolute performance of a gradual type system
+@;  and the relative performance of two implementations of the same gradual type
+@;  system.
+@; To validate the method, the chapter reports on its application to
+@;  @integer->word[(*NUM-BENCHMARKS*)] programs and @integer->word[(length (*RKT-VERSIONS*))]
+@;  implementations of Typed Racket.
+@; Also many Reticulated programs.
 
 
 @section{Design Criteria}
