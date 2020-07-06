@@ -34,6 +34,7 @@
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
 ]
 
+@; sound GT has cost
 Sound gradual types come with performance overhead.
 A soundness theorem guarantees that static types are valid claims about the
  run-time behavior of a program.
@@ -44,6 +45,7 @@ These run-time checks impose a cost in proportion to the frequency
  of typed/untyped interactions, the nature of the data that crosses
  these type boundaries, and the strength of the soundness guarantee.
 
+@; must measure
 Language designers must measure the overhead of gradual types
  to judge the overall usefulness of a gradual typing system.
  @; ... benefits vs costs
@@ -52,22 +54,16 @@ Such measuments must systematically explore the mixed-typed space that
 The data tells users what kind of performance to expect.
 Furthermore, language designers can employ the data to justify improvements
  and alternative gradual typing approaches.
+@; TODO "must measure" vs "systematic" ... really its 2 points
 
 This chapter presents a systematic and scalable evaluation method that I
  developed with several collaborators---notably Asumu Takikawa and Zeina
  Migeed.
-...... ...... ..... explain that sentence
-
-
-@; This chapter presents the first systematic method for evaluating the
-@;  performance of sound gradual type systems.
-@; The method quantifies both the absolute performance of a gradual type system
-@;  and the relative performance of two implementations of the same gradual type
-@;  system.
-@; To validate the method, the chapter reports on its application to
-@;  @integer->word[(*NUM-BENCHMARKS*)] programs and @integer->word[(length (*RKT-VERSIONS*))]
-@;  implementations of Typed Racket.
-@; Also many Reticulated programs.
+The method summarizes performance for the exponentially-many ways that a programmer
+ can mix typed and untyped code by focusing on a binary "goodness" measure.
+Informally, a mixture is good if it is fast enough to use.
+Random sampling can approximate the proportion of good mixtures for programs
+ in which exhaustive evaluation is not practical.
 
 
 @section{Design Criteria}
