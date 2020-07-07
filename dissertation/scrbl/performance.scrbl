@@ -15,8 +15,8 @@
 
 
 @(require
-   (prefix-in jfp: greenman-thesis/jfp-2019/main)
-   (prefix-in pepm: greenman-thesis/pepm-2018/main)
+   (prefix-in tr: greenman-thesis/jfp-2019/main)
+   (prefix-in rp: greenman-thesis/pepm-2018/main)
    gtp-plot/configuration-info
    gtp-plot/typed-racket-info
    gtp-plot/performance-info)
@@ -604,11 +604,85 @@ The appendix contains mathematical and
  empirical justification for the simple random approximation method.
 
 
+@subsection{Approximate Evaluation Method}
+
+@;@Section-ref{sec:evaluation} instantiates this method using @${r\!=\!@id[rp:NUM-SAMPLE-TRIALS]}
+@; samples each containing @${@id[rp:SAMPLE-RATE]\!*\!(F + C)} configurations,
+@; where @${F} is the number of functions and methods in the benchmark and
+@; @${C} is the number of class definitions.
+@;The intervals produced by this method
+@; (for the @bm*[rp:SAMPLE-BENCHMARKS] benchmarks) are thin,
+@; but the paper does not argue that the intervals are very likely to be accurate.
+@;This appendix provides the missing argument.
+@;
+@;@subsection{Statistical Argument}
+@;
+@;Let @${d} be a predicate that checks whether a configuration from
+@; a fixed program is @ddeliverable{D}.
+@;Since @${d} is either true or false for every configuration,
+@; this predicate defines a Bernoulli random variable @${X_d} with parameter
+@; @${p}, where @${p} is the true proportion of @ddeliverable{D} configurations.
+@;Consequently, the expected value of this random variable is @${p}.
+@;The law of large numbers therefore states that the average of infinitely
+@; many samples of @${X_d} converges to @${p}, the true proportion
+@; of deliverable configurations.
+@;Convergence suggests that the average of ``enough'' samples is ``close to'' @${p}.
+@;The central limit theorem provides a similar guarantee---any sequence of
+@; such averages is normally distributed around the true proportion.
+@;A @${95\%} confidence interval generated from sample averages is therefore
+@; likely to contain the true proportion.
+@;
+@;
+@;@;@subsection{Back-of-the-Envelope Argument}
+@;@;
+@;@;Suppose a few developers independently apply gradual typing to a program.
+@;@;For a fixed overhead tolerance @${D}, some proportion of the developers have
+@;@; @ddeliverable{D} configurations.
+@;@;There is a remote chance that this proportion coincides with the true proportion
+@;@; of @ddeliverable{D} configurations.
+@;@;Intuitively, the chance is less remote if the number of developers is large.
+@;@;But even for a small number of developers, if they repeat this experiment
+@;@; multiple times, then the average proportion of @ddeliverable{D} configurations
+@;@; should tend towards the true proportion.
+@;@;After all, if the true proportion of @ddeliverable{D} configurations is
+@;@; @${10\%} then approximately @${1} in @${10} randomly sampled configurations is
+@;@; @ddeliverable{D}.
+@;
+@;
+@;@subsection{Empirical Illustration}
+@;
+@;@Figure-ref{fig:sample:validate} superimposes the results of simple random
+@; sampling upon the exhaustive data for three benchmarks.
+@;Specifically, these plots are the result of a two-step recipe:
+@;@itemlist[
+@;@item{
+@;  First, we plot the true proportion of
+@;   @ddeliverable{D} configurations for @${D} between @${1}x and @${10}x.
+@;  This data is represented by a blue curve; the area under the curve is shaded
+@;   blue.
+@;}
+@;@item{
+@;  Second, we plot a
+@;   @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
+@;   as a brown interval.
+@;  This is a 95% confidence interval generated from @integer->word[rp:NUM-SAMPLE-TRIALS]
+@;   samples each containing @$[(format "~a(F+C)" rp:SAMPLE-RATE)] configurations
+@;   chosen uniformly at random.
+@;}
+@;]
+@;
+@;@;The intervals accurately enclose the true proportions of @ddeliverable{D} configurations.
+@;
+@;@figure["fig:sample:validate" @elem{Simple random approximations}
+@;  (parameterize ([*PLOT-HEIGHT* 100]
+@;                 [*SINGLE-COLUMN?* #true])
+@;    @render-validate-samples-plot*[VALIDATE-BENCHMARKS])
+@;]
 
 
 
 @;@; -----------------------------------------------------------------------------
-@;@section[#:tag "sec:tr-evaluation"]{Application: Typed Racket}
+@;@section[#:tag "sec:tr:evaluation"]{Application: Typed Racket}
 @;
 @;This section introduces @integer->word[(count-benchmarks)] @emph{gradual typing performance} (@|GTP|) benchmark programs that are representative of actual user code yet small enough to make exhaustive performance evaluation tractable.
 @;The following descriptions of the benchmark programs---arranged by size as measured in number of migratable modules---briefly summarize their relevant characteristics.
@@ -789,7 +863,7 @@ The appendix contains mathematical and
 @;
 @;
 @;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:conversion"]{From Programs to Benchmarks}
+@;@subsection[#:tag "sec:tr:conversion"]{From Programs to Benchmarks}
 @;
 @;@(define MIN-ITERS-STR "3")
 @;@(define MAX-ITERS-STR "30")
@@ -826,7 +900,7 @@ The appendix contains mathematical and
 @;
 @;
 @;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:protocol"]{Experimental Protocol}
+@;@subsection[#:tag "sec:tr:protocol"]{Experimental Protocol}
 @;
 @;@(define MIN-ITERS-STR "3")
 @;@(define MAX-ITERS-STR "30")
@@ -867,7 +941,7 @@ The appendix contains mathematical and
 @;
 @;
 @;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:plots"]{Evaluating Absolute Performance}
+@;@subsection[#:tag "sec:tr:plots"]{Evaluating Absolute Performance}
 @;
 @;@(render-lnm-plot
 @;  (lambda (pict*)
@@ -948,7 +1022,7 @@ The appendix contains mathematical and
 @;
 @;
 @;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:compare"]{Evaluating Relative Performance}
+@;@subsection[#:tag "sec:tr:compare"]{Evaluating Relative Performance}
 @;
 @;Although the absolute performance of Racket version 6.4 is underwhelming, it is a significant improvement over versions 6.2 and 6.3.
 @;This improvement is manifest in the difference between curves on the overhead plots.
@@ -983,7 +1057,7 @@ The appendix contains mathematical and
 @; ))
 @;
 @;@; -----------------------------------------------------------------------------
-@;@section[#:tag "sec:scale"]{Evaluation Method, Part II}
+@;@section[#:tag "sec:tr:scale"]{Evaluation Method, Part II}
 @;
 @;@(define srs-samples 5)
 @;@(define sample-size-factor 10)
@@ -1065,7 +1139,7 @@ The appendix contains mathematical and
 
 
 @; -----------------------------------------------------------------------------
-@section[#:tag "sec:rp-evaluation"]{Application 2: Reticulated Python}
+@section[#:tag "sec:rp:evaluation"]{Application 2: Reticulated Python}
 
 Together with Zeina Migeed, I conducted a performance evaluation for Reticulated
  Python.
@@ -1090,7 +1164,7 @@ We found two soundness holes: one with optional function parameters and one
  with tuples.
 
 
-@subsection[#:tag "sec:protocol"]{Protocol}
+@subsection[#:tag "sec:rp:protocol"]{Protocol}
 
 @parag{Granularity}
 The granularity of this evaluation is @emph{function and class fields}.
@@ -1103,7 +1177,7 @@ One syntactic unit in the experiment is either one function,
 To convert a Reticulated program into a benchmark, we:
  (1) build a driver module that runs the program and collects timing information;
  (2) remove any non-determinism or I/O actions;
-@;footnote{@Integer->word[(length '(aespython futen http2 slowSHA))] benchmarks inadvertantly perform I/O actions, see @section-ref{sec:threats}.}
+@;footnote{@Integer->word[(length '(aespython futen http2 slowSHA))] benchmarks inadvertantly perform I/O actions, see @section-ref{sec:rp:threats}.}
  (3) partition the program into migratable and contextual modules; and
  (4) add type annotations to the migratable modules.
 We modify any Python code that Reticulated's type
@@ -1145,13 +1219,262 @@ Cluster nodes are IBM NeXtScale nx360 M4 servers with two Intel Xeon E5-2650 v2
  8-core processors, 32 GB of RAM, and 250 GB of local disk storage.
 
 @; -----------------------------------------------------------------------------
-@subsection[#:tag "sec:evaluation"]{Performance Evaluation}
+@subsection[#:tag "sec:rp:benchmarks"]{Benchmark Descriptions}
+
+@(let ([total @integer->word[rp:NUM-EXHAUSTIVE-BENCHMARKS]]
+       [num1 @Integer->word[(length (list* 'aespython 'stats rp:DLS-2014-BENCHMARK-NAMES))]]
+       [num2 @Integer->word[(length rp:POPL-2017-BENCHMARK-NAMES)]]
+       [num3 @integer->word[(length '(Espionage PythonFlow take5 sample_fsm))]]
+      ) @elem{
+   @|num1| benchmarks originate from case studies by @citet{vksb-dls-2014}.
+   @;@;footnote{@|dls-names|.}
+   @|num2| are from the evaluation by @citet{vss-popl-2017} on programs from
+   the Python Performance Benchmark Suite.
+   The remaining @|num3| originate from open-source programs.
+})
+
+The following descriptions credit each benchmark's original author,
+ state whether the benchmark depends on any contextual modules,
+ and briefly summarize its purpose.
+
+@; -----------------------------------------------------------------------------
+@; --- WARNING: the order of benchmarks matters!
+@; ---  Do not re-order without checking ALL PROSE in this file
+@; -----------------------------------------------------------------------------
+
+@rp:bm-desc["futen"
+@hyperlink["http://blog.amedama.jp/"]{@tt{momijiame}}
+@url{https://github.com/momijiame/futen}
+@list[
+  @lib-desc["fnmatch"]{Filename matching}
+  @lib-desc["os.path"]{Path split, path join, path expand, getenv}
+  @lib-desc["re"]{One regular expression match}
+  @lib-desc["shlex"]{Split host names from an input string}
+  @lib-desc["socket"]{Basic socket operations}
+]]{
+  Converts an @hyperlink["https://www.openssh.com/"]{OpenSSH} configuration
+  file to an inventory file for the
+  @hyperlink["https://www.ansible.com/"]{@emph{Ansiable}} automation framework.
+  @; 1900 iterations
+}
+
+@bm-desc["http2"
+@authors[@hyperlink["https://github.com/httplib2/httplib2"]{Joe Gregorio}]
+@url{https://github.com/httplib2/httplib2}
+@list[
+  @lib-desc["urllib"]{To split an IRI into components}
+]]{
+  Converts a collection of @hyperlink["https://en.wikipedia.org/wiki/Internationalized_Resource_Identifier"]{Internationalized Resource Identifiers}
+  to equivalent @hyperlink["http://www.asciitable.com/"]{ASCII} resource
+  identifiers.
+  @; 10 iterations
+}
+
+@bm-desc["slowSHA"
+@authors["Stefano Palazzo"]
+@url{http://github.com/sfstpala/SlowSHA}
+@list[
+  @lib-desc["os"]{path split}
+]]{
+  Applies the SHA-1 and SHA-512 algorithms to English words.
+  @; 1 iteration
+}
+
+@bm-desc["call_method"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Microbenchmarks simple method calls;
+  the calls do not use argument lists,
+  keyword arguments, or tuple unpacking.
+  @; Consists of @${32*10^5} calls to trivial functions.
+  @; 1 iteration
+}
+
+@bm-desc["call_simple"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Same as @bm{call_method}, using functions rather than methods.
+}
+
+@bm-desc["chaos"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[
+  @lib-desc["math"]{Square root}
+  @lib-desc["random"]{randrange}
+]]{
+  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{@emph{chaos game}} method.
+  @; 1 iteration
+}
+
+@bm-desc["fannkuch"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Implements Anderson and Rettig's microbenchmark@~cite{ar-lp-1994}.
+  @; 1 iteration
+}
+
+@bm-desc["float"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[
+  @lib-desc["math"]{Sin, Cos, Sqrt}
+]]{
+  Microbenchmarks floating-point operations.
+  @; 1 iteration (200,000 points)
+}
+
+@bm-desc["go"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[
+  @lib-desc["math"]{sqrt log}
+  @lib-desc["random"]{randrange random}
+  "two untyped modules"
+]]{
+  Implements the game @hyperlink["https://en.wikipedia.org/wiki/Go_(game)"]{Go}.
+  This benchmark is split across three files: a @defn{migratable} module that implements
+  the game board, a @defn{contextual} module that defines constants, and a @defn{contextual} module
+  that implements an AI and drives the benchmark.
+  @; 2 iterations
+}
+
+@bm-desc["meteor"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Solves the Shootout benchmarks meteor puzzle.@footnote{@url{http://benchmarksgame.alioth.debian.org/u32/meteor-description.html}}
+  @; 1 iterations (finds at most 6,000 solutions)
+}
+
+@bm-desc["nbody"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Models the orbits of Jupiter, Saturn, Uranus, and Neptune.
+  @; 1 iteration
+}
+
+@bm-desc["nqueens"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@math{8}-queens} problem by a brute-force algorithm 10 times in a row.
+}
+
+@bm-desc["pidigits"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Microbenchmarks big-integer arithmetic.
+  @; 1 iteration (5,000 digits)
+}
+
+@bm-desc["pystone"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Implements Weicker's @emph{Dhrystone} benchmark.@footnote{@url{http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf}}
+  @; 50,000 iterations
+}
+
+@bm-desc["spectralnorm"
+@authors["The Python Benchmark Suite"]
+@url{https://github.com/python/performance}
+@list[]]{
+  Computes the largest singular value of an infinite matrix.
+  @; 10 iterations
+}
+
+@bm-desc["Espionage"
+@authors["Zeina Migeed"]
+""
+@list[
+  @lib-desc["operator"]{itemgetter}
+]]{
+  Implements Kruskal's spanning-tree algorithm.
+  @; 1 iteration
+}
+
+@bm-desc["PythonFlow"
+@authors["Alfian Ramadhan"]
+@url{https://github.com/masphei/PythonFlow}
+@list[
+  @lib-desc["os"]{path join}
+]]{
+  Implements the Ford-Fulkerson max flow algorithm. 
+  @; no longer needs citation
+  @;@~cite{ff-cjm-1956}.
+  @; 1 iteration
+}
+
+@bm-desc["take5"
+@authors["Maha Alkhairy" "Zeina Migeed"]
+""
+@list[
+  @lib-desc["random"]{randrange shuffle random seed}
+  @lib-desc["copy"]{deepcopy}
+]]{
+  Implements a card game and a simple player AI.
+  @; 500 iterations
+}
+
+@bm-desc["sample_fsm"
+@authors["Linh Chi Nguyen"]
+@url{https://github.com/ayaderaghul/sample-fsm}
+@list[
+  @lib-desc["itertools"]{cycles}
+  @lib-desc["os"]{path split}
+  @lib-desc["random"]{random randrange}
+]]{
+  Simulates the interactions of economic agents modeled as finite-state automata@~cite{n-mthesis-2014}.
+  @; 100 iterations
+}
+
+@bm-desc["aespython"
+@authors[@hyperlink["http://caller9.com/"]{Adam Newman}
+         @hyperlink["https://github.com/serprex"]{Demur Remud}]
+@url{https://github.com/serprex/pythonaes}
+@list[
+  @lib-desc["os"]{random stat}
+  @lib-desc["struct"]{pack unpack calcsize}
+]]{
+  @; Second sentence is a little awkward. I just want to say, "this is really
+  @;  a Python implementation of AES, not just a wrapper to some UNIX implementation"
+  Implements the @hyperlink["http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf"]{Advanced Encryption Standard}.
+  @;Uses the @tt{os} library only to generate random bytes and invoke the
+  @; @hyperlink["http://man7.org/linux/man-pages/man2/stat.2.html"]{@tt{stat()}}
+  @; system call.
+  @; 1 iteration, encrypts the book of Leviticus (2800 lines)
+}
+
+@bm-desc["stats"
+@authors[@hyperlink["https://connects.catalyst.harvard.edu/Profiles/display/Person/12467"]{Gary Strangman}]
+@url{https://github.com/seperman/python-statlib/blob/master/statlib/pstat.py}
+@list[
+  @lib-desc["copy"]{deepcopy}
+  @lib-desc["math"]{pow abs etc.}
+]]{
+  Implements first-order statistics functions; in other words, transformations
+   on either floats or (possibly-nested) lists of floats.
+  The original program consists of two modules.
+  The benchmark is modularized according to comments in the program's source
+   code to reduce the size of each module's configuration space.
+  @; 1 iteration
+}
+
+
+@; -----------------------------------------------------------------------------
+@subsection[#:tag "sec:rp:evaluation"]{Performance Evaluation}
 
 @figure["fig:static-benchmark" "Static summary of benchmarks"
-  @pepm:render-static-information[MAIN-BENCHMARKS]]
+  @rp:render-static-information[MAIN-BENCHMARKS]]
 
 To assess the run-time cost of gradual typing in Reticulated, we measured
- the performance of @integer->word[pepm:NUM-MAIN-BENCHMARKS] benchmark programs.
+ the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
 @(let* ([column-descr*
          (list
            @elem{lines of code (@bold{SLOC}), }
@@ -1160,32 +1483,32 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
            @elem{and number of class definitions (@bold{C}).})]
         [num-col @integer->word[(length column-descr*)]]
        ) @elem{
-  @Figure-ref{fig:pepm:static-benchmark} tabulates information about the size and
+  @Figure-ref{fig:rp:static-benchmark} tabulates information about the size and
    structure of the @defn{migratable} portions of these benchmarks.
   The @|num-col| columns report the @|column-descr*|
-  @Section-ref{sec:pepm:benchmarks} of the appendix
+  @Section-ref{sec:rp:benchmarks} of the appendix
    describes the benchmarks' origin and purpose.
 })
 
 The following three subsections present the results of the evaluation.
-@Section-ref{sec:ratio} reports the performance of the untyped
+@Section-ref{sec:rp:ratio} reports the performance of the untyped
  and fully-typed configurations.
-@Section-ref{sec:overhead} plots the proportion of @ddeliverable{D}
- configurations for @${D} between @${1} and @${@id[pepm:MAX-OVERHEAD]}.
-@Section-ref{sec:exact} compares the number of type annotations in each
+@Section-ref{sec:rp:overhead} plots the proportion of @ddeliverable{D}
+ configurations for @${D} between @${1} and @${@id[rp:MAX-OVERHEAD]}.
+@Section-ref{sec:rp:exact} compares the number of type annotations in each
  configuration to its performance.
 
 
-@subsection[#:tag "sec:ratio"]{Performance Ratios}
+@subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
 
-The table in @figure-ref{fig:pepm:ratio} lists the extremes of gradual typing in
+The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
  Reticulated.
 From left to right, these are:
  the performance of the untyped configuration relative to the Python baseline (the @emph[u/p-ratio]),
  the performance of the fully-typed configuration relative to the untyped configuration (the @emph[t/u-ratio]),
  and the overall delta between fully-typed and Python (the @emph[t/p-ratio]).
 
-@(let* ([futen-row (ratios-table-row pepm:RT 'futen)]
+@(let* ([futen-row (ratios-table-row rp:RT 'futen)]
         [futen-u/p (ratios-row-retic/python futen-row)]
         [futen-t/u (ratios-row-typed/retic futen-row)]) @elem{
   For example, the row for @bm{futen} reports a @|u/p-ratio| of @${@|futen-u/p|}.
@@ -1202,8 +1525,8 @@ Migrating a benchmark to
  Reticulated, or from untyped to fully-typed, always adds performance overhead.
 The migration never improves performance.
 The overhead is always within an order-of-magnitude.
-@(let* ([rp* (map ratios-row-retic/python pepm:RT)]
-        [tr* (map ratios-row-typed/retic pepm:RT)]
+@(let* ([rp* (map ratios-row-retic/python rp:RT)]
+        [tr* (map ratios-row-typed/retic rp:RT)]
         [count-< (λ (x* n) (length (filter (λ (str) (< (string->number str) n)) x*)))]
         [rp-<2 (count-< rp* 2)]
         [rp-<3 (count-< rp* 3)]
@@ -1234,20 +1557,20 @@ The overhead is always within an order-of-magnitude.
 })
 
 @figure["fig:ratio" "Performance ratios"
-  @render-ratios-table[pepm:RT]
+  @render-ratios-table[rp:RT]
 ]
 
 
-@subsection[#:tag "sec:overhead"]{Overhead Plots}
+@subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
 
 @figure*["fig:overhead" "Overhead plots"
-  @render-overhead-plot*[pepm:MAIN-BENCHMARKS]
+  @render-overhead-plot*[rp:MAIN-BENCHMARKS]
 ]
 
-@Figure-ref{fig:pepm:overhead} summarizes the overhead of gradual typing in the
+@Figure-ref{fig:rp:overhead} summarizes the overhead of gradual typing in the
  benchmark programs.
 Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)
- for values of @${D} between @${1}x overhead and @${@id[pepm:MAX-OVERHEAD]}x overhead (@|x-axis|).
+ for values of @${D} between @${1}x overhead and @${@id[rp:MAX-OVERHEAD]}x overhead (@|x-axis|).
 The @|x-axes| are log-scaled to focus on low overheads;
  vertical tick marks appear at @${1.2}x, @${1.4}x, @${1.6}x, @${1.8}x, @${4}x, @${6}x, and @${8}x overhead.
 
@@ -1261,35 +1584,35 @@ If the data is approximate, the heading lists the number of samples
 @emph{Note} the curves for the approximate data
  (i.e., the curves for @bm{sample_fsm}, @bm{aespython}, and @bm{stats}) are intervals.
 For instance, the height of an interval at @${x\!=\!4} is the range of the
- @sraapproximation[pepm:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" pepm:SAMPLE-RATE) "95"]
+ @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
  for the number of @ddeliverable[4] configurations.
 These intervals are thin because there is little variance in the proportion
- of @ddeliverable{D} configurations across the @integer->word[pepm:NUM-SAMPLE-TRIALS]
+ of @ddeliverable{D} configurations across the @integer->word[rp:NUM-SAMPLE-TRIALS]
  samples.
 @emph{End}
 
 
 
 @parag{Overhead Plot, Conclusions}
-Curves in @figure-ref{fig:pepm:overhead} typically cover a large area and reach the
+Curves in @figure-ref{fig:rp:overhead} typically cover a large area and reach the
  top of the @|y-axis| at a low value of @${D}.
-This value is always less than @${@id[pepm:MAX-OVERHEAD]}.
+This value is always less than @${@id[rp:MAX-OVERHEAD]}.
 In other words, every configuration in the
- experiment is @ddeliverable[pepm:MAX-OVERHEAD].
+ experiment is @ddeliverable[rp:MAX-OVERHEAD].
 For many benchmarks, the maximum overhead is significantly lower.
 @(let ([num-2-deliv (length '(futen slowSHA fannkuch nbody nqueens pidigits
                               take5 stats))]) @elem{
   Indeed, @integer->word[num-2-deliv] benchmarks are @ddeliverable[2].})
 
 None of the configurations in the experiment run faster than the Python baseline.
-This is to be expected, given the @|u/p-ratio|s in @figure-ref{fig:pepm:ratio} and the
+This is to be expected, given the @|u/p-ratio|s in @figure-ref{fig:rp:ratio} and the
  fact that Reticulated translates type annotations into run-time checks.
 
 @(let ([smooth '(futen http2 slowSHA chaos fannkuch float nbody pidigits
                  pystone PythonFlow take5 sample_fsm aespython stats)])
   @elem{
     @Integer->word[(length smooth)] benchmarks have relatively smooth slopes.
-    The plots for the other @integer->word[(- pepm:NUM-EXHAUSTIVE-BENCHMARKS (length smooth))]
+    The plots for the other @integer->word[(- rp:NUM-EXHAUSTIVE-BENCHMARKS (length smooth))]
      benchmarks have wide, flat segments.
     These flat segments are due to functions that are frequently executed
      in the benchmarks' traces; all configurations in which one of these functions
@@ -1297,10 +1620,10 @@ This is to be expected, given the @|u/p-ratio|s in @figure-ref{fig:pepm:ratio} a
 })
 
 @(let* ([NOT-tp '(http2 call_method spectralnorm)]
-        [num-tp (- pepm:NUM-MAIN-BENCHMARKS (length NOT-tp))]
-        [S-SLOWER (percent-slower-than-typed "spectralnorm")]) @elem{
-  @Integer->word[num-tp] benchmarks are roughly @ddeliverable{T}, where @${T} is
-   the @|t/p-ratio| listed in @figure-ref{fig:ratio}.
+        [num-tp (- rp:NUM-MAIN-BENCHMARKS (length NOT-tp))]
+        [S-SLOWER (rp:percent-slower-than-typed "spectralnorm")]) @elem{
+@Integer->word[num-tp] benchmarks are roughly @ddeliverable{T}, where @${T} is
+ the @|t/p-ratio| listed in @figure-ref{fig:rp:ratio}.
 In these benchmarks, the fully-typed configuration is one of the slowest configurations.
 @;Note that these ratios are typically larger than Typed Racket's typed/untyped ratios@~cite{tfgnvf-popl-2016}.
 The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
@@ -1311,24 +1634,24 @@ Unfortunately, this speedup is due to a soundness bug;
 })
 
 
-@subsection[#:tag "sec:exact"]{Absolute Running Times}
+@subsection[#:tag "sec:rp:exact"]{Absolute Running Times}
 
-@figure*["fig:exact" "Running time (in seconds) vs. Number of typed components"
-  @render-exact-runtime-plot*[MAIN-BENCHMARKS]
+@figure*["fig:rp:exact" "Running time (in seconds) vs. Number of typed components"
+  @rp:render-exact-runtime-plot*[rp:MAIN-BENCHMARKS]
 ]
 
 Since changing the type annotations in a Reticulated program changes its
  performance, the language should provide a cost model to help developers
  predict the performance of a given configuration.
-The plots in @figure-ref{fig:exact} demonstrate that a simple heuristic
+The plots in @figure-ref{fig:rp:exact} demonstrate that a simple heuristic
  works well for these benchmarks: the performance of a configuration is
  proportional to the number of type annotations in the configuration.
 
 @parag{How to Read the Plots}
-@Figure-ref{fig:exact} contains one point for every run of every
+@Figure-ref{fig:rp:exact} contains one point for every run of every
  configuration in the experiment.
-(Recall from @section-ref{sec:protocol},
- the data for each configuration is @id[NUM-ITERATIONS] runs.)
+(Recall from @section-ref{sec:rp:protocol},
+ the data for each configuration is @id[rp:NUM-ITERATIONS] runs.)
 Each point compares the number of type annotations in a
  configuration (@|x-axis|) against its running time, measured in seconds (@|y-axis|).
 
@@ -1336,8 +1659,8 @@ The plots contain many points with both the same number of typed components
  and similar performance.
 To reduce the visual overlap between such points, the points for a given
  configuration are spread across the @|x-axis|; in particular,
- the @id[NUM-ITERATIONS] points for a configuration with @math{N}
- typed components lie within the interval @${N\!\pm\!@id[EXACT-RUNTIME-XSPACE]}
+ the @id[rp:NUM-ITERATIONS] points for a configuration with @math{N}
+ typed components lie within the interval @${N\!\pm\!@id[rp:EXACT-RUNTIME-XSPACE]}
  on the @|x-axis|.
 
 For example, @bm{fannkuch} has two configurations: the untyped configuration
@@ -1346,11 +1669,11 @@ To determine whether a point @${(x,y)} in the plot for @bm{fannkuch} represents
  the untyped or fully-typed configuration, round @${x} to the nearest integer.
 
 
-@parag{Conclusions}
+@parag{Exact Runtime Conclusions}
 
 Suppose a programmer starts at an arbitrary configuration and adds some
  type annotations.
-The plots in @figure-ref{fig:exact} suggest that this action will affect
+The plots in @figure-ref{fig:rp:exact} suggest that this action will affect
  performance in one of four possible ways, based on trends among the plots.
 
 @exact-runtime-category["types make things slow"
@@ -1361,7 +1684,7 @@ The plots in @figure-ref{fig:exact} suggest that this action will affect
     Typing any function, class, or method adds a small performance overhead.
 })]
 
-@exact-runtime-category[@elem{types make things very slow}
+@rp:exact-runtime-category[@elem{types make things very slow}
   '(call_method call_simple go http2 meteor nqueens spectralnorm Espionage PythonFlow)
   (λ (num-in-category) @elem{
     @string-titlecase[num-in-category] plots have visible gaps between
@@ -1370,17 +1693,17 @@ The plots in @figure-ref{fig:exact} suggest that this action will affect
      run-time cost.
     Configurations above the gap have some common type annotations that
      add significant overhead.
-    Each such gap corresponds to a flat slope in @figure-ref{fig:overhead}.
+    Each such gap corresponds to a flat slope in @figure-ref{fig:rp:overhead}.
 })]
 
-@exact-runtime-category[@elem{types are free}
+@rp:exact-runtime-category[@elem{types are free}
   '(fannkuch nbody pidigits)
   (λ (num-in-category) @elem{
     In @|num-in-category| benchmarks, all configurations have similar performance.
     The dynamic checks that enforce tag soundness add insignificant overhead.
 })]
 
-@exact-runtime-category[@elem{types make things fast}
+@rp:exact-runtime-category[@elem{types make things fast}
   '(call_method spectralnorm)
   (λ (num-in-category) @elem{
     In @|num-in-category| benchmarks, some configurations
@@ -1404,7 +1727,7 @@ In principle a JIT compiler could generate check-free code if it could infer
  approach would improve performance in practice.
 
 
-@subsection[#:tag "sec:threats"]{Threats to Validity}
+@subsection[#:tag "sec:rp:threats"]{Threats to Validity}
 
 We have identified five sources of systematic
  bias.
@@ -1481,336 +1804,4 @@ Function signatures can leave some arguments untyped, and class field
  declaractions can omit types for some members.
 We believe that a fine-grained evaluation would support the
  conclusions presented in this paper.
-
-@subsection[#:tag "sec:appendix:validating"]{Validating the Approximation Method}
-
-@Section-ref{sec:method} proposes a so-called @emph{simple random approximation}
- method for guessing the number of @ddeliverable{D} configurations in a benchmark:
-
-@|DEF-APPROX|@;
-@;
-@Section-ref{sec:evaluation} instantiates this method using @${r\!=\!@id[pepm:NUM-SAMPLE-TRIALS]}
- samples each containing @${@id[pepm:SAMPLE-RATE]\!*\!(F + C)} configurations,
- where @${F} is the number of functions and methods in the benchmark and
- @${C} is the number of class definitions.
-The intervals produced by this method
- (for the @bm*[pepm:SAMPLE-BENCHMARKS] benchmarks) are thin,
- but the paper does not argue that the intervals are very likely to be accurate.
-This appendix provides the missing argument.
-
-@subsection{Statistical Argument}
-
-Let @${d} be a predicate that checks whether a configuration from
- a fixed program is @ddeliverable{D}.
-Since @${d} is either true or false for every configuration,
- this predicate defines a Bernoulli random variable @${X_d} with parameter
- @${p}, where @${p} is the true proportion of @ddeliverable{D} configurations.
-Consequently, the expected value of this random variable is @${p}.
-The law of large numbers therefore states that the average of infinitely
- many samples of @${X_d} converges to @${p}, the true proportion
- of deliverable configurations.
-Convergence suggests that the average of ``enough'' samples is ``close to'' @${p}.
-The central limit theorem provides a similar guarantee---any sequence of
- such averages is normally distributed around the true proportion.
-A @${95\%} confidence interval generated from sample averages is therefore
- likely to contain the true proportion.
-
-
-@;@subsection{Back-of-the-Envelope Argument}
-@;
-@;Suppose a few developers independently apply gradual typing to a program.
-@;For a fixed overhead tolerance @${D}, some proportion of the developers have
-@; @ddeliverable{D} configurations.
-@;There is a remote chance that this proportion coincides with the true proportion
-@; of @ddeliverable{D} configurations.
-@;Intuitively, the chance is less remote if the number of developers is large.
-@;But even for a small number of developers, if they repeat this experiment
-@; multiple times, then the average proportion of @ddeliverable{D} configurations
-@; should tend towards the true proportion.
-@;After all, if the true proportion of @ddeliverable{D} configurations is
-@; @${10\%} then approximately @${1} in @${10} randomly sampled configurations is
-@; @ddeliverable{D}.
-
-
-@subsection{Empirical Illustration}
-
-@Figure-ref{fig:sample:validate} superimposes the results of simple random
- sampling upon the exhaustive data for three benchmarks.
-Specifically, these plots are the result of a two-step recipe:
-@itemlist[
-@item{
-  First, we plot the true proportion of
-   @ddeliverable{D} configurations for @${D} between @${1}x and @${10}x.
-  This data is represented by a blue curve; the area under the curve is shaded
-   blue.
-}
-@item{
-  Second, we plot a
-   @sraapproximation[pepm:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" pepm:SAMPLE-RATE) "95"]
-   as a brown interval.
-  This is a 95% confidence interval generated from @integer->word[pepm:NUM-SAMPLE-TRIALS]
-   samples each containing @$[(format "~a(F+C)" pepm:SAMPLE-RATE)] configurations
-   chosen uniformly at random.
-}
-]
-
-@;The intervals accurately enclose the true proportions of @ddeliverable{D} configurations.
-
-@figure["fig:sample:validate" @elem{Simple random approximations}
-  (parameterize ([*PLOT-HEIGHT* 100]
-                 [*SINGLE-COLUMN?* #true])
-    @render-validate-samples-plot*[VALIDATE-BENCHMARKS])
-]
-
-@subsection[#:tag "sec:appendix:benchmarks"]{Benchmark Descriptions}
-
-@(let ([total @integer->word[NUM-EXHAUSTIVE-BENCHMARKS]]
-       [num1 @Integer->word[(length (list* 'aespython 'stats DLS-2014-BENCHMARK-NAMES))]]
-       [num2 @Integer->word[(length POPL-2017-BENCHMARK-NAMES)]]
-       [num3 @integer->word[(length '(Espionage PythonFlow take5 sample_fsm))]]
-      ) @elem{
-   @|num1| benchmarks originate from case studies by @citet{vksb-dls-2014}.
-   @;@;footnote{@|dls-names|.}
-   @|num2| are from the evaluation by @citet{vss-popl-2017} on programs from
-   the Python Performance Benchmark Suite.
-   The remaining @|num3| originate from open-source programs.
-})
-
-The following descriptions credit each benchmark's original author,
- state whether the benchmark depends on any contextual modules,
- and briefly summarize its purpose.
-
-@; -----------------------------------------------------------------------------
-@; --- WARNING: the order of benchmarks matters!
-@; ---  Do not re-order without checking ALL PROSE in this file
-@; -----------------------------------------------------------------------------
-
-@bm-desc["futen"
-@hyperlink["http://blog.amedama.jp/"]{@tt{momijiame}}
-@url{https://github.com/momijiame/futen}
-@list[
-  @lib-desc["fnmatch"]{Filename matching}
-  @lib-desc["os.path"]{Path split, path join, path expand, getenv}
-  @lib-desc["re"]{One regular expression match}
-  @lib-desc["shlex"]{Split host names from an input string}
-  @lib-desc["socket"]{Basic socket operations}
-]]{
-  Converts an @hyperlink["https://www.openssh.com/"]{OpenSSH} configuration
-  file to an inventory file for the
-  @hyperlink["https://www.ansible.com/"]{@emph{Ansiable}} automation framework.
-  @; 1900 iterations
-}
-
-@bm-desc["http2"
-@authors[@hyperlink["https://github.com/httplib2/httplib2"]{Joe Gregorio}]
-@url{https://github.com/httplib2/httplib2}
-@list[
-  @lib-desc["urllib"]{To split an IRI into components}
-]]{
-  Converts a collection of @hyperlink["https://en.wikipedia.org/wiki/Internationalized_Resource_Identifier"]{Internationalized Resource Identifiers}
-  to equivalent @hyperlink["http://www.asciitable.com/"]{ASCII} resource
-  identifiers.
-  @; 10 iterations
-}
-
-@bm-desc["slowSHA"
-@authors["Stefano Palazzo"]
-@url{http://github.com/sfstpala/SlowSHA}
-@list[
-  @lib-desc["os"]{path split}
-]]{
-  Applies the SHA-1 and SHA-512 algorithms to English words.
-  @; 1 iteration
-}
-
-@bm-desc["call_method"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Microbenchmarks simple method calls;
-  the calls do not use argument lists,
-  keyword arguments, or tuple unpacking.
-  @; Consists of @${32*10^5} calls to trivial functions.
-  @; 1 iteration
-}
-
-@bm-desc["call_simple"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Same as @bm{call_method}, using functions rather than methods.
-}
-
-@bm-desc["chaos"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[
-  @lib-desc["math"]{Square root}
-  @lib-desc["random"]{randrange}
-]]{
-  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{@emph{chaos game}} method.
-  @; 1 iteration
-}
-
-@bm-desc["fannkuch"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Implements Anderson and Rettig's microbenchmark.
-  @;@~cite{ar-lp-1994}.
-  @; 1 iteration
-}
-
-@bm-desc["float"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[
-  @lib-desc["math"]{Sin, Cos, Sqrt}
-]]{
-  Microbenchmarks floating-point operations.
-  @; 1 iteration (200,000 points)
-}
-
-@bm-desc["go"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[
-  @lib-desc["math"]{sqrt log}
-  @lib-desc["random"]{randrange random}
-  "two untyped modules"
-]]{
-  Implements the game @hyperlink["https://en.wikipedia.org/wiki/Go_(game)"]{Go}.
-  This benchmark is split across three files: a @defn{migratable} module that implements
-  the game board, a @defn{contextual} module that defines constants, and a @defn{contextual} module
-  that implements an AI and drives the benchmark.
-  @; 2 iterations
-}
-
-@bm-desc["meteor"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Solves the Shootout benchmarks meteor puzzle.
-  @;footnote{@url{http://benchmarksgame.alioth.debian.org/u32/meteor-description.html}}
-  @; 1 iterations (finds at most 6,000 solutions)
-}
-
-@bm-desc["nbody"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Models the orbits of Jupiter, Saturn, Uranus, and Neptune.
-  @; 1 iteration
-}
-
-@bm-desc["nqueens"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@math{8}-queens} problem by a brute-force algorithm.
-  @; 10 iterations
-}
-
-@bm-desc["pidigits"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Microbenchmarks big-integer arithmetic.
-  @; 1 iteration (5,000 digits)
-}
-
-@bm-desc["pystone"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Implements Weicker's @emph{Dhrystone} benchmark.
-  @;footnote{@url{http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf}}
-  @; 50,000 iterations
-}
-
-@bm-desc["spectralnorm"
-@authors["The Python Benchmark Suite"]
-@url{https://github.com/python/performance}
-@list[]]{
-  Computes the largest singular value of an infinite matrix.
-  @; 10 iterations
-}
-
-@bm-desc["Espionage"
-@authors["Zeina Migeed"]
-""
-@list[
-  @lib-desc["operator"]{itemgetter}
-]]{
-  Implements Kruskal's spanning-tree algorithm.
-  @; 1 iteration
-}
-
-@bm-desc["PythonFlow"
-@authors["Alfian Ramadhan"]
-@url{https://github.com/masphei/PythonFlow}
-@list[
-  @lib-desc["os"]{path join}
-]]{
-  Implements the Ford-Fulkerson max flow algorithm. 
-  @; no longer needs citation
-  @;@~cite{ff-cjm-1956}.
-  @; 1 iteration
-}
-
-@bm-desc["take5"
-@authors["Maha Alkhairy" "Zeina Migeed"]
-""
-@list[
-  @lib-desc["random"]{randrange shuffle random seed}
-  @lib-desc["copy"]{deepcopy}
-]]{
-  Implements a card game and a simple player AI.
-  @; 500 iterations
-}
-
-@bm-desc["sample_fsm"
-@authors["Linh Chi Nguyen"]
-@url{https://github.com/ayaderaghul/sample-fsm}
-@list[
-  @lib-desc["itertools"]{cycles}
-  @lib-desc["os"]{path split}
-  @lib-desc["random"]{random randrange}
-]]{
-  Simulates the interactions of economic agents modeled as finite-state automata.
-  @;@~cite{n-mthesis-2014}.
-  @; 100 iterations
-}
-
-@bm-desc["aespython"
-@authors[@hyperlink["http://caller9.com/"]{Adam Newman}
-         @hyperlink["https://github.com/serprex"]{Demur Remud}]
-@url{https://github.com/serprex/pythonaes}
-@list[
-  @lib-desc["os"]{random stat}
-  @lib-desc["struct"]{pack unpack calcsize}
-]]{
-  @; Second sentence is a little awkward. I just want to say, "this is really
-  @;  a Python implementation of AES, not just a wrapper to some UNIX implementation"
-  Implements the @hyperlink["http://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf"]{Advanced Encryption Standard}.
-  @;Uses the @tt{os} library only to generate random bytes and invoke the
-  @; @hyperlink["http://man7.org/linux/man-pages/man2/stat.2.html"]{@tt{stat()}}
-  @; system call.
-  @; 1 iteration, encrypts the book of Leviticus (2800 lines)
-}
-
-@bm-desc["stats"
-@authors[@hyperlink["https://connects.catalyst.harvard.edu/Profiles/display/Person/12467"]{Gary Strangman}]
-@url{https://github.com/seperman/python-statlib/blob/master/statlib/pstat.py}
-@list[
-  @lib-desc["copy"]{deepcopy}
-  @lib-desc["math"]{pow abs etc.}
-]]{
-  Implements first-order statistics functions; in other words, transformations
-   on either floats or (possibly-nested) lists of floats.
-  The original program consists of two modules.
-  The benchmark is modularized according to comments in the program's source
-   code to reduce the size of each module's configuration space.
-  @; 1 iteration
-}
 
