@@ -29,6 +29,10 @@
   ddeliverable
   kstep
 
+  stransient
+  sguarded
+  snatural
+
 )
 
 (require
@@ -115,3 +119,6 @@
     (if (real? s) (~a s) s))
   (elem pct-elem ($ r-elem ", " s-elem) "-approximation"))
 
+(define sguarded "guarded")
+(define snatural sguarded)
+(define stransient "transient")
