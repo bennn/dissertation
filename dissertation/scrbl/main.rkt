@@ -23,6 +23,10 @@
   summary
   bm
   id
+  Section-ref
+  section-ref
+  Chapter-ref
+  chapter-ref
 
   definition
   sraapproximation
@@ -33,6 +37,8 @@
   sguarded
   snatural
 
+  parag
+  configuration-lattice
 )
 
 (require
@@ -122,3 +128,22 @@
 (define sguarded "guarded")
 (define snatural sguarded)
 (define stransient "transient")
+
+(define (Section-ref s)
+  (elem "Chapter" ~ (secref s)))
+
+(define Chapter-ref Section-ref)
+
+(define (section-ref s)
+  (elem "chapter" ~ (secref s)))
+
+(define chapter-ref section-ref)
+
+(define (parag . x)
+  (apply elem #:style "paragraph" x))
+
+(define (configuration-lattice n)
+  (unless (exact-nonnegative-integer? n)
+    (raise-argument-error 'configuration-lattice "natural?" n))
+  (performance-lattice n))
+

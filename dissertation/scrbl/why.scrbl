@@ -59,7 +59,7 @@
 @; — The biggest technical problem is your discussion of FFIs. I think it
 @; doesn’t come across what you want.
 
-@title{Migratory Typing}
+@title[#:tag "chap:why"]{Migratory Typing}
 @; why / where-from
 
 @; summary:
