@@ -47,4 +47,3 @@
 @include-section{conclusion.scrbl}
 
 
-@exact|{\bibliography{bg}}|
