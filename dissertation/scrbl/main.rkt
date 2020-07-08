@@ -39,6 +39,8 @@
 
   parag
   configuration-lattice
+
+  github-commit
 )
 
 (require
@@ -146,4 +148,11 @@
   (unless (exact-nonnegative-integer? n)
     (raise-argument-error 'configuration-lattice "natural?" n))
   (performance-lattice n))
+
+(define (github-commit user repo commit)
+  (define url-str
+    (format "https://github.com/~a/~a/commit/~a" user repo commit))
+  (define short-commit
+    (substring commit 0 7))
+  (hyperlink url-str @tt[short-commit]))
 
