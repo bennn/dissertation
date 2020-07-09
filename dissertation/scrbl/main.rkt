@@ -93,8 +93,14 @@
 (define (nested-inset . content)
   (nested #:style 'inset content))
 
-(define bm tt)
-(define library tt)
+(define (latex-escape str)
+  (string-replace str "_" "\\_"))
+
+(define (bm str)
+  (exact (list "\\textsf{" (latex-escape str) "}")))
+
+(define (library str)
+  (tt str))
 
 (define id ~a)
 
@@ -183,7 +189,7 @@
                  . descr)
   (define name-str
     (if (list? bm-name*)
-      (string-join bm-name* ", ")
+      (add-between bm-name* ", ")
       bm-name*))
   (exact (elem
     "\\benchmark{"

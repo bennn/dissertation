@@ -838,7 +838,7 @@ This section concludes with a table summarizing the static characteristics of ea
 @; TODO wrapper function, to sort and check for missing?
 @exact{\bigskip}
 @bm-desc[
-  "sieve"
+  @bm{sieve}
   #:author "Ben Greenman"
   #:origin "Synthetic"
   #:purpose "Generate prime numbers"]{
@@ -847,7 +847,7 @@ This section concludes with a table summarizing the static characteristics of ea
     Introducing a type boundary between these modules leads to significant overhead.
 }
 @bm-desc[
-  "forth"
+  @bm{forth}
   #:author "Ben Greenman"
   #:origin "Library"
   #:purpose "Forth interpreter"
@@ -857,7 +857,7 @@ This section concludes with a table summarizing the static characteristics of ea
   These objects accumulate proxies as they cross type boundaries.
 }
 @bm-desc[
-  '("fsm" "fsmoo")
+  (list @bm{fsm} @bm{fsmoo})
   #:author "Linh Chi Nguyen"
   #:origin "Economics research"
   #:purpose "Economy simulator"
@@ -866,7 +866,7 @@ This section concludes with a table summarizing the static characteristics of ea
   This benchmark comes in two flavors: @bm{fsm} stores the agents in a mutable vector and @bm{fsmoo} uses a first-class object.
 }
 @bm-desc[
-  "mbta"
+  @bm{mbta}
   #:author "Matthias Felleisen"
   #:origin "Educational"
   #:purpose "Interactive map"
@@ -877,7 +877,7 @@ This section concludes with a table summarizing the static characteristics of ea
    performance bottleneck.
 }
 @bm-desc[
-  "morsecode"
+  @bm{morsecode}
   #:author "John Clements and Neil Van Dyke"
   #:origin "Library"
   #:purpose "Morse code trainer"
@@ -886,7 +886,7 @@ This section concludes with a table summarizing the static characteristics of ea
   Every function that crosses a type boundary in @bm{morsecode} operates on strings and integers, thus dynamically type-checking these functions' arguments is relatively cheap.
 }
 @bm-desc[
-  "zombie"
+  @bm{zombie}
   #:author "David Van Horn"
   #:origin "Research"
   #:purpose "Game"
@@ -903,7 +903,7 @@ This section concludes with a table summarizing the static characteristics of ea
     @;]
 }
 @bm-desc[
-  "dungeon"
+  @bm{dungeon}
   #:author "Vincent St. Amour"
   #:origin "Application"
   #:purpose "Maze generator"]{
@@ -919,7 +919,7 @@ This section concludes with a table summarizing the static characteristics of ea
   @;The benchmark avoids @library{racket/dict} to avoid a type boundary.
 }
 @bm-desc[
-  "zordoz"
+  @bm{zordoz}
   #:author "Ben Greenman"
   #:origin "Library"
   #:purpose "Explore bytecode"
@@ -930,7 +930,7 @@ This section concludes with a table summarizing the static characteristics of ea
   Typed code interacting with the library suffers overhead.
 }
 @bm-desc[
-  "lnm"
+  @bm{lnm}
   #:author "Ben Greenman"
   #:origin "Synthetic"
   #:purpose "Data visualization"
@@ -941,7 +941,7 @@ This section concludes with a table summarizing the static characteristics of ea
   Two modules are tightly-coupled to Typed Racket libraries; typing both modules improves performance.
 }
 @bm-desc[
-  "suffixtree"
+  @bm{suffixtree}
   #:author "Danny Yoo"
   #:origin (hyperlink "https://github.com/dyoo/suffixtree" "Library")
   #:purpose "Ukkonen's suffix tree algorithm"]{
@@ -949,7 +949,7 @@ This section concludes with a table summarizing the static characteristics of ea
   The largest performance overheads are due to a boundary between struct definitions and functions on the structures.
 }
 @bm-desc[
-  "kcfa"
+  @bm{kcfa}
   #:author "Matt Might"
   #:origin "Educational"
   #:purpose "Explanation of k-CFA"
@@ -959,7 +959,7 @@ This section concludes with a table summarizing the static characteristics of ea
   When this environment crosses a type boundary, it acquires a new proxy.
 }
 @bm-desc[
-  "snake"
+  @bm{snake}
   #:author "David Van Horn"
   #:origin "Research"
   #:purpose "Game"
@@ -968,7 +968,7 @@ This section concludes with a table summarizing the static characteristics of ea
   Modules in this benchmark frequently exchange first-order values, such as lists and integers.
 }
 @bm-desc[
-  "take5"
+  @bm{take5}
   #:author "Matthias Felleisen"
   #:origin "Educational"
   #:purpose "Game"]{
@@ -976,7 +976,7 @@ This section concludes with a table summarizing the static characteristics of ea
   These players communicate infrequently, so gradual typing adds relatively little overhead.
 }
 @bm-desc[
-  "acquire"
+  @bm{acquire}
   #:author "Matthias Felleisen"
   #:origin "Educational"
   #:purpose "Game"
@@ -985,7 +985,7 @@ This section concludes with a table summarizing the static characteristics of ea
   These objects encapsulate the core data structures; few higher-order values cross type boundaries.
 }
 @bm-desc[
-  "tetris"
+  @bm{tetris}
   #:author "David Van Horn"
   #:origin "Research"
   #:purpose "Game"
@@ -994,8 +994,8 @@ This section concludes with a table summarizing the static characteristics of ea
   Frequent type boundary crossings, rather than proxies or expensive runtime checks, are the source of performance overhead.
 }
 @bm-desc[
-  "synth"
-  #:author "Vincent St. Amour \\& Neil Toronto"
+  @bm{synth}
+  #:author "Vincent St. Amour and Neil Toronto"
   #:origin "Application"
   #:purpose "Music synthesis DSL"
   #:url "http://github.com/stamourv/synth"]{
@@ -1004,7 +1004,7 @@ This section concludes with a table summarizing the static characteristics of ea
   The worst overhead occurs when arrays frequently cross type boundaries.
 }
 @bm-desc[
-  "gregor"
+  @bm{gregor}
   #:author "Jon Zeppieri"
   #:origin "Library"
   #:purpose "Date and time library"
@@ -1017,7 +1017,7 @@ This section concludes with a table summarizing the static characteristics of ea
   The benchmark builds tens of date values and runs unit tests on these values.
 }
 @bm-desc[
-  (list "quadBG" "quadMB")
+  (list @bm{quadBG} @bm{quadMB})
   #:author "Matthew Butterick"
   #:origin "Application"
   #:purpose "Typesetting"
@@ -1351,10 +1351,9 @@ The following descriptions credit each benchmark's original author,
  and briefly summarize its purpose.
 
 @; WARNING: benchmark order matters
-@; TODO avoid escaping _
 @exact{\bigskip}
 @bm-desc[
-  "futen"
+  @bm{futen}
   #:author (hyperlink "http://blog.amedama.jp/" @tt{momijiame})
   #:origin "Library"
   #:purpose "SSH configuration"
@@ -1372,7 +1371,7 @@ The following descriptions credit each benchmark's original author,
   @; 1900 iterations
 }
 @bm-desc[
-  "http2"
+  @bm{http2}
   #:author @hyperlink["https://github.com/httplib2/httplib2"]{Joe Gregorio}
   #:origin "Library"
   #:purpose "HTTP utilities"
@@ -1384,7 +1383,7 @@ The following descriptions credit each benchmark's original author,
   @; 10 iterations
 }
 @bm-desc[
-  "slowSHA"
+  @bm{slowSHA}
   #:author "Stefano Palazzo"
   #:origin "Library"
   #:purpose "Hashing"
@@ -1394,7 +1393,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "call\\_method"
+  @bm{call_method}
   #:author "Unknown"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test method calls"
@@ -1406,15 +1405,15 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "call\\_simple"
+  @bm{call_simple}
   #:author "Unknown"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test function calls"
   #:url "https://github.com/python/performance"]{
-  Same as @bm{call\\_method}, using functions rather than methods.
+  Same as @bm{call_method}, using functions rather than methods.
 }
 @bm-desc[
-  "chaos"
+  @bm{chaos}
   #:author "Carl Friedrich Bolz"
   #:origin "The Python Benchmark Suite"
   #:purpose "Create fractals"
@@ -1426,7 +1425,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "fannkuch"
+  @bm{fannkuch}
   #:author "Sokolov Yura"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test loops, integers, vectors"
@@ -1435,7 +1434,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "float"
+  @bm{float}
   #:author "Factor"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test float ops"
@@ -1445,7 +1444,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration (200,000 points)
 }
 @bm-desc[
-  "go"
+  @bm{go}
   #:author "Unknown"
   #:origin "The Python Benchmark Suite"
   #:purpose "Game"
@@ -1458,7 +1457,7 @@ The following descriptions credit each benchmark's original author,
   @; 2 iterations
 }
 @bm-desc[
-  "meteor"
+  @bm{meteor}
   #:author "Daniel Nanz"
   #:origin "The Python Benchmark Suite"
   #:purpose "Puzzle"
@@ -1468,7 +1467,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iterations (finds at most 6,000 solutions)
 }
 @bm-desc[
-  "nbody"
+  @bm{nbody}
   #:author "Kevin Carson"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test float ops"
@@ -1477,7 +1476,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "nqueens"
+  @bm{nqueens}
   #:author "Unknown"
   #:origin "The Python Benchmark Suite"
   #:purpose "Puzzle"
@@ -1485,7 +1484,7 @@ The following descriptions credit each benchmark's original author,
   Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm 10 times in a row.
 }
 @bm-desc[
-  "pidigits"
+  @bm{pidigits}
   #:author "Unknown"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test big integer ops"
@@ -1494,7 +1493,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration (5,000 digits)
 }
 @bm-desc[
-  "pystone"
+  @bm{pystone}
   #:author "Chris Arndt"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test integer ops"
@@ -1504,7 +1503,7 @@ The following descriptions credit each benchmark's original author,
   @; 50,000 iterations
 }
 @bm-desc[
-  "spectralnorm"
+  @bm{spectralnorm}
   #:author "Sebastien Loisel"
   #:origin "The Python Benchmark Suite"
   #:purpose "Test arithmetic"
@@ -1513,7 +1512,7 @@ The following descriptions credit each benchmark's original author,
   @; 10 iterations
 }
 @bm-desc[
-  "Espionage"
+  @bm{Espionage}
   #:author "Zeina Migeed"
   #:origin "Synthetic"
   #:purpose "Graph algorithm"
@@ -1522,7 +1521,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "PythonFlow"
+  @bm{PythonFlow}
   #:author "Alfian Ramadhan"
   #:origin "Synthetic"
   #:purpose "Flow algorithm"
@@ -1534,7 +1533,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
-  "take5"
+  @bm{take5}
   #:author "Maha Alkhairy and Zeina Migeed"
   #:origin "Educational"
   #:purpose "Game"
@@ -1543,7 +1542,7 @@ The following descriptions credit each benchmark's original author,
   @; 500 iterations
 }
 @bm-desc[
-  "sample\\_fsm"
+  @bm{sample_fsm}
   #:author "Zeina Migeed"
   #:origin "Economics research"
   #:purpose "Economy simulator"
@@ -1558,7 +1557,7 @@ The following descriptions credit each benchmark's original author,
   @; 100 iterations
 }
 @bm-desc[
-  "aespython"
+  @bm{aespython}
   #:author (list
     @hyperlink["http://caller9.com/"]{Adam Newman}
     @hyperlink["https://github.com/serprex"]{Demur Remud})
@@ -1575,7 +1574,7 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration, encrypts the book of Leviticus (2800 lines)
 }
 @bm-desc[
-  "stats"
+  @bm{stats}
   #:author @hyperlink["https://connects.catalyst.harvard.edu/Profiles/display/Person/12467"]{Gary Strangman}
   #:origin "Library"
   #:purpose "Statistics"
