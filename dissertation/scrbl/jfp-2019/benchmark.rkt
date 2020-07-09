@@ -8,6 +8,8 @@
 
   ALL-BENCHMARKS
   ;; (Listof Benchmark)
+  num-benchmarks
+  ;; natural?
 
   benchmark-rktd
   ;; (-> Benchmark Version Path-String)
@@ -389,6 +391,9 @@
     (tt (symbol->string (benchmark-name benchmark)))))
 
 (define ALL-BENCHMARKS (sort (unbox *ALL-BENCHMARKS*) benchmark<?))
+
+(define num-benchmarks (length ALL-BENCHMARKS))
+
 
 ;; =============================================================================
 

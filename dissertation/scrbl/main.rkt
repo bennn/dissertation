@@ -9,7 +9,6 @@
     gtp-plot/performance-info
     gtp-plot/plot
     gtp-util
-    greenman-thesis/gtp-benchmarks
     racket/format
     racket/list
     scriblib/figure
@@ -23,6 +22,7 @@
   summary
   bm
   id
+  library
   Section-ref
   section-ref
   Chapter-ref
@@ -32,6 +32,7 @@
   sraapproximation
   ddeliverable
   kstep
+  rkt
 
   stransient
   sguarded
@@ -41,6 +42,9 @@
   configuration-lattice
 
   github-commit
+  GTP
+  bm-desc
+  make-lib
 )
 
 (require
@@ -57,7 +61,6 @@
   gtp-plot/performance-info
   gtp-plot/plot
   gtp-util
-  greenman-thesis/gtp-benchmarks
   scribble/example
   scribble-abbrevs
   (only-in scribble/core
@@ -91,6 +94,7 @@
   (nested #:style 'inset content))
 
 (define bm tt)
+(define library tt)
 
 (define id ~a)
 
@@ -155,4 +159,53 @@
   (define short-commit
     (substring commit 0 7))
   (hyperlink url-str @tt[short-commit]))
+
+(define GTP
+  (exact "\\textsc{gtp}"))
+
+(struct lib [name url] #:prefab)
+
+(define make-lib lib)
+
+(define (render-lib lb)
+  (define u (lib-url lb))
+  (define name (tt (lib-name lb)))
+  (if u
+    (hyperlink u name)
+    name))
+
+(define (bm-desc bm-name*
+                 #:author author-str
+                 #:origin origin-str
+                 #:purpose purpose-str
+                 #:depends [lib* #f]
+                 #:url [url-str #f]
+                 . descr)
+  (define name-str
+    (if (list? bm-name*)
+      (string-join bm-name* ", ")
+      bm-name*))
+  (exact (elem
+    "\\benchmark{"
+    name-str
+    "}{"
+    (if (list? author-str)
+      (add-between author-str ", ")
+      author-str)
+    "}{"
+    (if url-str (hyperlink url-str origin-str) origin-str)
+    "}{"
+    purpose-str
+    "}{"
+    (apply elem descr)
+    "}{"
+    "}{"
+    (if lib*
+      (add-between (map render-lib lib*) ", ")
+      "None")
+    "}\n\n")))
+
+(define rkt tt)
+
+
 
