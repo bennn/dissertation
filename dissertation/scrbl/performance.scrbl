@@ -1604,7 +1604,10 @@ The following descriptions credit each benchmark's original author,
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:rp:performance"]{Performance Evaluation}
 
-@figure["fig:static-benchmark" "Static summary of benchmarks"
+@figure["fig:static-benchmark" @elem{
+  Static summary of the Reticulated benchmarks.
+  @bold{N} = number of components = functions + classes + methods.
+  SLOC = source lines of code as reported by David A. Wheeler's @tt{sloccount}.}
   @rp:render-static-information[rp:MAIN-BENCHMARKS]]
 
 @;  To assess the run-time cost of gradual typing in Reticulated, we measured

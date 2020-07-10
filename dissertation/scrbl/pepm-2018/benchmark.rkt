@@ -22,29 +22,7 @@
 )
 
 (require
-;  "script/config.rkt"
-;  "script/benchmark-info.rkt"
-;  "script/render.rkt"
-;  "script/util.rkt"
-;  (only-in "script/plot.rkt"
-;    *CONFIGURATION-X-JITTER*
-;    *OVERHEAD-MAX*)
-;  (only-in racket/class
-;    class new super-new object% define/public)
-;  racket/format
-;  racket/string
-;  pict
-;  scribble/acmart
-;  scribble/core
-;  scribble/example
-;  scribble/html-properties
-;  scribble/latex-properties
-;  scriblib/autobib
-;  scriblib/figure
-;  setup/main-collects
-
-
-  (only-in scribble/base bold centered tabular hspace tt)
+  (only-in scribble/base bold centered tabular hspace tt linebreak)
   file/glob
   gtp-util
   gtp-util/system
@@ -52,11 +30,13 @@
   gtp-plot/reticulated-info
   json
   pict
+  racket/format
   racket/list
   racket/set
   racket/string
   racket/path
   racket/runtime-path
+  scribble-abbrevs
   with-cache
   (for-syntax racket/base syntax/parse))
 
@@ -146,7 +126,7 @@
         (lib name #f))))
 
 (define STATIC-INFO-TITLE*
-  (map bold '("Benchmark" "SLOC" "M" "F" "C")))
+  (list "Benchmark" (bold "N") "SLOC" "modules" "functions" "classes" "methods"))
 
 ;; TODO add cache
 (define (render-static-information name*)
@@ -155,7 +135,7 @@
       #:sep (hspace 2)
       #:style 'block
       #:row-properties '(l bottom-border 1)
-      #:column-properties (cons 'left (make-list (sub1 (length STATIC-INFO-TITLE*)) 'right))
+      #:column-properties (cons 'left (make-list (- (length STATIC-INFO-TITLE*) 1) 'right))
       (list* (map (λ (_) "") STATIC-INFO-TITLE*)
              STATIC-INFO-TITLE*
              (parameterize ([*current-cache-directory* cache-dir]
@@ -169,13 +149,21 @@
 (define (render-static-row bm-name)
   (define src (benchmark-name->directory bm-name))
   (define py (benchmark-name->python-info bm-name))
+  (define num-fun (python-info->num-functions py))
+  (define num-meth (python-info->num-methods py))
+  (define num-class (python-info->num-classes py))
   (cons
     (tt (symbol->string bm-name))
-    (map number->string (list
+    (map ~a (list
+      (+ num-fun num-meth num-class)
       (benchmark->sloc src)
       (python-info->num-modules py)
-      (+ (python-info->num-functions py) (python-info->num-methods py))
-      (python-info->num-classes py)))))
+      (hide-zero num-fun)
+      (hide-zero num-class)
+      (hide-zero num-meth)))))
+
+(define (hide-zero n)
+  (if (zero? n) "-" n))
 
 (define (benchmark-name->directory bm-name)
   (define pp (build-path benchmark-dir (symbol->string bm-name) TYPED))
@@ -414,10 +402,10 @@
 ))
 (define DLS-2017-BENCHMARK-NAMES '(
   Espionage
-  Evolution
-  sample_fsm
+  ;; Evolution
   PythonFlow
   take5
+  sample_fsm
   aespython
   stats
 ))
