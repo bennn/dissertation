@@ -14,11 +14,15 @@
     scriblib/figure
     scribble/example)
 
+  PYBENCH
+  unknown-author
+
   ~cite
 
   citet
 
   jointwork
+  disclaimer
   summary
   bm
   id
@@ -74,6 +78,9 @@
 
 ;; =============================================================================
 
+(define PYBENCH (hyperlink "https://pyperformance.readthedocs.io/" @tt{pyperformance}))
+(define unknown-author "unknown")
+
 (define (~cite . txt*)
   (exact (list "~\\citep{" txt* "}")))
 
@@ -86,6 +93,10 @@
             "This chapter is based on joint work with: "
             (oxfordize people*)
             (~cite (string-join paper* ","))))))
+
+(define (disclaimer . arg*)
+  (nested-inset
+    (list (bold "Note:") ~ arg*)))
 
 (define (summary . txt*)
   (nested-inset txt*))

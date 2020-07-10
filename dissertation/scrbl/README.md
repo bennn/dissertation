@@ -18,10 +18,17 @@ Style
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
 
+#### dependencies
+
+racket 7.7 +
+python xxx
+sloccount
+
 
 #### dear diary
 
 2020-06-18 : need to get moving, spend 2 hours/day or more cmon now
+2020-07-09 : we are rolling now, but still way slow progress/hour is pitiful
 
 
 #### outlines

@@ -38,6 +38,18 @@
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
 ]
 
+@disclaimer{
+  The Typed Racket data in this chapter is based on an early version
+   of the GTP benchmarks@~cite{gtnffvf-jfp-2019}.
+  These benchmarks have severe limitations that were later fixed,
+   thanks to work by: Sam Tobin-Hochstadt, Lukas Lazarek, Sam Sundar, and
+   Cameron Moy.
+
+  Up-to-date benchmarks with release notes are here:
+
+  @centered{@format-url{https://docs.racket-lang.org/gtp-benchmarks/index.html}}
+}
+
 @; sound GT has cost
 Sound gradual types come with performance overhead.
 A soundness theorem guarantees that static types are valid claims about the
@@ -943,9 +955,11 @@ This section concludes with a table summarizing the static characteristics of ea
 @bm-desc[
   @bm{suffixtree}
   #:author "Danny Yoo"
-  #:origin (hyperlink "https://github.com/dyoo/suffixtree" "Library")
-  #:purpose "Ukkonen's suffix tree algorithm"]{
-  Computes longest common subsequences between strings.
+  #:origin "Library"
+  #:purpose "String tools"
+  #:url "https://github.com/dyoo/suffixtree"]{
+  Implements Ukkonen's suffix tree algorithm and computes
+  longest common subsequences between strings.
   The largest performance overheads are due to a boundary between struct definitions and functions on the structures.
 }
 @bm-desc[
@@ -1319,8 +1333,7 @@ Each job:
 }
 @item{
   downloaded fresh copies of @|rp:PYTHON|
-  and Reticulated (commit @github-commit["mvitousek" "reticulated" "e478343ce7c0f2bc50d897b0ad38055e8fd9487d"])
-  on the @hyperlink["https://github.com/mvitousek/reticulated"]{@tt{master}} branch);
+  and Reticulated commit @github-commit["mvitousek" "reticulated" "e478343ce7c0f2bc50d897b0ad38055e8fd9487d"];
 }
 @item{
   repeatedly:
@@ -1335,8 +1348,7 @@ Cluster nodes are IBM NeXtScale nx360 M4 servers with two Intel Xeon E5-2650 v2
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:rp:benchmarks"]{Benchmarks}
 
-@(let ([total @integer->word[rp:NUM-EXHAUSTIVE-BENCHMARKS]]
-       [num1 @Integer->word[(length (list* 'aespython 'stats rp:DLS-2014-BENCHMARK-NAMES))]]
+@(let ([num1 @Integer->word[(length (list* 'aespython 'stats rp:DLS-2014-BENCHMARK-NAMES))]]
        [num2 @Integer->word[(length rp:POPL-2017-BENCHMARK-NAMES)]]
        [num3 @integer->word[(length '(Espionage PythonFlow take5 sample_fsm))]]) @elem{
    @|num1| benchmarks originate from case studies by @citet{vksb-dls-2014}.
@@ -1394,8 +1406,8 @@ The following descriptions credit each benchmark's original author,
 }
 @bm-desc[
   @bm{call_method}
-  #:author "Unknown"
-  #:origin "The Python Benchmark Suite"
+  #:author unknown-author
+  #:origin PYBENCH
   #:purpose "Test method calls"
   #:url "https://github.com/python/performance"]{
   Microbenchmarks simple method calls;
@@ -1406,8 +1418,8 @@ The following descriptions credit each benchmark's original author,
 }
 @bm-desc[
   @bm{call_simple}
-  #:author "Unknown"
-  #:origin "The Python Benchmark Suite"
+  #:author unknown-author
+  #:origin PYBENCH
   #:purpose "Test function calls"
   #:url "https://github.com/python/performance"]{
   Same as @bm{call_method}, using functions rather than methods.
@@ -1415,7 +1427,7 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{chaos}
   #:author "Carl Friedrich Bolz"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Create fractals"
   #:url "https://github.com/python/performance"
   #:depends @list[
@@ -1427,16 +1439,16 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{fannkuch}
   #:author "Sokolov Yura"
-  #:origin "The Python Benchmark Suite"
-  #:purpose "Test loops, integers, vectors"
+  #:origin PYBENCH
+  #:purpose "Test integers, vectors"
   #:url "https://github.com/python/performance"]{
-  Implements Anderson and Rettig's microbenchmark@~cite{ar-lp-1994}.
+  Implements a classic LISP microbenchmark@~cite{ar-lp-1994}.
   @; 1 iteration
 }
 @bm-desc[
   @bm{float}
   #:author "Factor"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Test float ops"
   #:url "https://github.com/python/performance"
   #:depends @list[@rp:lib-desc["math"]{Sin, Cos, Sqrt}]]{
@@ -1445,8 +1457,8 @@ The following descriptions credit each benchmark's original author,
 }
 @bm-desc[
   @bm{go}
-  #:author "Unknown"
-  #:origin "The Python Benchmark Suite"
+  #:author unknown-author
+  #:origin PYBENCH
   #:purpose "Game"
   #:url "https://github.com/python/performance"
   #:depends @list[ @rp:lib-desc["math"]{sqrt log} @rp:lib-desc["random"]{randrange random}]]{
@@ -1459,7 +1471,7 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{meteor}
   #:author "Daniel Nanz"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Puzzle"
   #:url "https://github.com/python/performance"]{
   Solves the Shootout benchmarks meteor puzzle.
@@ -1469,7 +1481,7 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{nbody}
   #:author "Kevin Carson"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Test float ops"
   #:url "https://github.com/python/performance"]{
   Models the orbits of Jupiter, Saturn, Uranus, and Neptune.
@@ -1477,16 +1489,16 @@ The following descriptions credit each benchmark's original author,
 }
 @bm-desc[
   @bm{nqueens}
-  #:author "Unknown"
-  #:origin "The Python Benchmark Suite"
+  #:author unknown-author
+  #:origin PYBENCH
   #:purpose "Puzzle"
   #:url "https://github.com/python/performance"]{
   Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm 10 times in a row.
 }
 @bm-desc[
   @bm{pidigits}
-  #:author "Unknown"
-  #:origin "The Python Benchmark Suite"
+  #:author unknown-author
+  #:origin PYBENCH
   #:purpose "Test big integer ops"
   #:url "https://github.com/python/performance"]{
   Microbenchmarks big-integer arithmetic.
@@ -1495,7 +1507,7 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{pystone}
   #:author "Chris Arndt"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Test integer ops"
   #:url "https://github.com/python/performance"]{
   Implements Weicker's @emph{Dhrystone} benchmark.
@@ -1505,7 +1517,7 @@ The following descriptions credit each benchmark's original author,
 @bm-desc[
   @bm{spectralnorm}
   #:author "Sebastien Loisel"
-  #:origin "The Python Benchmark Suite"
+  #:origin PYBENCH
   #:purpose "Test arithmetic"
   #:url "https://github.com/python/performance"]{
   Computes the largest singular value of an infinite matrix.
@@ -1553,7 +1565,7 @@ The following descriptions credit each benchmark's original author,
     @rp:lib-desc["os"]{path split}
     @rp:lib-desc["random"]{random randrange}
   ]]{
-  Simulates the interactions of economic agents modeled as finite-state automata@~cite{na-eai-2016}.
+  Adapted from the Typed Racket @bm{fsm} benchmark.
   @; 100 iterations
 }
 @bm-desc[
@@ -1589,12 +1601,12 @@ The following descriptions credit each benchmark's original author,
 }
 
 
-@;  @; -----------------------------------------------------------------------------
-@;  @subsection[#:tag "sec:rp:evaluation"]{Performance Evaluation}
-@;  
-@;  @figure["fig:static-benchmark" "Static summary of benchmarks"
-@;    @rp:render-static-information[MAIN-BENCHMARKS]]
-@;  
+@; -----------------------------------------------------------------------------
+@subsection[#:tag "sec:rp:performance"]{Performance Evaluation}
+
+@figure["fig:static-benchmark" "Static summary of benchmarks"
+  @rp:render-static-information[rp:MAIN-BENCHMARKS]]
+
 @;  To assess the run-time cost of gradual typing in Reticulated, we measured
 @;   the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
 @;  @(let* ([column-descr*
