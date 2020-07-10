@@ -1311,6 +1311,7 @@ The granularity of this evaluation is @emph{function and class fields}.
 One syntactic unit in the experiment is either one function,
  one method, or the collection of all fields for one class.
 @; TODO example
+@; TODO connect to static figure ... use N everywhere? ... say "units"?
 
 
 @parag{Data Collection}
@@ -1600,63 +1601,65 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 
-
-@; -----------------------------------------------------------------------------
-@subsection[#:tag "sec:rp:performance"]{Performance Evaluation}
-
-@figure["fig:static-benchmark" @elem{
+@figure["fig:rp:static-benchmark" @elem{
   Static summary of the Reticulated benchmarks.
   @bold{N} = number of components = functions + classes + methods.
   SLOC = source lines of code as reported by David A. Wheeler's @tt{sloccount}.}
   @rp:render-static-information[rp:MAIN-BENCHMARKS]]
 
-@;  To assess the run-time cost of gradual typing in Reticulated, we measured
-@;   the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
-@;  @(let* ([column-descr*
-@;           (list
-@;             @elem{lines of code (@bold{SLOC}), }
-@;             @elem{number of modules (@bold{M}), }
-@;             @elem{number of function and method definitions (@bold{F}), }
-@;             @elem{and number of class definitions (@bold{C}).})]
-@;          [num-col @integer->word[(length column-descr*)]]
-@;         ) @elem{
-@;    @Figure-ref{fig:rp:static-benchmark} tabulates information about the size and
-@;     structure of the @defn{migratable} portions of these benchmarks.
-@;    The @|num-col| columns report the @|column-descr*|
-@;    @Section-ref{sec:rp:benchmarks} of the appendix
-@;     describes the benchmarks' origin and purpose.
-@;  })
-@;  
-@;  The following three subsections present the results of the evaluation.
-@;  @Section-ref{sec:rp:ratio} reports the performance of the untyped
-@;   and fully-typed configurations.
-@;  @Section-ref{sec:rp:overhead} plots the proportion of @ddeliverable{D}
-@;   configurations for @${D} between @${1} and @${@id[rp:MAX-OVERHEAD]}.
-@;  @Section-ref{sec:rp:exact} compares the number of type annotations in each
-@;   configuration to its performance.
-@;  
-@;  
-@;  @subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
-@;  
-@;  The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
-@;   Reticulated.
-@;  From left to right, these are:
-@;   the performance of the untyped configuration relative to the Python baseline (the @emph[u/p-ratio]),
-@;   the performance of the fully-typed configuration relative to the untyped configuration (the @emph[t/u-ratio]),
-@;   and the overall delta between fully-typed and Python (the @emph[t/p-ratio]).
-@;  
-@;  @(let* ([futen-row (ratios-table-row rp:RT 'futen)]
-@;          [futen-u/p (ratios-row-retic/python futen-row)]
-@;          [futen-t/u (ratios-row-typed/retic futen-row)]) @elem{
-@;    For example, the row for @bm{futen} reports a @|u/p-ratio| of @${@|futen-u/p|}.
-@;    This means that the average time to run the untyped configuration of the
-@;     @bm{futen} benchmark using Reticulated was @${@|futen-u/p|} times slower than the
-@;     average time of running the same code using Python.
-@;    Similarly, the @|t/u-ratio| for @bm{futen} states that the fully-typed configuration
-@;     is @${@|futen-t/u|} times slower than the untyped configuration.
-@;  })
-@;  
-@;  
+To assess the run-time cost of gradual typing in Reticulated, we measured
+ the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
+@(let* ([column-descr*
+         (list
+           @elem{number of migratable units (@bold{N} = num. functions + methods + classes)}
+           @elem{lines of code (SLOC)}
+           @elem{number of modules}
+           @elem{number of function definitions}
+           @elem{number of classes}
+           @elem{number of method definitions})]
+        [num-col @integer->word[(length column-descr*)]]
+       )
+  (unless (= (length column-descr*) (- (length rp:STATIC-INFO-TITLE*) 1))
+    (printf "WARNING: missing column description~n actual: ~s~n descr: ~s~n" 
+            rp:STATIC-INFO-TITLE*
+            column-descr*))
+@elem{
+  @Figure-ref{fig:rp:static-benchmark} tabulates information about the size and
+   structure of the @defn{migratable} portions of these benchmarks.
+  The @|num-col| columns report the @oxfordize[column-descr*].
+  Most benchmarks are small, with 1--3 modules and fewer than 200 lines of code.
+  That said, the number of gradually-typed configurations in the experiment is
+   prohibitively large.
+  The relatively small @bm{sample_fsm} describes half a million configurations.
+  For the largest two benchmarks, @bm{aespython} and @bm{stats}, exhaustive
+   measurement is out of the question.
+})
+
+@;@subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
+@;
+@;@figure["fig:ratio" "Performance ratios"
+@;  @render-ratios-table[rp:RT]
+@;]
+@;
+@;The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
+@; Reticulated.
+@;From left to right, these are:
+@; the performance of the untyped configuration relative to the Python baseline (the @emph[u/p-ratio]),
+@; the performance of the fully-typed configuration relative to the untyped configuration (the @emph[t/u-ratio]),
+@; and the overall delta between fully-typed and Python (the @emph[t/p-ratio]).
+@;
+@;@(let* ([futen-row (ratios-table-row rp:RT 'futen)]
+@;        [futen-u/p (ratios-row-retic/python futen-row)]
+@;        [futen-t/u (ratios-row-typed/retic futen-row)]) @elem{
+@;  For example, the row for @bm{futen} reports a @|u/p-ratio| of @${@|futen-u/p|}.
+@;  This means that the average time to run the untyped configuration of the
+@;   @bm{futen} benchmark using Reticulated was @${@|futen-u/p|} times slower than the
+@;   average time of running the same code using Python.
+@;  Similarly, the @|t/u-ratio| for @bm{futen} states that the fully-typed configuration
+@;   is @${@|futen-t/u|} times slower than the untyped configuration.
+@;})
+
+
 @;  @parag{Performance Ratios, Conclusions}
 @;  Migrating a benchmark to
 @;   Reticulated, or from untyped to fully-typed, always adds performance overhead.
@@ -1692,10 +1695,6 @@ The following descriptions credit each benchmark's original author,
 @;      Given that an untyped Reticulated program offers the same safety guarantees
 @;       as Python, it is surprising that the @|u/p-ratio|s are so large.
 @;  })
-@;  
-@;  @figure["fig:ratio" "Performance ratios"
-@;    @render-ratios-table[rp:RT]
-@;  ]
 @;  
 @;  
 @;  @subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
