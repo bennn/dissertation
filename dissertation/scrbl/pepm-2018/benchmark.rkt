@@ -5,7 +5,6 @@
   MAIN-BENCHMARKS
   EXHAUSTIVE-BENCHMARKS VALIDATE-BENCHMARKS SAMPLE-BENCHMARKS
   NUM-MAIN-BENCHMARKS
-  RT
   MAX-OVERHEAD
   NUM-ITERATIONS
   PYTHON
@@ -19,6 +18,15 @@
   render-exact-runtime-plot*
   exact-runtime-category
   lib-desc
+  u/p-ratio
+  t/u-ratio
+  t/p-ratio
+
+  get-ratios-table
+  ratios-table-row
+  ratios-row-retic/python
+  ratios-row-typed/retic
+  render-ratios-table
 )
 
 (require
@@ -58,6 +66,15 @@
 (define SAMPLE "sample")
 (define SAMPLE-FILE-GLOB "sample*.tab")
 
+(define u/p-ratio
+  "retic/python ratio")
+
+(define t/u-ratio
+  "typed/retic ratio")
+
+(define t/p-ratio
+  "typed/python ratio")
+
 (define (->karst-data sym)
   (define karst-path
     (path-add-extension (build-path karst-dir (symbol->string sym)) "_tab.gz"))
@@ -69,24 +86,55 @@
   (and (directory-exists? prefix)
        (glob (build-path prefix SAMPLE-FILE-GLOB))))
 
-;; (struct benchmark-info (
-;;   module* ;; (Listof String)
-;;   name    ;; Symbol
-;;   src     ;; Path-String
-;; ) #:transparent
-;;   #:methods gen:custom-write
-;;   [(define (write-proc bm port mode)
-;;      (fprintf port "#<benchmark-info:~a>" (benchmark-info-name bm)))])
-;; 
-;; (define (make-benchmark-info name #:module* module* #:src src)
-;;   (benchmark-info module* name src))
-
-(define (get-ratios-table bm*)
-  (blank))
-
 (define (->dataset x)
   ;; get Karst data
   (raise-user-error '->dataset "not implemented"))
+
+(define RATIOS-TITLE
+  (list "Benchmark" "retic/python" "typed/retic" "typed/python"))
+
+(define (render-ratios-table row*)
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(bottom-border 1)
+      #:column-properties '(left right right right)
+      (list* RATIOS-TITLE
+             (map cdr row*)))))
+
+(define (get-ratios-table name*)
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "ratios-table.rktd")
+      (λ ()
+        (for/list ([name (in-list name*)])
+          (render-ratios-row (benchmark-name->performance-info name)))))))
+
+(define (ratios-table-row r* sym)
+  (or
+    (for/or ([r (in-list r*)]
+             #:when (eq? (car r) sym))
+      r)
+    (raise-argument-error 'ratios-table-row "benchmark name" 1 r* sym)))
+
+(define (ratios-row-retic/python r)
+  (caddr r))
+
+(define (ratios-row-typed/retic r)
+  (cadddr r))
+
+(define (ratios-row-typed/python r)
+  (cadddr (cdr r)))
+
+(define (render-ratios-row pi)
+  (define n (performance-info->name pi))
+  (list n
+        (tt (symbol->string n))
+        (rnd (untyped/baseline-ratio pi))
+        (rnd (typed/untyped-ratio pi))
+        (rnd (typed/baseline-ratio pi))))
 
 (define (percent-slower-than-typed pre-bm)
   (define pi (make-reticulated-info (->dataset pre-bm)))
@@ -126,7 +174,8 @@
         (lib name #f))))
 
 (define STATIC-INFO-TITLE*
-  (list "Benchmark" (bold "N") "SLOC" "modules" "functions" "classes" "methods"))
+  (list "Benchmark" (bold "N") "SLOC" "modules"
+        "functions" "classes" "methods"))
 
 ;; TODO add cache
 (define (render-static-information name*)
@@ -170,6 +219,12 @@
   (if (directory-exists? pp)
     pp
     (raise-argument-error 'benchmark-name->directory "directory-exists?" pp)))
+
+(define (benchmark-name->data-directory bm-name)
+  (define pp (build-path data-dir (symbol->string bm-name)))
+  (if (directory-exists? pp)
+    pp
+    (raise-argument-error 'benchmark-name->data-directory "directory-exists?" pp)))
 
 (define (benchmark->sloc bm-dir)
   (for/sum ((py (in-glob (build-path bm-dir "*py"))))
@@ -246,6 +301,10 @@
   (if (null? m*)
     (raise-user-error 'directory->python-info "directory ~a has no Python files" ps)
     (python-info bm-name (map path-string->module-info m*))))
+
+(define (benchmark-name->performance-info bm-name)
+  (define data-dir (benchmark-name->data-directory bm-name))
+  (make-reticulated-info data-dir))
 
 (define (path-string->module-info ps)
   (define py-json (path-string->exploded-module ps))
@@ -413,7 +472,6 @@
 (define MAIN-BENCHMARKS
   (append DLS-2014-BENCHMARK-NAMES POPL-2017-BENCHMARK-NAMES DLS-2017-BENCHMARK-NAMES))
 (define NUM-MAIN-BENCHMARKS (length MAIN-BENCHMARKS))
-(define RT (get-ratios-table MAIN-BENCHMARKS))
 
 (define-values [EXHAUSTIVE-BENCHMARKS VALIDATE-BENCHMARKS SAMPLE-BENCHMARKS]
   (let ([name* MAIN-BENCHMARKS])

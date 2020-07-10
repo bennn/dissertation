@@ -1346,6 +1346,9 @@ Each job:
 Cluster nodes are IBM NeXtScale nx360 M4 servers with two Intel Xeon E5-2650 v2
  8-core processors, 32 GB of RAM, and 250 GB of local disk storage.
 
+Data collection scripts are online:
+ @format-url{https://github.com/nuprl/retic_performance}
+
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:rp:benchmarks"]{Benchmarks}
 
@@ -1635,68 +1638,76 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
    measurement is out of the question.
 })
 
-@;@subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
-@;
-@;@figure["fig:ratio" "Performance ratios"
-@;  @render-ratios-table[rp:RT]
-@;]
-@;
-@;The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
-@; Reticulated.
-@;From left to right, these are:
-@; the performance of the untyped configuration relative to the Python baseline (the @emph[u/p-ratio]),
-@; the performance of the fully-typed configuration relative to the untyped configuration (the @emph[t/u-ratio]),
-@; and the overall delta between fully-typed and Python (the @emph[t/p-ratio]).
-@;
-@;@(let* ([futen-row (ratios-table-row rp:RT 'futen)]
-@;        [futen-u/p (ratios-row-retic/python futen-row)]
-@;        [futen-t/u (ratios-row-typed/retic futen-row)]) @elem{
-@;  For example, the row for @bm{futen} reports a @|u/p-ratio| of @${@|futen-u/p|}.
-@;  This means that the average time to run the untyped configuration of the
-@;   @bm{futen} benchmark using Reticulated was @${@|futen-u/p|} times slower than the
-@;   average time of running the same code using Python.
-@;  Similarly, the @|t/u-ratio| for @bm{futen} states that the fully-typed configuration
-@;   is @${@|futen-t/u|} times slower than the untyped configuration.
-@;})
+
+@subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
+
+@(let* ([rp:RT (rp:get-ratios-table rp:MAIN-BENCHMARKS)]
+        [futen-row (rp:ratios-table-row rp:RT 'futen)]
+        [futen-u/p (rp:ratios-row-retic/python futen-row)]
+        [futen-t/u (rp:ratios-row-typed/retic futen-row)]
+        [rp* (map rp:ratios-row-retic/python rp:RT)]
+        [tr* (map rp:ratios-row-typed/retic rp:RT)]
+        [count-< (λ (x* n) (length (filter (λ (str) (< (string->number str) n)) x*)))]
+        [rp-<2 (count-< rp* 2)]
+        [rp-<3 (count-< rp* 3)]
+        [rp-<4.5 (count-< rp* 4.5)]
+        [tr-<2 (count-< tr* 2)]
+        [tr-<3 (count-< tr* 3)]
+        [tr-<3.5 (count-< tr* 3.5)]
+        [num-> (for/sum ([rp (in-list rp*)]
+                         [tr (in-list tr*)]
+                         #:when (> (string->number rp) (string->number tr)))
+                 1)])
+  (unless (= (length rp*) rp-<4.5)
+    (printf "WARNING: performance-ratios expected all retic/python ratios to be < 4.5, but only ~a of ~a are"
+            rp-<4.5 (length rp*)))
+  (list
+@elem{
+The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
+ Reticulated.
+From left to right, these are:
+ the performance of the untyped configuration relative to the Python baseline (the @id[rp:u/p-ratio]),
+ the performance of the fully-typed configuration relative to the untyped configuration (the @id[rp:t/u-ratio]),
+ and the overall delta between fully-typed and Python (the @id[rp:t/p-ratio]).
+}
+
+@figure["fig:rp:ratio" @elem{Performance ratios for three important points in
+ a configuration space: fully-typed code (typed), untyped code run through
+ Reticulated (retic), and untyped code run via Python (python).}
+  @rp:render-ratios-table[rp:RT]
+]
+
+@elem{
+  For example, the row for @bm{futen} reports a @|rp:u/p-ratio| of @${@|futen-u/p|}.
+  This means that the average time to run the untyped configuration of the
+   @bm{futen} benchmark using Reticulated was @${@|futen-u/p|} times slower than the
+   average time of running the same code using Python.
+  Similarly, the @|rp:t/u-ratio| for @bm{futen} states that the fully-typed configuration
+   is @${@|futen-t/u|} times slower than the untyped configuration.
+}
+
+@parag{Performance Ratios, Conclusions}
+@elem{
+  Migrating a benchmark to
+   Reticulated, or from untyped to fully-typed, always adds performance overhead.
+  The migration never improves performance.
+  The overhead is always within an order-of-magnitude.
+
+  Regarding the @|rp:u/p-ratio|s:
+   @integer->word[rp-<2] are below @${2}x,
+   @integer->word[(- rp-<3 rp-<2)] are between @${2}x and @${3}x, and
+   the remaining @integer->word[(- rp-<4.5 rp-<3)] are below @${4.5}x.
+  The @|rp:t/u-ratio|s are typically lower:
+   @integer->word[tr-<2] are below @${2}x,
+   @integer->word[(- tr-<3 tr-<2)] are between @${2}x and @${3}x,
+   and the final @integer->word[(- tr-<3.5 tr-<3)] are below @${3.5}x.
+
+  @Integer->word[num->] benchmarks have larger @|rp:u/p-ratio|s than @|rp:t/u-ratio|s.
+  Given that an untyped Reticulated program offers the same safety guarantees
+   as Python, it is surprising that the @|rp:u/p-ratio|s are so large.
+}))
 
 
-@;  @parag{Performance Ratios, Conclusions}
-@;  Migrating a benchmark to
-@;   Reticulated, or from untyped to fully-typed, always adds performance overhead.
-@;  The migration never improves performance.
-@;  The overhead is always within an order-of-magnitude.
-@;  @(let* ([rp* (map ratios-row-retic/python rp:RT)]
-@;          [tr* (map ratios-row-typed/retic rp:RT)]
-@;          [count-< (λ (x* n) (length (filter (λ (str) (< (string->number str) n)) x*)))]
-@;          [rp-<2 (count-< rp* 2)]
-@;          [rp-<3 (count-< rp* 3)]
-@;          [rp-<4.5 (count-< rp* 4.5)]
-@;          [tr-<2 (count-< tr* 2)]
-@;          [tr-<3 (count-< tr* 3)]
-@;          [tr-<3.5 (count-< tr* 3.5)]
-@;          [num-> (for/sum ([rp (in-list rp*)]
-@;                           [tr (in-list tr*)]
-@;                           #:when (> (string->number rp) (string->number tr)))
-@;                   1)])
-@;    (unless (= (length rp*) rp-<4.5)
-@;      (raise-user-error 'performance-ratios
-@;        "expected all retic/python ratios to be < 4.5, but only ~a of ~a are" rp-<4.5 (length rp*)))
-@;    @elem{
-@;      Regarding the @|u/p-ratio|s:
-@;       @integer->word[rp-<2] are below @${2}x,
-@;       @integer->word[(- rp-<3 rp-<2)] are between @${2}x and @${3}x, and
-@;       the remaining @integer->word[(- rp-<4.5 rp-<3)] are below @${4.5}x.
-@;      The @|t/u-ratio|s are typically lower:
-@;        @integer->word[tr-<2] are below @${2}x,
-@;        @integer->word[(- tr-<3 tr-<2)] are between @${2}x and @${3}x,
-@;        and the final @integer->word[(- tr-<3.5 tr-<3)] are below @${3.5}x.
-@;  
-@;      @Integer->word[num->] benchmarks have larger @|u/p-ratio|s than @|t/u-ratio|s.
-@;      Given that an untyped Reticulated program offers the same safety guarantees
-@;       as Python, it is surprising that the @|u/p-ratio|s are so large.
-@;  })
-@;  
-@;  
 @;  @subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
 @;  
 @;  @figure*["fig:overhead" "Overhead plots"
@@ -1741,7 +1752,7 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
 @;    Indeed, @integer->word[num-2-deliv] benchmarks are @ddeliverable[2].})
 @;  
 @;  None of the configurations in the experiment run faster than the Python baseline.
-@;  This is to be expected, given the @|u/p-ratio|s in @figure-ref{fig:rp:ratio} and the
+@;  This is to be expected, given the @|rp:u/p-ratio|s in @figure-ref{fig:rp:ratio} and the
 @;   fact that Reticulated translates type annotations into run-time checks.
 @;  
 @;  @(let ([smooth '(futen http2 slowSHA chaos fannkuch float nbody pidigits
@@ -1759,7 +1770,7 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
 @;          [num-tp (- rp:NUM-MAIN-BENCHMARKS (length NOT-tp))]
 @;          [S-SLOWER (rp:percent-slower-than-typed "spectralnorm")]) @elem{
 @;  @Integer->word[num-tp] benchmarks are roughly @ddeliverable{T}, where @${T} is
-@;   the @|t/p-ratio| listed in @figure-ref{fig:rp:ratio}.
+@;   the @|rp:t/p-ratio| listed in @figure-ref{fig:rp:ratio}.
 @;  In these benchmarks, the fully-typed configuration is one of the slowest configurations.
 @;  @;Note that these ratios are typically larger than Typed Racket's typed/untyped ratios@~cite{tfgnvf-popl-2016}.
 @;  The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
