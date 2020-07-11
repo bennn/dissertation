@@ -6,13 +6,17 @@
     classicthesis/lang
     gtp-plot
     gtp-util
+    greenman-thesis/util
     racket/format
+    racket/math
     racket/list
     scriblib/figure
     scribble/example)
 
   PYBENCH
   unknown-author
+  x-axis y-axis
+  x-axes y-axes
 
   ~cite
 
@@ -28,6 +32,8 @@
   section-ref
   Chapter-ref
   chapter-ref
+  Figures-ref
+  figures-ref
 
   definition
   sraapproximation
@@ -44,6 +50,8 @@
   configuration-lattice
 
   github-commit
+  github-issue
+
   GTP
   bm-desc
   make-lib
@@ -54,10 +62,10 @@
     add-between
     partition
     take)
-  racket/format
   classicthesis/lang
   racket/format
   racket/string
+  greenman-thesis/util
   gtp-plot
   gtp-util
   scribble/example
@@ -69,6 +77,8 @@
     element)
   scriblib/figure
   setup/main-collects
+  racket/format
+  racket/math
   (for-syntax racket/base syntax/parse))
 
 ;; =============================================================================
@@ -103,7 +113,7 @@
   (string-replace str "_" "\\_"))
 
 (define (bm str)
-  (exact (list "\\textsf{" (latex-escape str) "}")))
+  (exact (list "\\textsf{" (latex-escape (~a str)) "}")))
 
 (define (library str)
   (tt str))
@@ -143,16 +153,34 @@
     (if (real? s) (~a s) s))
   (elem pct-elem ($ r-elem ", " s-elem) "-approximation"))
 
-(define overhead-long-caption
-  @elem{
-  The x-axis ranges over slowdown factors,
-  the y-axis counts configurations,
-  and a point (x, y) shows the proportion of @ddeliverable{x} configurations.
-  })
-
 (define sguarded "guarded")
 (define snatural sguarded)
 (define stransient "transient")
+
+(define (axes q)
+  (elem ($ q) "-axes"))
+
+(define x-axes
+  (axes "x"))
+
+(define y-axes
+  (axes "y"))
+
+(define (axis q)
+  (elem ($ q) "-axis"))
+
+(define x-axis
+  (axis "x"))
+
+(define y-axis
+  (axis "y"))
+
+(define overhead-long-caption
+  @elem{
+  The @|x-axis| ranges over slowdown factors,
+  the @|y-axis| counts configurations,
+  and a point (x, y) shows the proportion of @ddeliverable{x} configurations.
+  })
 
 (define (Section-ref s)
   (elem "Chapter" ~ (secref s)))
@@ -163,6 +191,25 @@
   (elem "chapter" ~ (secref s)))
 
 (define chapter-ref section-ref)
+
+(define (make-figures-ref first-char)
+  (define inner-make-figs-ref
+    (case-lambda
+      [(tag*)
+       (if (string=? first-char "F")
+         (apply Figure-ref tag*)
+         (apply figure-ref tag*))]
+      [(base-tag num-tags)
+       (inner-make-figs-ref
+         (for/list ((i (in-range num-tags)))
+           (format "~a:~a" base-tag i)))]))
+  inner-make-figs-ref)
+
+(define Figures-ref
+  (make-figures-ref "F"))
+
+(define figures-ref
+  (make-figures-ref "f"))
 
 (define (parag . x)
   (apply elem #:style "paragraph" x))
@@ -178,6 +225,13 @@
   (define short-commit
     (substring commit 0 7))
   (hyperlink url-str @tt[short-commit]))
+
+(define (github-issue user repo issue-name)
+  (define url-str
+    (format "https://github.com/~a/~a/issues/~a" user repo issue-name))
+  (define short-str
+    (format "~a/~a #~a" user repo issue-name))
+  (hyperlink url-str (tt short-str)))
 
 (define GTP
   (exact "\\textsc{gtp}"))

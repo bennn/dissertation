@@ -1718,73 +1718,155 @@ From left to right, these are:
   rp:MAIN-BENCHMARKS
 ]
 
-@;  @Figure-ref{fig:rp:overhead} summarizes the overhead of gradual typing in the
-@;   benchmark programs.
-@;  Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)
-@;   for values of @${D} between @${1}x overhead and @${@id[rp:MAX-OVERHEAD]}x overhead (@|x-axis|).
-@;  The @|x-axes| are log-scaled to focus on low overheads;
-@;   vertical tick marks appear at @${1.2}x, @${1.4}x, @${1.6}x, @${1.8}x, @${4}x, @${6}x, and @${8}x overhead.
-@;  
-@;  The heading above the plot for a given benchmark states the benchmark's name
-@;   and indicate whether the data is exhaustive or approximate.
-@;  If the data is exhaustive, this heading lists the number of configurations
-@;   in the benchmark.
-@;  If the data is approximate, the heading lists the number of samples
-@;   and the number of randomly-selected configurations in each sample.
-@;  
-@;  @emph{Note} the curves for the approximate data
-@;   (i.e., the curves for @bm{sample_fsm}, @bm{aespython}, and @bm{stats}) are intervals.
-@;  For instance, the height of an interval at @${x\!=\!4} is the range of the
-@;   @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
-@;   for the number of @ddeliverable[4] configurations.
-@;  These intervals are thin because there is little variance in the proportion
-@;   of @ddeliverable{D} configurations across the @integer->word[rp:NUM-SAMPLE-TRIALS]
-@;   samples.
-@;  @emph{End}
-@;  
-@;  
-@;  
-@;  @parag{Overhead Plot, Conclusions}
-@;  Curves in @figure-ref{fig:rp:overhead} typically cover a large area and reach the
-@;   top of the @|y-axis| at a low value of @${D}.
-@;  This value is always less than @${@id[rp:MAX-OVERHEAD]}.
-@;  In other words, every configuration in the
-@;   experiment is @ddeliverable[rp:MAX-OVERHEAD].
-@;  For many benchmarks, the maximum overhead is significantly lower.
-@;  @(let ([num-2-deliv (length '(futen slowSHA fannkuch nbody nqueens pidigits
-@;                                take5 stats))]) @elem{
-@;    Indeed, @integer->word[num-2-deliv] benchmarks are @ddeliverable[2].})
-@;  
-@;  None of the configurations in the experiment run faster than the Python baseline.
-@;  This is to be expected, given the @|rp:u/p-ratio|s in @figure-ref{fig:rp:ratio} and the
-@;   fact that Reticulated translates type annotations into run-time checks.
-@;  
-@;  @(let ([smooth '(futen http2 slowSHA chaos fannkuch float nbody pidigits
-@;                   pystone PythonFlow take5 sample_fsm aespython stats)])
-@;    @elem{
-@;      @Integer->word[(length smooth)] benchmarks have relatively smooth slopes.
-@;      The plots for the other @integer->word[(- rp:NUM-EXHAUSTIVE-BENCHMARKS (length smooth))]
-@;       benchmarks have wide, flat segments.
-@;      These flat segments are due to functions that are frequently executed
-@;       in the benchmarks' traces; all configurations in which one of these functions
-@;       is typed incur a significant performance overhead.
-@;  })
-@;  
-@;  @(let* ([NOT-tp '(http2 call_method spectralnorm)]
-@;          [num-tp (- rp:NUM-MAIN-BENCHMARKS (length NOT-tp))]
-@;          [S-SLOWER (rp:percent-slower-than-typed "spectralnorm")]) @elem{
-@;  @Integer->word[num-tp] benchmarks are roughly @ddeliverable{T}, where @${T} is
-@;   the @|rp:t/p-ratio| listed in @figure-ref{fig:rp:ratio}.
-@;  In these benchmarks, the fully-typed configuration is one of the slowest configurations.
-@;  @;Note that these ratios are typically larger than Typed Racket's typed/untyped ratios@~cite{tfgnvf-popl-2016}.
-@;  The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
-@;   runs faster than @${@id[S-SLOWER]\%} of all configurations.
-@;  Unfortunately, this speedup is due to a soundness bug;
-@;  @;footnote{Bug report: @url{https://github.com/mvitousek/reticulated/issues/36}}
-@;   in short, the implementation of Reticulated does not type-check the contents of tuples.
-@;  })
-@;  
-@;  
+@; TODO cite range of figures
+@Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] summarizes the overhead of gradual typing in the
+ benchmark programs.
+Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)
+ for values of @${D} between @${1}x overhead and @${@id[rp:MAX-OVERHEAD]}x overhead (@|x-axis|).
+The @|x-axes| are log-scaled to focus on low overheads;
+ vertical tick marks appear at @${1.2}x, @${1.4}x, @${1.6}x, @${1.8}x, @${4}x, @${6}x, and @${8}x overhead.
+
+The heading above the plot for a given benchmark states the benchmark's name
+ and indicate whether the data is exhaustive or approximate.
+If the data is exhaustive, this heading lists the number of configurations
+ in the benchmark.
+If the data is approximate, the heading lists the number of samples
+ and the number of randomly-selected configurations in each sample.
+
+The curves for the approximate data
+ (i.e., the curves for @bm{sample_fsm}, @bm{aespython}, and @bm{stats}) are intervals
+ rather than fixed-width lines.
+For instance, the height of an interval at @${x\!=\!4} is the range of the
+ @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
+ for the number of @ddeliverable[4] configurations.
+These intervals are thin because there is little variance in the proportion
+ of @ddeliverable{D} configurations across the @integer->word[rp:NUM-SAMPLE-TRIALS]
+ samples; that said, the @bm{sample_fsm} curve is visibly thicker than the
+ @bm{aespython} curve.
+
+
+@parag{Overhead Plot, Conclusions}
+Curves in @figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] typically cover a large area and reach the
+ top of the @|y-axis| at a low value of @${D}.
+This value is always less than @${@id[rp:MAX-OVERHEAD]}.
+In other words, every configuration in the
+ experiment is @ddeliverable[rp:MAX-OVERHEAD].
+For many benchmarks, the maximum overhead is significantly lower.
+@(let ([num-2-deliv (length '(futen slowSHA fannkuch nbody nqueens pidigits
+                              take5 stats))]) @elem{
+  Indeed, @integer->word[num-2-deliv] benchmarks are nearly @ddeliverable[2].})
+
+None of the configurations in the experiment run faster than the Python baseline.
+This is to be expected, given the @|rp:u/p-ratio|s in @figure-ref{fig:rp:ratio} and the
+ fact that Reticulated translates type annotations into run-time checks.
+
+@(let ([smooth '(futen http2 slowSHA chaos fannkuch float nbody pidigits
+                 pystone PythonFlow take5 sample_fsm aespython stats)])
+  @elem{
+    @Integer->word[(length smooth)] benchmarks have relatively smooth slopes.
+    The plots for the other @integer->word[(- rp:NUM-EXHAUSTIVE-BENCHMARKS (length smooth))]
+     benchmarks have wide, flat segments.
+    These flat segments are due to functions that are frequently executed
+     in the benchmarks' traces; all configurations in which one of these functions
+     is typed incur a significant performance overhead.
+})
+
+@(let* ([NOT-tp '(http2 call_method spectralnorm)]
+        [num-tp (- rp:NUM-MAIN-BENCHMARKS (length NOT-tp))]
+        [S-SLOWER (rp:percent-slower-than-typed 'spectralnorm)]) @elem{
+@Integer->word[num-tp] benchmarks are roughly @ddeliverable{T}, where @${T} is
+ the @|rp:t/p-ratio| listed in @figure-ref{fig:rp:ratio}.
+In these benchmarks, the fully-typed configuration is one of the slowest configurations.
+The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
+ runs faster than @${@id[S-SLOWER]\%} of all configurations.
+Unfortunately, this speedup is due to a soundness bug
+ (@github-issue["mvitousek" "reticulated" 36]);
+ in short, the implementation of Reticulated does not type-check the contents of tuples.
+})
+
+
+
+@subsection[#:tag "sec:rp:threats"]{Threats to Validity}
+
+We have identified five sources of systematic
+ bias.
+@(let* ( @; See `src/PyPI-ranking/README.md` to reproduce these claims
+        [lib-data* '((simplejson 50 "https://github.com/simplejson/simplejson")
+                     (requests 200 "https://github.com/kennethreitz/requests")
+                     (Jinja2 600 "https://github.com/pallets/jinja/tree/master/jinja2"))]
+        [rank-info @elem{PyPI Ranking (@format-url{http://pypi-ranking.info/alltime})}]
+        [lib-info (authors*
+                    (for/list ([ld (in-list lib-data*)]
+                               [long-style? (in-sequences '(#t)
+                                                          (in-cycle '(#f)))])
+                      @elem{
+                        @(if long-style? "The" "the")
+                        @hyperlink[(caddr ld)]{@tt[@symbol->string[(car ld)]]}
+                        library contains over @${@id[(cadr ld)]}@;
+                        @(if long-style? " functions and methods" "")}))]
+       ) @elem{
+  First, the experiment consists of a small suite of benchmarks, and these
+   benchmarks are rather small.
+  For example, an ad-hoc sample of the @|rank-info| reveals that even small
+   Python packages have far more functions and methods than our benchmarks.
+  @|lib-info|.
+})
+
+Second, the experiment considers one fully-typed configuration per benchmark;
+ however, there are many ways of typing a given program.
+The types in this experiment may differ from types ascribed by another Python
+ programmer, which, in turn, may lead to different performance overhead.
+
+@(let ([missing-types '(take5)]
+       [retic-limited '(pystone stats)]
+       [format-bm* (lambda (bm*) (authors* (map bm bm*)))]
+       @; see also https://github.com/nuprl/retic_performance/issues/55
+       @;
+       @; - futen is missing some type annotation(s)
+       @;   - LazyFqdn missing @fields
+       @; - call_method is missing some type annotation(s)
+       @;   - missing @fields, but actually empty
+       @; - call_method_slots is missing some type annotation(s)
+       @;   - missing @fields, but actually empty
+       @; - go uses the Dyn type
+       @;   - to avoid circular reference
+       @; - pystone uses the Dyn type
+       @;   - union type, (U PSRecord None)
+       @; - take5 is missing some type annotation(s)
+       @;   - `create_deck`, argument 'deck_size' is unannotated
+       @;   - same function has optional arguments, so the types ignored
+       @; - stats is missing some type annotation(s)
+       @;   - only on the print function
+       @; - stats uses the Dyn type
+       @;   - for polymorphism, "rank polymorphism", and union types
+      ) @elem{
+  Third, some benchmarks use dynamic typing.
+  The @bm{take5} benchmark contains one function that accepts optional arguments,
+   and is therefore dynamically typed (@github-issue["mvitousek" "reticulated" 32]).
+  The @bm{go} benchmark uses dynamic typing because Reticulated cannot validate
+   its use of a recursive class definition.
+  Two other benchmarks use dynamic typing to overcome Reticulated's lack of
+   untagged union types; namely, @format-bm*[retic-limited]
+})
+
+@(let ([use-io* '(aespython futen http2 slowSHA)]) @elem{
+  Fourth, the @(authors* (map bm use-io*)) benchmarks read from a file
+   within their timed computation.
+  We nevertheless consider our results representative.
+})
+
+Fifth, Reticulated supports a finer granularity of type annotations than the
+ experiment considers.
+Function signatures can leave some arguments untyped, and class field
+ declaractions can omit types for some members.
+We believe that a fine-grained evaluation would support the
+ conclusions presented in this paper.
+
+
+
+@; -----------------------------------------------------------------------------
+@; EXTRA PLOTS
+@;
 @;  @subsection[#:tag "sec:rp:exact"]{Absolute Running Times}
 @;  
 @;  @figure*["fig:rp:exact" "Running time (in seconds) vs. Number of typed components"
@@ -1844,7 +1926,7 @@ From left to right, these are:
 @;       run-time cost.
 @;      Configurations above the gap have some common type annotations that
 @;       add significant overhead.
-@;      Each such gap corresponds to a flat slope in @figure-ref{fig:rp:overhead}.
+@;      Each such gap corresponds to a flat slope in @figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))].
 @;  })]
 @;  
 @;  @rp:exact-runtime-category[@elem{types are free}
@@ -1876,83 +1958,3 @@ From left to right, these are:
 @;  In principle a JIT compiler could generate check-free code if it could infer
 @;   the run-time type of a variable, but it remains to be seen whether this
 @;   approach would improve performance in practice.
-@;  
-@;  
-@;  @subsection[#:tag "sec:rp:threats"]{Threats to Validity}
-@;  
-@;  We have identified five sources of systematic
-@;   bias.
-@;  @(let* ( @; See `src/PyPI-ranking/README.md` to reproduce these claims
-@;          [lib-data* '((simplejson 50 "https://github.com/simplejson/simplejson")
-@;                       (requests 200 "https://github.com/kennethreitz/requests")
-@;                       (Jinja2 600 "https://github.com/pallets/jinja/tree/master/jinja2"))]
-@;          [rank-info @elem{PyPI Ranking
-@;  @;footnote{@url{http://pypi-ranking.info/alltime}}}]
-@;          [lib-info (authors*
-@;                      (for/list ([ld (in-list lib-data*)]
-@;                                 [long-style? (in-sequences '(#t)
-@;                                                            (in-cycle '(#f)))])
-@;                        @elem{
-@;                          @(if long-style? "The" "the")
-@;                          @hyperlink[(caddr ld)]{@tt[@symbol->string[(car ld)]]}
-@;                          library contains over @${@id[(cadr ld)]}@;
-@;                          @(if long-style? " functions and methods" "")}))]
-@;         ) @elem{
-@;    First, the experiment consists of a small suite of benchmarks, and these
-@;     benchmarks are rather small.
-@;    For example, an ad-hoc sample of the @|rank-info| reveals that even small
-@;     Python packages have far more functions and methods than our benchmarks.
-@;    @|lib-info|.
-@;  })
-@;  
-@;  Second, the experiment considers one fully-typed configuration per benchmark;
-@;   however, there are many ways of typing a given program.
-@;  The types in this experiment may differ from types ascribed by another Python
-@;   programmer, which, in turn, may lead to different performance overhead.
-@;  
-@;  @(let ([missing-types '(take5)]
-@;         [retic-limited '(pystone stats)]
-@;         [format-bm* (lambda (bm*) (authors* (map bm bm*)))]
-@;         @; see also https://github.com/nuprl/retic_performance/issues/55
-@;         @;
-@;         @; - futen is missing some type annotation(s)
-@;         @;   - LazyFqdn missing @fields
-@;         @; - call_method is missing some type annotation(s)
-@;         @;   - missing @fields, but actually empty
-@;         @; - call_method_slots is missing some type annotation(s)
-@;         @;   - missing @fields, but actually empty
-@;         @; - go uses the Dyn type
-@;         @;   - to avoid circular reference
-@;         @; - pystone uses the Dyn type
-@;         @;   - union type, (U PSRecord None)
-@;         @; - take5 is missing some type annotation(s)
-@;         @;   - `create_deck`, argument 'deck_size' is unannotated
-@;         @;   - same function has optional arguments, so the types ignored
-@;         @; - stats is missing some type annotation(s)
-@;         @;   - only on the print function
-@;         @; - stats uses the Dyn type
-@;         @;   - for polymorphism, "rank polymorphism", and union types
-@;        ) @elem{
-@;    Third, some benchmarks use dynamic typing.
-@;    The @bm{take5} benchmark contains one function that accepts optional arguments,
-@;     and is therefore dynamically typed.
-@;  @;footnote{Bug report: @url{https://github.com/mvitousek/reticulated/issues/32}.}
-@;    The @bm{go} benchmark uses dynamic typing because Reticulated cannot validate
-@;     its use of a recursive class definition.
-@;    The @format-bm*[retic-limited] benchmarks use dynamic typing
-@;     to overcome Reticulated's lack of untagged union types.
-@;  })
-@;  
-@;  @(let ([use-io* '(aespython futen http2 slowSHA)]) @elem{
-@;    Fourth, the @(authors* (map bm use-io*)) benchmarks read from a file
-@;     within their timed computation.
-@;    We nevertheless consider our results representative.
-@;  })
-@;  
-@;  Fifth, Reticulated supports a finer granularity of type annotations than the
-@;   experiment considers.
-@;  Function signatures can leave some arguments untyped, and class field
-@;   declaractions can omit types for some members.
-@;  We believe that a fine-grained evaluation would support the
-@;   conclusions presented in this paper.
-@;  

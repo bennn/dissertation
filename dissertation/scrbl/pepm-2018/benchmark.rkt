@@ -29,6 +29,7 @@
   ratios-row-retic/python
   ratios-row-typed/retic
   render-ratios-table
+  percent-slower-than-typed
 )
 
 (require
@@ -89,10 +90,6 @@
   (and (directory-exists? prefix)
        (glob (build-path prefix SAMPLE-FILE-GLOB))))
 
-(define (->dataset x)
-  ;; get Karst data
-  (raise-user-error '->dataset "not implemented"))
-
 (define RATIOS-TITLE
   (list "Benchmark" "retic/python" "typed/retic" "typed/python"))
 
@@ -140,29 +137,24 @@
         (rnd (typed/baseline-ratio pi))))
 
 (define (percent-slower-than-typed pre-bm)
-  (define pi (make-reticulated-info (->dataset pre-bm)))
+  (define pi (benchmark-name->performance-info pre-bm))
   (define total (performance-info->num-configurations pi))
   (define num-good ((deliverable (typed/baseline-ratio pi)) pi))
   (round (pct (- total num-good) total)))
 
 (define (render-overhead-plot* base-tag caption-short caption-long f-render all-bm-name*)
-  (define plot-per-page 5)
-  (define page* (take* all-bm-name* plot-per-page))
+  (define page* (take* all-bm-name* overhead-plots-per-page))
   (define num-pages (length page*))
-  (define y-sep 12)
-  (define single-plot-y
-    (/ (- thesis-max-page-height (* (- plot-per-page 1) y-sep))
-       plot-per-page))
   (parameterize ((*GRID-NUM-COLUMNS* 1)
                  (*GRID-X* thesis-max-page-width)
-                 (*GRID-Y-SKIP* y-sep)
+                 (*GRID-Y-SKIP* overhead-y-sep)
                  (*OVERHEAD-SHOW-RATIO* #f)
                  (*FONT-SIZE* 12)
                  (*OVERHEAD-LINE-WIDTH* 0.1))
     (for/list ((bm-name* (in-list page*))
                (page-num (in-naturals)))
       (define tag
-        (string-append base-tag (if (zero? page-num) base-tag (string-append ":" (number->string page-num)))))
+        (string-append base-tag ":" (number->string page-num)))
       (define cap
         (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
           (if (zero? page-num)
@@ -170,8 +162,8 @@
             short)))
       (define grid-y
         (let ((len (length bm-name*)))
-          (+ (* single-plot-y len)
-             (* y-sep (- len 1)))))
+          (+ (* overhead-plot-y len)
+             (* overhead-y-sep (- len 1)))))
       (define pp
         (parameterize ([*GRID-Y* grid-y]
                        [*current-cache-directory* cache-dir]
