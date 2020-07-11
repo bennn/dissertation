@@ -16,7 +16,6 @@
   POPL-2017-BENCHMARK-NAMES
   render-static-information
   render-overhead-plot
-  render-overhead-plot*
   render-exact-runtime-plot*
   exact-runtime-category
   lib-desc
@@ -30,6 +29,8 @@
   ratios-row-typed/retic
   render-ratios-table
   percent-slower-than-typed
+
+  cache-dir
 )
 
 (require
@@ -141,37 +142,6 @@
   (define total (performance-info->num-configurations pi))
   (define num-good ((deliverable (typed/baseline-ratio pi)) pi))
   (round (pct (- total num-good) total)))
-
-(define (render-overhead-plot* base-tag caption-short caption-long f-render all-bm-name*)
-  (define page* (take* all-bm-name* overhead-plots-per-page))
-  (define num-pages (length page*))
-  (parameterize ((*GRID-NUM-COLUMNS* 1)
-                 (*GRID-X* thesis-max-page-width)
-                 (*GRID-Y-SKIP* overhead-y-sep)
-                 (*OVERHEAD-SHOW-RATIO* #f)
-                 (*FONT-SIZE* 12)
-                 (*OVERHEAD-LINE-WIDTH* 0.1))
-    (for/list ((bm-name* (in-list page*))
-               (page-num (in-naturals)))
-      (define tag
-        (string-append base-tag ":" (number->string page-num)))
-      (define cap
-        (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
-          (if (zero? page-num)
-            (list short " " caption-long)
-            short)))
-      (define grid-y
-        (let ((len (length bm-name*)))
-          (+ (* overhead-plot-y len)
-             (* overhead-y-sep (- len 1)))))
-      (define pp
-        (parameterize ([*GRID-Y* grid-y]
-                       [*current-cache-directory* cache-dir]
-                       [*current-cache-keys* (list (λ () bm-name*))]
-                       [*with-cache-fasl?* #f])
-          (with-cache (cachefile (string-append tag ".rktd"))
-            (λ () (grid-plot f-render bm-name*)))))
-      (figure* tag cap pp))))
 
 (define (render-overhead-plot bm-name)
   (define pi (benchmark-name->performance-info bm-name))

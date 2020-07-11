@@ -1710,12 +1710,13 @@ From left to right, these are:
 
 @subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
 
-@rp:render-overhead-plot*[
+@render-overhead-plot*[
   "fig:rp:overhead"
   "Reticulated overhead plots"
   overhead-long-caption
   rp:render-overhead-plot
   rp:MAIN-BENCHMARKS
+  rp:cache-dir
 ]
 
 @; TODO cite range of figures
