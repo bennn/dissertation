@@ -1708,12 +1708,16 @@ From left to right, these are:
 }))
 
 
-@;  @subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
-@;  
-@;  @figure*["fig:overhead" "Overhead plots"
-@;    @render-overhead-plot*[rp:MAIN-BENCHMARKS]
-@;  ]
-@;  
+@subsection[#:tag "sec:rp:overhead"]{Overhead Plots}
+
+@rp:render-overhead-plot*[
+  "fig:rp:overhead"
+  "Reticulated overhead plots"
+  overhead-long-caption
+  rp:render-overhead-plot
+  rp:MAIN-BENCHMARKS
+]
+
 @;  @Figure-ref{fig:rp:overhead} summarizes the overhead of gradual typing in the
 @;   benchmark programs.
 @;  Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)

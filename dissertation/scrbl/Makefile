@@ -1,7 +1,7 @@
 MAIN=bg
 
 all: pkg compile abstract.scrbl acknowledgments.scrbl bg.scrbl both.scrbl conclusion.scrbl design.scrbl future.scrbl introduction.scrbl performance.scrbl related.scrbl transient.scrbl why.scrbl
-	raco scribble --latex ++style texstyle.tex ++extra package.tex ++extra def.tex ${MAIN}.scrbl
+	PLTSTDERR="error info@bg-thesis" raco scribble --latex ++style texstyle.tex ++extra package.tex ++extra def.tex ${MAIN}.scrbl
 	latexmk -silent --pdf ${MAIN}.tex ${MAIN}.bib
 
 compile:

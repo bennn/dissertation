@@ -15,6 +15,8 @@
   DLS-2017-BENCHMARK-NAMES
   POPL-2017-BENCHMARK-NAMES
   render-static-information
+  render-overhead-plot
+  render-overhead-plot*
   render-exact-runtime-plot*
   exact-runtime-category
   lib-desc
@@ -31,11 +33,12 @@
 
 (require
   (only-in scribble/base bold centered tabular hspace tt linebreak)
+  (only-in scriblib/figure figure*)
   file/glob
   gtp-util
   gtp-util/system
-  gtp-plot/performance-info
-  gtp-plot/reticulated-info
+  gtp-plot
+  greenman-thesis/util
   json
   pict
   racket/format
@@ -141,6 +144,50 @@
   (define total (performance-info->num-configurations pi))
   (define num-good ((deliverable (typed/baseline-ratio pi)) pi))
   (round (pct (- total num-good) total)))
+
+(define (render-overhead-plot* base-tag caption-short caption-long f-render all-bm-name*)
+  (define plot-per-page 5)
+  (define page* (take* all-bm-name* plot-per-page))
+  (define num-pages (length page*))
+  (define y-sep 12)
+  (define single-plot-y
+    (/ (- thesis-max-page-height (* (- plot-per-page 1) y-sep))
+       plot-per-page))
+  (parameterize ((*GRID-NUM-COLUMNS* 1)
+                 (*GRID-X* thesis-max-page-width)
+                 (*GRID-Y-SKIP* y-sep)
+                 (*OVERHEAD-SHOW-RATIO* #f)
+                 (*FONT-SIZE* 12)
+                 (*OVERHEAD-LINE-WIDTH* 0.1))
+    (for/list ((bm-name* (in-list page*))
+               (page-num (in-naturals)))
+      (define tag
+        (string-append base-tag (if (zero? page-num) base-tag (string-append ":" (number->string page-num)))))
+      (define cap
+        (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
+          (if (zero? page-num)
+            (list short " " caption-long)
+            short)))
+      (define grid-y
+        (let ((len (length bm-name*)))
+          (+ (* single-plot-y len)
+             (* y-sep (- len 1)))))
+      (define pp
+        (parameterize ([*GRID-Y* grid-y]
+                       [*current-cache-directory* cache-dir]
+                       [*current-cache-keys* (list (λ () bm-name*))]
+                       [*with-cache-fasl?* #f])
+          (with-cache (cachefile (string-append tag ".rktd"))
+            (λ () (grid-plot f-render bm-name*)))))
+      (figure* tag cap pp))))
+
+(define (render-overhead-plot bm-name)
+  (define pi (benchmark-name->performance-info bm-name))
+  (define sample? (sample-info? pi))
+  (define f (if sample? samples-plot overhead-plot))
+  (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (f pi)))
 
 (define (render-exact-runtime-plot* bm-name*)
   (blank))

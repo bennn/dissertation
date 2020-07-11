@@ -4,10 +4,7 @@
   (all-from-out
     scribble-abbrevs
     classicthesis/lang
-    gtp-plot/configuration-info
-    gtp-plot/typed-racket-info
-    gtp-plot/performance-info
-    gtp-plot/plot
+    gtp-plot
     gtp-util
     racket/format
     racket/list
@@ -37,6 +34,7 @@
   ddeliverable
   kstep
   rkt
+  overhead-long-caption
 
   stransient
   sguarded
@@ -60,10 +58,7 @@
   classicthesis/lang
   racket/format
   racket/string
-  gtp-plot/configuration-info
-  gtp-plot/typed-racket-info
-  gtp-plot/performance-info
-  gtp-plot/plot
+  gtp-plot
   gtp-util
   scribble/example
   scribble-abbrevs
@@ -147,6 +142,13 @@
   (define s-elem
     (if (real? s) (~a s) s))
   (elem pct-elem ($ r-elem ", " s-elem) "-approximation"))
+
+(define overhead-long-caption
+  @elem{
+  The x-axis ranges over slowdown factors,
+  the y-axis counts configurations,
+  and a point (x, y) shows the proportion of @ddeliverable{x} configurations.
+  })
 
 (define sguarded "guarded")
 (define snatural sguarded)
