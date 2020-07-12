@@ -1087,17 +1087,17 @@ For example, the one import statement in @bm{sieve} names nine identifiers.
 ]
 
 
-@;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:tr:overhead"]{Overhead Plots}
-@;
+@; -----------------------------------------------------------------------------
+@subsection[#:tag "sec:tr:overhead"]{Overhead Plots}
 
-@;@render-overhead-plot*[
-@;  "fig:tr:overhead"
-@;  "Typed Racket overhead plots"
-@;  overhead-long-caption
-@;  tr:render-overhead-plot
-@;  '(fsm fsm fsmoo)
-@;  #f #;tr:cache-dir]
+
+@render-overhead-plot*[
+  "fig:tr:overhead"
+  "Typed Racket overhead plots"
+  overhead-long-caption
+  tr:render-overhead-plot
+  tr:ALL-BENCHMARKS
+  tr:cache-dir]
 
 @; TODO
 @;@(render-lnm-plot

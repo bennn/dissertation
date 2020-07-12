@@ -56,6 +56,7 @@
   with-cache
   (only-in scribble/base bold centered hyperlink tabular hspace tt linebreak)
   greenman-thesis/jfp-2019/parameter
+  greenman-thesis/util
   (only-in greenman-thesis bm)
   gtp-plot
   gtp-util
@@ -68,6 +69,8 @@
 (define benchmark-dir (build-path HERE "benchmarks"))
 (define data-dir (build-path HERE "data"))
 (define cache-dir (build-path HERE "with-cache"))
+
+(define MAX-OVERHEAD (*HI*))
 
 (define NUM-POPL
   (length '(sieve morsecode mbta zordoz suffixtree lnm kcfa snake tetris synth gregor quadMB)))
@@ -508,8 +511,14 @@
         (rnd (typed/baseline-ratio pi))))
 
 
-(define (render-overhead-plot xxx)
-  'todo)
+(define (render-overhead-plot bb)
+  (define bm-name (if (benchmark? bb) (benchmark-name bb) bb))
+  (define pi (benchmark-name->performance-info bm-name))
+  (define sample? (sample-info? pi))
+  (define f (if sample? samples-plot overhead-plot))
+  (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (f pi)))
 
 ;; =============================================================================
 
