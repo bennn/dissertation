@@ -1060,9 +1060,15 @@ This section concludes with a table summarizing the static characteristics of ea
   @; The predicate for @racket[QuadBG] runs significantly faster.
 }
 
+@;@figure*["fig:tr:static-benchmark" @elem{
+@;  Static characteristics of the @|GTP| benchmarks.
+@;  @bold{N} = number of components = number of modules.
+@; ... where do line counts come from?
+@;  @;SLOC = source lines of code as reported by @|SLOCCOUNT|.}
+@;  @tr:render-static-information[tr:ALL-BENCHMARKS]]
+@;]
 
-
-@;@Figure-ref{fig:bm} tabulates the size and complexity of the benchmark programs.
+@;@Figure-ref{fig:tr:static-benchmark} tabulates the size and complexity of the benchmark programs.
 @;The lines of code (Untyped LOC) and number of migratable modules (# Mod.) approximate program size.
 @;The type annotations (Annotation LOC) count additional lines in the typed configuration.
 @;These lines are primarily type annotations, but also include type casts and assertions.
@@ -1074,15 +1080,28 @@ This section concludes with a table summarizing the static characteristics of ea
 @;Boundaries are import statements from one module to another, excluding imports from runtime or third-party libraries.
 @;An identifier named in such an import statement counts as an export.
 @;For example, the one import statement in @bm{sieve} names nine identifiers.
-@;
-@;@figure*["fig:bm" @elem{Static characteristics of the @|GTP| benchmarks}
-@;  @render-benchmarks-table{}
-@;]
+
+@subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
+
+@; TODO fig:tr:ratio
+@; @figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks.}
+@;   @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
+@; ]
 
 
 @;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:tr:plots"]{Evaluating Absolute Performance}
+@;@subsection[#:tag "sec:tr:overhead"]{Overhead Plots}
 @;
+
+@;@render-overhead-plot*[
+@;  "fig:tr:overhead"
+@;  "Typed Racket overhead plots"
+@;  overhead-long-caption
+@;  tr:render-overhead-plot
+@;  '(fsm fsm fsmoo)
+@;  #f #;tr:cache-dir]
+
+@; TODO
 @;@(render-lnm-plot
 @;  (lambda (pict*)
 @;    (define name*
@@ -1159,123 +1178,8 @@ This section concludes with a table summarizing the static characteristics of ea
 @;                 [name (in-list name*)]
 @;                 [i (in-naturals 1)])
 @;        (figure name (get-caption i) p)))))
-@;
-@;
-@;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:tr:compare"]{Evaluating Relative Performance}
-@;
-@;Although the absolute performance of Racket version 6.4 is underwhelming, it is a significant improvement over versions 6.2 and 6.3.
-@;This improvement is manifest in the difference between curves on the overhead plots.
-@;For example in @bm{gregor} (third plot in @figure-ref{fig:lnm:3}), version 6.4 has at least as many deliverable configurations as version 6.2 for any overhead on the @${x}-axis.
-@;The difference is greatest near @${x=2}; in terms of configurations, over 80% of @bm{gregor} configurations are not @ddeliverable{2} on v6.2 but are @ddeliverable{2} on v6.4.
-@;The overhead plots for many other benchmarks demonstrate a positive difference between the number of @ddeliverable{D} configurations on version 6.4 relative to version 6.2.
-@;
-@;The plot of @figure-ref{fig:scale:delta} explicitly shows the improvement of version 6.4 over version 6.2.
-@;It consists of @integer->word[(*NUM-BENCHMARKS*)] purple lines, one for each benchmark.
-@;These lines plot the difference between the curves for v6.4 and v6.2 on the corresponding overhead plot.
-@;For example, the line for @bm{gregor} (labeled @${\mathsf{r}}) demonstrates a large improvement in the number of @ddeliverable{2} configurations.
-@;The plot also shows that fifteen of the @integer->word[(*NUM-BENCHMARKS*)] benchmarks significantly benefit from running on version 6.4.
-@;Only the line for the @bm{forth} benchmark demonstrates a significant regression;
-@; the @bm{zombie} benchmark demonstrates a small regression due to an increase in the cost of type casts.
-@;
-@;The improved performance of Racket version 6.4 is due to revisions of the contract system and Typed Racket's use of contracts to enforce static types.
-@;In particular, the contract system allocates fewer closures to track the labels that Typed Racket uses to report type boundary errors.
-@;The regression in the @bm{forth} benchmark is due to a bug in the implementation of class contracts in version 6.2.
-@;This bug would suppress the allocation of certain necessary class contracts.
-@;With the bug fixed, @bm{forth} generates the contracts but suffers additional performance overhead.
-@;
-@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
-@;                [*PLOT-HEIGHT* 180]
-@;                [*PLOT-WIDTH* 440]
-@;                [*PLOT-FONT-SCALE* 0.02]
-@;                [*DELTA-SECTION-ALPHA* 0.5]
-@;                [*X-TICK-LINES?* #t])
-@; (list
-@;  @figure["fig:scale:delta" @elem{Relative performance of v6.4 versus v6.2}
-@;    (render-delta ALL-BENCHMARKS)
-@;  ]
-@; ))
-@;
-@;@; -----------------------------------------------------------------------------
-@;@section[#:tag "sec:tr:scale"]{Evaluation Method, Part II}
-@;
-@;@(define srs-samples 5)
-@;@(define sample-size-factor 10)
-@;@(define snake-sample-size (* sample-size-factor (benchmark->num-modules snake)))
-@;@(define large-bm* (for/list ([bm (in-list ALL-BENCHMARKS)]
-@;                              #:when (< 5 (benchmark->num-modules bm)))
-@;                     bm))
-@;
-@;  @; plot library ~ 80 modules
-@;  @; math library ~ 197 modules
-@;The evaluation method of @secref{sec:method} does not scale to benchmarks with a large number of migratable modules.
-@;Benchmarking a full performance lattice for a program with @${N} such components requires @exact{$2^N$} measurements.
-@;In practice, this limits an exhaustive evaluation of Typed Racket to programs with approximately 20 migratable modules.
-@;An evaluation of micro-level gradual typing would be severly limited; depending on the definition of a migratable component, such an evaluation might be limited to programs with 20 functions.
-@;
-@;Fortunately, simple random sampling can approximate the ground truth presented in @secref{sec:tr}.
-@;Instead of measuring every configuration in a benchmark, it suffices to randomly sample a linear number of configurations and plot the overhead apparent in the sample.
-@;
-@;@Figure-ref{fig:scale:srs-snake} plots the true performance of the @bm{snake} benchmark against confidence intervals@~cite{n-ptrs-1937} generated from random samples.
-@;The plot on the left shows the absolute performance of @bm{snake} on version 6.2 (dashed red line) and version 6.4 (solid blue line).
-@;The plot on the right shows the improvement of version 6.4  relative to version 6.2 (solid purple line).
-@;Each line is surrounded by a thin interval generated from @integer->word[srs-samples] samples of @id[snake-sample-size] configurations each.
-@;
-@;The plots in @figure-ref{fig:scale:srs-snake} suggest that the intervals provide a reasonable approximation of the performance of the @bm{snake} benchmark.
-@;These intervals capture both the absolute performance (left plot) and relative performance (right plot) of @bm{snake}.
-@;
-@;@Figure-ref{fig:scale:delta-interval} provides evidence for the linear sampling suggestion of @figure-ref{fig:scale:srs-snake} using data for the @integer->word[(length large-bm*)] largest benchmarks in the @|GTP| suite.
-@;The solid purple lines from @figure-ref{fig:scale:delta} alongside confidence intervals generated from a small number of samples.
-@;Specifically, the interval for a benchmark with @${N} modules is generated from @integer->word[srs-samples] samples of @exact{$@id[sample-size-factor]N$} configurations.
-@;Hence the samples for @bm{lnm} use @id[(* 10 (benchmark->num-modules lnm))] configurations and the samples for @bm{quadMB} use @id[(* 10 (benchmark->num-modules quadMB))] configurations.
-@;For every benchmark, the true relative performance (solid purple line) lies within the corresponding interval.
-@;In conclusion, a language designer can quickly approximate performance by computing a similar interval.
-@;
-@;
-@;@subsection{Statistical Protocol}
-@;
-@;For readers interested in reproducing the above results, this section describes the protocol that generated @figure-ref{fig:scale:srs-snake}.
-@;The details for @figure-ref{fig:scale:delta-interval} are analogous:
-@;
-@;@itemlist[
-@;@item{
-@;  To generate one random sample, select @id[snake-sample-size] configurations (10 times the number of modules) without replacement and associate each configuration with its overhead from the exhaustive performance evaluation reported in @secref{sec:tr}.
-@;  @; Sampling with replacement yielded similar results.
-@;}
-@;@item{
-@;  To generate a confidence interval for the number of @ddeliverable{D} configurations based on @integer->word[srs-samples] such samples, calculate the proportion of @ddeliverable{D} configurations in each sample and generate a 95% confidence interval from the proportions.
-@;  This is the so-called @emph{index method}@~cite{f-arxiv-2006} for computing a confidence interval from a sequence of ratios.
-@;  This method is intuitive, but admittedly less precise than a method such as Fieller's@~cite{f-rss-1957}.
-@;  The two intervals in the left half of @figure-ref{fig:scale:srs-snake} are a sequence of such confidence intervals.
-@;}
-@;@item{
-@;  To generate an interval for the difference between the number of @ddeliverable{D} configurations on version 6.4 and the number of @ddeliverable{D} configurations on version 6.2, compute two confidence intervals as described in the previous step and plot the largest and smallest difference between these intervals.
-@;
-@;  In terms of @figure-ref{fig:scale:delta-interval} the upper bound for the number of @ddeliverable{D} configurations on the right half of @figure-ref{fig:scale:srs-snake} is the difference between the upper confidence limit on the number of @ddeliverable{D} configurations in version 6.4 and the lower confidence limit on the number of @ddeliverable{D} configurations in version 6.2.
-@;  The corresponding lower bound is the difference between the lower confidence limit on version 6.4 and the upper confidence limit on version 6.2.
-@;}
-@;]
-@;
-@;@(parameterize ([*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
-@;                [*COLOR-OFFSET* 3]
-@;                [*RKT-VERSIONS* '("6.2" "6.4")])
-@;  @figure["fig:scale:srs-snake" @elem{Approximating absolute performance}
-@;    (render-srs-single snake sample-size-factor)
-@;  ]
-@;)
-@;
-@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
-@;                [*PLOT-HEIGHT* 140]
-@;                [*PLOT-WIDTH* 440]
-@;                [*PLOT-FONT-SCALE* 0.02]
-@;                [*DELTA-SECTION-ALPHA* 0.6]
-@;                [*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
-@;                [*TICKS-START-FROM* (- (length ALL-BENCHMARKS) (length large-bm*))])
-@; (list
-@;  @figure["fig:scale:delta-interval" @elem{Approximating relative performance}
-@;      (render-delta large-bm* #:sample-factor sample-size-factor #:sample-style 'interval)
-@;  ]
-@; ))
+
+
 
 
 @; -----------------------------------------------------------------------------
@@ -1607,8 +1511,12 @@ The following descriptions credit each benchmark's original author,
 @figure["fig:rp:static-benchmark" @elem{
   Static summary of the Reticulated benchmarks.
   @bold{N} = number of components = functions + classes + methods.
-  SLOC = source lines of code as reported by David A. Wheeler's @tt{sloccount}.}
+  SLOC = source lines of code as reported by @|SLOCCOUNT|.}
   @rp:render-static-information[rp:MAIN-BENCHMARKS]]
+@; TODO TR has extra columns
+@;  annotation LOC = meaningful but probably less interesting for retic
+@;  #adp = n/a
+@;  #bnd #export = meaningful, but do not have
 
 To assess the run-time cost of gradual typing in Reticulated, we measured
  the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
@@ -1866,7 +1774,123 @@ We believe that a fine-grained evaluation would support the
 
 
 @; -----------------------------------------------------------------------------
-@; EXTRA PLOTS
+@; EXTRA PLOTS / STUFF
+@;
+@;@; -----------------------------------------------------------------------------
+@;@subsection[#:tag "sec:tr:compare"]{Evaluating Relative Performance}
+@;
+@;Although the absolute performance of Racket version 6.4 is underwhelming, it is a significant improvement over versions 6.2 and 6.3.
+@;This improvement is manifest in the difference between curves on the overhead plots.
+@;For example in @bm{gregor} (third plot in @figure-ref{fig:lnm:3}), version 6.4 has at least as many deliverable configurations as version 6.2 for any overhead on the @${x}-axis.
+@;The difference is greatest near @${x=2}; in terms of configurations, over 80% of @bm{gregor} configurations are not @ddeliverable{2} on v6.2 but are @ddeliverable{2} on v6.4.
+@;The overhead plots for many other benchmarks demonstrate a positive difference between the number of @ddeliverable{D} configurations on version 6.4 relative to version 6.2.
+@;
+@;The plot of @figure-ref{fig:scale:delta} explicitly shows the improvement of version 6.4 over version 6.2.
+@;It consists of @integer->word[(*NUM-BENCHMARKS*)] purple lines, one for each benchmark.
+@;These lines plot the difference between the curves for v6.4 and v6.2 on the corresponding overhead plot.
+@;For example, the line for @bm{gregor} (labeled @${\mathsf{r}}) demonstrates a large improvement in the number of @ddeliverable{2} configurations.
+@;The plot also shows that fifteen of the @integer->word[(*NUM-BENCHMARKS*)] benchmarks significantly benefit from running on version 6.4.
+@;Only the line for the @bm{forth} benchmark demonstrates a significant regression;
+@; the @bm{zombie} benchmark demonstrates a small regression due to an increase in the cost of type casts.
+@;
+@;The improved performance of Racket version 6.4 is due to revisions of the contract system and Typed Racket's use of contracts to enforce static types.
+@;In particular, the contract system allocates fewer closures to track the labels that Typed Racket uses to report type boundary errors.
+@;The regression in the @bm{forth} benchmark is due to a bug in the implementation of class contracts in version 6.2.
+@;This bug would suppress the allocation of certain necessary class contracts.
+@;With the bug fixed, @bm{forth} generates the contracts but suffers additional performance overhead.
+@;
+@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
+@;                [*PLOT-HEIGHT* 180]
+@;                [*PLOT-WIDTH* 440]
+@;                [*PLOT-FONT-SCALE* 0.02]
+@;                [*DELTA-SECTION-ALPHA* 0.5]
+@;                [*X-TICK-LINES?* #t])
+@; (list
+@;  @figure["fig:scale:delta" @elem{Relative performance of v6.4 versus v6.2}
+@;    (render-delta ALL-BENCHMARKS)
+@;  ]
+@; ))
+@;
+@;@; -----------------------------------------------------------------------------
+@;@section[#:tag "sec:tr:scale"]{Evaluation Method, Part II}
+@;
+@;@(define srs-samples 5)
+@;@(define sample-size-factor 10)
+@;@(define snake-sample-size (* sample-size-factor (benchmark->num-modules snake)))
+@;@(define large-bm* (for/list ([bm (in-list ALL-BENCHMARKS)]
+@;                              #:when (< 5 (benchmark->num-modules bm)))
+@;                     bm))
+@;
+@;  @; plot library ~ 80 modules
+@;  @; math library ~ 197 modules
+@;The evaluation method of @secref{sec:method} does not scale to benchmarks with a large number of migratable modules.
+@;Benchmarking a full performance lattice for a program with @${N} such components requires @exact{$2^N$} measurements.
+@;In practice, this limits an exhaustive evaluation of Typed Racket to programs with approximately 20 migratable modules.
+@;An evaluation of micro-level gradual typing would be severly limited; depending on the definition of a migratable component, such an evaluation might be limited to programs with 20 functions.
+@;
+@;Fortunately, simple random sampling can approximate the ground truth presented in @secref{sec:tr}.
+@;Instead of measuring every configuration in a benchmark, it suffices to randomly sample a linear number of configurations and plot the overhead apparent in the sample.
+@;
+@;@Figure-ref{fig:scale:srs-snake} plots the true performance of the @bm{snake} benchmark against confidence intervals@~cite{n-ptrs-1937} generated from random samples.
+@;The plot on the left shows the absolute performance of @bm{snake} on version 6.2 (dashed red line) and version 6.4 (solid blue line).
+@;The plot on the right shows the improvement of version 6.4  relative to version 6.2 (solid purple line).
+@;Each line is surrounded by a thin interval generated from @integer->word[srs-samples] samples of @id[snake-sample-size] configurations each.
+@;
+@;The plots in @figure-ref{fig:scale:srs-snake} suggest that the intervals provide a reasonable approximation of the performance of the @bm{snake} benchmark.
+@;These intervals capture both the absolute performance (left plot) and relative performance (right plot) of @bm{snake}.
+@;
+@;@Figure-ref{fig:scale:delta-interval} provides evidence for the linear sampling suggestion of @figure-ref{fig:scale:srs-snake} using data for the @integer->word[(length large-bm*)] largest benchmarks in the @|GTP| suite.
+@;The solid purple lines from @figure-ref{fig:scale:delta} alongside confidence intervals generated from a small number of samples.
+@;Specifically, the interval for a benchmark with @${N} modules is generated from @integer->word[srs-samples] samples of @exact{$@id[sample-size-factor]N$} configurations.
+@;Hence the samples for @bm{lnm} use @id[(* 10 (benchmark->num-modules lnm))] configurations and the samples for @bm{quadMB} use @id[(* 10 (benchmark->num-modules quadMB))] configurations.
+@;For every benchmark, the true relative performance (solid purple line) lies within the corresponding interval.
+@;In conclusion, a language designer can quickly approximate performance by computing a similar interval.
+@;
+@;
+@;@subsection{Statistical Protocol}
+@;
+@;For readers interested in reproducing the above results, this section describes the protocol that generated @figure-ref{fig:scale:srs-snake}.
+@;The details for @figure-ref{fig:scale:delta-interval} are analogous:
+@;
+@;@itemlist[
+@;@item{
+@;  To generate one random sample, select @id[snake-sample-size] configurations (10 times the number of modules) without replacement and associate each configuration with its overhead from the exhaustive performance evaluation reported in @secref{sec:tr}.
+@;  @; Sampling with replacement yielded similar results.
+@;}
+@;@item{
+@;  To generate a confidence interval for the number of @ddeliverable{D} configurations based on @integer->word[srs-samples] such samples, calculate the proportion of @ddeliverable{D} configurations in each sample and generate a 95% confidence interval from the proportions.
+@;  This is the so-called @emph{index method}@~cite{f-arxiv-2006} for computing a confidence interval from a sequence of ratios.
+@;  This method is intuitive, but admittedly less precise than a method such as Fieller's@~cite{f-rss-1957}.
+@;  The two intervals in the left half of @figure-ref{fig:scale:srs-snake} are a sequence of such confidence intervals.
+@;}
+@;@item{
+@;  To generate an interval for the difference between the number of @ddeliverable{D} configurations on version 6.4 and the number of @ddeliverable{D} configurations on version 6.2, compute two confidence intervals as described in the previous step and plot the largest and smallest difference between these intervals.
+@;
+@;  In terms of @figure-ref{fig:scale:delta-interval} the upper bound for the number of @ddeliverable{D} configurations on the right half of @figure-ref{fig:scale:srs-snake} is the difference between the upper confidence limit on the number of @ddeliverable{D} configurations in version 6.4 and the lower confidence limit on the number of @ddeliverable{D} configurations in version 6.2.
+@;  The corresponding lower bound is the difference between the lower confidence limit on version 6.4 and the upper confidence limit on version 6.2.
+@;}
+@;]
+@;
+@;@(parameterize ([*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
+@;                [*COLOR-OFFSET* 3]
+@;                [*RKT-VERSIONS* '("6.2" "6.4")])
+@;  @figure["fig:scale:srs-snake" @elem{Approximating absolute performance}
+@;    (render-srs-single snake sample-size-factor)
+@;  ]
+@;)
+@;
+@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
+@;                [*PLOT-HEIGHT* 140]
+@;                [*PLOT-WIDTH* 440]
+@;                [*PLOT-FONT-SCALE* 0.02]
+@;                [*DELTA-SECTION-ALPHA* 0.6]
+@;                [*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
+@;                [*TICKS-START-FROM* (- (length ALL-BENCHMARKS) (length large-bm*))])
+@; (list
+@;  @figure["fig:scale:delta-interval" @elem{Approximating relative performance}
+@;      (render-delta large-bm* #:sample-factor sample-size-factor #:sample-style 'interval)
+@;  ]
+@; ))
 @;
 @;  @subsection[#:tag "sec:rp:exact"]{Absolute Running Times}
 @;  

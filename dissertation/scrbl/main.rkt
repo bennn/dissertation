@@ -14,6 +14,7 @@
     scribble/example)
 
   PYBENCH
+  SLOCCOUNT
   unknown-author
   x-axis y-axis
   x-axes y-axes
@@ -87,6 +88,7 @@
 ;; =============================================================================
 
 (define PYBENCH (hyperlink "https://pyperformance.readthedocs.io/" @tt{pyperformance}))
+(define SLOCCOUNT (hyperlink "https://dwheeler.com/sloccount/" @elem{David A. Wheeler's @tt{sloccount}}))
 (define unknown-author "unknown")
 
 (define (~cite . txt*)
@@ -306,12 +308,17 @@
           (+ (* overhead-plot-y len)
              (* overhead-y-sep (- len 1)))))
       (define pp
-        (parameterize ([*GRID-Y* grid-y]
-                       [*current-cache-directory* cache-dir]
-                       [*current-cache-keys* (list (λ () bm-name*))]
-                       [*with-cache-fasl?* #f])
-          (with-cache (cachefile (string-append tag ".rktd"))
-            (λ () (grid-plot f-render bm-name*)))))
+        (let ()
+          (define (render-thunk)
+            (parameterize ([*GRID-Y* grid-y])
+              (grid-plot f-render bm-name*)))
+          (if cache-dir
+            (parameterize ([*current-cache-directory* cache-dir]
+                           [*current-cache-keys* (list (λ () bm-name*))]
+                           [*with-cache-fasl?* #f])
+              (with-cache (cachefile (string-append tag ".rktd"))
+                render-thunk))
+            (render-thunk))))
       (figure* tag cap pp))))
 
 
