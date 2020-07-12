@@ -34,9 +34,10 @@
 
   NUM-POPL
 
-  render-overhead-plot
+  render-static-information
   get-ratios-table
   render-ratios-table
+  render-overhead-plot
 
   cache-dir
 )
@@ -44,8 +45,8 @@
 (require
   (only-in racket/path
     find-relative-path)
-  (only-in racket/list
-    last)
+  racket/list
+  racket/format
   (only-in racket/file
     file->value)
   racket/match
@@ -55,6 +56,7 @@
   with-cache
   (only-in scribble/base bold centered hyperlink tabular hspace tt linebreak)
   greenman-thesis/jfp-2019/parameter
+  (only-in greenman-thesis bm)
   gtp-plot
   gtp-util
   file/glob
@@ -410,6 +412,62 @@
   (define data-dir (benchmark-name->data-file bm-name))
   (make-typed-racket-info data-dir))
 
+(define STATIC-INFO-TITLE*
+  (list "Benchmark" (bold "N") "SLOC"))
+
+#;("Untyped LOC" "Typed LOC" "adaptors" "boundaries" "exports")
+
+(define (render-static-information bm*)
+  (define name*
+    (map benchmark-name bm*))
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(l bottom-border 1)
+      #:column-properties (cons 'left (make-list (- (length STATIC-INFO-TITLE*) 1) 'right))
+      (list* (map (λ (_) "") STATIC-INFO-TITLE*)
+             STATIC-INFO-TITLE*
+             (parameterize ([*current-cache-directory* cache-dir]
+                            [*current-cache-keys* (list (λ () name*))]
+                            [*with-cache-fasl?* #f])
+               (define target "static-table.rktd")
+               (with-cache (cachefile target)
+                 (λ ()
+                   (map render-static-row bm*))))))))
+
+(define (render-static-row bb)
+  (define name (benchmark-name bb))
+  (cons
+    (bm name)
+    (map ~a (list
+      (benchmark->num-modules bb)
+      (benchmark->sloc name)))))
+
+(define (benchmark->sloc name)
+  ;; hard-coded from JFP table
+  (case name
+    ((sieve) (+ 35 17))
+    ((forth) (+ 255 30))
+    ((fsm) (+ 182 56))
+    ((fsmoo) (+ 194 83))
+    ((mbta) (+ 266 71))
+    ((morsecode) (+ 159 38))
+    ((zombie) (+ 302 27))
+    ((dungeon) (+ 534 68))
+    ((zordoz) (+ 1378 215))
+    ((lnm) (+ 488 114))
+    ((suffixtree) (+ 537 129))
+    ((kcfa) (+ 229 53))
+    ((snake) (+ 160 51))
+    ((take5) (+ 327 27))
+    ((acquire) (+ 1654 304))
+    ((tetris) (+ 246 107))
+    ((synth) (+ 835 139))
+    ((gregor) (+ 945 175))
+    ((quadBG) (+ 6780 221))
+    ((quadMB) (+ 6706 294))))
+
 (define RATIOS-TITLE
   (list "Benchmark" "typed/untyped"))
 
@@ -446,7 +504,7 @@
 
 (define (render-ratios-row name pi)
   (list name
-        (tt (symbol->string name))
+        (bm name)
         (rnd (typed/baseline-ratio pi))))
 
 

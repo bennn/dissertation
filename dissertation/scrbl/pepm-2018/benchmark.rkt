@@ -40,6 +40,7 @@
   gtp-util
   gtp-util/system
   gtp-plot
+  (only-in greenman-thesis bm)
   greenman-thesis/util
   json
   pict
@@ -132,7 +133,7 @@
 (define (render-ratios-row pi)
   (define n (performance-info->name pi))
   (list n
-        (tt (symbol->string n))
+        (bm n)
         (rnd (untyped/baseline-ratio pi))
         (rnd (typed/untyped-ratio pi))
         (rnd (typed/baseline-ratio pi))))
@@ -186,7 +187,6 @@
   (list "Benchmark" (bold "N") "SLOC" "modules"
         "functions" "classes" "methods"))
 
-;; TODO add cache
 (define (render-static-information name*)
   (centered
     (tabular
@@ -211,7 +211,7 @@
   (define num-meth (python-info->num-methods py))
   (define num-class (python-info->num-classes py))
   (cons
-    (tt (symbol->string bm-name))
+    (bm bm-name)
     (map ~a (list
       (+ num-fun num-meth num-class)
       (benchmark->sloc src)

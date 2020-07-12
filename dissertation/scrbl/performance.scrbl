@@ -1060,26 +1060,25 @@ This section concludes with a table summarizing the static characteristics of ea
   @; The predicate for @racket[QuadBG] runs significantly faster.
 }
 
-@;@figure*["fig:tr:static-benchmark" @elem{
-@;  Static characteristics of the @|GTP| benchmarks.
-@;  @bold{N} = number of components = number of modules.
-@; ... where do line counts come from?
-@;  @;SLOC = source lines of code as reported by @|SLOCCOUNT|.}
-@;  @tr:render-static-information[tr:ALL-BENCHMARKS]]
-@;]
+@figure*["fig:tr:static-benchmark" @elem{
+  Static characteristics of the @|GTP| benchmarks.
+  @bold{N} = number of components = number of modules.
+  SLOC = source lines of fully-typed code as reported by @|SLOCCOUNT|.}
+  @tr:render-static-information[tr:ALL-BENCHMARKS]]
+]
 
-@;@Figure-ref{fig:tr:static-benchmark} tabulates the size and complexity of the benchmark programs.
-@;The lines of code (Untyped LOC) and number of migratable modules (# Mod.) approximate program size.
-@;The type annotations (Annotation LOC) count additional lines in the typed configuration.
-@;These lines are primarily type annotations, but also include type casts and assertions.
-@;@;footnote{The benchmarks use more annotations than Typed Racket requires because they give full type signatures for each import. Only imports from untyped modules require annotation.}
-@;Adaptor modules (# Adp.) roughly correspond to the number of user-defined datatypes in each benchmark;
-@; the next section provides a precise explanation.
-@;Lastly, the boundaries (# Bnd.) and exports (# Exp.) distill each benchmark's graph structure.
-@;@;footnote{The appendix contains actual module dependence graphs.}
-@;Boundaries are import statements from one module to another, excluding imports from runtime or third-party libraries.
-@;An identifier named in such an import statement counts as an export.
-@;For example, the one import statement in @bm{sieve} names nine identifiers.
+@Figure-ref{fig:tr:static-benchmark} tabulates the size and complexity of the benchmark programs.
+The lines of code (Untyped LOC) and number of migratable modules (# Mod.) approximate program size.
+The type annotations (Annotation LOC) count additional lines in the typed configuration.
+These lines are primarily type annotations, but also include type casts and assertions.
+@;footnote{The benchmarks use more annotations than Typed Racket requires because they give full type signatures for each import. Only imports from untyped modules require annotation.}
+Adaptor modules (# Adp.) roughly correspond to the number of user-defined datatypes in each benchmark;
+ the next section provides a precise explanation.
+Lastly, the boundaries (# Bnd.) and exports (# Exp.) distill each benchmark's graph structure.
+@;footnote{The appendix contains actual module dependence graphs.}
+Boundaries are import statements from one module to another, excluding imports from runtime or third-party libraries.
+An identifier named in such an import statement counts as an export.
+For example, the one import statement in @bm{sieve} names nine identifiers.
 
 @subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
 
