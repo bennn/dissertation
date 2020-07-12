@@ -63,7 +63,8 @@
   (only-in racket/list
     add-between
     partition
-    take)
+    take
+    last)
   classicthesis/lang
   racket/format
   racket/string

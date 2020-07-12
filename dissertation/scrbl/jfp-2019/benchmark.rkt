@@ -33,6 +33,7 @@
   (all-from-out greenman-thesis/jfp-2019/parameter)
 
   NUM-POPL
+  MAX-OVERHEAD
 
   render-static-information
   get-ratios-table
@@ -40,6 +41,8 @@
   render-overhead-plot
 
   cache-dir
+
+  deliverable*
 )
 
 (require
@@ -411,8 +414,8 @@
     pp
     (raise-argument-error 'benchmark-name->data-file "directory-exists?" pp)))
 
-(define (benchmark-name->performance-info bm-name)
-  (define data-dir (benchmark-name->data-file bm-name))
+(define (benchmark-name->performance-info bm-name [version "6.4"])
+  (define data-dir (benchmark-name->data-file bm-name version))
   (make-typed-racket-info data-dir))
 
 (define STATIC-INFO-TITLE*
@@ -511,14 +514,23 @@
         (rnd (typed/baseline-ratio pi))))
 
 
-(define (render-overhead-plot bb)
-  (define bm-name (if (benchmark? bb) (benchmark-name bb) bb))
+(define (render-overhead-plot bm-name)
   (define pi (benchmark-name->performance-info bm-name))
   (define sample? (sample-info? pi))
   (define f (if sample? samples-plot overhead-plot))
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (deliverable* D v bm*)
+  (define name* (map benchmark-name bm*))
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (lambda () name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile (format "deliverable-count-~a.rktd" D))
+      (lambda ()
+        (for/sum ((nm (in-list name*)))
+          ((deliverable D) (benchmark-name->performance-info nm v)))))))
 
 ;; =============================================================================
 

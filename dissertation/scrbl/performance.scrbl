@@ -1049,7 +1049,6 @@ This section concludes with a table summarizing the static characteristics of ea
   The second version, @bm{quadBG}, uses identical code but weakens types to match the untyped configuration.
   This version is therefore suitable for judging the implementation
    of Typed Racket rather than the user experience of Typed Racket.
-  The conference version of this paper included data only for @bm{quadMB}.
 
   @; To give a concrete example of different types, here are the definitions
   @;  for the core @tt{Quad} datatype from both @bm{quadMB} and @bm{quadBG}.
@@ -1064,21 +1063,16 @@ This section concludes with a table summarizing the static characteristics of ea
   Static characteristics of the @|GTP| benchmarks.
   @bold{N} = number of components = number of modules.
   SLOC = source lines of fully-typed code as reported by @|SLOCCOUNT|.}
-  @tr:render-static-information[tr:ALL-BENCHMARKS]]
+  @tr:render-static-information[tr:ALL-BENCHMARKS]
 ]
 
-@Figure-ref{fig:tr:static-benchmark} tabulates the size and complexity of the benchmark programs.
-The lines of code (Untyped LOC) and number of migratable modules (# Mod.) approximate program size.
-The type annotations (Annotation LOC) count additional lines in the typed configuration.
-These lines are primarily type annotations, but also include type casts and assertions.
-@;footnote{The benchmarks use more annotations than Typed Racket requires because they give full type signatures for each import. Only imports from untyped modules require annotation.}
-Adaptor modules (# Adp.) roughly correspond to the number of user-defined datatypes in each benchmark;
- the next section provides a precise explanation.
-Lastly, the boundaries (# Bnd.) and exports (# Exp.) distill each benchmark's graph structure.
-@;footnote{The appendix contains actual module dependence graphs.}
-Boundaries are import statements from one module to another, excluding imports from runtime or third-party libraries.
-An identifier named in such an import statement counts as an export.
-For example, the one import statement in @bm{sieve} names nine identifiers.
+@Figure-ref{fig:tr:static-benchmark} tabulates the size of the migratable
+ code in the benchmark programs.
+The column labeled @bold{N} reports the number of migratable modules;
+ the configuration space for each program has @${2^N} points.
+The SLOC column reports lines of code in the fully-typed configuration.
+Type annotations add 10 to 300 lines of code, but the count approximates size.
+
 
 @subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
 
@@ -1086,98 +1080,101 @@ For example, the one import statement in @bm{sieve} names nine identifiers.
   @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
 ]
 
+@Figure-ref{fig:tr:ratio} lists the overhead of static types in the benchmarks.
+In @bm{sieve}, for example, the fully-typed configuration runs slightly
+ faster than untyped.
+In @bm{forth}, the typed configuration is almost 10x slower.
+
+@parag{Performance Ratios, Conclusions}
+
+Overall, the typed configurations run slightly slower than the untyped code.
+These small slowdowns are due to type casts on input data and on
+ contextual modules.
+
+A few benchmarks, notably @bm{lnm} and @bm{suffixtree}, run faster when
+ typed.
+For @bm{lnm}, the speedup is due to a typed contextual module than slows
+ down the untyped configuration.
+For @bm{suffixtree}, we have a positive speedup thanks to the Typed Racket
+ optimizer.
+
+Three benchmarks suffer tremendously when typed: @bm{forth}, @bm{zombie},
+ and @bm{quadMB}.
+Type casts play a large role.
+The newest version of the benchmarks should avoid these pathologies.
+
 
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:tr:overhead"]{Overhead Plots}
-
 
 @render-overhead-plot*[
   "fig:tr:overhead"
   "Typed Racket overhead plots"
   overhead-long-caption
   tr:render-overhead-plot
-  tr:ALL-BENCHMARKS
+  (map tr:benchmark-name tr:ALL-BENCHMARKS)
   tr:cache-dir]
 
-@; TODO
-@;@(render-lnm-plot
-@;  (lambda (pict*)
-@;    (define name*
-@;      (for/list ([p (in-list pict*)]
-@;                 [i (in-naturals)])
-@;        (format "fig:lnm:~a" i)))
-@;    (define get-caption
-@;      (let ([N (length name*)])
-@;        (lambda (i) @elem{@|GTP| overhead plots (@id[i]/@id[N])})))
-@;    (define NUMV (integer->word (length (*RKT-VERSIONS*))))
-@;    (cons
-@;      @elem{
-@;        @(apply Figure-ref name*) present the results of measuring the benchmark programs in a series of overhead plots.
-@;        As in @figure-ref{fig:suffixtree-plot}, the left column of the figures are cumulative distribution functions for @ddeliverable[] configurations and the right column are cumulative distribution functions for @step["1" "D"] configurations.
-@;        These plots include data for three versions of Racket released between June 2015 and February 2016.
-@;        Data for version 6.2 are thin red curves with short dashes.
-@;        Data for version 6.3 are mid-sized green curves with long dashes.
-@;        Data for version 6.4 are thick, solid, blue curves.
-@;        The typed/untyped ratio for each version appears above each plot in the left column.
-@;
-@;        @; -- overall, bleak picture
-@;        @(let* ([num-bm (length ALL-BENCHMARKS)]
-@;                [num-bm-str (integer->word num-bm)]
-@;                [num-configs (*TOTAL-NUM-CONFIGURATIONS*)]
-@;                [max-str (format "~a" (*MAX-OVERHEAD*))]
-@;                [suffixtree-num-modules (integer->word 6)]
-@;                [num-max-deliverable 9] ; TODO, use *MAX-OVERHEAD*
-@;                [num-max-deliverable-str (integer->word num-max-deliverable)]
-@;                [num-mostly-2-deliverable 6]
-@;                [num-mostly-2-deliverable-str (integer->word num-mostly-2-deliverable)]
-@;                [num-good-slope 8]
-@;                [num-good-slope-str (integer->word num-good-slope)]
-@;                [v-min (first (*RKT-VERSIONS*))]
-@;                [v-max (last (*RKT-VERSIONS*))]
-@;                [absolute-min-overhead "1.2"]
-@;                [absolute-min-overhead-bm "synth"]
-@;                [format-% (lambda (n) (format "~a%" (round (* 100 (/ n num-configs)))))]
-@;                [lo (number->string (*LO*))]
-@;                [hi (number->string (*HI*))]
-@;                [lo-prop (format-% (deliverable* (*LO*) v-max ALL-BENCHMARKS))]
-@;                [hi-prop (format-% (- num-configs (deliverable* (*HI*) v-max ALL-BENCHMARKS)))]
-@;               )
-@;          @elem{
-@;            Many curves are quite flat; they demonstrate that gradual typing introduces large and widespread performance overhead in the corresponding benchmarks.
-@;            Among benchmarks with fewer than @|suffixtree-num-modules| modules, the most common shape is a flat line near the 50% mark.
-@;            Such lines imply that the performance of a group of configurations is dominated by a single type boundary.
-@;            @; For instance, there is one type boundary in @bm{fsm} that adds overwhelming slowdown when present; all eight configurations with this boundary have over @|max-str| overhead.
-@;            Benchmarks with @|suffixtree-num-modules| or more modules generally have smoother slopes, but five such benchmarks have essentially flat curves.
-@;            The overall message is that for many values of @${D} between 1 and @|max-str|, few configurations are @ddeliverable{}.
-@;
-@;            For example, in @integer->word[(- num-bm num-mostly-2-deliverable)] of the @|num-bm-str| benchmark programs, at most half the configurations are @ddeliverable{2} on any version.
-@;            The situation is worse for lower (more realistic) overheads, and does not improve much for higher overheads.
-@;            Similarly, there are ten benchmarks in which at most half the configurations are @ddeliverable{10}.
-@;
-@;            The curves' endpoints describe the extremes of gradual typing.
-@;            The left endpoint gives the percentage of configurations that run at least as quickly as the untyped configuration.
-@;            Except for the @bm{lnm} benchmark, such configurations are a low proportion of the total.
-@;@;footnote{The @bm{sieve} case is degenerate. Only its untyped and fully-typed configurations are @ddeliverable{1}.}
-@;            The right endpoint shows how many configurations suffer over 20x performance overhead.
-@;@;footnote{Half the configurations for @bm{dungeon} do not run on versions 6.2 and 6.3 due to a defect in the way these versions proxy first-class classes. The overhead plots report an ``over 20x'' performance overhead for these configurations.}
-@;            @string-titlecase[num-max-deliverable-str] benchmarks have at least one such configuration.
-@;
-@;            Moving from @${k=0} to @${k=1} in a fixed version of Racket does little to improve the number of @ddeliverable{} configurations.
-@;            Given the slopes of the @${k=0} plots, this result is not surprising.
-@;            One type conversion step can eliminate a pathological boundary, such as those in @bm{fsm} and @bm{zombie}, but the overhead in larger benchmarks comes from a variety of type boundaries.
-@;            Except in configurations with many typed modules, adding types to one additional module is not likely to improve performance.
-@;
-@;            In summary, the application of the evaluation method projects a negative image of Typed Racket's sound gradual typing.
-@;            Only a small number of configurations in the benchmark suite run with low overhead; a mere @|lo-prop| of all configurations are @ddeliverable[lo] on Racket v@|v-max|.
-@;            Many demonstrate extreme overhead; @|hi-prop| of all configurations are not even @ddeliverable[hi] on version @|v-max|.
-@;          })
-@;      }
-@;      (for/list ([p (in-list pict*)]
-@;                 [name (in-list name*)]
-@;                 [i (in-naturals 1)])
-@;        (figure name (get-caption i) p)))))
+@Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length tr:ALL-BENCHMARKS) overhead-plots-per-page))]
+ present the results of measuring the benchmark programs in a series of overhead plots.
+As in @figure-ref{fig:suffixtree-plot}, the plots are
+ cumulative distribution functions for @ddeliverable[] configurations.
 
+@; -- overall, bleak picture
+@parag{Conclusions}
+@(let* ([num-bm tr:num-benchmarks]
+        [num-bm-str (integer->word num-bm)]
+        [num-configs (tr:*TOTAL-NUM-CONFIGURATIONS*)]
+        [max-str (format "~a" tr:MAX-OVERHEAD)]
+        [suffixtree-num-modules (integer->word 6)]
+        [num-max-deliverable 9] ; TODO, use *MAX-OVERHEAD*
+        [num-max-deliverable-str (integer->word num-max-deliverable)]
+        [num-mostly-2-deliverable 6]
+        [num-mostly-2-deliverable-str (integer->word num-mostly-2-deliverable)]
+        [num-good-slope 8]
+        [num-good-slope-str (integer->word num-good-slope)]
+        [v-max (last (tr:*RKT-VERSIONS*))]
+        [format-% (lambda (n) (format "~a%" (round (* 100 (/ n num-configs)))))]
+        [lo (number->string (tr:*LO*))]
+        [hi (number->string (tr:*HI*))]
+        [lo-prop (format-% (tr:deliverable* (tr:*LO*) v-max tr:ALL-BENCHMARKS))]
+        [hi-prop (format-% (- num-configs (tr:deliverable* (tr:*HI*) v-max tr:ALL-BENCHMARKS)))]
+       ) @elem{
+Many curves are quite flat; they demonstrate that gradual typing introduces
+ large and widespread performance overhead in the corresponding benchmarks.
+Among benchmarks with fewer than @|suffixtree-num-modules| modules, the
+ most common shape is a flat line near the 50% mark.
+Such lines imply that the performance of a group of configurations is
+ dominated by a single type boundary.
+@; For instance, there is one type boundary in @bm{fsm} that adds overwhelming slowdown when present; all eight configurations with this boundary have over @|max-str| overhead.
+Benchmarks with @|suffixtree-num-modules| or more modules generally have
+ smoother slopes, but five such benchmarks have essentially flat curves.
+The overall message is that for many values of @${D} between 1 and
+ @|max-str|, few configurations are @ddeliverable{}.
 
+For example, in @integer->word[(- num-bm num-mostly-2-deliverable)] of the
+ @|num-bm-str| benchmark programs, at most half the configurations are
+ @ddeliverable{2} on any version.
+The situation is worse for lower (more realistic) overheads, and does not
+ improve much for higher overheads.
+Similarly, there are ten benchmarks in which at most half the
+ configurations are @ddeliverable{10}.
+
+The curves' endpoints describe the extremes of gradual typing.
+The left endpoint gives the percentage of configurations that run at least
+ as quickly as the untyped configuration.
+Except for the @bm{lnm} benchmark, such configurations are a low proportion of the total.
+The right endpoint shows how many configurations suffer over 20x performance overhead.
+@string-titlecase[num-max-deliverable-str] benchmarks have at least one such configuration.
+
+In summary, the application of the evaluation method projects a negative
+ image of Typed Racket's sound gradual typing.
+Only a small number of configurations in the benchmark suite run with low
+ overhead; a mere @|lo-prop| of all configurations are @ddeliverable[lo] on
+ Racket v@|v-max|.
+Many demonstrate extreme overhead; @|hi-prop| of all configurations are not
+ even @ddeliverable[hi] on version @|v-max|.
+})
 
 
 @; -----------------------------------------------------------------------------
@@ -1547,8 +1544,6 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
 
 @subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
 
-@; TODO explain why 3 configs ... TR only needs 1 column
-
 @(let* ([rp:RT (rp:get-ratios-table rp:MAIN-BENCHMARKS)]
         [futen-row (rp:ratios-table-row rp:RT 'futen)]
         [futen-u/p (rp:ratios-row-retic/python futen-row)]
@@ -1627,7 +1622,6 @@ From left to right, these are:
   rp:cache-dir
 ]
 
-@; TODO cite range of figures
 @Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] summarizes the overhead of gradual typing in the
  benchmark programs.
 Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)
