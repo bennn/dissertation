@@ -25,7 +25,6 @@
 ;; -----------------------------------------------------------------------------
 
 (defparam2 *NUM-BENCHMARKS* Natural 0)
-(defparam2 *NUM-OO-BENCHMARKS* Natural 0)
 (defparam2 *TOTAL-NUM-CONFIGURATIONS* Natural 0)
 
 (defparam2 *LO* Natural 1.4)

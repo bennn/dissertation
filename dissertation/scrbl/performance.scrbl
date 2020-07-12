@@ -1083,10 +1083,9 @@ This section concludes with a table summarizing the static characteristics of ea
 
 @subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
 
-@; TODO fig:tr:ratio
-@; @figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks.}
-@;   @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
-@; ]
+@figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks.}
+  @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
+]
 
 
 @;@; -----------------------------------------------------------------------------
@@ -1548,6 +1547,8 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
 
 
 @subsection[#:tag "sec:rp:ratio"]{Performance Ratios}
+
+@; TODO explain why 3 configs ... TR only needs 1 column
 
 @(let* ([rp:RT (rp:get-ratios-table rp:MAIN-BENCHMARKS)]
         [futen-row (rp:ratios-table-row rp:RT 'futen)]

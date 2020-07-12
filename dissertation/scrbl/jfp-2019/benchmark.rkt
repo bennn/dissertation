@@ -30,13 +30,15 @@
   benchmark<?
   ;; (-> Benchmark Benchmark Boolean)
 
-  (rename-out [format:bm bm])
-  ;; (-> Benchmark Elem)
-  ;; For formatting
-
   (all-from-out greenman-thesis/jfp-2019/parameter)
 
   NUM-POPL
+
+  render-overhead-plot
+  get-ratios-table
+  render-ratios-table
+
+  cache-dir
 )
 
 (require
@@ -51,8 +53,9 @@
   racket/runtime-path
   (for-syntax racket/base syntax/parse)
   with-cache
-  (only-in scribble/base tt hyperlink)
+  (only-in scribble/base bold centered hyperlink tabular hspace tt linebreak)
   greenman-thesis/jfp-2019/parameter
+  gtp-plot
   gtp-util
   file/glob
 )
@@ -60,6 +63,9 @@
 ;; =============================================================================
 
 (define-runtime-path HERE ".")
+(define benchmark-dir (build-path HERE "benchmarks"))
+(define data-dir (build-path HERE "data"))
+(define cache-dir (build-path HERE "with-cache"))
 
 (define NUM-POPL
   (length '(sieve morsecode mbta zordoz suffixtree lnm kcfa snake tetris synth gregor quadMB)))
@@ -76,6 +82,7 @@
 ) #:prefab )
 
 (define *ALL-BENCHMARKS* (box '()))
+(define *NUM-OO-BENCHMARKS* (box 0))
 
 (define library tt)
 
@@ -136,7 +143,7 @@
 
 (define-syntax-rule (define-oo-benchmark stx* ...)
   (begin
-    (*NUM-OO-BENCHMARKS* (+ 1 (*NUM-OO-BENCHMARKS*)))
+    (set-box! *NUM-OO-BENCHMARKS* (+ 1 (unbox *NUM-OO-BENCHMARKS*)))
     (define-benchmark stx* ...)))
 
 (define-syntax (define-benchmark stx)
@@ -165,13 +172,14 @@
         (provide name))]))
 
 (define (make-benchmark name author num-adaptor origin purpose lib*)
-  (define cache-rktd (format "cache-bm-~a.rktd" name))
-  (with-cache (build-path HERE "cache" cache-rktd)
+  (define cache-rktd (format "bm-~a.rktd" name))
+  (with-cache (build-path cache-dir cache-rktd)
     #:read deserialize
     #:write serialize
     #:fasl? #false
     #:keys #f
-    (lambda ()
+    (lambda () (raise-user-error 'make-benchmark "not implemented, use JFP cache files instead"))
+    #;(lambda ()
       (define M
         (name->modulegraph name))
       (define rktd*
@@ -385,15 +393,65 @@
 (define (benchmark->module-names bm)
   (map car (benchmark-adjlist bm)))
 
-(define (format:bm benchmark)
-  (if (eq? benchmark quad)
-    (tt "quad")
-    (tt (symbol->string (benchmark-name benchmark)))))
-
 (define ALL-BENCHMARKS (sort (unbox *ALL-BENCHMARKS*) benchmark<?))
 
 (define num-benchmarks (length ALL-BENCHMARKS))
 
+(define (benchmark-name->data-file bm-name [version "6.4"])
+  (define pp
+    (let* ((name (if (eq? bm-name 'zordoz) (format "~a.~a" bm-name version) bm-name))
+           (patt (format "~a-*rktd" name)))
+      (glob-first (build-path data-dir version patt))))
+  (if (file-exists? pp)
+    pp
+    (raise-argument-error 'benchmark-name->data-file "directory-exists?" pp)))
+
+(define (benchmark-name->performance-info bm-name)
+  (define data-dir (benchmark-name->data-file bm-name))
+  (make-typed-racket-info data-dir))
+
+(define RATIOS-TITLE
+  (list "Benchmark" "typed/untyped"))
+
+(define (render-ratios-table row*)
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(bottom-border 1)
+      #:column-properties '(left right)
+      (list* RATIOS-TITLE
+             (map cdr row*)))))
+
+(define (get-ratios-table bm*)
+  (define name*
+    (for/list ((bm (in-list bm*)))
+      (if (benchmark? bm)
+        (benchmark-name bm)
+        bm)))
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "ratios-table.rktd")
+      (λ ()
+        (for/list ([name (in-list name*)])
+          (render-ratios-row name (benchmark-name->performance-info name)))))))
+
+(define (ratios-table-row r* sym)
+  (or
+    (for/or ([r (in-list r*)]
+             #:when (eq? (car r) sym))
+      r)
+    (raise-argument-error 'ratios-table-row "benchmark name" 1 r* sym)))
+
+(define (render-ratios-row name pi)
+  (list name
+        (tt (symbol->string name))
+        (rnd (typed/baseline-ratio pi))))
+
+
+(define (render-overhead-plot xxx)
+  'todo)
 
 ;; =============================================================================
 
@@ -449,7 +507,7 @@
      [quadBG  => 14]))
 
   (test-case "num-benchmarks"
-    (check-equal? (*NUM-OO-BENCHMARKS*) 5)
+    (check-equal? (unbox *NUM-OO-BENCHMARKS*) 5)
     (check-equal? (*NUM-BENCHMARKS*) 20)
     (check-equal? (length ALL-BENCHMARKS) 20)
     (check-equal? (*TOTAL-NUM-CONFIGURATIONS*) 43940))
