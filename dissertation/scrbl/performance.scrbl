@@ -125,8 +125,17 @@ In general, an evaluation must treat each combination as equally-likely.
   A Racket program with @id[num-example-configs] modules supports @id[(expt 2 num-example-configs)]
   mixed-typed configurations, including the fully-untyped and fully-typed versions.
   }
-
-  (configuration-lattice num-example-configs)]
+  (parameterize ([*LATTICE-CONFIG-X-MARGIN* 6]
+                 [*LATTICE-CONFIG-Y-MARGIN* 10]
+                 [*FONT-SIZE* 12]
+                 [*LATTICE-UNIT-HEIGHT* 6]
+                 [*LATTICE-UNIT-WIDTH* 7]
+                 [*LATTICE-UNIT-X-MARGIN* 0]
+                 [*LATTICE-UNIT-BORDER-WIDTH* 0]
+                 [*LATTICE-LINES?* #true]
+                 [*LATTICE-CONFIG-LABEL-MARGIN* 1])
+    (configuration-lattice num-example-configs))
+]
 ))
 
 
@@ -208,15 +217,15 @@ In general, let the notation @${c_1 \rightarrow_k c_2} express the idea
 }
 @figure*["fig:example-lattice" @elem{
 Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
-  @(parameterize ([*LATTICE-CONFIG-X-MARGIN* 3]
-                  [*LATTICE-CONFIG-Y-MARGIN* 8]
-                  [*FONT-SIZE* 12]
-                  [*LATTICE-UNIT-HEIGHT* 6]
-                  [*LATTICE-UNIT-WIDTH* 3]
-                  [*LATTICE-UNIT-X-MARGIN* 0]
-                  [*LATTICE-UNIT-BORDER-WIDTH* 0]
-                  [*LATTICE-LINES?* #true]
-                  [*LATTICE-CONFIG-LABEL-MARGIN* 1])
+  (parameterize ([*LATTICE-CONFIG-X-MARGIN* 10]
+                 [*LATTICE-CONFIG-Y-MARGIN* 10]
+                 [*FONT-SIZE* 12]
+                 [*LATTICE-UNIT-HEIGHT* 8]
+                 [*LATTICE-UNIT-WIDTH* 12]
+                 [*LATTICE-UNIT-X-MARGIN* 0]
+                 [*LATTICE-UNIT-BORDER-WIDTH* 0]
+                 [*LATTICE-LINES?* #true]
+                 [*LATTICE-CONFIG-LABEL-MARGIN* 1])
     (performance-lattice S))
 ]
 @elem{
