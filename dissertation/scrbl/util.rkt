@@ -16,8 +16,8 @@
 (define thesis-max-page-width 440)
 (define thesis-max-page-height 580)
 
-(define overhead-plots-per-page 5)
-(define overhead-y-sep 12)
+(define overhead-plots-per-page 7)
+(define overhead-y-sep 10)
 (define overhead-plot-y
   (/ (- thesis-max-page-height (* (- overhead-plots-per-page 1) overhead-y-sep))
      overhead-plots-per-page))

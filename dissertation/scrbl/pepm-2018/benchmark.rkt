@@ -16,6 +16,7 @@
   POPL-2017-BENCHMARK-NAMES
   render-static-information
   render-overhead-plot
+  render-validate-plot
   render-exact-runtime-plot*
   exact-runtime-category
   lib-desc
@@ -70,7 +71,7 @@
 
 (define TYPED "typed")
 (define SAMPLE "sample")
-(define SAMPLE-FILE-GLOB "sample*.tab")
+(define SAMPLE-FILE-GLOB "sample-*.tab")
 
 (define u/p-ratio
   "retic/python ratio")
@@ -82,13 +83,12 @@
   "typed/python ratio")
 
 (define (->karst-data sym)
-  (define karst-path
-    (path-add-extension (build-path karst-dir (symbol->string sym)) "_tab.gz"))
+  (define dir (benchmark-name->data-directory sym))
+  (define karst-path (path-add-extension (build-path dir (symbol->string sym)) ".tab.gz"))
   (and (file-exists? karst-path) karst-path))
 
 (define (->sample-data sym)
-  (define prefix
-    (build-path karst-dir SAMPLE (symbol->string sym)))
+  (define prefix (build-path karst-dir (symbol->string sym)))
   (and (directory-exists? prefix)
        (glob (build-path prefix SAMPLE-FILE-GLOB))))
 
@@ -151,6 +151,13 @@
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (render-validate-plot bm-name)
+  (define pi (benchmark-name->performance-info bm-name 'exhaustive))
+  (define si (benchmark-name->performance-info bm-name 'approximate))
+  (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (validate-samples-plot pi si)))
 
 (define (render-exact-runtime-plot* bm-name*)
   (blank))
@@ -311,9 +318,9 @@
     (raise-user-error 'directory->python-info "directory ~a has no Python files" ps)
     (python-info bm-name (map path-string->module-info m*))))
 
-(define (benchmark-name->performance-info bm-name)
+(define (benchmark-name->performance-info bm-name [kind #f])
   (define data-dir (benchmark-name->data-directory bm-name))
-  (make-reticulated-info data-dir))
+  (make-reticulated-info data-dir kind))
 
 (define (path-string->module-info ps)
   (define py-json (path-string->exploded-module ps))
@@ -484,9 +491,8 @@
 
 (define-values [EXHAUSTIVE-BENCHMARKS VALIDATE-BENCHMARKS SAMPLE-BENCHMARKS]
   (let ([name* MAIN-BENCHMARKS])
-    (define e* (filter ->karst-data name*))
-    (define s* (filter (λ (n) (and (not (memq n '(Evolution take5)))
-                                   (->sample-data n)
+    (define e* (filter (λ (n) (and (->karst-data n) n)) name*))
+    (define s* (filter (λ (n) (and (not (null? (->sample-data n)))
                                    #t))
                        name*))
     (define-values [v* r*] (partition (λ (n) (memq n e*)) s*))

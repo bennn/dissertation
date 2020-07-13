@@ -294,6 +294,7 @@
   (parameterize ((*GRID-NUM-COLUMNS* 1)
                  (*GRID-X* thesis-max-page-width)
                  (*GRID-Y-SKIP* overhead-y-sep)
+                 (*LEGEND-Y-SKIP* 0)
                  (*OVERHEAD-SHOW-RATIO* #f)
                  (*FONT-SIZE* 12)
                  (*OVERHEAD-LINE-WIDTH* 0.1))
@@ -306,10 +307,10 @@
       (define cap
         (if (= num-pages 1)
           (list caption-short caption-long)
-          (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
+          (let ((fig-num (format " (~a/~a)." (+ 1 page-num) num-pages)))
             (if (zero? page-num)
-              (list short " " caption-long)
-              short))))
+              (list caption-short fig-num " " caption-long)
+              (list caption-short fig-num)))))
       (define grid-y
         (let ((len (length bm-name*)))
           (+ (* overhead-plot-y len)

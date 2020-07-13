@@ -444,96 +444,118 @@ Pathologies like the 100x slowdowns in @figure-ref{fig:example-lattice}
 
 @section{Approximate Evaluation Method}
 
-@; If an exhaustive performance evaluation is infeasible, an alternative is
-@;  to select configurations via simple random sampling and measure the
-@;  proportion of @ddeliverable{D} configurations in the sample.
-@; Repeating this sampling experiment yields a @emph{simple random approximation}
-@;  of the true proportion of @ddeliverable{D} configurations.
-@; 
-@; @definition[@sraapproximation["r" "s" "95"]]{
-@;   Given @${r} samples each containing @${s} configurations chosen uniformly at random,
-@;    a @emph{@sraapproximation["r" "s" "95"]} is a @${95\%} confidence interval for
-@;    the proportion of @ddeliverable{D} configurations in each sample.
-@; }
-@; 
-@; The appendix contains mathematical and
-@;  empirical justification for the simple random approximation method.
-@; 
-@; 
-@; 
-@; @;@Section-ref{sec:evaluation} instantiates this method using @${r\!=\!@id[rp:NUM-SAMPLE-TRIALS]}
-@; @; samples each containing @${@id[rp:SAMPLE-RATE]\!*\!(F + C)} configurations,
-@; @; where @${F} is the number of functions and methods in the benchmark and
-@; @; @${C} is the number of class definitions.
-@; @;The intervals produced by this method
-@; @; (for the @bm*[rp:SAMPLE-BENCHMARKS] benchmarks) are thin,
-@; @; but the paper does not argue that the intervals are very likely to be accurate.
-@; @;This appendix provides the missing argument.
-@; @;
-@; @;@subsection{Statistical Argument}
-@; @;
-@; @;Let @${d} be a predicate that checks whether a configuration from
-@; @; a fixed program is @ddeliverable{D}.
-@; @;Since @${d} is either true or false for every configuration,
-@; @; this predicate defines a Bernoulli random variable @${X_d} with parameter
-@; @; @${p}, where @${p} is the true proportion of @ddeliverable{D} configurations.
-@; @;Consequently, the expected value of this random variable is @${p}.
-@; @;The law of large numbers therefore states that the average of infinitely
-@; @; many samples of @${X_d} converges to @${p}, the true proportion
-@; @; of deliverable configurations.
-@; @;Convergence suggests that the average of ``enough'' samples is ``close to'' @${p}.
-@; @;The central limit theorem provides a similar guarantee---any sequence of
-@; @; such averages is normally distributed around the true proportion.
-@; @;A @${95\%} confidence interval generated from sample averages is therefore
-@; @; likely to contain the true proportion.
-@; @;
-@; @;
-@; @;@;@subsection{Back-of-the-Envelope Argument}
-@; @;@;
-@; @;@;Suppose a few developers independently apply gradual typing to a program.
-@; @;@;For a fixed overhead tolerance @${D}, some proportion of the developers have
-@; @;@; @ddeliverable{D} configurations.
-@; @;@;There is a remote chance that this proportion coincides with the true proportion
-@; @;@; of @ddeliverable{D} configurations.
-@; @;@;Intuitively, the chance is less remote if the number of developers is large.
-@; @;@;But even for a small number of developers, if they repeat this experiment
-@; @;@; multiple times, then the average proportion of @ddeliverable{D} configurations
-@; @;@; should tend towards the true proportion.
-@; @;@;After all, if the true proportion of @ddeliverable{D} configurations is
-@; @;@; @${10\%} then approximately @${1} in @${10} randomly sampled configurations is
-@; @;@; @ddeliverable{D}.
-@; @;
-@; @;
-@; @;@subsection{Empirical Illustration}
-@; @;
-@; @;@Figure-ref{fig:sample:validate} superimposes the results of simple random
-@; @; sampling upon the exhaustive data for three benchmarks.
-@; @;Specifically, these plots are the result of a two-step recipe:
-@; @;@itemlist[
-@; @;@item{
-@; @;  First, we plot the true proportion of
-@; @;   @ddeliverable{D} configurations for @${D} between @${1}x and @${10}x.
-@; @;  This data is represented by a blue curve; the area under the curve is shaded
-@; @;   blue.
-@; @;}
-@; @;@item{
-@; @;  Second, we plot a
-@; @;   @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
-@; @;   as a brown interval.
-@; @;  This is a 95% confidence interval generated from @integer->word[rp:NUM-SAMPLE-TRIALS]
-@; @;   samples each containing @$[(format "~a(F+C)" rp:SAMPLE-RATE)] configurations
-@; @;   chosen uniformly at random.
-@; @;}
-@; @;]
-@; @;
-@; @;@;The intervals accurately enclose the true proportions of @ddeliverable{D} configurations.
-@; @;
-@; @;@figure["fig:sample:validate" @elem{Simple random approximations}
-@; @;  (parameterize ([*PLOT-HEIGHT* 100]
-@; @;                 [*SINGLE-COLUMN?* #true])
-@; @;    @render-validate-samples-plot*[VALIDATE-BENCHMARKS])
-@; @;]
-@; 
+If an exhaustive performance evaluation is infeasible, an alternative is
+ to select configurations via simple random sampling and measure the
+ proportion of @ddeliverable{D} configurations in the sample.
+Repeating this sampling experiment yields a @emph{simple random approximation}
+ of the true proportion of @ddeliverable{D} configurations.
+
+@definition[@sraapproximation["r" "s" "95"]]{
+  Given @${r} samples each containing @${s} configurations chosen uniformly at random,
+   a @emph{@sraapproximation["r" "s" "95"]} is a @${95\%} confidence interval for
+   the proportion of @ddeliverable{D} configurations in each sample.
+}
+
+Intuitively, this sampling method should lead to good results because
+ it randomly samples a stable population.
+If the true proportion of @ddeliverable{D} configurations in a program
+ happens to be 10%, then one random selection has a 1 in 10 chance of
+ drawing a @ddeliverable{D} configuration.
+
+A statistical justification depends on the law of large numbers the
+ central limit theorem.
+Let @${d} be a predicate that checks whether a configuration
+ is @ddeliverable{D}.
+Since @${d} is either true or false for every configuration,
+ this predicate defines a Bernoulli random variable @${X_d} with parameter
+ @${p}, where @${p} is the true proportion of @ddeliverable{D} configurations.
+Consequently, the expected value of this random variable is @${p}.
+The law of large numbers states that the average of @emph{infinitely}
+ many samples of @${X_d} converges to @${p}, the true proportion
+ of deliverable configurations.
+We cannot draw infinitely many samples, but perhaps this convergence
+ property means that the average of ``enough'' samples is ``close'' to @${p}.
+Indeed, the central limit theorem guarantees that any sequence of
+ such averages is normally distributed around the true proportion.
+A @${95\%} confidence interval generated from sample averages is therefore
+ likely to contain the true proportion.
+
+The statistical argument reveals two weaknesses in the sampling method.
+
+@itemlist[
+@item{
+  First, there is no guarantee that every confidence interval based on sampling
+   contains the true proportion of @ddeliverable{D} configurations.
+  The results can mislead.
+}
+@item{
+  Second, the confidence intervals could be huge.
+  A wide interval offers little insight, even if it happens to contain the
+   true proportion.
+  (In the extreme, a useless interval says that 0% to 100% of configurations
+   are @ddeliverable{D}.)
+}
+]
+
+The argument does say, however, that an interval is more likely to be useful
+ if based on a huge number of samples, each sample containing a huge number
+ of configurations.
+Question is, how well does a manageable experiment size work in practice?
+
+@Figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"] test the
+ @sraapproximation["r" "s" "95"] method using 
+ @${r\!=\!@id[rp:NUM-SAMPLE-TRIALS]} samples each containing a linear
+ number of configurations.
+More precisely, each sample contains @${@id[rp:SAMPLE-RATE]\!*\!N} configurations
+ out of the @${2^N} possibilities in the benchmark at hand.
+These plots show both the true data and the result of sampling:
+ a solid blue line shows the true proportion of @ddeliverable{D} configurations,
+ and an orange interval shows the result of approximation.
+
+@;@render-overhead-plot*[
+@;  "fig:tr:validate-sample"
+@;  @elem{Validate Typed Racket}
+@;  ""
+@;  tr:render-validate-plot
+@;  '()
+@;  #f
+@;]
+
+@id[rp:VALIDATE-BENCHMARKS]
+
+@render-overhead-plot*[
+  "fig:rp:validate-sample"
+  @elem{Reticulated sample validation}
+  ""
+  rp:render-validate-plot
+  rp:VALIDATE-BENCHMARKS
+  rp:cache-dir
+]
+
+In each plot, the sample intervals are both thin and capture the true
+ proportion.
+Thus a linear number of samples appears sufficient.
+
+
+@subsection{Statistical Protocol}
+
+For readers interested in reproducing the above results, this section describes
+ the protocol that generated @figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"].
+
+To generate one random sample, select @${@id[rp:SAMPLE-RATE]\!*\!N} configurations
+ without replacement and compute their overhead.
+We have tried sampling with replacement and found similar results.
+
+To generate a confidence interval for the number of @ddeliverable{D}
+ configurations based on a group of samples, calculate
+ the proportion of @ddeliverable{D} configurations in each sample and generate
+ a 95% confidence interval from the proportions.
+This is the simple @emph{index method} for computing a
+ confidence interval from a sequence of ratios (@format-url{https://arxiv.org/pdf/0710.2024v1.pdf}).
+We have not experimented with a more precise method such as
+ Fieller's@~cite{f-rss-1957}.
+
+
 @;@; -----------------------------------------------------------------------------
 @; NOTES ABOUT CONVERTING BENCHMARKS ... GENERAL
 @;@subsection[#:tag "sec:tr:conversion"]{From Programs to Benchmarks}
@@ -1635,66 +1657,7 @@ We believe that a fine-grained evaluation would support the
 @;  ]
 @; ))
 @;
-@;@; -----------------------------------------------------------------------------
-@;@section[#:tag "sec:tr:scale"]{Evaluation Method, Part II}
-@;
-@;@(define srs-samples 5)
-@;@(define sample-size-factor 10)
-@;@(define snake-sample-size (* sample-size-factor (benchmark->num-modules snake)))
-@;@(define large-bm* (for/list ([bm (in-list ALL-BENCHMARKS)]
-@;                              #:when (< 5 (benchmark->num-modules bm)))
-@;                     bm))
-@;
-@;  @; plot library ~ 80 modules
-@;  @; math library ~ 197 modules
-@;The evaluation method of @secref{sec:method} does not scale to benchmarks with a large number of migratable modules.
-@;Benchmarking a full performance lattice for a program with @${N} such components requires @exact{$2^N$} measurements.
-@;In practice, this limits an exhaustive evaluation of Typed Racket to programs with approximately 20 migratable modules.
-@;An evaluation of micro-level gradual typing would be severly limited; depending on the definition of a migratable component, such an evaluation might be limited to programs with 20 functions.
-@;
-@;Fortunately, simple random sampling can approximate the ground truth presented in @secref{sec:tr}.
-@;Instead of measuring every configuration in a benchmark, it suffices to randomly sample a linear number of configurations and plot the overhead apparent in the sample.
-@;
-@;@Figure-ref{fig:scale:srs-snake} plots the true performance of the @bm{snake} benchmark against confidence intervals@~cite{n-ptrs-1937} generated from random samples.
-@;The plot on the left shows the absolute performance of @bm{snake} on version 6.2 (dashed red line) and version 6.4 (solid blue line).
-@;The plot on the right shows the improvement of version 6.4  relative to version 6.2 (solid purple line).
-@;Each line is surrounded by a thin interval generated from @integer->word[srs-samples] samples of @id[snake-sample-size] configurations each.
-@;
-@;The plots in @figure-ref{fig:scale:srs-snake} suggest that the intervals provide a reasonable approximation of the performance of the @bm{snake} benchmark.
-@;These intervals capture both the absolute performance (left plot) and relative performance (right plot) of @bm{snake}.
-@;
-@;@Figure-ref{fig:scale:delta-interval} provides evidence for the linear sampling suggestion of @figure-ref{fig:scale:srs-snake} using data for the @integer->word[(length large-bm*)] largest benchmarks in the @|GTP| suite.
-@;The solid purple lines from @figure-ref{fig:scale:delta} alongside confidence intervals generated from a small number of samples.
-@;Specifically, the interval for a benchmark with @${N} modules is generated from @integer->word[srs-samples] samples of @exact{$@id[sample-size-factor]N$} configurations.
-@;Hence the samples for @bm{lnm} use @id[(* 10 (benchmark->num-modules lnm))] configurations and the samples for @bm{quadMB} use @id[(* 10 (benchmark->num-modules quadMB))] configurations.
-@;For every benchmark, the true relative performance (solid purple line) lies within the corresponding interval.
-@;In conclusion, a language designer can quickly approximate performance by computing a similar interval.
-@;
-@;
-@;@subsection{Statistical Protocol}
-@;
-@;For readers interested in reproducing the above results, this section describes the protocol that generated @figure-ref{fig:scale:srs-snake}.
-@;The details for @figure-ref{fig:scale:delta-interval} are analogous:
-@;
-@;@itemlist[
-@;@item{
-@;  To generate one random sample, select @id[snake-sample-size] configurations (10 times the number of modules) without replacement and associate each configuration with its overhead from the exhaustive performance evaluation reported in @secref{sec:tr}.
-@;  @; Sampling with replacement yielded similar results.
-@;}
-@;@item{
-@;  To generate a confidence interval for the number of @ddeliverable{D} configurations based on @integer->word[srs-samples] such samples, calculate the proportion of @ddeliverable{D} configurations in each sample and generate a 95% confidence interval from the proportions.
-@;  This is the so-called @emph{index method}@~cite{f-arxiv-2006} for computing a confidence interval from a sequence of ratios.
-@;  This method is intuitive, but admittedly less precise than a method such as Fieller's@~cite{f-rss-1957}.
-@;  The two intervals in the left half of @figure-ref{fig:scale:srs-snake} are a sequence of such confidence intervals.
-@;}
-@;@item{
-@;  To generate an interval for the difference between the number of @ddeliverable{D} configurations on version 6.4 and the number of @ddeliverable{D} configurations on version 6.2, compute two confidence intervals as described in the previous step and plot the largest and smallest difference between these intervals.
-@;
-@;  In terms of @figure-ref{fig:scale:delta-interval} the upper bound for the number of @ddeliverable{D} configurations on the right half of @figure-ref{fig:scale:srs-snake} is the difference between the upper confidence limit on the number of @ddeliverable{D} configurations in version 6.4 and the lower confidence limit on the number of @ddeliverable{D} configurations in version 6.2.
-@;  The corresponding lower bound is the difference between the lower confidence limit on version 6.4 and the upper confidence limit on version 6.2.
-@;}
-@;]
-@;
+
 @;@(parameterize ([*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
 @;                [*COLOR-OFFSET* 3]
 @;                [*RKT-VERSIONS* '("6.2" "6.4")])
