@@ -39,6 +39,8 @@
   get-ratios-table
   render-ratios-table
   render-overhead-plot
+  benchmark-name->performance-info
+  benchmark->num-modules
 
   cache-dir
 

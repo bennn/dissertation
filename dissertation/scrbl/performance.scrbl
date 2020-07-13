@@ -3,15 +3,13 @@
 @; TODO, outline:
 @; - [ ] method : space, assumptions, goals, exhaustive, approximate, threats
 @;   - [ ] fun, other visualizations from JFP that fell by the wayside
-@; - [ ] app TR : benchmarks, protocol, data
-@; - [ ] app RP : benchmarks, protocol, data
+@; - [X] app TR : benchmarks, protocol, data
+@; - [X] app RP : benchmarks, protocol, data
 @;
 @; special acknowledgment to Asumu, for visualizations in POPL paper,
 @;  because my dissertation has overlap with his
 @;
 @; do NOT need summary (abstract) and intro paragraph
-@;
-@; explain that JFP benchmarks are buggy, point to gtp-benchmarks release notes
 @;
 @; extra viz:
 @;  JFP appendix, heartbeat plots, ....
@@ -118,12 +116,12 @@ Gradual typing promises to support exponentially-many combinations of typed
  and untyped code.
 Using Typed Racket, a programmer can add types to any module; thus a program
  with @id[num-example-configs] modules leads to @${2^@id[num-example-configs]}
- possible combinations (@figure-ref{fig:example-lattice}).
+ possible combinations (@figure-ref{fig:example-lattice-0}).
 Languages that offer types at a finer granularity have even more possibilities.
 In general, an evaluation must treat each combination as equally-likely.
 }
 
-@figure["fig:example-lattice" @elem{
+@figure["fig:example-lattice-0" @elem{
   A Racket program with @id[num-example-configs] modules supports @id[(expt 2 num-example-configs)]
   mixed-typed configurations, including the fully-untyped and fully-typed versions.
   }
@@ -147,483 +145,296 @@ If a programmer can tolerate a certain overhead, say @id[example-overhead]x,
 
 
 @; -----------------------------------------------------------------------------
-@section{Evaluation Method}
+@section{Exhaustive Evaluation Method}
 
-The method = 2 methods = exhaustive and approximate
-how to do it, what parameters
-includes benchmark adaptation
+We have developed two methods to measure the performance of a gradually-typed
+ program: an exhaustive method that considers the entire configuration space,
+ and an approximation thereof.
+This section presents the exhaustive method---first by example and then more
+ formally.
 
-@; @citet{tfgnvf-popl-2016} introduce a three-step method for evaluating the performance of
-@;  a gradual typing system:
-@;  (1) identify a suite of fully-typed programs;
-@;  (2) measure the performance of all gradually-typed @emph{configurations} of the programs;
-@;  (3) count the number of configurations with performance overhead no greater than a certain limit.
-@; They apply this method to Typed Racket, a gradual typing system
-@;  with module-level granularity; in other words, a Typed Racket program with @${M} modules has
-@;  @${2^M} gradually-typed configurations.
-@; 
-@; Reticulated supports gradual typing at a much finer granularity,
-@;  making it impractical to directly apply the Takikawa method.
-@; A naive application would require @${2^a} measurements for one function with @${a} formal parameters,
-@;  and similarly @${2^f} measurements for one class with @${f} fields.
-@; The following subsections therefore generalize the Takikawa method (@section-ref{sec:method:adapt})
-@;  and describe the protocol we use to evaluate Reticulated (@section-ref{sec:protocol}).
-@; 
-@; 
-@; @; -----------------------------------------------------------------------------
-@; @subsection{Exhaustive Evaluation Method}
-@; 
-@; 
-@; @; -----------------------------------------------------------------------------
-@; @subsection[#:tag "sec:method:lattice"]{Performance Lattice}
-@; 
-@; @(define suffixtree-lattice-version "6.2")
-@; @(define S (make-typed-racket-info (benchmark-rktd suffixtree suffixtree-lattice-version)))
-@; @(define suffixtree-num-modules     (integer->word (performance-info->num-units S)))
-@; @(define suffixtree-num-configs     (performance-info->num-configurations S))
-@; @(define suffixtree-num-configs-str (number->string suffixtree-num-configs))
-@; @(define suffixtree-sample-D        2)
-@; @(define suffixtree-num-D           ((deliverable suffixtree-sample-D) S))
-@; @(define MAX-OVERHEAD 20)
-@; @(define suffixtree-num-D-max       ((deliverable MAX-OVERHEAD) S))
-@; @(define suffixtree-num-D-str       (integer->word suffixtree-num-D))
-@; @; TODO need to talk about L-steps in the gtp-plot package!
-@; @;@(define suffixtree-sample-k        1)
-@; @;@(define suffixtree-num-k           (count-configurations S (lambda (cfg) (<= (configuration-info->mean-runtime cfg) suffixtree-sample-D))))
-@; @;@(define suffixtree-num-k-str       (number->string suffixtree-num-k))
-@; @(define suffixtree-tu-ratio        (format "~ax" (~r (typed/untyped-ratio S) #:precision '(= 1))))
-@; @(define suffixtree-max             MAX-OVERHEAD)
-@; @(define suffixtree-num-max         (- suffixtree-num-configs ((deliverable suffixtree-max) S)))
-@; @(define suffixtree-num-samples 111)
-@; 
-@;     @figure*["fig:suffixtree-lattice" @elem{Performance overhead in @bm{suffixtree}, on Racket v@|suffixtree-lattice-version|.}
-@;       @(parameterize ([*LATTICE-CONFIG-X-MARGIN* 3]
-@;                       [*LATTICE-CONFIG-Y-MARGIN* 8]
-@;                       [*FONT-SIZE* 10]
-@;                       [*LATTICE-UNIT-HEIGHT* 6]
-@;                       [*LATTICE-UNIT-WIDTH* 3]
-@;                       [*LATTICE-UNIT-X-MARGIN* 0]
-@;                       [*LATTICE-UNIT-BORDER-WIDTH* 0]
-@;                       [*LATTICE-LINES?* #true]
-@;                       [*LATTICE-CONFIG-LABEL-MARGIN* 1])
-@;         (performance-lattice S))
-@;     ]
-@; 
-@; The promise of Typed Racket's macro-level gradual typing is that programmers
-@;  can add types to any subset of the modules in an untyped program.
-@; In principle, this promise extends to third-party libraries and modules from
-@;  the Racket runtime system, but in practice a programmer has no control over
-@;  such modules.
-@; Thus we distinguish between two kinds of modules: the @emph{migratable} modules
-@;  that a programmer may add types to, and the @emph{contextual} modules in the
-@;  software ecosystem, which remain unchanged.
-@; A comprehensive performance evaluation must therefore consider the
-@;  @emph{configurations} a programmer could possibly create given type annotations
-@;  for each migratable module.
-@; These configurations form a lattice, ordered by the subset relation on the set
-@;  of typed modules in a configuration.
-@; 
-@; @Figure-ref{fig:suffixtree-lattice} demonstrates one such lattice for a program
-@;  with @|suffixtree-num-modules| migratable modules.
-@; The black rectangle at the top of the lattice represents the configuration in
-@;  which all @|suffixtree-num-modules| modules are typed.
-@; The other @id[(sub1 suffixtree-num-configs)] rectangles represent
-@;  configurations with some untyped modules.
-@; 
-@; A given row in the lattice groups configurations with the same number of typed
-@;  modules (black squares).
-@; For instance, configurations in the second row from the bottom contain two
-@;  typed modules.
-@; These represent all possible ways of converting two modules in the untyped
-@;  configuration to Typed Racket.
-@; Similarly, configurations in the third row represent all possible
-@;  configurations a programmer might encounter after applying three such
-@;  @emph{type conversion steps} to the untyped configuration.
-@; In general, let the notation @${c_1 \rightarrow_k c_2} express the idea
-@;  that a programmer starting from configuration @${c_1} (in row
-@;  @${i}) could reach configuration @${c_2} (in row @${j}) after
-@;  taking at most @${k} type conversion steps (@${j - i \le k}).
-@; 
-@; Configurations in @figure-ref{fig:suffixtree-lattice} are furthermore labeled
-@;  with their performance overhead relative to the untyped configuration on Racket
-@;  version 6.2.
-@; With these labels, a language implementor can draw several conclusions about
-@;  the performance overhead of gradual typing in this program.
-@; For instance, @|suffixtree-num-D-str| configurations run within a
-@;  @id[suffixtree-sample-D]x overhead.
-@;  @; and @|suffixtree-num-k-str| configurations
-@;  @; are at most @integer->word[suffixtree-sample-k] type conversion step from a
-@;  @; configuration that runs within a @id[suffixtree-sample-D]x overhead.
-@; High overheads are common (@id[suffixtree-num-max] configurations have over
-@;  @id[suffixtree-max]x overhead), but the fully typed configuration runs faster
-@;  (0.7x overhead) than the untyped configuration because Typed Racket uses the
-@;  type annotations to compile efficient bytecode.
-@; 
-@; A labeled lattice such as @figure-ref{fig:suffixtree-lattice} is a @emph{performance lattice}.
-@; The same lattice without labels is a @emph{configuration lattice}.
-@; Practically speaking, users of a gradual type system explore configuration lattices and maintainers of such systems may use performance lattices to evaluate overall performance.
-@; 
-@; 
-@; @; -----------------------------------------------------------------------------
-@; @subsection[#:tag "sec:measurements"]{Performance Metrics}
-@; 
-@; The most basic question, and least important, about a gradually typed language is
-@;  how fast fully-typed programs are in comparison to their fully untyped relative.
-@; In principle and in Typed Racket, static types enable optimizations and can
-@;  serve in place of runtime tag checks.
-@; The net effect of such improvements may, however, be offset by the runtime cost
-@;  of enforcing type soundness.
-@; Relative performance is therefore best described as a ratio, to capture the
-@;  possibility of speedups and slowdowns.@;
-@; 
-@;     @definition["typed/untyped ratio"]{
-@;      The typed/untyped ratio of a performance
-@;       lattice is the time needed to run the top (fully typed) configuration divided by the
-@;       time needed to run the bottom (untyped) configuration.
-@;     }
-@; 
-@; For users of a gradual type system, the important performance
-@;  question is how much overhead their current configuration suffers.
-@;  @; RELATIVE TO previous version (standardized as "untyped program")
-@; If the performance overhead is low enough, programmers can release the
-@;  configuration to clients.
-@; Depending on the nature of the application, some developers might not accept
-@;  any performance overhead.
-@; Others may be willing to tolerate an order-of-magnitude slowdown.
-@; The following parameterized definition of a deliverable configuration accounts
-@;  for these varying requirements.@;
-@; 
-@;     @definition[@list{@ddeliverable{}}]{
-@;      A configuration
-@;       is @ddeliverable{} if its performance is no worse than a
-@;       factor of @${D} slowdown compared to the untyped configuration.
-@;      @;A program is @ddeliverable{} if all its configurations are @ddeliverable{}.
-@;     }
-@; 
-@; @; NOTE: really should be using %, but Sec 4 shows why stick to x
-@; @;
-@; If an application is currently in a non-@ddeliverable[] configuration,
-@;  the next question is how much work a team must invest to reach a
-@;  @ddeliverable[] configuration.
-@; One coarse measure of ``work'' is the number of additional modules that must be
-@;  annotated with types before performance improves.@;
-@; 
-@;     @definition[@list{@kstep{}}]{
-@;      A configuration @exact{$c_1$} is @kstep[] if @exact{$c_1 \rightarrow_k c_2$}
-@;       and @exact{$c_2$} is @ddeliverable{}.
-@;     }
-@; 
-@; The number of @kstep[] configurations captures the experience of a prescient
-@;  programmer that converts the @exact{$k$} modules that maximize the performance
-@;  improvement.
-@; 
-@; @(define sample-data
-@;   (let* ([rng (vector->pseudo-random-generator (vector 0 1 2 3 4 5))]
-@;          [approx (lambda (n) (let ([offset (/ n (random 1 10 rng))]) (if (zero? (random 0 1 rng)) (+ n offset) (- n offset))))]
-@;          [mean+std* `#((20 . 0)
-@;                        (50 . 0) (,(approx 50) . 0) (,(approx 50) . 0)
-@;                        (30 . 0) (,(approx 30) . 0) (,(approx 30) . 0)
-@;                        (10 . 0))]
-@;          [mean (lambda (i) (car (vector-ref mean+std* i)))])
-@;     (lambda (tag)
-@;       (case tag
-@;        [(c000) (mean 0)]
-@;        [(c001) (mean 1)]
-@;        [(c010) (mean 2)]
-@;        [(c100) (mean 3)]
-@;        [(c011) (mean 4)]
-@;        [(c101) (mean 5)]
-@;        [(c110) (mean 6)]
-@;        [(c111) (mean 7)]
-@;        [(all) (make-typed-racket-info (for/vector ((ms (in-vector mean+std*))) (list (car ms))))]
-@;        [else (raise-user-error 'sample-data "Invalid configuration '~a'. Use e.g. c000 for untyped." tag)]))))
-@; @(define (sample-overhead cfg)
-@;   (ceiling (/ (sample-data cfg) (sample-data 'c000))))
-@; 
-@;     @figure["fig:demo-lattice" "Sample performance lattice"
-@;       (parameterize ([*LATTICE-CONFIG-X-MARGIN* 30]
-@;                      [*LATTICE-CONFIG-Y-MARGIN* 8]
-@;                      [*LATTICE-UNIT-X-MARGIN* 0]
-@;                      [*LATTICE-LINE-ALPHA* 0.8])
-@;         (performance-lattice (sample-data 'all))) @; TODO sample data =/= perf-info struct
-@;     ]
-@; 
-@; 
-@; Let us illustrate these terms with an example.
-@; Suppose there is a project with
-@;  three modules where the untyped configuration runs in @id[(sample-data 'c000)]
-@;  seconds and the typed configuration runs in @id[(sample-data 'c111)] seconds.
-@; Furthermore, suppose half the mixed configurations run in
-@;   approximately @id[(sample-data 'c001)] seconds and the other half run in
-@;   approximately @id[(sample-data 'c011)] seconds.
-@; @Figure-ref{fig:demo-lattice} is a performance lattice for this hypothetical program.
-@; The label below each configuration is its overhead relative to the untyped configuration.
-@; 
-@; @(let* ([tu-ratio (/ (sample-data 'c111) (sample-data 'c000))]
-@;         [t-str @id[(sample-overhead 'c111)]]
-@;         [g-overheads (map sample-overhead '(c011 c101 c110 c001 c010 c100))]
-@;         [min-g (inexact->exact (apply max (take g-overheads 3)))]
-@;         [max-g (inexact->exact (apply max g-overheads))])
-@;   @elem{
-@;     The typed/untyped ratio is @id[tu-ratio],
-@;      indicating a performance improvement due to adding types.
-@;     The typed configuration is also
-@;       @ddeliverable[t-str]
-@;       because it runs within a @elem[t-str]x
-@;       slowdown relative to the untyped configuration.
-@;     All mixed configurations are
-@;       @ddeliverable[@id[max-g]], but only three are, e.g.,
-@;       @ddeliverable[@id[min-g]].
-@;     Lastly, the mixed configurations are all @kstep["2" t-str]
-@;      because they can reach the typed configuration in at most two type conversion steps.
-@;   })
-@; 
-@; The ratio of @ddeliverable{D} configurations in a performance lattice is a
-@;  measure of the overall feasibility of gradual typing.
-@; When this ratio is high, then no matter how the application evolves,
-@;  performance is likely to remain acceptable.
-@; Conversely, a low ratio implies that a team may struggle to recover performance after
-@;  typing a few modules.
-@; Practitioners with a fixed performance requirement @${D} can therefore use the number
-@;  of @ddeliverable[] configurations to extrapolate the performance of a gradual type system.
-@; 
-@; 
-@; @; -----------------------------------------------------------------------------
-@; @subsection[#:tag "sec:graphs"]{Overhead Plots}
-@; 
-@; @; less than half of all @bm{suffixtree} configurations run within a @id[(*MAX-OVERHEAD*)]x slowdown.
-@; 
-@; Although a performance lattice contains a comprehensive description of
-@;  performance overhead, it does not effectively communicate this information.
-@; It is difficult to tell, at a glance, whether a program has good or bad
-@;  performance relative to its users' requirements.
-@; Comparing the relative performance of two or more lattices is also difficult
-@;  and is in practice limited to programs with an extremely small number of
-@;  modules.
-@; 
-@; The main lesson to extract from a performance lattice is the proportion of
-@;  @kstep{} configurations for various @${k} and @${D}.
-@; In other words, this proportion describes the number of configurations (out of
-@;  the entire lattice) that are at most @${k} upward steps from a @ddeliverable{D}
-@;  configuration.
-@; One way to plot this information is to fix a value for @${k}, say @${k=0}, and
-@;  consider a set of values @exact{$d_0,\ldots,d_{n-1}$} for @${D}.
-@; The set of proportions of @kstep["0" "d_i"] configurations defines a cumulative
-@;  distribution function with the value of @${D} on the independent axis and the
-@;  proportion of configurations on the dependent axis.
-@; 
-@; @Figure-ref{fig:suffixtree-plot} demonstrates two such @emph{overhead plots},
-@;  summarizing the data in @figure-ref{fig:suffixtree-lattice}.
-@; @; TODO awkward
-@; Specifically, each plots the @|suffixtree-num-configs-str| configurations of a
-@;  program called @bm{suffixtree} using data measured on Racket
-@;  v@|suffixtree-lattice-version|.
-@; The plot on the left fixes @${k=0} and plots the proportion of @kstep["0" "D"]
-@;  configurations.
-@; The plot on the right fixes @${k=1} and plots the proportion of @kstep["1" "D"]
-@;  configurations.
-@; Both plots consider @${@id[suffixtree-num-samples]} values of @${D} evenly spaced between 1x and
-@;  20x.
-@; The line on each plot represents the cumulative distribution function.
-@; The x-axis is log scaled to focus on low overheads.
-@; 
-@; The plot on the left, in which @${k=0}, confirms the observation made in
-@;  @secref{sec:method:lattice} that @(id (round (* 100 (/ suffixtree-num-D
-@;  suffixtree-num-configs))))% of the @|suffixtree-num-configs-str| configurations
-@;  (@|suffixtree-num-D-str| configurations) run within a @id[suffixtree-sample-D]x
-@;  overhead.
-@; For values of @${D} larger than 2x, the proportion of @ddeliverable{D}
-@;  configurations is slightly larger, but even at a @id[MAX-OVERHEAD]x overhead,
-@;  this proportion is only @(id (round (* 100 (/ suffixtree-num-D-max
-@;  suffixtree-num-configs))))%.
-@; The plot on the right shows that the proportion of @kstep["1" "D"] is typically
-@;  twice as high as the proportion of @ddeliverable{} configurations for this
-@;  benchmark.
-@; 
-@; This presentation scales to arbitrarily large programs because the @${y}-axis
-@;  plots the proportion of @ddeliverable{D} configurations; in contrast, a
-@;  performance lattice contains exponentially many nodes.
-@; Furthermore, plotting the overhead for multiple implementations of a gradual
-@;  type system on the same set of axes conveys their relative performance.
-@; 
-@; @figure*["fig:suffixtree-plot" @elem{Overhead plots for @bm{suffixtree}, on Racket v@|suffixtree-lattice-version|.
-@; The unlabeled vertical ticks mark, from left-to-right:
-@;   1.2x, 1.4x, 1.6x, 1.8x, 4x, 6x, 8x, 10x, 12x, 14x, 16x, and 18x.
-@; }
-@;   (parameterize ((*OVERHEAD-SAMPLES* suffixtree-num-samples))
-@;     (overhead-plot S))
-@; ]
-@; 
-@; @; ---
-@; 
-@; @parag{How to Read the Plots}
-@; Overhead plots are cumulative distribution functions.
-@; As the value of @${D} increases along the @|x-axis|, the number of
-@;  @ddeliverable{D} configurations is monotonically increasing.
-@; The important question is how many configurations are @ddeliverable{D}
-@;  for low values of @${D}.
-@; If this number is large, then a developer who applies gradual typing to a
-@;  similar program has a large chance that the configuration they arrive at
-@;  is a @ddeliverable{D} configuration.
-@; The area under the curve is the answer to this question.
-@; A curve with a large shaded area below it implies that a large number
-@;  of configurations have low performance overhead.
-@; 
-@; @(let ([d0 "d_0"]
-@;        [d1 "d_1"]) @elem{
-@;   The second most important aspects of an overhead plot are the two values of @${D}
-@;    where the curve starts and ends.
-@;   More precisely, if @${h\!:\!\mathbb{R}^+\!\rightarrow\!\mathbb{N}} is a function
-@;    that counts the percent of @ddeliverable{D}
-@;    configurations in a benchmark, the critical points are the smallest
-@;    overheads @${@|d0|, @|d1|} such
-@;    that @${h(@|d0|)\!>\!0\%} and @${h(@|d1|)\!=\!100\%}.
-@;   An ideal start-value would lie between zero and one; if @${@|d0|\!<\!1} then
-@;    at least one configuration runs faster than the Python baseline.
-@;   The end-value @${@|d1|} is the overhead of the slowest-running configuration.
-@; })
-@; 
-@; Lastly, the slope of a curve corresponds to the likelihood that
-@;  accepting a small increase in performance overhead increases the number
-@;  of deliverable configurations.
-@; A flat curve (zero slope) suggests that the performance of a group of
-@;  configurations is dominated by a common set of type annotations.
-@; Such observations are no help to programmers facing performance issues,
-@;  but may help language designers find inefficiencies in their implementation
-@;  of gradual typing.
-@; 
-@; 
-@; 
-@; @subsection{Assumptions and Limitations}
-@; 
-@; Plots in the style of @figure-ref{fig:suffixtree-plot} rest on two assumptions
-@;  and have two significant limitations, which readers must keep in mind as they
-@;  interpret the results.
-@; 
-@; @; - assn: log scale
-@; The @emph{first assumption} is that configurations with less than 2x overhead
-@;  are significantly more practical than configurations with a 10x overhead or more.
-@; Hence the plots use a log-scaled x-axis to simultaneously encourage
-@;  fine-grained comparison in the 1.2x to 1.6x overhead range and blur the
-@;  distinction between, e.g., 14x and 18x slowdowns.
-@; 
-@; @; Zorn: 30% of execution time in storage management "represent the worst-case overhead that that might be expected to be associated with garbage collection."
-@; 
-@; @; - assn: 20x
-@; The @emph{second assumption} is that configurations with more than 20x
-@;  overhead are completely unusable in practice.
-@; Pathologies like the 100x slowdowns in @figure-ref{fig:suffixtree-lattice}
-@;  represent a challenge for implementors, but if these overheads suddenly
-@;  dropped to 30x, the configurations would still be useless to developers.
-@; 
-@; @; - limit: no identity, no relation between configs (where is typed?)
-@; The @emph{first limitation} of the overhead plots is that they do not report
-@;  the number of types in a configuration.
-@; The one exception is the fully-typed configuration; its overhead is given
-@;  explicitly through the typed/untyped ratio above the left plot.
-@; 
-@; @; - limit: angelic choice
-@; The @emph{second limitation} is that the @kstep{1} plot does not show how we
-@;  optimistically chose the best type conversion step.
-@; In a program with @${N} modules, a programmer has at most @${N} type conversion
-@;  steps to choose from, some of which may not lead to a @ddeliverable[] configuration.
-@; For example, there are six configurations with exactly one typed module in
-@;  @figure-ref{fig:suffixtree-lattice} but only one of these is @ddeliverable{1}.
-@; 
-@; 
-@; 
-@; 
-@; 
-@; @; -----------------------------------------------------------------------------
-@; @subsection{Definitions}
-@; 
-@; 
-@; @; @subsection[#:tag "sec:method:adapt"]{Generalizing the Takikawa Method}
-@; 
-@; A gradual typing system enriches a dynamically typed language with a notion of static typing;
-@;  that is, some pieces of a program can be statically typed.
-@; The @emph{granularity} of a gradual typing system defines the minimum size of
-@;  such pieces in terms of abstract syntax.
-@; A performance evaluation must define its own granularity to systematically
-@;  explore the ways that a programmer may write type annotations, subject to
-@;  practical constraints.
-@; 
-@; @definition["granularity"]{
-@;   The @emph{granularity} of an evaluation is the syntactic unit at which
-@;    the evaluation adds or removes type annotations.
-@; }
-@; 
-@; For example, the evaluation in @citet{tfgnvf-popl-2016} is at the granularity
-@;  of modules.
-@; The evaluation in @citet{vss-popl-2017} is at the granularity
-@;  of whole programs.
-@; @Section-ref{sec:protocol} defines the @emph{function and class-fields} granularity, which we use for this evaluation.
-@; 
-@; After defining a granularity, a performance evaluation must define a suite of
-@;  programs to measure.
-@; A potential complication is that such programs may depend on external libraries
-@;  or other modules that lie outside the scope of the evaluation.
-@; It is important to distinguish these so-called @emph{contextual modules} from the
-@;  focus of the experiment.
-@; 
-@; @definition["migratable, contextual"]{
-@;   The @emph{migratable modules} in a program define its configurations.
-@;   The @emph{contextual modules} in a program are common across all configurations.
-@; }
-@; 
-@; The granularity and migratable modules define the
-@;  @emph{configurations} of a fully-typed program.
-@; 
-@; @definition["configurations"]{
-@;   Let @${P \tcstep P'}
-@;    if and only if program @${P'} can be obtained from
-@;    @${P} by annotating one syntactic unit in an migratable module.
-@;   Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
-@;    relation.
-@;   {The @${\tcstep} relation expresses the notion of a
-@;    @emph{type conversion step}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
-@;    The @${\tcmulti} relation expresses the notion of @emph{term precision}@~cite{svcb-snapl-2015}.}
-@;   @; note^2: `e0 -->* e1` if and only if `e1 <= e0`
-@;   The @emph{configurations} of a fully-typed program @${P^\tau} are all
-@;    programs @${P} such that @${P\!\tcmulti P^\tau}.
-@;   Furthermore, @${P^\tau} is a so-called @emph{fully-typed configuration};
-@;    an @emph{untyped configuration} @${P^\lambda} has the property @${P^\lambda\!\tcmulti P}
-@;    for all configurations @${P}.
-@; }
-@; 
-@; An evaluation must measure the performance overhead of these configurations
-@;  relative to some default.
-@; A natural baseline is the performance of the original program, distinct from the
-@;  gradual typing system.
-@; 
-@; @definition["baseline"]{
-@;  The @emph{baseline performance} of a program is its running time in the absence
-@;   of gradual typing.
-@; }
-@; 
-@; In Typed Racket, the baseline is the performance of Racket running the
-@;  untyped configuration.
-@; In Reticulated, the baseline is Python running the untyped configuration.
-@; This is not the same as Reticulated running the untyped configuration
-@;  because Reticulated inserts checks in untyped code@~cite{vksb-dls-2014}.
-@; 
-@; @definition["performance ratio"]{
-@;   A @emph{performance ratio} is the running time of a configuration
-@;    divided by the baseline performance of the untyped configuration.
-@; }
-@; 
-@; An @emph{exhaustive} performance evaluation measures the performance of every
-@;  configuration.
-@; The natural way to interpret this data is to choose a notion of
-@;  ``good performance'' and count the proportion of ``good'' configurations.
-@; In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
-@;  performance overhead they could deliver to clients.
-@; 
-@; @definition[@ddeliverable{D}]{
-@;   For @$|{D \in \mathbb{R}^{+}}|, a configuration is @emph{@ddeliverable{D}}
-@;    if its performance ratio is no greater than @${D}.
-@; }
-@; 
+
+@subsection{By Example}
+
+A Typed Racket program is a collection of modules (@figure-ref{fig:example-program}).
+Some modules are under the direct control of the programmer;
+ these migratable modules are often identified with the program.
+Other modules are controlled by different programmers.
+These contextual modules may come from the standard library or
+ a package registry.
+
+@figure*["fig:example-program" @elem{
+  Example Typed Racket program.
+  The four @emph{migratable} modules on the left are under the programmer's control.
+  The two @emph{contextual} modules on the right represent libraries and core
+   language APIs.
+  }
+  (make-example-program-pict)
+]
+
+Gradual typing in Typed Racket lets a programmer choose the language
+ for each migratable module.
+Thus a program with @${N} migratable modules opens a space of @${2^N}
+ possibilites (@figure-ref{fig:example-lattice-0})---and no more, because the
+ contextual modules are not easily open to modification.
+
+@(let* ((lattice-version "6.4")
+        (S (tr:benchmark-name->performance-info 'fsm lattice-version))
+        (num-modules (tr:benchmark->num-modules tr:fsm))
+       ) @list[
+@elem{
+An exhaustive performance evaluation must consider all @${2^N} possibilities.
+After all, a programmer might choose any one; there is no reason why
+ not.
+To give one example, the performance lattice in @figure-ref{fig:example-lattice}
+ shows this full dataset for a program named @bm{fsm} that has @id[num-modules]
+ migratable modules.
+The @integer->word[(expt 2 num-modules)] configurations are arranged in a
+ lattice with the fully-untyped configuration on the bottom and the fully-typed
+ configuration on top.
+A given row in the lattice groups configurations with the same number of typed
+ modules (black squares).
+For instance, configurations in the second row from the bottom contain two
+ typed modules.
+These represent all possible ways of converting two modules in the untyped
+ configuration to Typed Racket.
+Similarly, configurations in the third row represent all possible
+ configurations a programmer might encounter after applying three such
+ @emph{type conversion steps} to the untyped configuration.
+In general, let the notation @${c_1 \rightarrow_k c_2} express the idea
+ that a programmer starting from configuration @${c_1} (in row
+ @${i}) could reach configuration @${c_2} (in row @${j}) after
+ taking at most @${k} type conversion steps (@${j - i \le k}).
+}
+@figure*["fig:example-lattice" @elem{
+Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
+  @(parameterize ([*LATTICE-CONFIG-X-MARGIN* 3]
+                  [*LATTICE-CONFIG-Y-MARGIN* 8]
+                  [*FONT-SIZE* 12]
+                  [*LATTICE-UNIT-HEIGHT* 6]
+                  [*LATTICE-UNIT-WIDTH* 3]
+                  [*LATTICE-UNIT-X-MARGIN* 0]
+                  [*LATTICE-UNIT-BORDER-WIDTH* 0]
+                  [*LATTICE-LINES?* #true]
+                  [*LATTICE-CONFIG-LABEL-MARGIN* 1])
+    (performance-lattice S))
+]
+@elem{
+Configurations in @figure-ref{fig:example-lattice} are furthermore labeled
+ with their performance overhead relative to the untyped configuration on Racket
+ version @|lattice-version|.
+With these labels, a language implementor can draw several conclusions about
+ the performance overhead of gradual typing in this program.
+A first observation is that the fully-typed code runs the same speed as untyped.
+This 1x overhead is also the overall best point in the lattice.
+Six other configurations run within a 2x overhead, but the rest suffer
+ from orders-of-magnitude slowdowns.
+Gradual typing in @bm{fsm} can come at a huge cost.
+}
+@elem{
+Drawing such conclusions is not easy, however, even for this small program.
+Analyzing a lattice for programs with eight or more modules is clearly infeasible.
+@Figure-ref{fig:overhead-plot-example} presents a graphical alternative,
+ an @emph{overhead plot},
+ that anonymizes configurations and focuses on overhead relative to untyped.
+@; TODO awkward, haven't introduced ddeliv yet!
+Overhead plots are cumulative distribution functions.
+As the value of @${D} increases along the @|x-axis|, the number of
+ @ddeliverable{D} configurations is monotonically increasing.
+The important question is how many configurations are @ddeliverable{D}
+ for low values of @${D}.
+If this number is large, then a developer who applies gradual typing to a
+ similar program has a large chance that the configuration they arrive at
+ is a @ddeliverable{D} configuration.
+The area under the curve is the answer to this question.
+A curve with a large shaded area below it implies that a large number
+ of configurations have low performance overhead.
+
+@(let ([d0 "d_0"]
+       [d1 "d_1"]) @elem{
+  The second most important aspects of an overhead plot are the two values of @${D}
+   where the curve starts and ends.
+  More precisely, if @${h\!:\!\mathbb{R}^+\!\rightarrow\!\mathbb{N}} is a function
+   that counts the percent of @ddeliverable{D}
+   configurations in a benchmark, the critical points are the smallest
+   overheads @${@|d0|, @|d1|} such
+   that @${h(@|d0|)\!>\!0\%} and @${h(@|d1|)\!=\!100\%}.
+  An ideal start-value would lie between zero and one; if @${@|d0|\!<\!1} then
+   at least one configuration runs faster than the Python baseline.
+  The end-value @${@|d1|} is the overhead of the slowest-running configuration.
+})
+
+Lastly, the slope of a curve corresponds to the likelihood that
+ accepting a small increase in performance overhead increases the number
+ of deliverable configurations.
+A flat curve (zero slope) suggests that the performance of a group of
+ configurations is dominated by a common set of type annotations.
+Such observations are no help to programmers facing performance issues,
+ but may help language designers find inefficiencies in their implementation
+ of gradual typing.
+}
+@render-overhead-plot*[
+  "fig:overhead-plot-example"
+  @elem{
+Overhead plot for @bm{fsm}, on Racket v@|lattice-version|.
+The unlabeled vertical ticks mark, from left-to-right:
+1.2x, 1.4x, 1.6x, 1.8x, 4x, 6x, 8x, 10x, 12x, 14x, 16x, and 18x.
+  }
+  ""
+  tr:render-overhead-plot
+  '(fsm)
+  #f
+]
+@elem{
+An overhead plot in the style of @figure-ref{fig:overhead-plot-example}
+ scales to arbitrarily large programs because the @|y-axis|
+ plots the proportion of @ddeliverable{D} configurations; in contrast, a
+ performance lattice contains exponentially many nodes.
+Furthermore, plotting the overhead for multiple implementations of a gradual
+ type system on the same set of axes conveys their relative performance.
+}
+])
+
+@; TODO more words here?
+
+To summarize, the exhaustive method has three steps:
+@itemlist[#:style 'ordered
+ @item{
+   identify a suite of fully-typed programs;
+ }
+ @item{
+   measure the performance of all gradually-typed @emph{configurations} of the programs;
+ }
+ @item{
+   count the number of configurations with performance overhead no greater than a certain limit.
+ }
+]
+
+
+@subsection{By Definition}
+
+The following definitions capture the intuitions above and generalize
+ beyond Typed Racket.
+As a running example, this section will use Reticulated Python to demonstrate
+ the generalization.
+Reticulated permits optional types for every parameter to a function,
+ every function return type, and every class field.
+
+A gradual typing system enriches a dynamically typed language with a notion of static typing;
+ that is, some pieces of a program can be statically typed.
+The @emph{granularity} of a gradual typing system defines the minimum size of
+ such pieces in terms of abstract syntax.
+A performance evaluation must define its own granularity to systematically
+ explore the ways that a programmer may write type annotations, subject to
+ practical constraints.
+
+@definition["granularity"]{
+  The @emph{granularity} of an evaluation is the syntactic unit at which
+   the evaluation adds or removes type annotations.
+}
+
+For example, the evaluation in @citet{tfgnvf-popl-2016} is at the granularity
+ of modules.
+The evaluation in @citet{vss-popl-2017} is at the granularity
+ of whole programs.
+@Section-ref{sec:protocol} defines the @emph{function and class-fields} granularity, which we use for this evaluation.
+
+After defining a granularity, a performance evaluation must define a suite of
+ programs to measure.
+A potential complication is that such programs may depend on external libraries
+ or other modules that lie outside the scope of the evaluation.
+It is important to distinguish these so-called @emph{contextual modules} from the
+ focus of the experiment.
+
+@definition["migratable, contextual"]{
+  The @emph{migratable modules} in a program define its configurations.
+  The @emph{contextual modules} in a program are common across all configurations.
+}
+
+The granularity and migratable modules define the
+ @emph{configurations} of a fully-typed program.
+
+@definition["configurations"]{
+  Let @${P \tcstep P'}
+   if and only if program @${P'} can be obtained from
+   @${P} by annotating one syntactic unit in an migratable module.
+  Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
+   relation.
+  {The @${\tcstep} relation expresses the notion of a
+   @emph{type conversion step}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
+   The @${\tcmulti} relation expresses the notion of @emph{term precision}@~cite{svcb-snapl-2015}.}
+  @; note^2: `e0 -->* e1` if and only if `e1 <= e0`
+  The @emph{configurations} of a fully-typed program @${P^\tau} are all
+   programs @${P} such that @${P\!\tcmulti P^\tau}.
+  Furthermore, @${P^\tau} is a so-called @emph{fully-typed configuration};
+   an @emph{untyped configuration} @${P^\lambda} has the property @${P^\lambda\!\tcmulti P}
+   for all configurations @${P}.
+}
+
+An evaluation must measure the performance overhead of these configurations
+ relative to some default.
+A natural baseline is the performance of the original program, distinct from the
+ gradual typing system.
+
+@definition["baseline"]{
+ The @emph{baseline performance} of a program is its running time in the absence
+  of gradual typing.
+}
+
+In Typed Racket, the baseline is the performance of Racket running the
+ untyped configuration.
+In Reticulated, the baseline is Python running the untyped configuration.
+This is not the same as Reticulated running the untyped configuration
+ because Reticulated inserts checks in untyped code@~cite{vksb-dls-2014}.
+
+@definition["performance ratio"]{
+  A @emph{performance ratio} is the running time of a configuration
+   divided by the baseline performance of the untyped configuration.
+}
+
+An @emph{exhaustive} performance evaluation measures the performance of every
+ configuration.
+The natural way to interpret this data is to choose a notion of
+ ``good performance'' and count the proportion of ``good'' configurations.
+In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
+ performance overhead they could deliver to clients.
+
+@definition[@ddeliverable{D}]{
+  For @$|{D \in \mathbb{R}^{+}}|, a configuration is @emph{@ddeliverable{D}}
+   if its performance ratio is no greater than @${D}.
+}
+
+
+@subsection{Threats and Limitations}
+
+Fixed types.
+@; TODO
+
+Granularity doesn't go inside type, to allow List(Dyn) etc.
+@; TODO
+
+Plots in the style of @figure-ref{fig:overhead-plot-example} rest on two
+ assumptions.
+Readers must keep these in mind as they
+ interpret the results.
+
+@; - assn: log scale
+The first assumption is that configurations with less than 2x overhead
+ are significantly more practical than configurations with a 10x overhead or more.
+Hence the plots use a log-scaled x-axis to simultaneously encourage
+ fine-grained comparison in the 1.2x to 1.6x overhead range and blur the
+ distinction between, e.g., 14x and 18x slowdowns.
+
+@; - assn: 20x
+The second assumption is that configurations with more than @id[tr:MAX-OVERHEAD]x
+ overhead are completely unusable in practice.
+Pathologies like the 100x slowdowns in @figure-ref{fig:example-lattice}
+ represent a challenge for implementors, but if these overheads suddenly
+ dropped to 30x, the configurations would still be useless to developers.
+
+
+@section{Approximate Evaluation Method}
+
 @; If an exhaustive performance evaluation is infeasible, an alternative is
 @;  to select configurations via simple random sampling and measure the
 @;  proportion of @ddeliverable{D} configurations in the sample.
@@ -640,7 +451,6 @@ includes benchmark adaptation
 @;  empirical justification for the simple random approximation method.
 @; 
 @; 
-@; @subsection{Approximate Evaluation Method}
 @; 
 @; @;@Section-ref{sec:evaluation} instantiates this method using @${r\!=\!@id[rp:NUM-SAMPLE-TRIALS]}
 @; @; samples each containing @${@id[rp:SAMPLE-RATE]\!*\!(F + C)} configurations,
@@ -762,6 +572,17 @@ includes benchmark adaptation
 @;  (4) add type annotations to the migratable modules.
 @; We modify any Python code that Reticulated's type
 @;  system cannot validate, such as code that requires untagged unions or polymorphism.
+
+
+@section{Benchmark Selection}
+
+Our approach to benchmarks.
+As large as possible.
+As real as possible.
+To this end, "origin" below and credits to original programs author.
+Some however from benchmark suite chosen because prior Python evaluation.
+
+TODO
 
 
 @; -----------------------------------------------------------------------------
@@ -1117,7 +938,7 @@ The newest version of the benchmarks should avoid these pathologies.
 
 @Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length tr:ALL-BENCHMARKS) overhead-plots-per-page))]
  present the results of measuring the benchmark programs in a series of overhead plots.
-As in @figure-ref{fig:suffixtree-plot}, the plots are
+As in @figure-ref{fig:overhead-plot-example}, the plots are
  cumulative distribution functions for @ddeliverable[] configurations.
 
 @; -- overall, bleak picture

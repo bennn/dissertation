@@ -57,6 +57,8 @@
   bm-desc
   make-lib
   render-overhead-plot*
+
+  make-example-program-pict
 )
 
 (require
@@ -298,12 +300,16 @@
     (for/list ((bm-name* (in-list page*))
                (page-num (in-naturals)))
       (define tag
-        (string-append base-tag ":" (number->string page-num)))
+        (if (= num-pages 1)
+          base-tag
+          (string-append base-tag ":" (number->string page-num))))
       (define cap
-        (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
-          (if (zero? page-num)
-            (list short " " caption-long)
-            short)))
+        (if (= num-pages 1)
+          (list caption-short caption-long)
+          (let ((short (format "~a (~a/~a)." caption-short (+ 1 page-num) num-pages)))
+            (if (zero? page-num)
+              (list short " " caption-long)
+              short))))
       (define grid-y
         (let ((len (length bm-name*)))
           (+ (* overhead-plot-y len)
@@ -322,4 +328,22 @@
             (render-thunk))))
       (figure* tag cap pp))))
 
+(define (make-module-pict color)
+  (define w (/ thesis-max-page-width 12))
+  (file-icon w (* 1.5 w) color))
+
+(define (make-migratable-pict)
+  (make-module-pict "black"))
+
+(define (make-contextual-pict)
+  (make-module-pict "gray"))
+
+(define (make-configuration-pict n make-pict)
+  (apply hb-append 4 (build-list n (lambda (_i) (make-pict)))))
+
+(define (make-example-program-pict)
+  (hb-append
+    20
+    (make-configuration-pict 4 make-migratable-pict)
+    (make-configuration-pict 2 make-contextual-pict)))
 
