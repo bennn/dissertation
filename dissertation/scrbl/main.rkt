@@ -66,6 +66,7 @@
     add-between
     partition
     take
+    take-right
     last)
   classicthesis/lang
   racket/format

@@ -7,6 +7,9 @@
   overhead-y-sep
   overhead-plot-y
 
+  SAMPLE-RATE
+  NUM-SAMPLE-TRIALS
+
   log-bg-thesis-info
   log-bg-thesis-warning
   log-bg-thesis-error)
@@ -23,3 +26,6 @@
      overhead-plots-per-page))
 
 (define-logger bg-thesis)
+
+(define SAMPLE-RATE 10)
+(define NUM-SAMPLE-TRIALS 10)

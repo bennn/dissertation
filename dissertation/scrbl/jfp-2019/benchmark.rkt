@@ -39,6 +39,7 @@
   get-ratios-table
   render-ratios-table
   render-overhead-plot
+  render-validate-plot
   benchmark-name->performance-info
   benchmark->num-modules
 
@@ -52,6 +53,8 @@
     find-relative-path)
   racket/list
   racket/format
+  (only-in racket/random
+    random-sample)
   (only-in racket/file
     file->value)
   racket/match
@@ -420,6 +423,16 @@
   (define data-dir (benchmark-name->data-file bm-name version))
   (make-typed-racket-info data-dir))
 
+(define (performance-info->sample-info pi #:replacement? [replace? #f])
+  (define num-in-sample
+    (* SAMPLE-RATE (performance-info->num-units pi)))
+  (define rand-gen
+    (vector->pseudo-random-generator '#(2020 07 13 18 54 00)))
+  (define sample*
+    (for/list ((_i (in-range NUM-SAMPLE-TRIALS)))
+      (random-sample (in-configurations pi) num-in-sample rand-gen #:replacement? replace?)))
+  (make-sample-info pi sample*))
+
 (define STATIC-INFO-TITLE*
   (list "Benchmark" (bold "N") "SLOC"))
 
@@ -523,6 +536,13 @@
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (render-validate-plot bm-name)
+  (define pi (benchmark-name->performance-info bm-name))
+  (define si (performance-info->sample-info pi #:replacement? #f))
+  (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (validate-samples-plot pi si)))
 
 (define (deliverable* D v bm*)
   (define name* (map benchmark-name bm*))

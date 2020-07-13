@@ -504,31 +504,31 @@ Question is, how well does a manageable experiment size work in practice?
 
 @Figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"] test the
  @sraapproximation["r" "s" "95"] method using 
- @${r\!=\!@id[rp:NUM-SAMPLE-TRIALS]} samples each containing a linear
+ @${r\!=\!@id[NUM-SAMPLE-TRIALS]} samples each containing a linear
  number of configurations.
-More precisely, each sample contains @${@id[rp:SAMPLE-RATE]\!*\!N} configurations
+More precisely, each sample contains @${@id[SAMPLE-RATE]\!*\!N} configurations
  out of the @${2^N} possibilities in the benchmark at hand.
 These plots show both the true data and the result of sampling:
  a solid blue line shows the true proportion of @ddeliverable{D} configurations,
  and an orange interval shows the result of approximation.
+Don't worry about the interpretation of the blue lines for now,
+ the application sections go into great detail.
 
-@;@render-overhead-plot*[
-@;  "fig:tr:validate-sample"
-@;  @elem{Validate Typed Racket}
-@;  ""
-@;  tr:render-validate-plot
-@;  '()
-@;  #f
-@;]
-
-@id[rp:VALIDATE-BENCHMARKS]
+@render-overhead-plot*[
+  "fig:tr:validate-sample"
+  @elem{Typed Racket sample validation.}
+  ""
+  tr:render-validate-plot
+  (map tr:benchmark-name (take-right tr:ALL-BENCHMARKS overhead-plots-per-page))
+  tr:cache-dir
+]
 
 @render-overhead-plot*[
   "fig:rp:validate-sample"
-  @elem{Reticulated sample validation}
+  @elem{Reticulated sample validation.}
   ""
   rp:render-validate-plot
-  rp:VALIDATE-BENCHMARKS
+  (take rp:VALIDATE-BENCHMARKS overhead-plots-per-page)
   rp:cache-dir
 ]
 
@@ -542,7 +542,7 @@ Thus a linear number of samples appears sufficient.
 For readers interested in reproducing the above results, this section describes
  the protocol that generated @figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"].
 
-To generate one random sample, select @${@id[rp:SAMPLE-RATE]\!*\!N} configurations
+To generate one random sample, select @${@id[SAMPLE-RATE]\!*\!N} configurations
  without replacement and compute their overhead.
 We have tried sampling with replacement and found similar results.
 
@@ -1069,10 +1069,10 @@ One syntactic unit in the experiment is either one function,
 For benchmarks with at most @$|{2^{17}}| configurations, we conduct an exhaustive
  evaluation.
 For larger benchmarks we conduct a simple random approximation using
- @integer->word[rp:NUM-SAMPLE-TRIALS] samples each containing @${@id[rp:SAMPLE-RATE]\!*\!(F + C)}
+ @integer->word[NUM-SAMPLE-TRIALS] samples each containing @${@id[SAMPLE-RATE]\!*\!(F + C)}
  configurations, where @${F} is the number of functions in the benchmark and
  @${C} is the number of classes.
-Note that the number @id[rp:SAMPLE-RATE] was chosen simply to collect
+Note that the number @id[SAMPLE-RATE] was chosen simply to collect
  as much data as possible in a reasonable amount of time.
 
 All data in this paper was produced by jobs we sent
@@ -1492,10 +1492,10 @@ The curves for the approximate data
  (i.e., the curves for @bm{sample_fsm}, @bm{aespython}, and @bm{stats}) are intervals
  rather than fixed-width lines.
 For instance, the height of an interval at @${x\!=\!4} is the range of the
- @sraapproximation[rp:NUM-SAMPLE-TRIALS (format "[~a(F+C)]" rp:SAMPLE-RATE) "95"]
+ @sraapproximation[NUM-SAMPLE-TRIALS (format "[~a(F+C)]" SAMPLE-RATE) "95"]
  for the number of @ddeliverable[4] configurations.
 These intervals are thin because there is little variance in the proportion
- of @ddeliverable{D} configurations across the @integer->word[rp:NUM-SAMPLE-TRIALS]
+ of @ddeliverable{D} configurations across the @integer->word[NUM-SAMPLE-TRIALS]
  samples; that said, the @bm{sample_fsm} curve is visibly thicker than the
  @bm{aespython} curve.
 
