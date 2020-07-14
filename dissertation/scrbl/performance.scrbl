@@ -556,55 +556,6 @@ We have not experimented with a more precise method such as
  Fieller's@~cite{f-rss-1957}.
 
 
-@;@; -----------------------------------------------------------------------------
-@; NOTES ABOUT CONVERTING BENCHMARKS ... GENERAL
-@;@subsection[#:tag "sec:tr:conversion"]{From Programs to Benchmarks}
-@;
-@;@(define MIN-ITERS-STR "3")
-@;@(define MAX-ITERS-STR "30")
-@;@(define FREQ-STR "1.40 GHz")
-@;@(define TYPED-BM* (list fsm synth quad))
-@;
-@;@string-titlecase[@integer->word[(- (*NUM-BENCHMARKS*) (length TYPED-BM*))]] of the benchmark programs are adaptations of untyped programs.
-@;The other three benchmarks (@bm{fsm}, @bm{synth}, and @bm{quad}) use most of the type annotations and code from originally-typed programs.
-@;Any differences between the original programs and the benchmarks are due to the following five complications.
-@;
-@;First, the addition of types to untyped code occasionally requires type casts or small refactorings.
-@;For example, the expression @racket[(string->number "42")] has the Typed Racket type @racket[(U Complex #f)].
-@;This expression cannot appear in a context expecting an @racket[Integer] without an explicit type cast.
-@;As another example, the @bm{quad} programs call a library function to partition a @racket[(Listof (U A B))] into a @racket[(Listof A)] and a @racket[(Listof B)] using a predicate for values of type @racket[A].
-@;Typed Racket cannot currently prove that values which fail the predicate have type @racket[B], so the @bm{quad} benchmarks replace the call with two filtering passes.
-@;
-@;Second, Typed Racket cannot enforce certain types across a type boundary.
-@;For example, the core datatypes in the @bm{synth} benchmark are monomorphic because Typed Racket cannot dynamically enforce parametric polymorphism on instances of an untyped structure.
-@;
-@;Third, any contracts present in the untyped programs are represented as type annotations and in-line assertions in the derived benchmarks.
-@;The @bm{acquire} program in particular uses contracts to ensure that certain lists are sorted and have unique elements.
-@;The benchmark enforces these conditions with explicit pre and post-conditions on the relevant functions.
-@;
-@;Fourth, each @emph{static import} of an untyped struct type into typed code generates a unique datatype.
-@;Typed modules that share instances of an untyped struct must therefore reference a common static import site.
-@;The benchmarks include additional contextual modules, called @emph{adaptor modules}, to provide this canonical import site; for each module @${M} in the original program that exports a struct, the benchmark includes an adaptor module that provides type annotations for every identifier exported by @${M}.
-@;Adaptor modules add a layer of indirection, but this indirection does not add measurable performance overhead.
-@;
-@;Fifth, some benchmarks use a different modularization than the original program.
-@;The @bm{kcfa} benchmark is modularized according to comments in the original, single-module program.
-@;The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single file containing all their data structure definitions; the original programs defined these structures in the same module as the functions on the structures.
-@;Lastly, the @bm{quadBG} benchmark has two fewer modules than @bm{quadMB} because it inlines the definitions of two (large) data structures that @bm{quadMB} keeps in separate files.
-@;Removing these boundaries has a negligible affect on performance overhead and greatly reduces the number of configurations.
-@;
-@;
-@;  NOTES FROM RETICULATED
-@; To convert a Reticulated program into a benchmark, we:
-@;  (1) build a driver module that runs the program and collects timing information;
-@;  (2) remove any non-determinism or I/O actions;
-@; @;footnote{@Integer->word[(length '(aespython futen http2 slowSHA))] benchmarks inadvertantly perform I/O actions, see @section-ref{sec:rp:threats}.}
-@;  (3) partition the program into migratable and contextual modules; and
-@;  (4) add type annotations to the migratable modules.
-@; We modify any Python code that Reticulated's type
-@;  system cannot validate, such as code that requires untagged unions or polymorphism.
-
-
 @section{Benchmark Selection}
 
 Our approach to benchmarks.
@@ -613,7 +564,68 @@ As real as possible.
 To this end, "origin" below and credits to original programs author.
 Some however from benchmark suite chosen because prior Python evaluation.
 
-TODO
+
+@subsection[#:tag "sec:tr:conversion"]{From Programs to Benchmarks}
+
+To convert a Reticulated program into a benchmark, we:
+ (1) build a driver module that runs the program and collects timing information;
+ (2) remove any non-determinism or I/O actions;
+ (3) partition the program into migratable and contextual modules; and
+ (4) add type annotations to the migratable modules.
+That said, @integer->word[(length '(aespython futen http2 slowSHA))]
+ benchmarks inadvertantly perform I/O actions, see @section-ref{sec:rp:threats}.
+We modify any Python code that Reticulated's type
+ system cannot validate, such as code that requires untagged unions or polymorphism.
+
+
+@string-titlecase[@integer->word[(- (*NUM-BENCHMARKS*) (length TYPED-BM*))]] of
+ the benchmark programs are adaptations of untyped programs.
+The other three benchmarks (@bm{fsm}, @bm{synth}, and @bm{quad}) use most of
+ the type annotations and code from originally-typed programs.
+Any differences between the original programs and the benchmarks are due to the
+ following five complications.
+
+First, the addition of types to untyped code occasionally requires type casts or small refactorings.
+For example, the expression @racket[(string->number "42")] has the Typed Racket type @racket[(U Complex #f)].
+This expression cannot appear in a context expecting an @racket[Integer] without an explicit type cast.
+As another example, the @bm{quad} programs call a library function to partition a @racket[(Listof (U A B))] into a @racket[(Listof A)] and a @racket[(Listof B)] using a predicate for values of type @racket[A].
+Typed Racket cannot currently prove that values which fail the predicate have type @racket[B], so the @bm{quad} benchmarks replace the call with two filtering passes.
+
+Second, Typed Racket cannot enforce certain types across a type boundary.
+For example, the core datatypes in the @bm{synth} benchmark are monomorphic
+ because Typed Racket cannot dynamically enforce parametric polymorphism on
+ instances of an untyped structure.
+
+Third, any contracts present in the untyped programs are represented as type
+ annotations and in-line assertions in the derived benchmarks.
+The @bm{acquire} program in particular uses contracts to ensure that certain
+ lists are sorted and have unique elements.
+The benchmark enforces these conditions with explicit pre and post-conditions
+ on the relevant functions.
+
+Fourth, each @emph{static import} of an untyped struct type into typed code
+ generates a unique datatype.
+Typed modules that share instances of an untyped struct must therefore
+ reference a common static import site.
+The benchmarks include additional contextual modules, called @emph{adaptor
+ modules}, to provide this canonical import site; for each module @${M} in the
+ original program that exports a struct, the benchmark includes an adaptor
+ module that provides type annotations for every identifier exported by @${M}.
+Adaptor modules add a layer of indirection, but this indirection does not add
+ measurable performance overhead.
+
+Fifth, some benchmarks use a different modularization than the original program.
+The @bm{kcfa} benchmark is modularized according to comments in the original,
+ single-module program.
+The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
+ file containing all their data structure definitions; the original programs
+ defined these structures in the same module as the functions on the structures.
+Lastly, the @bm{quadBG} benchmark has two fewer modules than @bm{quadMB}
+ because it inlines the definitions of two (large) data structures that
+ @bm{quadMB} keeps in separate files.
+Removing these boundaries has a negligible affect on performance overhead and
+ greatly reduces the number of configurations.
+
 
 
 @; -----------------------------------------------------------------------------
