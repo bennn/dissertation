@@ -1,7 +1,8 @@
 \overfullrule=1mm
 
+%% --- override Scribble
 \let\ssum\relax
-
+\renewcommand{\SecRefLocal}[3]{\ref{#1}}
 
 \newcommand{\tcstep}{\rightarrow}
 \newcommand{\tcmulti}{\tcstep\!\!{}^\ast}

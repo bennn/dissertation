@@ -6,10 +6,7 @@
 @; - [X] app TR : benchmarks, protocol, data
 @; - [X] app RP : benchmarks, protocol, data
 @;
-@; special acknowledgment to Asumu, for visualizations in POPL paper,
-@;  because my dissertation has overlap with his
-@;
-@; do NOT need summary (abstract) and intro paragraph
+@; TODO sort retic benchmarks by N, acknowledge origin somewhere else! re-cache
 @;
 @; extra viz:
 @;  JFP appendix, heartbeat plots, ....

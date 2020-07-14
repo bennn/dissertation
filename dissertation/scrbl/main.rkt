@@ -34,6 +34,8 @@
   section-ref
   Chapter-ref
   chapter-ref
+  Table-ref
+  table-ref
   Figures-ref
   figures-ref
 
@@ -193,14 +195,23 @@
   })
 
 (define (Section-ref s)
-  (elem "Chapter" ~ (secref s)))
+  (elem "Chapter" ~ (seclink s)))
+
+(define (section-ref s)
+  (elem "chapter" ~ (seclink s)))
 
 (define Chapter-ref Section-ref)
 
-(define (section-ref s)
-  (elem "chapter" ~ (secref s)))
-
 (define chapter-ref section-ref)
+
+(define (able-ref first-letter lbl)
+  (elem (list first-letter "able" ~ (elem #:style "ref" lbl))))
+
+(define (Table-ref s)
+  (able-ref "T" s))
+
+(define (table-ref s)
+  (able-ref "t" s))
 
 (define (make-figures-ref first-char)
   (define inner-make-figs-ref
