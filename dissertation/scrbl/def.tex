@@ -1,5 +1,7 @@
 \overfullrule=1mm
 
+\let\ssum\relax
+
 
 \newcommand{\tcstep}{\rightarrow}
 \newcommand{\tcmulti}{\tcstep\!\!{}^\ast}
@@ -32,3 +34,779 @@
 \definecolor{OutputColor}{rgb}{0.59,0.00,0.59}
 \newcommand{\RktMeta}[1]{\inColor{IdentifierColor}{#1}}
 \newcommand{\twoline}[2]{\parbox[s]{1.8cm}{\flushright\hfill #1\newline#2}}
+
+
+\mathchardef\mhyphen="2D
+
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.1] pzcmi7t}{}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\mdfdefinestyle{staframestyle}{
+  skipabove=0ex,rightmargin=0ex,skipbelow=2ex,leftmargin=2ex, %
+  innertopmargin=1.2ex,innerrightmargin=1ex,innerbottommargin=1.2ex,innerleftmargin=1ex, %
+  align=center,roundcorner=8pt, %
+  outerlinewidth=1pt,middlelinewidth=1pt,innerlinewidth=0.5pt,outerlinecolor=black,middlelinecolor=white,innerlinecolor=black}
+
+\mdfdefinestyle{dynframestyle}{
+  skipabove=0ex,rightmargin=0ex,skipbelow=2ex,leftmargin=2ex, %
+  innertopmargin=1.2ex,innerrightmargin=1ex,innerbottommargin=1.2ex,innerleftmargin=1ex, %
+  align=center,roundcorner=2pt, %
+  outerlinewidth=1.3pt,outerlinecolor=black,backgroundcolor=black!07!white}
+
+\newcommand{\todo}[1]{\textbf{TODO}: #1}
+\newcommand{\ldotsplus}{\ldots{}_{+}}
+
+\newcommand{\lbl}[2]{\noindent\parbox[t]{\columnwidth}{#1\\#2}}
+\newenvironment{rrarray}{\(\begin{array}{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)}
+\newenvironment{displayrrarray}{\smallskip\(\begin{array}{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)\smallskip}
+\newenvironment{langarray}{\(\begin{array}[t]{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)}
+\newcommand{\sidecond}[1]{\multicolumn{3}{l}{\mbox{\quad #1}}}
+\newcommand{\wideas}[2]{\makebox[\widthof{$#2$}][l]{$#1$}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proofsketch}{\renewcommand{\proofname}{Proof Sketch}\begin{proof}}{\end{proof}}
+
+\newcommand{\nsym}{N}
+\newcommand{\csym}{C}
+\newcommand{\fsym}{F}
+\newcommand{\asym}{A}
+\newcommand{\tsym}{T}
+\newcommand{\esym}{E}
+\newcommand{\xsym}{X}
+\newcommand{\ysym}{Y}
+
+\newcommand{\nscr}{\mathsf{\nsym}}
+\newcommand{\cscr}{\mathsf{\csym}}
+\newcommand{\fscr}{\mathsf{\fsym}}
+\newcommand{\ascr}{\mathsf{\asym}}
+\newcommand{\tscr}{\mathsf{\tsym}}
+\newcommand{\escr}{\mathsf{\esym}}
+\newcommand{\xscr}{\mathsf{\xsym}}
+
+\newcommand{\nname}{Natural}
+\newcommand{\cname}{Co-Natural}
+\newcommand{\fname}{Forgetful}
+\newcommand{\aname}{Amnesic}
+\newcommand{\tname}{Transient}
+\newcommand{\ename}{Erasure}
+
+\newcommand{\snredsta}{\vartriangleright}
+\newcommand{\snreddyn}{\blacktriangleright}
+\newcommand{\scredsta}{\vartriangleright}
+\newcommand{\screddyn}{\blacktriangleright}
+\newcommand{\scredrule}{\rule[0.5ex]{0.6em}{0.6pt}}
+\newcommand{\makearrowhead}[1]{\kern-0.8pt\raisebox{0.16ex}{$#1$}}
+\newcommand{\makerred}[1]{\mathrel{\rrarrow_{_{\!#1}}^{\kern-0.1em*}}}
+\newcommand{\srredX}{\makerred{}}
+
+\newcommand{\makereductionsymbols}[1]{%
+  \expandafter\newcommand\csname nred#1S\endcsname{\snredsta_{_{\!\!\mathsf{\scriptstyle#1}}}}%
+  \expandafter\newcommand\csname nred#1D\endcsname{\snreddyn_{_{\!\!\mathsf{\scriptstyle#1}}}}%
+  \expandafter\newcommand\csname nred#1Sann\endcsname{\csname nred#1S\endcsname^{\sownerpolicy}}%
+  \expandafter\newcommand\csname nred#1Dann\endcsname{\csname nred#1D\endcsname^{\sownerpolicy}}%
+  \expandafter\newcommand\csname nred#1Sanns\endcsname{\snredsta_{_{\!\!\thickrrbar{\mathsf{\scriptstyle#1}}}}}%
+  \expandafter\newcommand\csname nred#1Danns\endcsname{\snreddyn_{_{\!\!\thickrrbar{\mathsf{\scriptstyle#1}}}}}%
+  \expandafter\newcommand\csname cred#1S\endcsname{\mathrel{\scredrule\makearrowhead{\scriptstyle\snredsta}_{_{\!\!\mathsf{\scriptstyle#1}}}}}%
+  \expandafter\newcommand\csname cred#1D\endcsname{\mathrel{\scredrule\makearrowhead{\scriptstyle\snreddyn}_{_{\!\!\mathsf{\scriptstyle#1}}}}}%
+  \expandafter\newcommand\csname cred#1\endcsname{\mathrel{\rrarrow_{_{\!\mathsf{\scriptstyle#1}}}}}%
+  \expandafter\newcommand\csname cred#1anns\endcsname{\mathrel{\longrrarrow_{_{\!\thickrrbar{\mathsf{\scriptstyle#1}}}}}}%
+  %\expandafter\newcommand\csname rred#1S\endcsname{\mathrel{\scredrule\makearrowhead{\scriptstyle\snredsta}_{_{\!\!\mathsf{\scriptstyle#1}}}^{\kern-0.1em*}}}%
+  %\expandafter\newcommand\csname rred#1D\endcsname{\mathrel{\scredrule\makearrowhead{\scriptstyle\snreddyn}_{_{\!\!\mathsf{\scriptstyle#1}}}^{\kern-0.1em*}}}%
+  \expandafter\newcommand\csname rred#1\endcsname{\makerred{\mathsf{\scriptstyle#1}}}%
+  \expandafter\newcommand\csname rred#1ann\endcsname{\mathrel{\makebox[0pt][l]{\raisebox{4pt}[2pt]{$\scriptstyle\sownerpolicy$}}\rrarrow_{_{\!\mathsf{\scriptstyle#1}}}^{\kern-0.1em*}}}%
+  \expandafter\newcommand\csname rred#1anns\endcsname{\mathrel{\longrrarrow_{_{\!\thickrrbar{\mathsf{\scriptstyle#1}}}}^{\kern-0.1em*}}}%
+  \expandafter\newcommand\csname rred#1policy\endcsname[1]{\mathrel{\makebox[0pt][l]{\raisebox{4pt}[2pt]{$\scriptstyle##1$}}\rrarrow_{_{\!\mathsf{\scriptstyle#1}}}^{\kern-0.1em*}}}%
+}
+
+\makereductionsymbols{\nsym}
+\makereductionsymbols{\csym}
+\makereductionsymbols{\fsym}
+\makereductionsymbols{\asym}
+\makereductionsymbols{\xsym}
+\makereductionsymbols{\ysym}
+\makereductionsymbols{\tsym}
+\makereductionsymbols{\esym}
+
+
+\newcommand{\nredXsym}{\ooalign{\textcolor[rgb]{0.75,0.75,0.75}{$\blacktriangleright$}\cr\hidewidth\hbox{$\vartriangleright$}\cr}}
+
+\newcommand{\makeunireductionsymbols}[1]{%
+  \expandafter\newcommand\csname nred#1Xsym\endcsname{\nredXsym_{_{\!\!\mathsf{\scriptstyle#1}}}}%
+  \expandafter\newcommand\csname nred#1X\endcsname{\mathrel{\csname nred#1Xsym\endcsname}}%
+  \expandafter\newcommand\csname nred#1Xann\endcsname{\csname nred#1S\endcsname^{\sownerpolicy}}%
+  \expandafter\newcommand\csname nred#1Xanns\endcsname{\nredXsym_{_{\!\!\thickrrbar{\mathsf{\scriptstyle#1}}}}}%
+}
+
+\makeunireductionsymbols{\tsym}
+\makeunireductionsymbols{\esym}
+
+\newcommand{\integers}{\mathbb{Z}}
+\newcommand{\naturals}{\mathbb{N}}
+\newcommand{\subt}{\mathrel{<:}}
+\newcommand{\subteq}{\mathrel{\leqslant\kern-0.3em\raisebox{0.3ex}{:}}}
+\newcommand{\floorof}[1]{\lfloor #1 \rfloor}
+\newcommand{\tagof}[1]{\floorof{#1}}
+\newcommand{\ftagof}[1]{\tagof{#1}}
+\newcommand{\cardinality}[1]{|#1|}
+\newcommand{\powerset}[1]{\mathpzc{P}(#1)}
+\newcommand{\hicup}{\mathrel{\raisebox{0.1ex}{\scalebox{0.9}{\(\cup\)}}}}
+
+\newcommand{\modname}[2]{$\underline{\hbox to #2in{#1}}$\\[-2ex]}
+\newcommand{\codett}[1]{{\tt #1}}
+\newcommand{\frombnd}[2]{#1~#2\,\cdot~}
+\newcommand{\fromuntyped}[2]{\frombnd{\edynb{#2}{#1}}{\snredsta}}
+\newcommand{\fromtyped}[2]{\frombnd{\estab{#2}{#1}}{\snreddyn}}
+
+%% TODO no bullet points, just the >> rule on the left? (tabular, wrap text?)
+%%  the left column is too much indented ... do something!
+%% TODO add space between logical items ... maybe subitem is right idea
+\newcommand{\approachbullet}{--}
+\newcommand{\formatapproach}[7]{
+  \paragraph{#1} \hfill $\sdyn = $ dynamic to static,\quad$\ssta = $ static to dynamic
+
+  \begin{minipage}[t]{0.48\columnwidth}
+  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize}
+    \item
+      $\fromuntyped{v}{\tint}$
+    \item[] #2
+    \item
+      $\fromuntyped{v}{(\tpair{\tau_0}{\tau_1})}$
+    \item[] #3
+    \item
+      $\fromuntyped{v}{(\tfun{\tau_0}{\tau_1})}$
+    \item[] #4
+  \end{itemize}
+  \end{minipage}\begin{minipage}[t]{0.48\columnwidth}
+  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize}
+    \item
+      $\fromtyped{v}{\tint}$
+    \item[] #5
+    \item
+      $\fromtyped{v}{(\tpair{\tau_0}{\tau_1})}$
+    \item[] #6
+    \item
+      $\fromtyped{v}{(\tfun{\tau_0}{\tau_1})}$
+    \item[] #7
+  \end{itemize}
+  \end{minipage}
+  \smallskip
+}
+
+\newcommand{\BNFeq}{=}
+\newcommand{\eeq}{=}
+\newcommand{\feq}{=}
+\newcommand{\sassign}{=}
+\newcommand{\sdefeq}{\triangleq}
+\newcommand{\sabbreveq}{\iff}
+
+\newcommand{\tinst}[2]{#1{\{#2\}}}
+
+\newcommand{\sfont}[1]{\mathsf{#1}}
+\newcommand{\typefont}[1]{\mathsf{#1}}
+\newcommand{\mffont}[1]{\textit{#1}}
+\newcommand{\rrfont}[1]{\mathsf{#1}}
+\newcommand{\textstrat}[1]{{\bf\em#1}}
+\newcommand{\wrapfont}[1]{\mathbb{#1}}
+
+\makeatletter
+\newcommand{\thickbar}{\mathpalette\@thickbar}
+\newcommand{\@thickbar}[2]{{#1\mkern1.5mu\vbox{ % kern = left margin of new character
+  \sbox\z@{$#1\mkern-2mu#2\mkern1.4mu$}% kern = left and right bounds of the rule
+  \sbox\tw@{$#1\overline{#2}$}%
+  \dimen@=\dimexpr\ht\tw@-\ht\z@-1.6\p@\relax % height of rule over base
+  \hrule\@height1\p@ % height/thickness of rule
+  \vskip\dimen@
+  \box\z@}\mkern-1.6mu} % kern = right margin of new character
+}
+\newcommand{\thickrrbar}{\mathpalette\@thickrrbar}
+\newcommand{\@thickrrbar}[2]{{#1\mkern2.0mu\vbox{ % kern = left margin of new character
+  \sbox\z@{$#1\mkern0mu#2\mkern0mu$}% kern = ???
+  \sbox\tw@{$#1\overline{#2}$}%
+  \dimen@=\dimexpr\ht\tw@-\ht\z@-0.6\p@\relax % height of rule over base
+  \hrule\@height1\p@ % height/thickness of rule
+  \vskip\dimen@
+  \box\z@}\mkern-1.5mu} % kern = right margin of new character
+}
+\newcommand{\thickjbar}{\mathpalette\@thickjbar}
+\newcommand{\@thickjbar}[2]{{#1\mkern1.0mu\vbox{ % kern = left margin of new character
+  \sbox\z@{$#1\mkern-0.5mu#2\mkern-1.5mu$}% kern = ???
+  \sbox\tw@{$#1\overline{#2}$}%
+  \dimen@=\dimexpr\ht\tw@-\ht\z@-2.0\p@\relax % height of rule over base
+  \hrule\@height0.8\p@ % height/thickness of rule
+  \vskip\dimen@
+  \box\z@}\mkern0mu} % kern = right margin of new character
+}
+\makeatother
+
+\newcommand{\substat}[1]{#1_{s}}
+\newcommand{\subdyn}[1]{#1_{d}}
+
+\newcommand{\fakebf}[1]{\ooalign{{$#1$}\cr\hidewidth\makebox[4pt][l]{$#1$}\cr}}
+\newcommand{\lowersym}[1]{\raisebox{-0.7ex}{$#1$}}
+\newcommand{\mktagproj}[1]{\lowersym{\llcorner}\!\!#1\!\!\lowersym{\lrcorner}}
+
+% s = symbol
+\newcommand{\stheorem}{\textsc{Theorem}}
+\newcommand{\slemma}{\textsc{Lemma}}
+\newcommand{\scorollary}{\textsc{Corollary}}
+\newcommand{\sexample}{\textsc{Example}}
+\newcommand{\sdefinition}{\textsc{Definition}}
+\newcommand{\sproposition}{\textsc{Proposition}}
+\newcommand{\sconjecture}{\textsc{Conjecture}}
+\newcommand{\stopofprogram}{\bullet}
+\newcommand{\sunop}{\textit{unop}}
+\newcommand{\sbinop}{\textit{binop}}
+\newcommand{\ssum}{\sfont{sum}}
+\newcommand{\squotient}{\sfont{quotient}}
+\newcommand{\sdyn}{\sfont{dyn}}
+\newcommand{\sstat}{\sfont{stat}}
+\newcommand{\ssta}{\sstat}
+\newcommand{\Nstawrapper}{\emph{stat-mon}}
+\newcommand{\Ndynwrapper}{\emph{dyn-mon}}
+\newcommand{\Astawrapper}{\emph{stat-wrap}}
+\newcommand{\Adynwrapper}{\emph{dyn-wrap}}
+\newcommand{\sapp}{\sfont{app}}
+\newcommand{\slet}{\sfont{let}}
+\newcommand{\sinkwd}{\sfont{in}}
+\newcommand{\sfst}{\sfont{fst}}
+\newcommand{\ssnd}{\sfont{snd}}
+\newcommand{\sbndfst}{\sfont{fst}}
+\newcommand{\sbndsnd}{\sfont{snd}}
+\newcommand{\sbnddom}{\sfont{dom}}
+\newcommand{\sbndcod}{\sfont{cod}}
+\newcommand{\sincr}{\sfont{add1}}
+\newcommand{\sresult}{r}
+\newcommand{\sdiverge}{\Omega}
+\newcommand{\stagerror}{\sfont{TagErr}}
+\newcommand{\tagerrortxt}[1]{\stagerror\,{#1}}
+\newcommand{\tagerrorD}{\stagerror}
+\newcommand{\redexerror}{\stagerror}
+\newcommand{\invarianterror}{\sfont{InvariantErr}}
+\newcommand{\tagerrorS}{\invarianterror}
+\newcommand{\policyerror}{\sfont{PolicyErr}}
+\newcommand{\sboundaryerror}{\sfont{BndryErr}}
+\newcommand{\sann}[2]{#1_{\sfont{#2}}}
+\newcommand{\sflip}{\mffont{flip}}
+\newcommand{\sfresh}{\mffont{fresh}}
+\newcommand{\smerge}{\mffont{merge}}
+\newcommand{\sshallow}{\mffont{shape-match}}
+\newcommand{\sunion}{\cup}
+\newcommand{\sdepth}{\mffont{wraps}}
+\newcommand{\smondepth}{\mffont{guard-depth}}
+\newcommand{\sconcat}{}
+\newcommand{\shasbnd}{\mffont{has-boundary}}
+\newcommand{\slast}{\mffont{last}}
+\newcommand{\sbndeqowners}{\simeq}
+\newcommand{\sbndseteqowners}{\mathrel{\supseteq\joinrel\subseteq}}
+\newcommand{\smember}{\in}
+\newcommand{\snil}{{\cdot}}
+\newcommand{\sremove}{\setminus}
+\newcommand{\srev}{\mffont{rev}} %{\rule[0.4ex]{0.4em}{0.14ex}}
+\newcommand{\snext}{\mffont{next}}
+\newcommand{\sintersect}{\cap}
+\newcommand{\sholeowner}{\mffont{hole\textsf{-}owner}}
+\newcommand{\sholeowneraux}{\mffont{h\textsf{-}own}}
+\newcommand{\smonitor}{\mffont{guard}}
+\newcommand{\sforget}{\mffont{forget}}
+\newcommand{\sD}{\mathpzc{D}}
+\newcommand{\sS}{\mathpzc{S}}
+\newcommand{\sDH}{\sann{\sD}{H}}
+\newcommand{\sSH}{\sann{\sS}{H}}
+\newcommand{\sDF}{\sann{\sD}{F}}
+\newcommand{\sSF}{\sann{\sS}{F}}
+\newcommand{\sDA}{\sann{\sD}{A}}
+\newcommand{\sSA}{\sann{\sS}{A}}
+\newcommand{\sdynop}{\emph{dynop}}
+\newcommand{\sowner}{\ell}
+\newcommand{\sowners}{\sowner^{*}}
+\newcommand{\sownerset}{\sowners}
+\newcommand{\sownerlist}{\thickbar{\sowner}}
+\newcommand{\sownerpos}{\sowner_{\mathbf{+}}}
+\newcommand{\sownerneg}{\sowner_{\mathbf{-}}}
+\newcommand{\sobligation}{k}
+\newcommand{\sobligations}{K}
+\newcommand{\sguard}{\wrapfont{G}}
+\newcommand{\smon}{\sguard}
+\newcommand{\sdivzero}{\sfont{DivisionByZero}}
+\newcommand{\sblame}{b}
+\newcommand{\sbnd}{\sblame}
+\newcommand{\sbndcomma}{\raisebox{0.2ex}{$\scriptscriptstyle\blacktriangleleft$}}
+\newcommand{\sklist}{\stag^{*}}
+\newcommand{\stlist}{\stype^{*}}
+\newcommand{\sblist}{\thickbar{\sbnd}}
+\newcommand{\sbset}{\sbnd^{*}}
+\newcommand{\sblisteq}{=}
+\newcommand{\sexpr}{e}
+\newcommand{\sexprstat}{\substat{\sexpr}}
+\newcommand{\sexprdyn}{\subdyn{\sexpr}}
+\newcommand{\ssurface}{s}
+\newcommand{\svalue}{v}
+\newcommand{\svaluestat}{\substat{\svalue}}
+\newcommand{\svaluedyn}{\subdyn{\svalue}}
+\newcommand{\sprehist}{\sfont{trace}} % TODO pre-trace?
+\newcommand{\shistory}{\wrapfont{T}}
+\newcommand{\strace}{\shistory}
+\newcommand{\stype}{\tau}
+\newcommand{\svar}{x}
+\newcommand{\snat}{n}
+\newcommand{\sint}{i}
+\newcommand{\stypeenv}{\Gamma}
+\newcommand{\sownerenv}{\mathpzc{L}}
+\newcommand{\sdynproj}{\mathbf{0}}
+\newcommand{\sidproj}{\mathbf{1}}
+\newcommand{\stagproj}{\mktagproj{\cdot}}
+\newcommand{\sXproj}{F}
+\newcommand{\sWT}{\vdash}
+\newcommand{\sWTO}{\mathrel{\thickjbar{\sWT}}}
+\newcommand{\sWTfull}{\sWT_{\sidproj}}
+\newcommand{\sWTtag}{\sWT_{\kern-0.3em{\raisebox{0.5ex}{\(\mktagproj{~}\)}}}} % maybe \vdash_K ?
+\newcommand{\sWTnone}{\sWT_{\sdynproj}}
+\newcommand{\sWTX}{\sWT_{\sXproj}}
+\newcommand{\sWS}{\sWT}
+\newcommand{\sWD}{\sWT}
+\newcommand{\sWL}{\Vdash}
+\newcommand{\sWLsingle}{\sWL}
+\newcommand{\sWLpath}{\sWL_{p}}
+\newcommand{\sWLheap}{\sWL_{h}}
+\newcommand{\srexpr}{\lesssim}
+\newcommand{\srctx}{\srexpr}
+\newcommand{\srvalue}{\srexpr}
+\newcommand{\satrexpr}{\eqsim}
+\newcommand{\satrctx}{\satrexpr}
+\newcommand{\sbehaviorle}{\srexpr}
+\newcommand{\sbehaviorge}{\gtrsim}
+\newcommand{\sbehavioreq}{\satrexpr}
+\newcommand{\sdelta}{\delta}
+\newcommand{\sDelta}{\Delta}
+\newcommand{\sdeltaH}{\delta_{\hsym}}
+\newcommand{\sdeltaA}{\delta_{\asym}}
+\newcommand{\saddoblig}{\mffont{add\textsf{-}oblig}}
+\newcommand{\saddobligs}{\mffont{add\textsf{-}obligs}}
+\newcommand{\saddtrace}{\mffont{add\textsf{-}trace}}
+\newcommand{\sgettrace}{\mffont{get\textsf{-}trace}}
+\newcommand{\sremtrace}{\mffont{rem\textsf{-}trace}}
+\newcommand{\stypefst}{\mffont{fst}}
+\newcommand{\stypesnd}{\mffont{snd}}
+\newcommand{\stypedom}{\mffont{dom}}
+\newcommand{\stypecod}{\mffont{cod}}
+\newcommand{\sctx}{E}
+\newcommand{\sblistowners}{\mffont{labels}}
+\newcommand{\sblistsenders}{\mffont{senders}}
+\newcommand{\sbsetsenders}{\sblistsenders}
+\newcommand{\svalueowners}{\mffont{owners}}
+\newcommand{\stypeobligations}{\sfont{obligations}}
+\newcommand{\soutermost}{\sfont{first}}
+\newcommand{\spolicy}{\mathbf{p}}
+\newcommand{\szeropolicy}{\fakebf{\scriptstyle 0}}
+\newcommand{\sownerpolicy}{\fakebf{\scriptstyle\sowner}}
+\newcommand{\sownerspolicy}{\fakebf{\scriptstyle\sownerlist}}
+\newcommand{\sload}{\sfont{load}}
+\newcommand{\sloadH}{\sload_{\hsym}}
+\newcommand{\sloadN}{\sloadH}
+\newcommand{\sloadT}{\sload_{\tsym}}
+\newcommand{\sloadA}{\sload_{\asym}}
+\newcommand{\sloadX}{\sload_{\xsym}}
+\newcommand{\seval}{\sfont{eval}}
+\newcommand{\sevalH}{\seval_{\hsym}}
+\newcommand{\sevalHann}{\sevalH^{\sownerpolicy}}
+\newcommand{\sevalHanns}{\sevalH^{\sownerspolicy}}
+\newcommand{\sevalN}{\sevalH}
+\newcommand{\sevalNunl}{\sevalN}
+\newcommand{\sevalNann}{\sevalHann}
+\newcommand{\sevalNanns}{\sevalHanns}
+\newcommand{\sevalT}{\seval_{\tsym}}
+\newcommand{\sevalTunl}{\sevalT}
+\newcommand{\sevalTann}{\sevalT^{\sownerpolicy}}
+\newcommand{\sevalTanns}{\sevalT^{\sownerspolicy}}
+\newcommand{\sevalA}{\seval_{\asym}}
+\newcommand{\sevalAunl}{\sevalA}
+\newcommand{\sevalAann}{\sevalA^{\sownerpolicy}}
+\newcommand{\sevalAanns}{\sevalA^{\sownerspolicy}}
+\newcommand{\sevalX}{\seval_{\xsym}}
+\newcommand{\sevalXunl}{\sevalX}
+\newcommand{\sevalXpolicy}[1]{\sevalX^{#1}}
+\newcommand{\sevalXann}{\sevalXpolicy{\sownerpolicy}}
+\newcommand{\sevalXanns}{\sevalXpolicy{\sownerspolicy}}
+\newcommand{\spair}{\times}
+\newcommand{\sfun}{\Rightarrow}
+\newcommand{\smeet}{\sqcap}
+\newcommand{\sjoin}{\sqcup}
+\newcommand{\swellformed}{\mathbf{wf}}
+\newcommand{\swellformedO}{\thickjbar{\swellformed}}
+\newcommand{\ssurfacelang}{Surface Language}
+\newcommand{\sevallang}{Evaluation Language}
+\newcommand{\sopann}{\mffont{type\textsf{-}ann}}
+\newcommand{\scountable}{countable} % 'enumerable' is wider
+\newcommand{\sorigins}{Origins}
+\newcommand{\sbndhole}{\bullet}
+\newcommand{\sclass}{\sfont{class}}
+\newcommand{\spublic}{\sfont{public}}
+\newcommand{\sconstructor}{\sfont{constructor}}
+\newcommand{\sfunkwd}{\sfont{fun}}
+\newcommand{\sstatic}{\sfont{static}}
+\newcommand{\sdynkwd}{\sfont{dyn}}
+\newcommand{\snewkwd}{\sfont{new}}
+\newcommand{\sreturn}{\sfont{return}}
+\newcommand{\sdefine}{\sfont{define}}
+\newcommand{\sdefkwd}{\sfont{def}}
+\newcommand{\sfunction}{\sfont{function}}
+\newcommand{\sflowint}{\sfont{number}}
+\newcommand{\strint}{\sfont{Integer}}
+\newcommand{\syntaxho}{Higher-Order Evaluation Syntax}
+\newcommand{\syntaxfo}{First-Order Evaluation Syntax}
+\newcommand{\syntaxeo}{Erasure Evaluation Syntax}
+
+% t = type
+\newcommand{\tdyn}{{\mathpzc U}}
+\newcommand{\tnat}{\typefont{Nat}}
+\newcommand{\tint}{\typefont{Int}}
+\newcommand{\tpair}[2]{#1\!\spair\!#2}
+\newcommand{\tfun}[2]{#1\!\sfun\!#2}
+\newcommand{\tann}[2]{(#1:#2)}
+\newcommand{\tenv}{\stypeenv}
+\newcommand{\toptional}{\mbox{\raisebox{0.7ex}{\scalebox{0.9}{\(\stype\)}}\(\!/\!\)\raisebox{-0.4ex}{\scalebox{0.8}{\(\tdyn\)}}}}
+\newcommand{\stoptional}{\toptional}
+
+\newcommand{\ownerarrow}{\Uparrow}
+\newcommand{\sownerarrow}{\ownerarrow}
+\newcommand{\blamearrow}{\uparrow}
+\newcommand{\sblamearrow}{\blamearrow}
+\newcommand{\forgetowner}{\Downarrow}
+\newcommand{\ownertop}{\sowner_{\stopofprogram}}
+\newcommand{\sownertop}{\ownertop}
+\newcommand{\ownerdyn}{\sowner_{D}}
+\newcommand{\ownersta}{\sowner_{S}}
+\newcommand{\ownersd}{\sowner_{\tdyn}}
+\newcommand{\ownedby}[2]{{#1}^{#2}}
+
+\newcommand{\lobar}{(}
+\newcommand{\robar}{)}
+% \ulcorner is one idea ... but I like () better
+
+\newcommand{\obars}[2]{\ownedby{\lobar #1 \robar}{#2}}
+\newcommand{\obbars}[2]{\ownedby{\lobar\!\lobar #1\robar\!\robar}{#2}}
+\newcommand{\ocons}[2]{#1\!\cdot{}\!#2}
+\newcommand{\beo}[2]{\sboundaryerror~#1~#2}
+\newcommand{\boundaryerror}[2]{\sboundaryerror\,(#1, #2)}
+\newcommand{\divisionbyzeroerror}{\sfont{DivErr}}
+\newcommand{\obnd}[3]{(#1 \sbndcomma\,#2 \sbndcomma\,#3)}
+\newcommand{\oivl}[2]{[#1,\,#2)}
+
+\newcommand{\efun}[2]{\lambda #1.\, #2}
+\newcommand{\epair}[2]{\langle #1,#2 \rangle}
+\newcommand{\eapp}[3]{\tinst{\sapp}{#1}\,#2~#3}
+\newcommand{\eletdecl}[2]{\slet~#1=#2~\sinkwd}
+\newcommand{\elet}[3]{\eletdecl{#1}{#2}~#3}
+\newcommand{\eunopt}[2]{\tinst{\sunop}{#1}\,#2}
+\newcommand{\efst}[2]{\tinst{\sfst}{#1}\,#2}
+\newcommand{\esnd}[2]{\tinst{\ssnd}{#1}\,#2}
+\newcommand{\eincr}[1]{\sincr\,#1}
+\newcommand{\ebinopt}[3]{\tinst{\sbinop}{#1}\,#2\,#3}
+\newcommand{\esum}[3]{\tinst{\ssum}{#1}\,#2\,#3}
+\newcommand{\equotient}[3]{\tinst{\squotient}{#1}\,#2\,#3}
+\newcommand{\estat}[2]{\esta{#1}{#2}}
+\newcommand{\eerr}{\mathsf{Err}}
+\newcommand{\esubst}[3]{#1[#2\!\leftarrow\!#3]}
+\newcommand{\eset}[1]{\{#1\}}
+\newcommand{\ehistory}[3]{\shistory^{#1}\,#2\,#3}
+\newcommand{\ehopt}[2]{\ehistory{?}{#1}{#2}}
+\newcommand{\ehist}[2]{\ehistory{}{#1}{#2}}
+\newcommand{\etrace}[2]{\ehist{#1}{#2}}
+\newcommand{\eprehist}[2]{\sprehist\,#1\,#2}
+\newcommand{\esuffix}[2]{\eprehist{#1}{#2}}
+\newcommand{\ebnd}[4]{#1^{#4}\,#2~#3}
+\newcommand{\edyn}[2]{\ebnd{\sdyn}{#1}{#2}{}}
+\newcommand{\esta}[2]{\ebnd{\ssta}{#1}{#2}{}}
+\newcommand{\edynb}[2]{\ebnd{\sdyn}{#1}{#2}{}}
+\newcommand{\estab}[2]{\ebnd{\ssta}{#1}{#2}{}}
+\newcommand{\emonsuper}[3]{\ebnd{\smon}{#1}{#2}{#3}}
+\newcommand{\eguard}[2]{\emonsuper{#1}{#2}{}}
+\newcommand{\emon}[2]{\eguard{#1}{#2}}
+\newcommand{\emopt}[2]{\emonsuper{#1}{#2}{?}}
+\newcommand{\emonplus}[2]{\emonsuper{#1}{#2}{+}}
+\newcommand{\emoptplus}[2]{\emonsuper{#1}{#2}{+?}}
+
+\newcommand{\ctxhole}{{[\,]}}
+\newcommand{\ctx}{\sctx}
+\newcommand{\ctxo}[1]{\sctx^{#1}}
+\newcommand{\ctxbf}{Z}
+\newcommand{\ctxbars}[2]{[#1]^{#2}}
+
+\newcommand{\fappbase}[3]{#1(#3#2)}
+\newcommand{\fappo}[3]{\fappbase{#1}{#2}{#3,}}
+\newcommand{\fapp}[2]{\fappbase{#1}{#2}{}}
+\newcommand{\ffun}[2]{#1\!\longrightarrow\!#2}
+\newcommand{\fbool}{\mathpzc{B}}
+\newcommand{\ftrue}{\mathsf{True}}
+\newcommand{\ffalse}{\mathsf{False}}
+\newcommand{\fflip}[1]{\sflip\,(#1)}
+\newcommand{\ffresh}[2]{#1\mbox{ fresh in }#2}
+\newcommand{\fmerge}[2]{\smerge\,(#1, #2)}
+\newcommand{\funion}[2]{#1 \sunion #2}
+\newcommand{\fconcat}[2]{#1 \sconcat #2}
+\newcommand{\fdepth}[1]{\sdepth\,(#1)}
+\newcommand{\fmondepth}[1]{\smondepth\,(#1)}
+\newcommand{\fhasbnd}[2]{\shasbnd\,(#1, #2)}
+\newcommand{\fbndfst}[1]{\sbndfst\,(#1)}
+\newcommand{\fbndsnd}[1]{\sbndsnd\,(#1)}
+\newcommand{\fbnddom}[1]{\sbnddom\,(#1)}
+\newcommand{\fbndcod}[1]{\sbndcod\,(#1)}
+\newcommand{\fbndeqowners}[2]{#1 \sbndeqowners #2}
+\newcommand{\fbndseteqowners}[2]{#1 \sbndseteqowners #2}
+\newcommand{\fmember}[2]{#1 \smember #2}
+\newcommand{\fintersect}[2]{#1 \sintersect #2}
+\newcommand{\flast}[1]{\slast\,(#1)}
+\newcommand{\fremove}[2]{#1 \sremove #2}
+\newcommand{\fshallow}[2]{\sshallow\,(#1,#2)}
+\newcommand{\frev}[1]{\srev\,(#1)} %{{#1}^{\kern-0.3em\srev}}
+\newcommand{\fnext}[1]{\snext\,(#1)}
+\newcommand{\fholeowner}[1]{\sholeowner\,(#1)}
+\newcommand{\fholeowneraux}[2]{\sholeowneraux\,(#1,#2)}
+\newcommand{\fmonitor}[1]{\smonitor\,(#1)}
+\newcommand{\fforget}[1]{\sforget\,(#1)}
+\newcommand{\faddobligs}[2]{\saddobligs\,(#1, #2)}
+\newcommand{\faddoblig}[2]{\saddoblig\,(#1, #2)}
+\newcommand{\faddtrace}[2]{\saddtrace\,(#1, #2)}
+\newcommand{\fprehist}[2]{\faddtrace{#1}{#2}}
+\newcommand{\fgettrace}[1]{\sgettrace\,(#1)}
+\newcommand{\fremtrace}[1]{\sremtrace\,(#1)}
+\newcommand{\ftypefst}[1]{\stypefst\,(#1)}
+\newcommand{\ftypesnd}[1]{\stypesnd\,(#1)}
+\newcommand{\ftypedom}[1]{\stypedom\,(#1)}
+\newcommand{\ftypecod}[1]{\stypecod\,(#1)}
+\newcommand{\fcons}[2]{#1,#2}
+\newcommand{\feval}[1]{\seval(#1)}
+\newcommand{\fevalann}[1]{\seval^{\sownerpolicy}(#1)}
+\newcommand{\fevalHunl}[1]{\sevalH(#1)}
+\newcommand{\fevalNunl}[1]{\sevalN(#1)}
+\newcommand{\fevalHann}[1]{\sevalHann(#1)}
+\newcommand{\fevalNann}[1]{\sevalNann(#1)}
+\newcommand{\fevalNanns}[1]{\sevalNanns(#1)}
+\newcommand{\fevalTunl}[1]{\sevalT(#1)}
+\newcommand{\fevalTann}[1]{\sevalTann(#1)}
+\newcommand{\fevalTanns}[1]{\sevalTanns(#1)}
+\newcommand{\fevalAunl}[1]{\sevalA(#1)}
+\newcommand{\fevalAann}[1]{\sevalAann(#1)}
+\newcommand{\fevalAanns}[1]{\sevalAanns(#1)}
+\newcommand{\fevalXunl}[1]{\sevalX(#1)}
+\newcommand{\fevalXann}[1]{\sevalXann(#1)}
+\newcommand{\fevalXanns}[1]{\sevalXanns(#1)}
+\newcommand{\fevalXpolicy}[2]{\sevalXpolicy{#2}(#1)}
+\newcommand{\fXarrow}[2]{#2\!#1}
+\newcommand{\fblamearrow}[1]{\fXarrow{#1}{\blamearrow}}
+\newcommand{\fownerarrow}[1]{\fXarrow{#1}{\ownerarrow}}
+\newcommand{\fload}[1]{\sload(#1)}
+\newcommand{\floadH}[1]{\sloadH(#1)}
+\newcommand{\floadN}[1]{\sloadN(#1)}
+\newcommand{\floadT}[1]{\sloadT(#1)}
+\newcommand{\floadA}[1]{\sloadA(#1)}
+\newcommand{\floadX}[1]{\sloadX(#1)}
+\newcommand{\floadHann}[1]{\sloadH^{\sownerarrow}(#1)}
+\newcommand{\floadNann}[1]{\sloadN^{\sownerarrow}(#1)}
+\newcommand{\floadTann}[1]{\sloadT^{\sownerarrow}(#1)}
+\newcommand{\floadAann}[1]{\sloadA^{\sownerarrow}(#1)}
+\newcommand{\floadXann}[1]{\sloadX^{\sownerarrow}(#1)}
+\newcommand{\fblistowners}[1]{\sblistowners\,(#1)}
+\newcommand{\fblistsenders}[1]{\sblistsenders\,(#1)}
+\newcommand{\fbsetowners}[1]{\fblistowners{#1}}
+\newcommand{\fbsetsenders}[1]{\fblistsenders{#1}}
+\newcommand{\fvalueowners}[1]{\svalueowners\,(#1)}
+\newcommand{\ftypeobligations}[1]{\stypeobligations\,(#1)}
+\newcommand{\foutermost}[1]{\soutermost\,(#1)}
+\newcommand{\fmeet}[1]{\smeet #1}
+\newcommand{\fjoin}[1]{\sjoin #1}
+\newcommand{\fwellformed}[2]{#1 : #2~\swellformed}
+\newcommand{\fopann}[1]{\sopann\,(#1)}
+\newcommand{\fdiverge}[2]{#1 #2 \mbox{diverges}}
+\newcommand{\fexists}[2]{\exists\,#1.~#2}
+\newcommand{\fforall}[2]{\forall\,#1.~#2}
+\newcommand{\forigins}[1]{\sorigins{} of the {#1} strategy}
+\newcommand{\fproperties}[1]{Properties of #1}
+\newcommand{\fdynproj}[1]{\sdynproj(#1)}
+\newcommand{\fidproj}[1]{\sidproj(#1)}
+\newcommand{\ftagproj}[1]{\mktagproj{#1}}
+\newcommand{\fXproj}[1]{\sXproj(#1)}
+
+\newcommand{\rrarrow}{\rightarrow}
+\newcommand{\longrrarrow}{\longrightarrow}
+\newcommand{\rrsymb}{\vartriangleright}
+\newcommand{\rastar}{\rrarrow^{*}}
+\newcommand{\rtclosure}[1]{\rastar_{\bigcup\eset{#1}}}
+\newcommand{\samplerrsym}{{\bf r}}
+\newcommand{\samplerrarrow}{\mathrel{~{\samplerrsym}~}}
+\newcommand{\samplerred}{\makerred{\samplerrsym}}
+
+\newcommand{\propfont}[1]{\mathbf{#1}}
+\newcommand{\propts}[1]{\propfont{TS}\fakebf{(}#1\fakebf{)}}
+\newcommand{\propcm}{\propfont{CM}}
+\newcommand{\propbspath}{\propfont{BS}}
+\newcommand{\propbcpath}{\propfont{BC}}
+\newcommand{\propbsheap}{\propfont{BS{\mhyphen}h}}
+\newcommand{\propbcheap}{\propfont{BC{\mhyphen}h}}
+\newcommand{\completemonitoring}{\propcm}
+
+\newcommand{\Xigureref}[2]{{#1}igure~\ref{#2}}
+\newcommand{\Xectionref}[2]{{#1}ection~\ref{#2}}
+\newcommand{\Xableref}[2]{{#1}able~\ref{#2}}
+\newcommand{\Xheoremref}[2]{{#1}heorem~\ref{#2}}
+\newcommand{\Xefinitionref}[2]{{#1}efinition~\ref{#2}}
+\newcommand{\Xemmaref}[2]{{#1}emma~\ref{#2}}
+\newcommand{\Xlauseref}[2]{{#1}lause~\ref{#2}}
+\newcommand{\Xawref}[2]{{#1}aw~\ref{#2}}
+\newcommand{\Xrogramref}[2]{{#1}rogram~(\ref{#2})}
+
+\newcommand{\figureref}[1]{\Xigureref{f}{#1}}
+\newcommand{\sectionref}[1]{\Xectionref{s}{#1}}
+\newcommand{\tableref}[1]{\Xableref{t}{#1}}
+\newcommand{\figref}[1]{\figureref{#1}}
+\newcommand{\secref}[1]{\sectionref{#1}}
+\newcommand{\thmref}[1]{\Xheoremref{t}{#1}}
+\newcommand{\theoremref}[1]{\thmref{#1}}
+\newcommand{\definitionref}[1]{\Xefinitionref{d}{#1}}
+\newcommand{\lemmaref}[1]{\Xemmaref{l}{#1}}
+\newcommand{\clauseref}[1]{\Xlauseref{c}{#1}}
+\newcommand{\lawref}[1]{\Xawref{l}{#1}}
+\newcommand{\programref}[1]{\Xrogramref{p}{#1}}
+
+\newcommand{\Figureref}[1]{\Xigureref{F}{#1}}
+\newcommand{\Sectionref}[1]{\Xectionref{S}{#1}}
+\newcommand{\Tableref}[1]{\Xableref{T}{#1}}
+\newcommand{\Secref}[1]{\Sectionref{#1}}
+\newcommand{\Figref}[1]{\Figureref{#1}}
+\newcommand{\Thmref}[1]{\Xheoremref{T}{#1}}
+\newcommand{\Theoremref}[1]{\Thmref{#1}}
+\newcommand{\Definitionref}[1]{\Xefinitionref{D}{#1}}
+\newcommand{\Lemmaref}[1]{\Xemmaref{L}{#1}}
+\newcommand{\Clauseref}[1]{\Xlauseref{C}{#1}}
+\newcommand{\Lawref}[1]{\Xawref{L}{#1}}
+\newcommand{\Programref}[1]{\Xrogramref{P}{#1}}
+
+\newcommand{\scheck}{\sfont{check}}
+\newcommand{\sprevalue}{\sfont{w}}
+\newcommand{\sloc}{\sfont{p}}
+\newcommand{\sdirection}{\sfont{d}}
+\newcommand{\sforwards}{\sfont{\hookrightarrow}}
+\newcommand{\sbackwards}{\sfont{\hookleftarrow}}
+\newcommand{\stag}{K}
+\newcommand{\semptymap}{\emptyset}
+
+\newcommand{\knat}{\tnat}
+\newcommand{\kint}{\tint}
+\newcommand{\kpair}{\typefont{Pair}}
+\newcommand{\kfun}{\typefont{Fun}}
+
+\newcommand{\echeck}[4]{\scheck({#2}, {#3},{#4})}
+\newcommand{\echecktwo}[3]{\tinst{\scheck}{#1}\,{#2}\,{#3}}
+\newcommand{\echeckone}[2]{\tinst{\scheck}{#1}\,{#2}}
+\newcommand{\eloc}{\sloc}
+\newcommand{\eloczero}{\bullet} % placeholder variable, for the AT simulation
+\newcommand{\locations}{\mathbb{P}}
+
+\newcommand{\conftwo}[2]{#1; #2}
+\newcommand{\conf}[3]{#1; #2; #3}
+\newcommand{\oconf}[4]{#1; #2; #3; #4}
+
+\newcommand{\vstore}{\mathpzc{H}}
+\newcommand{\vrecord}[2]{#1 \mapsto #2}
+
+\newcommand{\bstore}{\mathpzc{B}}
+\newcommand{\brecord}[2]{#1 \mapsto #2}
+\newcommand{\bcons}[2]{#1 \cup \{#2\}}
+\newcommand{\bappend}[2]{#1 \cup #2}
+
+\newcommand{\vstoretype}{\mathpzc{T}}
+
+\newcommand{\Xstore}{\phi}
+\newcommand{\nostore}{~~}
+\newcommand{\withstores}[1]{#1~\Xstore}
+\newcommand{\withstoresprime}[1]{\withstores{#1}'}
+
+\newcommand{\lstore}{\mathpzc{O}}
+\newcommand{\lrecord}[2]{#1 \mapsto #2}
+
+\newcommand{\bbstore}{B}
+\newcommand{\bbrecord}[2]{#1 \sbndcomma #2}
+
+
+\newcommand{\sutyped}{U}
+
+\newcommand{\sstoresim}{\sim}
+\newcommand{\rstoresim}[2]{#1 \sstoresim #2}
+
+\newcommand{\rbstoresim}[3]{\fbndeqowners{#1}{#3(#2)}}
+\newcommand{\rbstoresimbasic}[2]{\fbndeqowners{#1}{#2}}
+
+\newcommand{\fmapref}[2]{#1(#2)}
+\newcommand{\smapupdate}{\sfont{update}}
+\newcommand{\fmapupdate}[3]{#1[#2 \hicup #3]}
+\newcommand{\fmapreplace}[3]{#1[#2 \mapsto #3]}
+
+%%%%%% example extension %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\meapp}[3]{%
+  \begin{array}[t]{l@{}l}
+    \sapp\{    & {#1}\} \\ 
+               & {#2}  \\ 
+               & {#3}
+  \end{array}}
+
+
+\newcommand{\mestab}[2]{%
+  \begin{array}[t]{l@{\,\,}l}
+   \ssta    & {#1} \\ 
+            & {#2}  \\ 
+  \end{array}}
+
+\newcommand{\medynb}[2]{%
+  \begin{array}[t]{l@{\,\,}l}
+   \sdyn    & #1 \\ 
+               & #2  \\ 
+  \end{array}}
+
+
+\newcommand{\techreport}{supplementary material}
+\newcommand{\zerowidth}[1]{\makebox[0pt][l]{\(#1\)}}
+\newcommand{\zeroheight}[1]{\raisebox{0pt}[0pt][0pt]{\(#1\)}}
+\newcommand{\reticmodelsymbol}{{\lambda^{\Downarrow}_{\ell}}}
+\newcommand{\shorturl}[2]{\href{#1#2}{\texttt{#2}}}
+\newcommand{\missingrules}{(selected rules)}
+\newcommand{\bigcheckmark}{\ding{51}}
+\newcommand{\bigxmark}{\ding{53}}
+\newcommand{\hugecheckmark}{\scalebox{1.25}{\bigcheckmark}}
+\newcommand{\hugexmark}{\scalebox{1.3}{\bigxmark}}
+
+\newcommand{\raisedsowner}{\raisebox{0.8ex}{$\scriptstyle\sowner_0$}} % hack for proof terms
+
+\newcommand{\dynhole}{\bullet}
+
+\newcommand{\mtlang}{\dagger}
+\newcommand{\dynlang}{\star}
+\newcommand{\mtlangann}{{\mtlang}}
+\newcommand{\dynlangann}{{\displaystyle\star}}
+\newcommand{\kafka}{\(\mathsf{KafKa}\)}
+\newcommand{\sqle}{\sqsubseteq}
+
+\newcommand{\deftablemacros}{%
+  \newcommand{\tblY}{\mbox{\bigcheckmark}}
+  \newcommand{\tblN}{\scalebox{0.8}{\bigxmark}}
+  \newcommand{\TSfull}{\sidproj}
+  \newcommand{\TStag}{\raisebox{0.5ex}{$\stagproj$}}
+  \newcommand{\TSnone}{\sdynproj}
+  \newcommand{\Bpath}{\emph{path}}
+  \newcommand{\Bheap}{\emph{heap}}
+  \newcommand{\hsep}{\quad\qquad}
+  \newcommand{\offsetbox}[1]{\zerowidth{\quad ##1}}
+  \newcommand{\LE}{\offsetbox{\sbehaviorle}}
+  \newcommand{\EQ}{\offsetbox{\sbehavioreq}}}
+
+\newcommand{\csharp}{C\#}
+\newcommand{\rrnum}[1]{\mbox{#1 --~~~}}
+
+\newcommand{\grantsponsor}[3]{\href{#3}{#1}}
+\newcommand{\grantnum}[2]{{\small\tt #2}}

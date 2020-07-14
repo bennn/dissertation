@@ -1,0 +1,205 @@
+%% almost everything here was taken from either
+%% - scribble/sigplan
+%% - classicthesis's examples
+%% - Stephen Chang's dissertation
+
+%% these are overwritten by functions that are called from scribble-generated code
+\newcommand{\myTitle}{Put title Here}
+%% \newcommand{\mySubtitle}{Put subtitle Here} %% did not add support on the scribble side
+\newcommand{\myName}{Put name here}
+%% \newcommand{\myProf}{Put name here} %% ditto
+%% \newcommand{\myOtherProf}{Put name here}
+%% \newcommand{\mySupervisor}{Put name here}
+%% \newcommand{\myFaculty}{Put data here}
+\newcommand{\Sdegree}[1]{\newcommand{\myDegree}{#1}}
+\newcommand{\Sdepartment}[1]{\newcommand{\myDepartment}{#1}}
+\newcommand{\Suniversity}[1]{\newcommand{\myUni}{#1}}
+\newcommand{\Slocation}[1]{\newcommand{\myLocation}{#1}}
+\newcommand{\Ssubmitdate}[1]{\newcommand{\myTime}{#1}}
+%% \newcommand{\myVersion}{Put data here} %% ditto
+
+\newcounter{dummy} % necessary for correct hyperlinks (to index, bib, etc.)
+\newlength{\abcd} % for ab..z string length calculation
+\usepackage{textcomp} % fix warning with missing font shapes
+\usepackage{scrhack} % fix warnings when using KOMA with listings package
+\usepackage{xspace} % to get the spacing after macros right
+\usepackage{mparhack} % get marginpar right
+\usepackage{fixltx2e} % fixes some LaTeX stuff
+
+\usepackage{classicthesis}
+
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+
+\renewcommand{\preDoc}{
+\frenchspacing
+\raggedbottom
+\pagenumbering{roman} %% last pre-content section should set it to `arabic` at the end
+\pagestyle{plain}
+}
+
+
+\newcommand{\thesisTitle}{
+%% taken from Stephen Chang's dissertation
+\begin{titlepage}
+\begin{addmargin}[-1cm]{-3cm}
+    \begin{center}
+        \large
+
+        \hfill
+
+        \vfill
+
+        \begingroup
+        \LARGE
+            \parbox[c][1in][c]{5in}{\center\color{Blue}\spacedallcaps{\myTitle}} \\ \bigskip
+        \endgroup
+
+        \bigskip
+
+        \spacedlowsmallcaps{\Large \myName}
+
+        \vfill
+
+        \vfill
+
+%        \mySubtitle \\ \medskip
+
+        Submitted in partial fulfillment of the requirements \\
+        for the degree of \myDegree \\ \bigskip
+
+        \bigskip
+
+        \myDepartment \\
+        \myUni \\ \myLocation \bigskip
+
+        \myTime\ %-- \myVersion
+
+        \vfill
+
+    \end{center}
+  \end{addmargin}
+\end{titlepage}
+
+%% back of title page
+\thispagestyle{empty}
+
+\hfill
+
+\vfill
+
+\noindent\myName: \\\textit{\myTitle,} \\ \myDegree, \myUni, \myLocation \\ %\mySubtitle,
+\textcopyright\ \myTime
+
+}
+
+\renewcommand{\titleAndVersionAndAuthors}[3]{
+  \renewcommand{\myTitle}{#1}
+  \renewcommand{\myName}{#3}
+  \thesisTitle
+}
+\renewcommand{\titleAndEmptyVersionAndAuthors}[3]{
+  \titleAndVersionAndAuthors{#1}{#2}{#3}
+}
+
+\usepackage{pdfpages}
+\newcommand{\Sapproval}[1]{
+  \includepdf[pages={1}]{#1}
+  \cleardoublepage
+}
+
+\newcommand{\Sabstract}[1]{
+  \pdfbookmark[1]{Abstract}{Abstract}
+  \begingroup
+  \chapter*{Abstract}
+  #1
+  \endgroup
+  \vfill
+}
+
+\newcommand{\Sacknowledgements}[1]{
+  \bigskip
+  \begingroup
+  \cleardoublepage
+  \pdfbookmark[1]{Acknowledgments}{acknowledgments}
+  \chapter*{Acknowledgments}
+  #1
+  \endgroup
+  \cleardoublepage
+}
+
+\newcommand{\Stableofcontents}[1]{
+  \refstepcounter{dummy}
+  \pdfbookmark[1]{\contentsname}{tableofcontents}
+  \setcounter{tocdepth}{2} % <-- 2 includes up to subsections in the ToC
+  \setcounter{secnumdepth}{3} % <-- 3 numbers up to subsubsections
+  \manualmark
+  \markboth{\spacedlowsmallcaps{\contentsname}}{\spacedlowsmallcaps{\contentsname}}
+  \tableofcontents
+  \automark[section]{chapter}
+  \renewcommand{\chaptermark}[1]{\markboth{\spacedlowsmallcaps{#1}}{\spacedlowsmallcaps{#1}}}
+  \renewcommand{\sectionmark}[1]{\markright{\thesection\enspace\spacedlowsmallcaps{#1}}}
+  \cleardoublepage
+}
+
+%% doesn't seem to work when called from inside \Stableofcontents, so
+%% needs to be called explicitly from the scribble document
+\newcommand{\Sendfrontmatter}{
+  \cleardoublepage\pagenumbering{arabic}
+}
+
+\newcommand{\Sthesispart}[2]{
+  \cleardoublepage
+  \part{#2}\label{#1}
+}
+
+%% Taken from scribble/book
+\renewcommand{\Spart}[2]{\part[#1]{#2}}
+\renewcommand{\Ssection}[2]{\chapter[#1]{#2}}
+\renewcommand{\Ssubsection}[2]{\section[#1]{#2}}
+\renewcommand{\Ssubsubsection}[2]{\subsection[#1]{#2}}
+\renewcommand{\Ssubsubsubsection}[2]{\subsubsection[#1]{#2}}
+\renewcommand{\Ssubsubsubsubsection}[2]{{\bf #2}}
+
+%% "star" means unnumbered and not in ToC: (also from scribble/book)
+\renewcommand{\Spartstar}[1]{\part*{#1}}
+\renewcommand{\Ssectionstar}[1]{\chapter*{#1}}
+\renewcommand{\Ssubsectionstar}[1]{\section*{#1}}
+\renewcommand{\Ssubsubsectionstar}[1]{\subsection*{#1}}
+\renewcommand{\Ssubsubsubsectionstar}[1]{\subsubsection*{#1}}
+\renewcommand{\Ssubsubsubsubsectionstar}[1]{\Ssubsubsubsubsection{#1}}
+
+% "starx" means unnumbered but in ToC: (also from scribble/book)
+\renewcommand{\Spartstarx}[2]{\Spartstar{#2}\addcontentsline{toc}{part}{#1}}
+\renewcommand{\Ssectionstarx}[2]{\Ssectionstar{#2}\addcontentsline{toc}{chapter}{#1}}
+\renewcommand{\Ssubsectionstarx}[2]{\Ssubsectionstar{#2}\addcontentsline{toc}{section}{#1}}
+\renewcommand{\Ssubsubsectionstarx}[2]{\Ssubsubsectionstar{#2}\addcontentsline{toc}{subsection}{#1}}
+\renewcommand{\Ssubsubsubsectionstarx}[2]{\Ssubsubsubsectionstar{#2}\addcontentsline{toc}{subsubsection}{#1}}
+\renewcommand{\Ssubsubsubsubsectionstarx}[2]{\Ssubsubsubsubsectionstar{#2}}
+
+\renewcommand{\ChapRefLocal}[3]{chapter~\ref{#1}}
+\renewcommand{\ChapRefLocalUC}[3]{Chapter~\ref{#1}}
+%% In this case, #2 is the scribble-computed section number, which can
+%% be hilariously off. No idea why.
+\renewcommand{\SecRefLocal}[3]{section~\ref{#1}}
+\renewcommand{\SecRefLocalUC}[3]{Section~\ref{#1}}
+\renewcommand{\PartRefLocal}[3]{part~\ref{#1}}
+\renewcommand{\PartRefLocalUC}[3]{Part~\ref{#1}}
+
+%% Define a \provideenvironment that is analogous to \providecommand
+%% From http://tex.stackexchange.com/questions/20687/does-newenvironment-have-a-provideenvironment-cousin-as-newcommand-has-prov
+\makeatletter
+\def\provideenvironment{\@star@or@long\provide@environment}
+\def\provide@environment#1{%
+        \@ifundefined{#1}%
+                {\def\reserved@a{\newenvironment{#1}}}%
+                {\def\reserved@a{\renewenvironment{dummy@environ}}}%
+        \reserved@a
+}
+\def\dummy@environ{}
+\makeatother
+
+%% FigureMulti is only loaded when the @figure form from scriblib/figure
+%% is used, so provide first to ensure it is always defined
+\provideenvironment{FigureMulti}{}{}
+\renewenvironment{FigureMulti}{\begin{figure}\FigureSetRef}{\end{figure}}

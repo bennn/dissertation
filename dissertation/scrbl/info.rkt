@@ -4,10 +4,13 @@
 (define deps '(
   "at-exp-lib"
   "base"
+  "gtp-plot"
   "gtp-util"
+  "pict-lib"
+  "reprovide-lang"
   "scribble-abbrevs"
   "scribble-lib"
-  "reprovide-lang"
+  "with-cache"
 ))
 (define build-deps '(
   "racket-doc"

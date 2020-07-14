@@ -8,15 +8,17 @@ TODO
         chapter2 = why
         chapter1 = what it's all about
         ... maybe DO want that TS Eliot quote to explain the writing experiment
-- [ ] performance chapter (2), adapt jfp19
-- [ ] transient-racket chapter (4), committee update email
+- [X] performance chapter (2), adapt jfp19
 - [ ] theory chapter (3)
+  ... copy JFP, get building, thats all for now
+- [ ] transient-racket chapter (4), committee update email
 - [ ] full intro (1)
 
 Style
 - [ ] ABC00 cite style, like theory papers
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
+- [ ] why not scribble/text ???
 
 #### dependencies
 

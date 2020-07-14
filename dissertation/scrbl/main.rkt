@@ -3,7 +3,7 @@
 (provide
   (all-from-out
     scribble-abbrevs
-    classicthesis/lang
+    greenman-thesis/classicthesis/lang
     gtp-plot
     gtp-util
     greenman-thesis/util
@@ -20,6 +20,7 @@
   x-axes y-axes
 
   ~cite
+  (rename-out (~cite ~citep))
 
   citet
 
@@ -68,7 +69,7 @@
     take
     take-right
     last)
-  classicthesis/lang
+  greenman-thesis/classicthesis/lang
   racket/format
   racket/string
   greenman-thesis/util
