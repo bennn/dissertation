@@ -32,6 +32,7 @@
     "Robert Bruce Findler"
     "Sam Tobin-Hochstadt"
     "Zeina Migeed"
+    "Matthias Felleisen"
   )
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
 ]
@@ -578,18 +579,28 @@ We modify any Python code that Reticulated's type
  system cannot validate, such as code that requires untagged unions or polymorphism.
 
 
-@string-titlecase[@integer->word[(- (*NUM-BENCHMARKS*) (length TYPED-BM*))]] of
+@(let* ((TYPED-BM (map bm '(fsm synth quadMB)))
+        (num-typed-bm (length TYPED-BM))) @elem{
+@string-titlecase[@integer->word[(- (tr:*NUM-BENCHMARKS*) num-typed-bm)]] of
  the benchmark programs are adaptations of untyped programs.
-The other three benchmarks (@bm{fsm}, @bm{synth}, and @bm{quad}) use most of
+The other @integer->word[num-typed-bm] benchmarks
+ (@oxfordize[TYPED-BM]) use most of
  the type annotations and code from originally-typed programs.
 Any differences between the original programs and the benchmarks are due to the
  following five complications.
+})
 
 First, the addition of types to untyped code occasionally requires type casts or small refactorings.
-For example, the expression @racket[(string->number "42")] has the Typed Racket type @racket[(U Complex #f)].
-This expression cannot appear in a context expecting an @racket[Integer] without an explicit type cast.
-As another example, the @bm{quad} programs call a library function to partition a @racket[(Listof (U A B))] into a @racket[(Listof A)] and a @racket[(Listof B)] using a predicate for values of type @racket[A].
-Typed Racket cannot currently prove that values which fail the predicate have type @racket[B], so the @bm{quad} benchmarks replace the call with two filtering passes.
+For example, the expression @tt{(string->number "42")} has the Typed Racket
+ type @tt{(U Complex #f)}.
+This expression cannot appear in a context expecting an @tt{Integer} without an
+ explicit type cast.
+As another example, the @bm{quad} programs call a library function to partition
+ a @tt{(Listof (U A B))} into a @tt{(Listof A)} and a
+ @tt{(Listof B)} using a predicate for values of type @tt{A}.
+Typed Racket cannot currently prove that values which fail the predicate have
+ type @tt{B}, so the @bm{quad} benchmarks replace the call with two
+ filtering passes.
 
 Second, Typed Racket cannot enforce certain types across a type boundary.
 For example, the core datatypes in the @bm{synth} benchmark are monomorphic
@@ -1633,6 +1644,8 @@ We believe that a fine-grained evaluation would support the
 
 @; -----------------------------------------------------------------------------
 @; EXTRA PLOTS / STUFF
+@; ... gallery of failed plots,
+@; ... talk about / show relative performance? so far its all absolute
 @;
 @;@; -----------------------------------------------------------------------------
 @;@subsection[#:tag "sec:tr:compare"]{Evaluating Relative Performance}
