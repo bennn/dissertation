@@ -28,6 +28,7 @@
   disclaimer
   summary
   bm
+  codett
   id
   library
   Section-ref
@@ -38,6 +39,13 @@
   table-ref
   Figures-ref
   figures-ref
+  (rename-out
+    [Section-ref Sectionref]
+    [section-ref sectionref]
+    [Chapter-ref Chapterref]
+    [chapter-ref chapterref]
+    [Table-ref Tableref]
+    [table-ref tableref])
 
   definition
   sraapproximation
@@ -127,8 +135,9 @@
 (define (bm str)
   (exact (list "\\textsf{" (latex-escape (~a str)) "}")))
 
-(define (library str)
-  (tt str))
+(define codett tt)
+
+(define library tt)
 
 (define id ~a)
 

@@ -158,7 +158,7 @@
 \newcommand{\hicup}{\mathrel{\raisebox{0.1ex}{\scalebox{0.9}{\(\cup\)}}}}
 
 \newcommand{\modname}[2]{$\underline{\hbox to #2in{#1}}$\\[-2ex]}
-\newcommand{\codett}[1]{{\tt #1}}
+\newcommand{\codett}[1]{\texttt{#1}}
 \newcommand{\frombnd}[2]{#1~#2\,\cdot~}
 \newcommand{\fromuntyped}[2]{\frombnd{\edynb{#2}{#1}}{\snredsta}}
 \newcommand{\fromtyped}[2]{\frombnd{\estab{#2}{#1}}{\snreddyn}}
@@ -211,7 +211,7 @@
 \newcommand{\typefont}[1]{\mathsf{#1}}
 \newcommand{\mffont}[1]{\textit{#1}}
 \newcommand{\rrfont}[1]{\mathsf{#1}}
-\newcommand{\textstrat}[1]{{\bf\em#1}}
+\newcommand{\textstrat}[1]{\textbf{\emph{#1}}}
 \newcommand{\wrapfont}[1]{\mathbb{#1}}
 
 \makeatletter
@@ -810,4 +810,4 @@
 \newcommand{\rrnum}[1]{\mbox{#1 --~~~}}
 
 \newcommand{\grantsponsor}[3]{\href{#3}{#1}}
-\newcommand{\grantnum}[2]{{\small\tt #2}}
+\newcommand{\grantnum}[2]{{\small\texttt{#2}}}
