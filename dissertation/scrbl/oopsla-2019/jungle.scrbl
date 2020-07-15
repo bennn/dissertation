@@ -284,7 +284,7 @@ Because Nom and other concrete languages require this kind of type structure in
  untyped code (@format-url{https://dart.dev})@~citep{wzlov-popl-2010,rzv-ecoop-2015,mt-oopsla-2017}.
  the model in @sectionref{sec:design:technical} does not support them.
 
-Both Reticulated and Typed Racket raise an error on \programref{eq:example-pair},
+Both Reticulated and Typed Racket raise an error on @exact|{\programref{eq:example-pair}}|,
  but for substantially different reasons.
 Typed Racket rejects the untyped pair at the boundary to the typed context
  because the pair does not fully match the declared type.
