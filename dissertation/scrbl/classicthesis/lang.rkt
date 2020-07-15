@@ -82,8 +82,8 @@
 ;; with the options provided on the #lang line
 (define (document-class options)
   @string-append{
-    \documentclass[ twoside,openright,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
-                    footinclude=true,cleardoublepage=empty,abstractoff, % <--- obsolete, remove (todo)
+    \documentclass[ twoside,open=right,titlepage,numbers=noenddot,headinclude,%1headlines,% letterpaper a4paper
+                    footinclude=true,cleardoublepage=empty,abstract=off,
                     BCOR=5mm,paper=a4,fontsize=11pt,%11pt,a4paper,%
                     ngerman,american,%
                     @(apply string-append
