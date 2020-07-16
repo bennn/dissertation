@@ -26,8 +26,6 @@
 @approval{src/approval.pdf}
 @; TODO allow - in name
 
-@exact|{\bibliographystyle{plainnat}}|
-
 @include-abstract{abstract.scrbl}
 
 @; need newline above
