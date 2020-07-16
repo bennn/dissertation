@@ -85,7 +85,7 @@ More precisely, this paper analyzes six distinct semantics via four properties (
    \end{array}\)\hfill}
 
    \smallskip
-   \hfill {$\dagger$ by adding trace wrappers, see \techreport{}} \qquad
+   \hfill {$\dagger$ by adding trace wrappers} \qquad
   }|
 ]
 
