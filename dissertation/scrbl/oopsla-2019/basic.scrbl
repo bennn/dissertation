@@ -528,7 +528,7 @@ Take the transitions (@${\sexpr\!\samplerrarrow\!\sexpr}) as given and focus on 
     \subitem\hfill
       \emph{The argument value\/ $\epair{8}{6}$ is input to the function. The substituted body flows out}
     \subitem\hfill
-      \emph{of the function, and by \lawref{law:pos} acquires the function's labels.}
+      \emph{of the function, and by @exact{\lawref{law:pos}} acquires the function's labels.}
 
     \item \label{law:new}
       A primitive operation ($\sdelta$) may remove labels on incoming base values.
@@ -556,11 +556,11 @@ To show how these laws inform the design of a lifted reduction relation,
  the following four rules show lifted variants of the examples
  from @sectionref{sec:design:semantic-framework}.
 The first rule demonstrates a base-type boundary (@exact{\lawref{law:base}}).
-The second demonstrates a higher-order boundary (\lawref{law:cross}); the
+The second demonstrates a higher-order boundary (@exact{\lawref{law:cross}}); the
  new guard on the right-hand side implicitly inherits the context label.
-The third rule sends an input (\lawref{law:neg}) and creates new application
+The third rule sends an input (@exact{\lawref{law:neg}}) and creates new application
  and boundary expressions.
-The fourth rule applies \lawref{law:pos} for an output.
+The fourth rule applies @exact{\lawref{law:pos}} for an output.
 
 @exact|{
 \begin{displayrrarray}
