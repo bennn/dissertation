@@ -4,7 +4,8 @@
 \let\ssum\relax
 \renewcommand{\SecRefLocal}[3]{\ref{#1}}
 \renewcommand{\preDoc}{\bibliographystyle{plainnat}\setcitestyle{numbers}}
-
+%% ... why is this so hard in scribble? just want "no linebreak"
+\newcommand{\bgequation}[2]{\begin{equation}#1#2\end{equation}}
 
 \newcommand{\tcstep}{\rightarrow}
 \newcommand{\tcmulti}{\tcstep\!\!{}^\ast}

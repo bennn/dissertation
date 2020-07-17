@@ -44,8 +44,16 @@
     [section-ref sectionref]
     [Chapter-ref Chapterref]
     [chapter-ref chapterref]
+    [Figure-ref Figureref]
+    [figure-ref figureref]
     [Table-ref Tableref]
     [table-ref tableref])
+
+  noindent
+  leavevmode
+  equation
+  latex-label
+  latex-ref
 
   definition
   sraapproximation
@@ -88,8 +96,11 @@
   scribble/example
   scribble-abbrevs
   (only-in scribble/core
+    make-style
     make-element
     make-paragraph
+    make-compound-paragraph
+    make-nested-flow
     plain
     element)
   scriblib/figure
@@ -140,6 +151,33 @@
 (define library tt)
 
 (define id ~a)
+
+(define (latex-label tag)
+  (make-element (make-style "label" '(exact-chars)) tag))
+
+(define (latex-ref tag)
+  (make-element (make-style "ref" '(exact-chars)) tag))
+
+(define leavevmode
+  (make-element (make-style "leavevmode" '()) ""))
+
+(define noindent
+  (make-element (make-style "noindent" '()) ""))
+
+(define (equation tag content)
+  (make-nested-flow
+    (make-style "bgequation" '(multicommand))
+    (list (para (latex-label tag)) (para content))))
+
+;; equation ref
+(define (_rogramref first-letter tag)
+  (exact (format "\\~arogramref{~a}" first-letter tag)))
+
+(define (Programref tag)
+  (_rogramref "P" tag))
+
+(define (programref tag)
+  (_rogramref "p" tag))
 
 (define (definition term . defn*)
   (make-paragraph plain

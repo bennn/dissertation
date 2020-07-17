@@ -19,6 +19,10 @@ Style
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
 - [ ] why not scribble/text ???
+- [ ] color-code ideas:
+  - sec 2 typed=black, untyped=white
+  - sec 3 typed=grey, untyped=white ... moving beyond black/white but not sure yet
+  - beyond : multi-color for typed components, depends on semantics
 
 #### dependencies
 

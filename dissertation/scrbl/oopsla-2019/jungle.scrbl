@@ -1,5 +1,5 @@
 #lang greenman-thesis/include
-@(require greenman-thesis/oopsla-2019/main)
+@(require greenman-thesis/oopsla-2019/main greenman-thesis/oopsla-2019/pict)
 
 @title[#:tag "sec:design:jungle"]{Assorted Behaviors by Example}
 
@@ -41,175 +41,32 @@ Flow is a migratory typing system for JavaScript,
 
 @section{Enforcing a Base Type}
 
-@figure*[
-  "fig:example-atom"
-  @elem{@exact|{\Programref{eq:example-atom}}| translated to four languages}
-
-@exact|{
-\begin{subfigure}[b]{0.48\columnwidth}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=61mm,align=center]\begin{alltt}
-function f(x : number): number
-\{ return x + 1; \}\end{alltt}\end{mdframed}
-\begin{minipage}{17mm}~\end{minipage}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=6mm] {};
-%%    \draw [-] (A) -- (B.north);
-    \draw [->] (A) to[bend right=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}\begin{minipage}{19mm}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=12.5mm,align=center]\begin{alltt}
-f(f);\end{alltt}\end{mdframed}
-\end{minipage}\hspace{-5mm}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=-7mm] {};
-    \node (D) [above of=B,yshift=-11mm,xshift=4mm] {\hugecheckmark};
-    \draw [dashed] (B) to[bend left=32,looseness=1.4] (C);
-    \draw [->,dashed] (B) -- (A);
-  \end{tikzpicture}
-\end{minipage}
-
-\caption{Flow}
-  \label{fig:flow-atom}
-\end{subfigure}%
-\qquad%
-\begin{subfigure}[b]{0.44\columnwidth}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=41mm,align=center]\begin{alltt}
-def f(x : Int)->Int:
-  return x + 1\end{alltt}\end{mdframed}
-
-\begin{minipage}{14mm}~\end{minipage}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=6mm] {};
-%%    \draw [-] (A) -- (B.north);
-    \draw [->] (A) to[bend right=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}\begin{minipage}{20mm}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=12mm,align=center]\begin{alltt}
-f(f)\end{alltt}\end{mdframed}
-\end{minipage}\hspace{-5mm}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=-7mm] {};
-    \node (D) [above of=B,yshift=-11mm] {\kern-3pt\hugexmark};
-    \draw [<-,dashed] (D) to[bend left=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}
-
-\caption{Reticulated}
-  \label{fig:retic-atom}
-\end{subfigure}
-
-\vspace{1ex}
-\begin{subfigure}[b]{0.45\columnwidth}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=53mm,align=center]\begin{alltt}
-(: f (-> Integer Integer))
-(define (f x)
-  (+ x 1))\end{alltt}\end{mdframed}
-
-\begin{minipage}{14mm}~\end{minipage}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=6mm] {};
-    \draw [->] (A) to[bend right=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}\begin{minipage}{21mm}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=14mm,align=center]\begin{alltt}
-(f f)\end{alltt}\end{mdframed}
-\end{minipage}\hspace{-5mm}\begin{minipage}{4mm}
-  \vspace{-7mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=8mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=-7mm] {};
-    \node (D) [above of=B,yshift=-11mm] {\kern-3pt\hugexmark};
-    \draw [<-,dashed] (D) to[bend left=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}
-
-\caption{Typed Racket}
-  \label{fig:tr-atom}
-\end{subfigure}%
-\qquad%
-\begin{subfigure}[b]{0.46\columnwidth}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=54mm,align=center]\begin{alltt}
-class F \{
-  constructor () \{\}
-  fun apply(Int x) : Int \{
-    return x + 1;
-  \}
-\}\end{alltt}\end{mdframed}
-\begin{minipage}{4.5mm}~\end{minipage}\begin{minipage}{4mm}
-  \vspace{-8mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=4mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=6mm] {};
-    \draw [-] (A) -- (B.north);
-    \draw [->] (B.north) to[bend right=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}\begin{minipage}{41mm}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=34mm,align=center]\begin{alltt}
-dyn f = new F();
-f.apply((dyn)f);\end{alltt}\end{mdframed}
-\end{minipage}\hspace{-5mm}\begin{minipage}{4mm}
-  \vspace{-9.5mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [inner sep=0pt,below of=A,yshift=2mm] {};
-    \node (C) [below of=B,yshift=2mm,xshift=-6mm] {};
-    \node (D) [above of=B,yshift=-7.2mm] {\raisebox{1mm}{\hugexmark}};
-    \draw [<-,dashed] (B.north) to[bend left=32,looseness=1.4] (C);
-  \end{tikzpicture}
-\end{minipage}
-
-\caption{Nom}
-  \label{fig:nom-atom}
-\end{subfigure}
-}|]
-
 One of the simplest ways that a mixed-typed interaction can go wrong
  is for untyped code to send incorrect input to a typed context that
  expects a flat value.
 The first example illustrates one such interaction: 
-@exact|{
-\begin{equation}
-  \label{eq:example-atom}
-  \begin{minipage}{33mm}
-    \begin{mdframed}[style=staframestyle,userdefinedwidth=33mm]\(
-      f = \efun{\tann{\svar}{\tint}}{\svar + 1}
-    \)\end{mdframed}
-  \end{minipage}\begin{minipage}{23mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [right of=A,xshift=3em] {};
-    \node (C) [below of=A,yshift=5ex] {};
-    \node (D) [below of=B,yshift=5ex] {};
-    \draw[->] (A) edge [bend left] (B);
-    \draw[<-,dashed] (C) edge [bend right] (D);
-  \end{tikzpicture}\end{minipage}\begin{minipage}{9mm}
-    \begin{mdframed}[style=dynframestyle,userdefinedwidth=9mm]\(
-      f~f
-    \)\end{mdframed}
-  \end{minipage}
-\end{equation}
-}|
-The typed function on the left expects an integer.
+
+@equation[
+  "eq:example-atom"
+  jungle:example-atom]
+
+@|noindent|The typed function on the left expects an integer.
 The untyped context on the right imports this function @${f} and applies @${f} to
  itself; thus the typed function receives a function rather than an integer.
 The question is whether the program halts
  or invokes the typed function @${f} on a nonsensical input.
 
+@figure*[
+  "fig:example-atom"
+  @elem{@exact|{\Programref{eq:example-atom}}| translated to four languages}
+  jungle:example-atom*]
 
-@Figure-ref{fig:example-atom} translates the program to four languages.
+@Figure-ref["fig:example-atom"] translates the program to four languages.
 Despite the differences in syntax and types, each clearly defines a
  typed function that expects an integer on the top
  and applies the function to itself in an untyped context on the bottom.
 
-In Flow (@exact|{\figureref{fig:flow-atom}}|), the program does not detect a type mismatch.
+In Flow, the program does not detect a type mismatch.
 The typed function receives a function and surprisingly computes a string
  (@tt{ECMA-262} edition 10, @exact{\S} @hyperlink["https://www.ecma-international.org/ecma-262/#sec-addition-operator-plus"]{12.8.3}).
 In the other three languages, the program halts with 
@@ -235,26 +92,12 @@ The checks for other types reveal differences among these non-trivial type enfor
 The second example is about pair types. Specifically, it questions what
  happens when typed code declares a pair type and receives an untyped pair
  at runtime:
-@exact|{
-\begin{equation}
-  \label{eq:example-pair}
-  \begin{minipage}{48mm}
-    \begin{mdframed}[style=staframestyle,userdefinedwidth=48mm]\(
-      g = \efun{\tann{\svar}{\tpair{\tint}{\tint}}}{}(\sfst~\svar) + 1
-    \)\end{mdframed}
-  \end{minipage}\begin{minipage}{23mm}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [right of=A,xshift=3em] {};
-    \node (C) [below of=A,yshift=5ex] {};
-    \node (D) [below of=B,yshift=5ex] {};
-    \draw[->] (A) edge [bend left] (B);
-    \draw[<-,dashed] (C) edge [bend right] (D);
-  \end{tikzpicture}\end{minipage}\begin{minipage}{20mm}
-    \begin{mdframed}[style=dynframestyle,userdefinedwidth=20mm]\(g~\epair{``A''}{2}\)\end{mdframed}
-  \end{minipage}
-\end{equation}
-}|
-The typed function on the left expects a pair of integers and uses the
+
+@equation[
+  "eq:example-pair"
+  jungle:example-pair]
+
+@|noindent|The typed function on the left expects a pair of integers and uses the
  first element of the input pair as a number.
 The untyped code on the right applies this function to a pair that contains a
  string and an integer.
