@@ -68,7 +68,8 @@ The chosen models illustrate @emph{natural}, @emph{transient}, @emph{optional} (
 The comparison excludes @emph{concrete} because of the
  stringent constraints it places on untyped code (@section-ref{sec:design:anti-concrete}).
 
-@figure*["tbl:design:contributions"
+@figure*[
+  "tbl:design:contributions"
   @elem{Informal summary of contributions}
   @exact|{
   {\deftablemacros{}
@@ -86,7 +87,7 @@ The comparison excludes @emph{concrete} because of the
   }|
 ]
 
-@Table-ref{tbl:design:contributions} sketches the results of the evaluation (@section-ref{sec:design:technical}).
+@Figure-ref{tbl:design:contributions} sketches the results of the evaluation (@section-ref{sec:design:technical}).
 The six letters in the top row correspond to different type-enforcement strategies,
  and thus different semantics, for the common surface language.
 As to be expected, @|nname| (@${\nscr}) accepts the fewest programs without raising a run-time
