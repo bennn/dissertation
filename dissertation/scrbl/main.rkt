@@ -165,9 +165,8 @@
   (make-element (make-style "noindent" '()) ""))
 
 (define (equation tag content)
-  (make-nested-flow
-    (make-style "bgequation" '(multicommand))
-    (list (para (latex-label tag)) (para content))))
+  (nested #:style "equation"
+    (para (latex-label tag) content)))
 
 ;; equation ref
 (define (_rogramref first-letter tag)
