@@ -6,6 +6,7 @@
   jungle:example-pair
   jungle:example-pair*
   jungle:tr-api
+  jungle:rp-api
 )
 
 (require
@@ -306,68 +307,31 @@
     jungle:example-pair-tr
     jungle:example-pair-nom))
 
-(define jungle:tr-api
-  ;; TODO add arrows / hubs
-  (let* ((u-net
-           (untyped-mod
-             "net/url"
-             '("#lang racket"
-               ";; +600 lines of code ...."
-               ""
-               "(define (call/input-url url c h)"
-               "  ;; connect to the url via c,"
-               "  ;; process the data via h"
-               "  ....)")))
-         (t-net
-           (typed-mod
-             "typed/net/url"
-             '("#lang typed/racket"
-               ""
-               "(define-type URL ....)"
-               ""
-               "(require/typed/provide"
-               "  ;; from this library"
-               "  net/url"
-               ""
-               "  ;; import the following"
-               "  [string->url"
-               "   (-> String URL)]"
-               ""
-               "  [call/input-url"
-               "   (∀ (A)"
-               "    (-> URL"
-               "        (-> String In-Port)"
-               "        (-> In-Port A)"
-               "        A))])")))
-         (client
-           (untyped-mod
-             "client"
-             '("#lang racket"
-               "(require html typed/net/url)"
-               ""
-               "(define URL"
-               "  (string->url \"https://sr.ht\"))"
-               ""
-               ";; connect to url, read html"
-               "(define (main)"
-               "  (call/input-url URL (λ(str) ....) read-html))")))
-         (v-pict
+(define (make-api-pict u-net t-net client
+                       #:callback-x-sep [cx #f]
+                       #:callback-y-sep [cy #f]
+                       #:callback-start-angle [csa #f]
+                       #:callback-start-pull [csp #f]
+                       #:callback-end-angle [cea #f]
+                       #:callback-end-pull [cep #f]
+                       #:extra-x-pad [xxp 0])
+  (let* ((v-pict
           (vl-append
             output-y
             u-net
-            (ht-append (* 8 shim-sep) (blank) t-net (blank))
+            (ht-append (* 8 shim-sep) (blank) t-net (blank xxp 0))
             client))
          (pp
            (ppict-do v-pict
               #:go (at-find-pict u-net lb-find 'lt #:abs-x shim-sep #:abs-y shim-sep)
               (tag-pict (blank) 'LT)
-              #:go (at-find-pict u-net rb-find 'rt #:abs-x shim-sep #:abs-y shim-sep)
+              #:go (at-find-pict u-net rb-find 'rt #:abs-x shim-sep #:abs-y (* (or cy 1) shim-sep))
               (tag-pict (blank) 'RT)
               #:go (at-find-pict t-net lc-find 'rt #:abs-x (- shim-sep))
               (tag-pict (blank (* 6 shim-sep) (* 4 shim-sep)) 'LC)
               #:go (at-find-pict client lt-find 'lb #:abs-x shim-sep #:abs-y (- shim-sep))
               (tag-pict (blank) 'LB)
-              #:go (at-find-pict client rt-find 'rt #:abs-x (- shim-sep) #:abs-y (* 4 shim-sep))
+              #:go (at-find-pict client rt-find 'rt #:abs-x (* (or cx -1) shim-sep) #:abs-y (* 4 shim-sep))
               (tag-pict (blank) 'RB)))
          (pp/line*
            (for/fold ((acc pp))
@@ -382,16 +346,88 @@
                             (list
                               (code-arrow 'LC lt-find 'LC rt-find 0 0 0 0 'solid)
                               (code-arrow 'LC lb-find 'LB lt-find (* 3/4 turn) (* 3/4 turn) 0 0 'solid)
-                              (code-arrow 'RB rt-find 'RT rb-find (* 25/100 turn) (* 35/100 turn) 1/2 1/2 'dot)))))
+                              (code-arrow 'RB rt-find 'RT rb-find (* (or csa 25/100) turn) (* (or cea 35/100) turn) (or csp 1/2) (or cep 1/2) 'dot)))))
              (add-code-arrow acc arr))))
     pp/arrow*))
+
+(define jungle:tr-api
+  (make-api-pict
+    (untyped-mod
+      "net/url"
+      '("#lang racket"
+        ";; +600 lines of code ...."
+        ""
+        "(define (call/input-url url c h)"
+        "  ;; connect to the url via c,"
+        "  ;; process the data via h"
+        "  ....)"))
+    (typed-mod
+      "typed/net/url"
+      '("#lang typed/racket"
+        ""
+        "(define-type URL ....)"
+        ""
+        "(require/typed/provide"
+        "  ;; from this library"
+        "  net/url"
+        ""
+        "  ;; import the following"
+        "  [string->url"
+        "   (-> String URL)]"
+        ""
+        "  [call/input-url"
+        "   (∀ (A)"
+        "    (-> URL"
+        "        (-> String In-Port)"
+        "        (-> In-Port A)"
+        "        A))])"))
+    (untyped-mod
+      "client"
+      '("#lang racket"
+        "(require html typed/net/url)"
+        ""
+        "(define URL"
+        "  (string->url \"https://sr.ht\"))"
+        ""
+        ";; connect to url, read html"
+        "(define (main)"
+        "  (call/input-url URL (λ(str) ....) read-html))"))))
+
+(define jungle:rp-api
+  (make-api-pict
+    #:callback-x-sep 0
+    #:callback-y-sep -1
+    #:callback-start-angle 3/100
+    #:callback-start-pull 125/100
+    #:callback-end-angle 47/100
+    #:callback-end-pull 115/100
+    #:extra-x-pad 30
+    (untyped-mod
+      "requests"
+      '("# 2,000 lines of code ...."
+        ""
+        "def get(url, *args, **kws):"
+        "  # Sends a GET request"
+        "  ...."))
+    (typed-mod
+      "typed_requests"
+      '("import requests as r"
+        ""
+        "def get(url:Str, to:Tuple(Float,Float)):"
+        "  return r.get(url, to)"))
+    (untyped-mod
+      "client"
+      '("from typed_requests import get"
+        ""
+        "wait_times = (2, \"zero\")"
+        "get(\"https://sr.ht\", wait_times)"))))
 
 (module+ raco-pict
   (provide raco-pict)
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        jungle:tr-api
+        jungle:rp-api
         '()
     )))
 )

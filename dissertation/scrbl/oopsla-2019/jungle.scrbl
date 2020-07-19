@@ -149,51 +149,12 @@ These sample behaviors are indicative of a wider difference;
 @figure*[
   "fig:tr-example"
   @elem{Using Typed Racket to define an API}
-  jungle:tr-api
-]
+  jungle:tr-api]
 
 @figure*[
   "fig:retic-example"
   @elem{Using Reticulated to define an API}
-  @exact|{
-  \begin{minipage}[t]{0.48\columnwidth}
-  \texttt{requests}\\[-1ex]
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=54mm,align=left]\begin{alltt}
-# 2,000 lines of code ....
-
-def get(url, *args, **kws):
-  # Sends a GET request
-  ....
-\end{alltt}\end{mdframed}
-
- {\texttt{client}\hfill\raisebox{-3.5mm}[0pt][0pt]{\begin{tikzpicture}
-  \node (A) {};
-  \node (B) [below right of=A,yshift=4mm] {};
-  \node (C) [below of=A] {};
-  \draw [->] (A.south east) to[bend right=30] (B.north east);
-  \draw [->] (B.south east) to[bend right=20] (C.north east);
-  \draw [->,dashed] (C.north west) -- (A.south west);
-\end{tikzpicture}}\hspace{01mm}~}\\[-1ex]
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=64mm,align=right]\begin{alltt}
-from typed_requests import get
-
-wait_times = (2, "zero")
-get("https://sr.ht", wait_times)
-\end{alltt}\end{mdframed}
-
-\end{minipage}\begin{minipage}[t]{0.52\columnwidth}
-  \vspace{2ex}
-  \texttt{typed\_requests}\\[-1ex]
-\begin{mdframed}[style=staframestyle,userdefinedwidth=62mm,align=left]\begin{alltt}
-import requests as r
-
-def get(url:Str,
-        to:Tuple(Float,Float)):
-  return r.get(url, to)
-\end{alltt}\end{mdframed}
-
-\end{minipage}
-}|]
+  jungle:rp-api]
 
 @Figure-ref["fig:tr-example" "fig:retic-example"] present excerpts
  from realistic programs that mix typed and untyped code.
