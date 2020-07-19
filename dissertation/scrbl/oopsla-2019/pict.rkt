@@ -4,12 +4,14 @@
   jungle:example-atom
   jungle:example-atom*
   jungle:example-pair
+  jungle:example-pair*
 )
 
 (require
   racket/string
   racket/format
   racket/math
+  (only-in racket/list take-right)
 
   pict
   pict-abbrevs
@@ -149,6 +151,48 @@
     #:go (at-find-pict 'u-out-0 rc-find 'lc #:abs-x (* 2 shim-sep))
     r-pict))
 
+(define (make-example-pair-pict u-str* t-str* r-str*)
+  (define u-pict (untyped-codeblock u-str*))
+  (define t-pict (typed-codeblock t-str*))
+  (define r-pict (if r-str* (error-text r-str*) (blank)))
+  (define shim-sep 4)
+  (define output-x 30)
+  (define output-y 12)
+  (define tu-pict
+    (let* ((t/u
+            (vl-append
+              t-pict
+              (tag-pict (blank shim-sep shim-sep) 't-shim)
+              (blank 0 output-y)
+              (tag-pict (blank shim-sep shim-sep) 'u-shim)
+              u-pict
+              (hb-append (blank shim-sep output-y)
+                         (tag-pict (blank output-x 0) 'u-out-0)))))
+      (add-code-arrow
+        t/u
+        (code-arrow 't-shim rb-find 'u-shim rt-find (* 3/4 turn) (* 3/4 turn) 0 0 'solid))))
+  (define r-out-arrow (code-arrow 'u-out-0 lb-find 'u-out-0 rb-find 0 0 0 0 'dot))
+  (ppict-do
+    (add-code-arrow tu-pict r-out-arrow)
+    #:go (at-find-pict 'u-out-0 rc-find 'lc #:abs-x (* 2 shim-sep))
+    r-pict))
+
+(define (interleave a* b*)
+  (cond
+    [(null? a*)
+     b*]
+    [(null? b*)
+     a*]
+    [else
+      (list* (car a*) (car b*) (interleave (cdr a*) (cdr b*)))]))
+
+(define (make-example-table . pict*)
+  (define title*
+    (list (title-text "Flow") (title-text "Reticulated")
+          (title-text "Typed Racket") (title-text "Nom")))
+  (table 2 (interleave (take-right title* (length pict*)) pict*)
+    lt-superimpose lt-superimpose 10 34))
+
 (define jungle:example-atom
   (make-example-atom-pict
     '("f = λ(x:Int) x+1")
@@ -196,15 +240,11 @@
     "Error"))
 
 (define jungle:example-atom*
-  (table 2
-    (list
-      (title-text "Flow") jungle:example-atom-flow
-      (title-text "Reticulated") jungle:example-atom-rp
-      (title-text "Typed Racket") jungle:example-atom-tr
-      (title-text "Nom") jungle:example-atom-nom)
-    lt-superimpose
-    lt-superimpose
-    10 34))
+  (make-example-table
+    jungle:example-atom-flow
+    jungle:example-atom-rp
+    jungle:example-atom-tr
+    jungle:example-atom-nom))
 
 (define jungle:example-pair
   (make-example-atom-pict
@@ -213,12 +253,54 @@
     #true
     #false))
 
+(define jungle:example-pair-rp
+  (make-example-pair-pict
+    '("x = [\"A\", 2]")
+    '("def g(y : Tuple(Int,Int)):"
+      "  return y[0] + 1"
+      ""
+      "g(x)")
+    "Error"))
+
+(define jungle:example-pair-tr
+  (make-example-pair-pict
+    '("(define x (list \"A\" 2))")
+    '("(require/typed"
+      "  [x (List Integer Integer)])"
+      ""
+      "(+ (first x) 1)")
+    "Error"))
+
+(define jungle:example-pair-nom
+  (make-example-pair-pict
+    '("class Pair {"
+      "  private fst;"
+      "  private snd;"
+      "  # ...."
+      "}"
+      ""
+      "x = new Pair(\"A\", 2)")
+    '("class IntPair {"
+      "  private Int fst;"
+      "  private Int snd;"
+      "  # ...."
+      "}"
+      ""
+      "((IntPair)x).fst + 1")
+    "Error"))
+
+(define jungle:example-pair*
+  (make-example-table
+    jungle:example-pair-rp
+    jungle:example-pair-tr
+    jungle:example-pair-nom))
+
 (module+ raco-pict
   (provide raco-pict)
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        jungle:example-pair
+        jungle:example-pair*
         '()
     )))
 )

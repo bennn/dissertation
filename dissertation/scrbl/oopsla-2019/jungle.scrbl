@@ -140,87 +140,8 @@ These sample behaviors are indicative of a wider difference;
 
 @figure*[
   "fig:example-pair"
-  @elem{@exact{\Programref{eq:example-pair}} translations}
-  @exact|{
-\begin{minipage}{0.51\columnwidth}
-\begin{subfigure}[b]{\columnwidth}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=27mm,align=center]\begin{alltt}
-x = ["A", 2]\end{alltt}\end{mdframed}
-  \vspace{-10mm}\begin{center}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [below of=A,yshift=3mm] {};
-    \draw[->] (A) -- (B);
-    \node (C) [below of=A,yshift=6mm,xshift=3mm] {\hugexmark};
-    \node (D) [below of=A,yshift=6mm,xshift=-3mm] {~~\hphantom{\hugexmark}};
-\end{tikzpicture}\end{center}\vspace{-5mm}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=52mm,align=center]\begin{alltt}
-def g(y : Tuple(Int,Int)):
-  return y[0] + 1
-
-g(x)\end{alltt}\end{mdframed}
-\vspace{-4mm}
-
-\caption{Reticulated}
-  \label{fig:retic-pair}
-\end{subfigure}
-
-\vspace{1ex}
-\begin{subfigure}[b]{\columnwidth}
-\vspace{4mm}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=47mm,align=center]\begin{alltt}
-(define x (list "A" 2))\end{alltt}\end{mdframed}
-\vspace{-10mm}\begin{center}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [below of=A,yshift=3mm] {};
-    \node (E) [below of=A,yshift=5mm] {};
-    \draw[->] (A) -- (E);
-    \node (C) [below of=A,yshift=6mm,xshift=3mm] {\hugexmark};
-    \node (D) [below of=A,yshift=6mm,xshift=-3mm] {~~\hphantom{\hugexmark}};
-\end{tikzpicture}\end{center}\vspace{-5mm}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=58mm,align=center]\begin{alltt}
-(require/typed
-  [x (List Integer Integer)])
-
-(+ (first x) 1)\end{alltt}\end{mdframed}
-\vspace{-4mm}
-
-\caption{Typed Racket}
-  \label{fig:tr-pair}
-\end{subfigure}
-\end{minipage}\hfill\begin{minipage}{0.38\columnwidth}
-\begin{subfigure}[t]{\columnwidth}
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=42mm,align=center]\begin{alltt}
-class Pair \{
-  private fst;
-  private snd;
-  # ....
-\}
-
-x = new Pair("A", 2)\end{alltt}\end{mdframed}
-\vspace{-10mm}\begin{center}\begin{tikzpicture}
-    \node (A) {};
-    \node (B) [below of=A,yshift=3mm] {};
-    \node (E) [below of=A,yshift=5mm] {};
-    \draw[->] (A) -- (E);
-    \node (C) [below of=A,yshift=6mm,xshift=3mm] {\hugexmark};
-    \node (D) [below of=A,yshift=6mm,xshift=-3mm] {~~\hphantom{\hugexmark}};
-\end{tikzpicture}\end{center}\vspace{-5mm}
-\begin{mdframed}[style=staframestyle,userdefinedwidth=42mm,align=center]\begin{alltt}
-class IntPair \{
-  private Int fst;
-  private Int snd;
-  # ....
-\}
-
-((IntPair)x).fst + 1\end{alltt}\end{mdframed}
-\vspace{-4mm}
-
-\caption{Nom}
-  \label{fig:nom-pair}
-\end{subfigure}
-\end{minipage}
-
-}|]
+  @elem{@exact|{\Programref{eq:example-pair}}| translations}
+  jungle:example-pair*]
 
 
 @section[#:tag "sec:design:lying-type"]{Uncovering the Source of a Mismatch}
