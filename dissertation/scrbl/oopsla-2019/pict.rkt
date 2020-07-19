@@ -5,6 +5,7 @@
   jungle:example-atom*
   jungle:example-pair
   jungle:example-pair*
+  jungle:tr-api
 )
 
 (require
@@ -20,6 +21,10 @@
   scribble-abbrevs/latex)
 
 (define turn revolution)
+
+(define shim-sep 4)
+(define output-x 30)
+(define output-y 12)
 
 (define untyped-color "white")
 (define typed-color "LightGray")
@@ -68,6 +73,18 @@
     #:x-margin 20
     #:y-margin 14
     (code-text* str*)))
+
+(define (add-modname str pict)
+  (vl-append
+    shim-sep
+    (code-text str)
+    (ht-append shim-sep (blank) pict)))
+
+(define (typed-mod str str*)
+  (add-modname str (typed-codeblock str*)))
+
+(define (untyped-mod str str*)
+  (add-modname str (untyped-codeblock str*)))
 
 (struct code-arrow [src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull style] #:transparent)
 
@@ -122,9 +139,6 @@
   (define t-pict (typed-codeblock t-str*))
   (define u-pict (untyped-codeblock u-str*))
   (define r-pict (if r-str* (if ok? (success-text r-str*) (error-text r-str*)) (blank)))
-  (define shim-sep 4)
-  (define output-x 30)
-  (define output-y 12)
   (define tu-pict
     (let* ((t/sep
              (vl-append t-pict (tag-pict (blank shim-sep shim-sep) 't-shim)))
@@ -155,9 +169,6 @@
   (define u-pict (untyped-codeblock u-str*))
   (define t-pict (typed-codeblock t-str*))
   (define r-pict (if r-str* (error-text r-str*) (blank)))
-  (define shim-sep 4)
-  (define output-x 30)
-  (define output-y 12)
   (define tu-pict
     (let* ((t/u
             (vl-append
@@ -295,12 +306,92 @@
     jungle:example-pair-tr
     jungle:example-pair-nom))
 
+(define jungle:tr-api
+  ;; TODO add arrows / hubs
+  (let* ((u-net
+           (untyped-mod
+             "net/url"
+             '("#lang racket"
+               ";; +600 lines of code ...."
+               ""
+               "(define (call/input-url url c h)"
+               "  ;; connect to the url via c,"
+               "  ;; process the data via h"
+               "  ....)")))
+         (t-net
+           (typed-mod
+             "typed/net/url"
+             '("#lang typed/racket"
+               ""
+               "(define-type URL ....)"
+               ""
+               "(require/typed/provide"
+               "  ;; from this library"
+               "  net/url"
+               ""
+               "  ;; import the following"
+               "  [string->url"
+               "   (-> String URL)]"
+               ""
+               "  [call/input-url"
+               "   (∀ (A)"
+               "    (-> URL"
+               "        (-> String In-Port)"
+               "        (-> In-Port A)"
+               "        A))])")))
+         (client
+           (untyped-mod
+             "client"
+             '("#lang racket"
+               "(require html typed/net/url)"
+               ""
+               "(define URL"
+               "  (string->url \"https://sr.ht\"))"
+               ""
+               ";; connect to url, read html"
+               "(define (main)"
+               "  (call/input-url URL (λ(str) ....) read-html))")))
+         (v-pict
+          (vl-append
+            output-y
+            u-net
+            (ht-append (* 8 shim-sep) (blank) t-net (blank))
+            client))
+         (pp
+           (ppict-do v-pict
+              #:go (at-find-pict u-net lb-find 'lt #:abs-x shim-sep #:abs-y shim-sep)
+              (tag-pict (blank) 'LT)
+              #:go (at-find-pict u-net rb-find 'rt #:abs-x shim-sep #:abs-y shim-sep)
+              (tag-pict (blank) 'RT)
+              #:go (at-find-pict t-net lc-find 'rt #:abs-x (- shim-sep))
+              (tag-pict (blank (* 6 shim-sep) (* 4 shim-sep)) 'LC)
+              #:go (at-find-pict client lt-find 'lb #:abs-x shim-sep #:abs-y (- shim-sep))
+              (tag-pict (blank) 'LB)
+              #:go (at-find-pict client rt-find 'rt #:abs-x (- shim-sep) #:abs-y (* 4 shim-sep))
+              (tag-pict (blank) 'RB)))
+         (pp/line*
+           (for/fold ((acc pp))
+                     ((arr (in-list
+                            (list
+                              (code-arrow 'LT lb-find 'LC lt-find (* 3/4 turn) (* 3/4 turn) 0 0 'solid)
+                              (code-arrow 'LC rb-find 'LC lb-find (* 1/2 turn) (* 1/2 turn) 0 0 'solid)))))
+             (add-code-arrow acc arr #:arrow-size 0)))
+         (pp/arrow*
+           (for/fold ((acc pp/line*))
+                     ((arr (in-list
+                            (list
+                              (code-arrow 'LC lt-find 'LC rt-find 0 0 0 0 'solid)
+                              (code-arrow 'LC lb-find 'LB lt-find (* 3/4 turn) (* 3/4 turn) 0 0 'solid)
+                              (code-arrow 'RB rt-find 'RT rb-find (* 25/100 turn) (* 35/100 turn) 1/2 1/2 'dot)))))
+             (add-code-arrow acc arr))))
+    pp/arrow*))
+
 (module+ raco-pict
   (provide raco-pict)
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        jungle:example-pair*
+        jungle:tr-api
         '()
     )))
 )

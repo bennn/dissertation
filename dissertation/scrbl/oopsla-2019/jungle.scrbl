@@ -149,64 +149,8 @@ These sample behaviors are indicative of a wider difference;
 @figure*[
   "fig:tr-example"
   @elem{Using Typed Racket to define an API}
-  @exact|{
-  \begin{minipage}{0.56\columnwidth}
- \texttt{net/url}\\[-1ex]
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=64mm,align=center]\begin{alltt}
-#lang racket
-;; +600 lines of code ....
-
-(define (call/input-url url c h)
-  ;; connect to the url via c,
-  ;; process the data via h
-  ....)
-\end{alltt}\end{mdframed}
- {\texttt{client}\hfill\raisebox{-3mm}[0pt][0pt]{\begin{tikzpicture}
-  \node (A) {};
-  \node (B) [below right of=A,yshift=2mm] {};
-  \node (C) [below of=A] {};
-  \draw [->] (A.south east) to[bend right=25] (B.north east);
-  \draw [->] (B.south east) to[bend right=25] (C.north east);
-  \draw [->,dashed] (C.north west) -- (A.south west);
-\end{tikzpicture}}\hspace{01mm}~}\\[-1ex]
-\begin{mdframed}[style=dynframestyle,userdefinedwidth=64mm,align=center]\begin{alltt}
-#lang racket
-(require html typed/net/url)
-
-(define URL
-  (string->url "https://sr.ht"))
-
-;; connect to url, read html
-(define (main)
-  (call/input-url URL
-                  (\(\lambda\) (str) ....)
-                  read-html))
-\end{alltt}\end{mdframed}
-  \end{minipage}\hfill\begin{minipage}{0.44\columnwidth}
-  \texttt{typed/net/url}\\[-1ex]
-\begin{mdframed}[style=staframestyle,userdefinedwidth=55mm,align=left]\begin{alltt}
-#lang typed/racket
-
-(define-type URL ....)
-
-(require/typed/provide
-  ;; from this library
-  net/url
-
-  ;; import the following
-  [string->url
-   (-> String URL)]
-
-  [call/input-url
-   (\(\forall\) (A)
-    (-> URL
-        (-> String In-Port)
-        (-> In-Port A)
-        A))])
-\end{alltt}\end{mdframed}
-  \end{minipage}
-
-}|]
+  jungle:tr-api
+]
 
 @figure*[
   "fig:retic-example"
