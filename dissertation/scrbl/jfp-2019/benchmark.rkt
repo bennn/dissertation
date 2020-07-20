@@ -39,6 +39,7 @@
   get-ratios-table
   render-ratios-table
   render-overhead-plot
+  render-relative-overhead-plot
   render-validate-plot
   benchmark-name->performance-info
   benchmark->num-modules
@@ -419,9 +420,11 @@
     pp
     (raise-argument-error 'benchmark-name->data-file "directory-exists?" pp)))
 
-(define (benchmark-name->performance-info bm-name [version "6.4"])
+(define (benchmark-name->performance-info bm-name [pre-version #f])
+  (define version (or pre-version "6.4"))
   (define data-dir (benchmark-name->data-file bm-name version))
-  (make-typed-racket-info data-dir))
+  (define extra-name (and pre-version (string->symbol (format "~a-~a" bm-name pre-version))))
+  (make-typed-racket-info data-dir #:name extra-name))
 
 (define (performance-info->sample-info pi #:replacement? [replace? #f])
   (define num-in-sample
@@ -536,6 +539,14 @@
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (render-relative-overhead-plot bm-name+v*)
+  (define bm-name (car bm-name+v*))
+  (define-values [v0 v1] (values (cadr bm-name+v*) (cddr bm-name+v*)))
+  (define pi-0 (benchmark-name->performance-info bm-name v0))
+  (define pi-1 (benchmark-name->performance-info bm-name v1))
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (overhead-plot (list pi-0 pi-1))))
 
 (define (render-validate-plot bm-name)
   (define pi (benchmark-name->performance-info bm-name))

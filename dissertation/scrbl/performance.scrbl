@@ -1,7 +1,7 @@
 #lang greenman-thesis/include
 
 @; TODO, outline:
-@; - [ ] method : space, assumptions, goals, exhaustive, approximate, threats
+@; - [X] method : space, assumptions, goals, exhaustive, approximate, threats
 @;   - [ ] fun, other visualizations from JFP that fell by the wayside
 @; - [X] app TR : benchmarks, protocol, data
 @; - [X] app RP : benchmarks, protocol, data
@@ -176,6 +176,7 @@ These contextual modules may come from the standard library or
   The two @emph{contextual} modules on the right represent libraries and core
    language APIs.
   }
+  @; TODO white = untyped, black = typed, NON-GRAY = contextual ... pick white or black!
   (make-example-program-pict)
 ]
 
@@ -186,6 +187,7 @@ Thus a program with @${N} migratable modules opens a space of @${2^N}
  contextual modules are not easily open to modification.
 
 @(let* ((lattice-version "6.4")
+        (relative-version "6.2")
         (S (tr:benchmark-name->performance-info 'fsm lattice-version))
         (num-modules (tr:benchmark->num-modules tr:fsm))
        ) @list[
@@ -292,13 +294,26 @@ The unlabeled vertical ticks mark, from left-to-right:
   '(fsm)
   #f
 ]
+@render-overhead-plot*[
+  "fig:relative-overhead-plot-example"
+  @elem{
+Overhead plots for @bm{fsm}, on Racket v@|lattice-version|
+ and v@|relative-version|.
+The blue curve for v@|lattice-version| is higher, showing a relative improvement.
+  }
+  ""
+  tr:render-relative-overhead-plot
+  (list (cons 'fsm (cons lattice-version relative-version)))
+  #f
+]
 @elem{
 An overhead plot in the style of @figure-ref{fig:overhead-plot-example}
  scales to arbitrarily large programs because the @|y-axis|
  plots the proportion of @ddeliverable{D} configurations; in contrast, a
  performance lattice contains exponentially many nodes.
 Furthermore, plotting the overhead for multiple implementations of a gradual
- type system on the same set of axes conveys their relative performance.
+ type system on the same set of axes conveys their relative performance
+ (@figure-ref{fig:relative-overhead-plot-example}).
 }
 ])
 
