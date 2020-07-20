@@ -39,6 +39,7 @@
   get-ratios-table
   render-ratios-table
   render-overhead-plot
+  render-exact-plot
   render-relative-overhead-plot
   render-validate-plot
   benchmark-name->performance-info
@@ -539,6 +540,12 @@
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (render-exact-plot bm-name)
+  (define pi (benchmark-name->performance-info bm-name))
+  (define f exact-runtime-plot)
+  (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
+  (f pi))
 
 (define (render-relative-overhead-plot bm-name+v*)
   (define bm-name (car bm-name+v*))

@@ -1,5 +1,5 @@
 TODO
-- [ ] intro : assumptions about gradual / migratory typing,
+- [X] intro : assumptions about gradual / migratory typing,
   see jfp19=X oopsla19=? jfp20=? proposal=X
   - [X] hang on, assumptions must go in extra chapter,
         they're not critical for theory work,
@@ -9,9 +9,10 @@ TODO
         chapter1 = what it's all about
         ... maybe DO want that TS Eliot quote to explain the writing experiment
 - [X] performance chapter (2), adapt jfp19
-- [ ] theory chapter (3)
+- [X] theory chapter (3)
   ... copy JFP, get building, thats all for now
 - [ ] transient-racket chapter (4), committee update email
+  - [ ] 2020-07-22 : share chap4 outline, diff with first attempt, intro, committee update
 - [ ] full intro (1)
 
 Style
@@ -35,7 +36,7 @@ sloccount
 
 2020-06-18 : need to get moving, spend 2 hours/day or more cmon now
 2020-07-09 : we are rolling now, but still way slow progress/hour is pitiful
-
+2020-07-20 : performance and design chapters are imported, need to get serious about transient / data
 
 #### outlines
 

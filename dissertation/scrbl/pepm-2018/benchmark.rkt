@@ -14,6 +14,7 @@
   POPL-2017-BENCHMARK-NAMES
   render-static-information
   render-overhead-plot
+  render-exact-plot
   render-validate-plot
   render-exact-runtime-plot*
   exact-runtime-category
@@ -28,6 +29,8 @@
   ratios-row-typed/retic
   render-ratios-table
   percent-slower-than-typed
+
+  benchmark-name->performance-info
 
   cache-dir
 )
@@ -147,6 +150,12 @@
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (f pi)))
+
+(define (render-exact-plot bm-name)
+  (define pi (benchmark-name->performance-info bm-name))
+  (define f exact-runtime-plot)
+  (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
+  (f pi))
 
 (define (render-validate-plot bm-name)
   (define pi (benchmark-name->performance-info bm-name 'exhaustive))

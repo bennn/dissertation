@@ -61,6 +61,7 @@
   kstep
   rkt
   overhead-long-caption
+  exact-long-caption
 
   stransient
   sguarded
@@ -240,6 +241,14 @@
   and a point (x, y) shows the proportion of @ddeliverable{x} configurations.
   })
 
+(define exact-long-caption
+  @elem{
+  The @|x-axis| ranges over the number of active typed units,
+  the @|y-axis| shows exact running times,
+  and a point (x, y) shows one running time for one configuration with @${x}
+  types.
+  })
+
 (define (Section-ref s)
   (elem "Chapter" ~ (seclink s)))
 
@@ -355,6 +364,8 @@
                  (*GRID-Y-SKIP* overhead-y-sep)
                  (*LEGEND-Y-SKIP* 0)
                  (*OVERHEAD-SHOW-RATIO* #f)
+                 (*AUTO-POINT-ALPHA?* #f)
+                 (*POINT-ALPHA* 0.4)
                  (*FONT-SIZE* 12)
                  (*OVERHEAD-LINE-WIDTH* 0.1))
     (for/list ((bm-name* (in-list page*))

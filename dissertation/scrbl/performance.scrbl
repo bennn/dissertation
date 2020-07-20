@@ -1653,69 +1653,67 @@ We believe that a fine-grained evaluation would support the
  conclusions presented in this paper.
 
 
-
 @; -----------------------------------------------------------------------------
-@; EXTRA PLOTS / STUFF
-@; ... gallery of failed plots,
-@; ... talk about / show relative performance? so far its all absolute
-@;
-@;@; -----------------------------------------------------------------------------
-@;@subsection[#:tag "sec:tr:compare"]{Evaluating Relative Performance}
-@;
-@;Although the absolute performance of Racket version 6.4 is underwhelming, it is a significant improvement over versions 6.2 and 6.3.
-@;This improvement is manifest in the difference between curves on the overhead plots.
-@;For example in @bm{gregor} (third plot in @figure-ref{fig:lnm:3}), version 6.4 has at least as many deliverable configurations as version 6.2 for any overhead on the @${x}-axis.
-@;The difference is greatest near @${x=2}; in terms of configurations, over 80% of @bm{gregor} configurations are not @ddeliverable{2} on v6.2 but are @ddeliverable{2} on v6.4.
-@;The overhead plots for many other benchmarks demonstrate a positive difference between the number of @ddeliverable{D} configurations on version 6.4 relative to version 6.2.
-@;
-@;The plot of @figure-ref{fig:scale:delta} explicitly shows the improvement of version 6.4 over version 6.2.
-@;It consists of @integer->word[(*NUM-BENCHMARKS*)] purple lines, one for each benchmark.
-@;These lines plot the difference between the curves for v6.4 and v6.2 on the corresponding overhead plot.
-@;For example, the line for @bm{gregor} (labeled @${\mathsf{r}}) demonstrates a large improvement in the number of @ddeliverable{2} configurations.
-@;The plot also shows that fifteen of the @integer->word[(*NUM-BENCHMARKS*)] benchmarks significantly benefit from running on version 6.4.
-@;Only the line for the @bm{forth} benchmark demonstrates a significant regression;
-@; the @bm{zombie} benchmark demonstrates a small regression due to an increase in the cost of type casts.
-@;
-@;The improved performance of Racket version 6.4 is due to revisions of the contract system and Typed Racket's use of contracts to enforce static types.
-@;In particular, the contract system allocates fewer closures to track the labels that Typed Racket uses to report type boundary errors.
-@;The regression in the @bm{forth} benchmark is due to a bug in the implementation of class contracts in version 6.2.
-@;This bug would suppress the allocation of certain necessary class contracts.
-@;With the bug fixed, @bm{forth} generates the contracts but suffers additional performance overhead.
-@;
-@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
-@;                [*PLOT-HEIGHT* 180]
-@;                [*PLOT-WIDTH* 440]
-@;                [*PLOT-FONT-SCALE* 0.02]
-@;                [*DELTA-SECTION-ALPHA* 0.5]
-@;                [*X-TICK-LINES?* #t])
-@; (list
-@;  @figure["fig:scale:delta" @elem{Relative performance of v6.4 versus v6.2}
-@;    (render-delta ALL-BENCHMARKS)
-@;  ]
-@; ))
-@;
+@section{Digression: Additional Visualizations}
 
-@;@(parameterize ([*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
-@;                [*COLOR-OFFSET* 3]
-@;                [*RKT-VERSIONS* '("6.2" "6.4")])
-@;  @figure["fig:scale:srs-snake" @elem{Approximating absolute performance}
-@;    (render-srs-single snake sample-size-factor)
-@;  ]
-@;)
-@;
-@;@(parameterize ([*RKT-VERSIONS* '("6.2" "6.4")]
-@;                [*PLOT-HEIGHT* 140]
-@;                [*PLOT-WIDTH* 440]
-@;                [*PLOT-FONT-SCALE* 0.02]
-@;                [*DELTA-SECTION-ALPHA* 0.6]
-@;                [*NUM-SIMPLE-RANDOM-SAMPLES* srs-samples]
-@;                [*TICKS-START-FROM* (- (length ALL-BENCHMARKS) (length large-bm*))])
-@; (list
-@;  @figure["fig:scale:delta-interval" @elem{Approximating relative performance}
-@;      (render-delta large-bm* #:sample-factor sample-size-factor #:sample-style 'interval)
-@;  ]
-@; ))
-@;
+The methods presented in this chapter are our most effective answer
+ to the question of how to evaluate the performance of a gradual typing system.
+In particular, the notion of @ddeliverable{} configurations is a
+ clear and scalable way to summarize performance.
+
+That said, a gradual typing system has other interesting properties besides
+ the number of @ddeliverable{} configurations.
+This section presents other visualizations that help answer extra
+ questions.
+
+
+@subsection{Exact Runtime Plots}
+
+@(let* ((bm-name 'nqueens)
+        (S (rp:benchmark-name->performance-info bm-name))
+        (num-units (performance-info->num-units S))
+       ) @list[
+@render-overhead-plot*[
+  "fig:example-exact-plot"
+  @elem{Number of type annotations vs. Running time on the Reticulated @bm[@~a[bm-name]] benchmark.}
+  exact-long-caption
+  rp:render-exact-plot
+  (list bm-name)
+  #f]
+@elem{
+The raw data behind an overhead plot is a sequence of running times for
+ every configuration.
+An overhead plot summarizes the running times into an average, and uses
+ these averages to group configurations into buckets.
+Unfortunately, this method hides outliers in the data and syntactic similarities among
+ configurations.
+
+@Figure-ref{fig:example-exact-plot} addresses both concerns.
+Instead of summarizing one configuration with its average runtime,
+ the plot contains one point for every running time in the dataset.
+These points are sorted left-to-right in one of the @integer->word[num-units]
+ columns of the figure; if a plot like this does not consist of distinct,
+ horizontal lines, the underlying dataset may have irregular running times.
+Each column contains all configurations that have the same number of types.
+In terms of the configuration lattice (@figure-ref{fig:example-lattice-0}),
+ the left-most column contains the bottom level and successive columns
+ present successive levels.
+At a glance, @figure-ref{fig:example-exact-plot} therefore shows the overall
+ effect of adding types.
+This high-level view can be useful for comparing different approaches to
+ gradual typing.
+}])
+
+
+@subsection{Relative Scatterplots}
+
+
+@; @subsection{Best-Path Plots}
+@; TODO make new gtp-plot function, draw lines on same plot ... or change pi struct?
+@;  right now, trouble is no way to tell config<
+
+
+
 @;  @subsection[#:tag "sec:rp:exact"]{Absolute Running Times}
 @;  
 @;  @figure*["fig:rp:exact" "Running time (in seconds) vs. Number of typed components"
