@@ -42,6 +42,7 @@
   render-exact-plot
   render-relative-overhead-plot
   render-validate-plot
+  render-scatterplot-example
   benchmark-name->performance-info
   benchmark->num-modules
 
@@ -561,6 +562,23 @@
   (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (validate-samples-plot pi si)))
+
+(define (render-scatterplot-example bm-name)
+  (define pi-collapse
+    (make-typed-racket-info (glob-first (build-path data-dir "collapsible" (format "~a-collapse.rktd" bm-name)))
+                            #:name bm-name))
+  (define pi-base
+    (make-typed-racket-info (glob-first (build-path data-dir "collapsible" (format "~a-6.12.rktd" bm-name)))
+                            #:name bm-name))
+  (define w (* 55/100 thesis-max-page-width))
+  (parameterize ((*FONT-SIZE* 12)
+                 (*OVERHEAD-PLOT-WIDTH* w)
+                 (*OVERHEAD-PLOT-HEIGHT* w)
+                 (*POINT-SIZE* 30)
+                 (*POINT-SYMBOL* 'dot)
+                 (*POINT-ALPHA* 0.5)
+                 (*POINT-COLOR* 6))
+    (relative-scatterplot pi-collapse pi-base)))
 
 (define (deliverable* D v bm*)
   (define name* (map benchmark-name bm*))

@@ -1707,6 +1707,42 @@ This high-level view can be useful for comparing different approaches to
 
 @subsection{Relative Scatterplots}
 
+@(let ((bm-name 'morsecode)) @list[
+@figure*[
+  "fig:example-scatterplot"
+  @elem{Scatterplot comparing @bm[bm-name] configurations before
+   and after a proposed change (collapsible contracts).
+   The @|x-axis| ranges over after-change overhead and the @|y-axis|
+    ranges over before-change overhead.
+   A point @${(x, y)} directly compares overhead.
+   Points above the line are better for collapsible.
+  }
+  (tr:render-scatterplot-example bm-name)
+]
+
+@elem{
+Together with Daniel Feltey, Christophe Scholliers, Robert Bruce Findler,
+ and Vincent St-Amour, I evaluated the effect of collapsible contracts
+ on gradual typing@~cite{fgsfs-oopsla-2018}.
+In brief, collapsible contracts are a new representation for run-time type
+ checks.
+The representation greatly improves some mixed-typed programs, but can
+ slow down others.
+
+To quantify the speedup/slowdown tradeoff in our implementation of collapsible
+ contracts, we used a scatterplot technique due to Spenser Bauman@~cite{bbst-oopsla-2017}.
+@Figure-ref{fig:example-scatterplot} shows one representative example from our work.
+Each point in the scatterplot shows how collapsible affects one configuration.
+Points above the diagonal line are improved;
+ points below the line get worse with collapsible contracts.
+More precisely, a point @${(X, Y)} shows the overhead in both systems.
+The first coordinate, @${X}, is the overhead with collapsible
+The @${Y} coordinate is the baseline overhead, without collapsible.
+If collapsible always led to a lower overhead, then @${X < Y} in each
+ point and all points would lie above the @${X=Y} line.
+As you can see, however, some points improve and others do not.
+}])
+
 
 @; @subsection{Best-Path Plots}
 @; TODO make new gtp-plot function, draw lines on same plot ... or change pi struct?
@@ -1714,94 +1750,3 @@ This high-level view can be useful for comparing different approaches to
 
 
 
-@;  @subsection[#:tag "sec:rp:exact"]{Absolute Running Times}
-@;  
-@;  @figure*["fig:rp:exact" "Running time (in seconds) vs. Number of typed components"
-@;    @rp:render-exact-runtime-plot*[rp:MAIN-BENCHMARKS]
-@;  ]
-@;  
-@;  Since changing the type annotations in a Reticulated program changes its
-@;   performance, the language should provide a cost model to help developers
-@;   predict the performance of a given configuration.
-@;  The plots in @figure-ref{fig:rp:exact} demonstrate that a simple heuristic
-@;   works well for these benchmarks: the performance of a configuration is
-@;   proportional to the number of type annotations in the configuration.
-@;  
-@;  @parag{How to Read the Plots}
-@;  @Figure-ref{fig:rp:exact} contains one point for every run of every
-@;   configuration in the experiment.
-@;  (Recall from @section-ref{sec:rp:protocol},
-@;   the data for each configuration is @id[rp:NUM-ITERATIONS] runs.)
-@;  Each point compares the number of type annotations in a
-@;   configuration (@|x-axis|) against its running time, measured in seconds (@|y-axis|).
-@;  
-@;  The plots contain many points with both the same number of typed components
-@;   and similar performance.
-@;  To reduce the visual overlap between such points, the points for a given
-@;   configuration are spread across the @|x-axis|; in particular,
-@;   the @id[rp:NUM-ITERATIONS] points for a configuration with @${N}
-@;   typed components lie within the interval @${N\!\pm\!@id[rp:EXACT-RUNTIME-XSPACE]}
-@;   on the @|x-axis|.
-@;  
-@;  For example, @bm{fannkuch} has two configurations: the untyped configuration
-@;   and the fully-typed configuration.
-@;  To determine whether a point @${(x,y)} in the plot for @bm{fannkuch} represents
-@;   the untyped or fully-typed configuration, round @${x} to the nearest integer.
-@;  
-@;  
-@;  @parag{Exact Runtime Conclusions}
-@;  
-@;  Suppose a programmer starts at an arbitrary configuration and adds some
-@;   type annotations.
-@;  The plots in @figure-ref{fig:rp:exact} suggest that this action will affect
-@;   performance in one of four possible ways, based on trends among the plots.
-@;  
-@;  @exact-runtime-category["types make things slow"
-@;    '(futen slowSHA chaos float pystone PythonFlow take5 sample_fsm aespython stats)
-@;    (λ (num-in-category) @elem{
-@;      The plots for @|num-in-category| benchmarks show a gradual increase in
-@;       performance overhead as the number of typed components increases.
-@;      Typing any function, class, or method adds a small performance overhead.
-@;  })]
-@;  
-@;  @rp:exact-runtime-category[@elem{types make things very slow}
-@;    '(call_method call_simple go http2 meteor nqueens spectralnorm Espionage PythonFlow)
-@;    (λ (num-in-category) @elem{
-@;      @string-titlecase[num-in-category] plots have visible gaps between
-@;       clusters of configurations with the same number of types.
-@;      Configurations below the gap contain type annotations that impose relatively little
-@;       run-time cost.
-@;      Configurations above the gap have some common type annotations that
-@;       add significant overhead.
-@;      Each such gap corresponds to a flat slope in @figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))].
-@;  })]
-@;  
-@;  @rp:exact-runtime-category[@elem{types are free}
-@;    '(fannkuch nbody pidigits)
-@;    (λ (num-in-category) @elem{
-@;      In @|num-in-category| benchmarks, all configurations have similar performance.
-@;      The dynamic checks that enforce tag soundness add insignificant overhead.
-@;  })]
-@;  
-@;  @rp:exact-runtime-category[@elem{types make things fast}
-@;    '(call_method spectralnorm)
-@;    (λ (num-in-category) @elem{
-@;      In @|num-in-category| benchmarks, some configurations
-@;       run faster than similar configurations with fewer typed components.
-@;      These speedups are the result of two implementation bugs:
-@;       (1) Reticulated does not dynamically check the contents of statically-typed tuples,
-@;       and (2) for method calls to dynamically-typed objects, Reticulated performs
-@;       a run-time check that overlaps with Python's dynamic typing@~cite{vksb-dls-2014}.
-@;  })]
-@;  
-@;  @exact{\smallskip}
-@;  
-@;  Overall, there is a clear trend that adding type annotations adds performance
-@;   overhead.
-@;  The increase is typically linear.
-@;  On one hand, this observation may help programmers predict performance issues.
-@;  On the other hand, the linear increase demonstrates that Reticulated does
-@;   not use type information to optimize programs.
-@;  In principle a JIT compiler could generate check-free code if it could infer
-@;   the run-time type of a variable, but it remains to be seen whether this
-@;   approach would improve performance in practice.
