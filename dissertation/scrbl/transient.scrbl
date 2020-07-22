@@ -87,3 +87,13 @@ Transient with blame is therefore an important direction for future work.
 @; why not others?
 @; ... mostly, no chaperones
 
+
+@section{Theory}
+
+@section{Implementation}
+
+@section{Performance}
+
+@section{Work-in-progress: Blame}
+
+
