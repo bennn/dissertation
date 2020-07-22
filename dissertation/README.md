@@ -28,6 +28,83 @@ Acknowledgments:
 update 2020-07-21
 ---
 
+Dear committee members,
+
+Since the last update, I have:
+
+- collected some data on the transient implementation;
+- tried adding blame, met negative results;
+- and started piecing together the dissertation
+
+
+## transient performance
+
+Transient is often better than normal Typed Racket, but not always.
+
+The table here shows worst-case overheads in a few small benchmarks.
+Transient fares worse on 3 of them; `snake` is especially bad.
+
+| benchmark |  max TR |  max transient |
+|-----------+---------+----------------|
+| fsm       |   1.25x |          1.06x |
+| jpeg      |  19.98x |          2.04x |
+| kcfa      |   3.81x |          3.78x |
+| mbta      |   1.43x |          1.41x |
+| morsecode |   1.84x |          2.48x |
+| snake     |  15.19x |         22.13x |
+| zombie    |  53.95x |          3.39x |
+| zordoz    |   2.77x |          5.74x |
+
+What to do?
+In the past, my Transient would remove the runtime check around `(f x)` if `f`
+was defined in transient code and never crossed a boundary. This helped bring
+`snake` to a ~8x overhead, but isn't safe in general. So, I will see if I
+can find a weaker static rule that helps.
+
+
+## blame
+
+In collaboration with Lukas Lazarek and Christos Dimoulas at Northwestern, I
+tried implementing the blame algorithm from Vitousek et al POPL 2019.
+
+The idea is to keep a map from heap addresses to boundary types. When a value
+gets eliminated, this map gets a new entry pointing the result value to its
+parent's boundary types.
+
+Keeping this map up-to-date, however, takes a LOT of extra time and space
+at runtime. Here are a few rows from above with a new column for a
+preliminary transient with blame:
+
+| benchmark |  max TR |  max transient | transient-blame |
+|-----------+---------+----------------+-----------------|
+| jpeg      |  19.98x |          2.04x |           4.79x |
+| snake     |  15.19x |         22.13x |         224.27x |
+| zordoz    |   2.77x |          5.74x |          10.81x |
+
+Besides the huge cost, there are other challenges that I will explain in
+the dissertation. Transient blame seems impractical for now, but the next
+student will be able to build on what we've learned this summer.
+
+
+## dissertation
+
+I have been importing material from past work (mostly JFP 19 and our recent
+JFP submission) into the dissertation.
+
+Next up: descibe the transient implementation & explore ways to report the
+data mixing TR+Transient+Racket.
+
+
+
+
+The main parts of the implementation are here in a pull request proposal
+ for Typed Racket:
+
+ <https://github.com/racket/typed-racket/pull/948>
+
+- - -
+
+
 Long-awaited
 
 implemented + ran basic transient,
