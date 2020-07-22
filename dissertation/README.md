@@ -33,7 +33,7 @@ Dear committee members,
 Since the last update, I have:
 
 - collected some data on the transient implementation;
-- tried adding blame, met negative results;
+- tried adding blame, found the POPL'17 algorithm unusably slow;
 - and started piecing together the dissertation
 
 
@@ -42,7 +42,8 @@ Since the last update, I have:
 Transient is often better than normal Typed Racket, but not always.
 
 The table here shows worst-case overheads in a few small benchmarks.
-Transient fares worse on 3 of them; `snake` is especially bad.
+Transient wins by a lot in `jpeg` and `zombie`, but fares worse in three.
+`snake` is especially bad.
 
 | benchmark |  max TR |  max transient |
 |-----------+---------+----------------|
@@ -58,18 +59,16 @@ Transient fares worse on 3 of them; `snake` is especially bad.
 What to do?
 In the past, my Transient would remove the runtime check around `(f x)` if `f`
 was defined in transient code and never crossed a boundary. This helped bring
-`snake` to a ~8x overhead, but isn't safe in general. So, I will see if I
-can find a weaker static rule that helps.
+`snake` to a ~8x overhead, but isn't safe in general.
 
 
 ## blame
 
-In collaboration with Lukas Lazarek and Christos Dimoulas at Northwestern, I
-tried implementing the blame algorithm from Vitousek et al POPL 2019.
+I tried implementing the blame algorithm from Vitousek et al POPL 2017.
 
-The idea is to keep a map from heap addresses to boundary types. When a value
-gets eliminated, this map gets a new entry pointing the result value to its
-parent's boundary types.
+The algorithm idea is to keep a map from functions/pairs/objects to boundary
+types. When one value gets eliminated, this map gets a new entry pointing
+from the result to its parent's boundary types.
 
 Keeping this map up-to-date, however, takes a LOT of extra time and space
 at runtime. Here are a few rows from above with a new column for a
@@ -82,50 +81,24 @@ preliminary transient with blame:
 | zordoz    |   2.77x |          5.74x |          10.81x |
 
 Besides the huge cost, there are other challenges that I will explain in
-the dissertation. Transient blame seems impractical for now, but the next
-student will be able to build on what we've learned this summer.
+the dissertation. Transient blame seems impractical.
 
 
 ## dissertation
 
-I have been importing material from past work (mostly JFP 19 and our recent
-JFP submission) into the dissertation.
-
-Next up: descibe the transient implementation & explore ways to report the
-data mixing TR+Transient+Racket.
+I have been importing material from past work---mostly JFP 19 and our submission
+to the JFP special issue on gradual typing---into the dissertation. Right now,
+I have first drafts for 3 of the 8 planned chapters.
 
 
+## public pre-release of transient
 
+The goal for Transient is to merge into a future Typed Racket release. Things
+are coming along, so I've opened a pull request with the main part of the
+implementation to solicit comments:
 
-The main parts of the implementation are here in a pull request proposal
- for Typed Racket:
+  <https://github.com/racket/typed-racket/pull/948>
 
- <https://github.com/racket/typed-racket/pull/948>
-
-- - -
-
-
-Long-awaited
-
-implemented + ran basic transient,
-"distracted" by blame, others,
-
-- practical transient
-  + changes to `typed-context?`, type->contract, optimizer, new rewriter
-  + mix trouble = macros, define-typed/untyped-id
-  + have trusted-ids, need trusted types (make-do-sequence)
-  + pr10350 = cannot trust typed ids = perf. hit
-
-- perf lessons, test viz?
-
-- blame
-  + tried following paper, testing if helpful to programmers,
-    many theory troubles
-    MAJOR perf troubles
-  + [ ] cost of sieve
-  + [ ] retic sieve slow too
-
-(keep it short, remember)
 
 
 
