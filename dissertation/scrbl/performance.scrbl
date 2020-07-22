@@ -19,7 +19,7 @@
    gtp-plot/typed-racket-info
    gtp-plot/performance-info)
 
-@title{Performance Analysis Method}
+@title[#:tag "chap:performance"]{Performance Analysis Method}
 @jointwork[
   #:people* '(
     "Asumu Takikawa"
