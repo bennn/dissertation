@@ -30,6 +30,7 @@
 @;   + overhead plots
 @;   + exact-points, lattices (what are the trends?)
 @;   + why so slow, what can be done?
+@;     - macros = problem = more typed code than untyped
 @; - blame, work in progress
 @;   + why blame
 @;   + transient-blame ideas
@@ -43,13 +44,11 @@
 
 @Chapter-ref{chap:performance} demonstrates that Typed Racket's gradual typing
  can add huge overhead to a mixed-typed program.
-The high cost raises doubts about sound gradual typing as a whole;
- being able to run mixed-typed code is not enough, programs also need to
- run in reasonable time.
-@Chapter-ref{chap:design} demonstrates alternatives in the design space.
- of sound gradual typing.
-Typed Racket's @emph{natural} approach sits at an extreme point;
- it offers strong static guarantees that unfortunately demand run-time support.
+The high cost raises doubts about sound gradual typing;
+ the ability to run mixed-typed code is not worth a severe performance hit.
+@Chapter-ref{chap:design} shows, however, that Typed Racket's guarded approach
+ is one of several type-sound methods in a larger design space.
+Adapting a weaker approach may lead to lower, more-predictable costs.
 
 Among the design alternative, the @emph{transient} approach is promising.
 Transient offers a basic soundness guarantee,
@@ -58,23 +57,24 @@ Transient offers a basic soundness guarantee,
 Furthermore, the data for Reticulated Python suggests that the overhead
  of Transient types never exceeds a 10x slowdown.
 
-This chapter describes my implementation of Transient Racket,
+This chapter describes the implementation and performance of Transient Racket,
  a new way to run Typed Racket programs.
-Transient Racket uses the same static types as normal Typed Racket
- (henceforth: Guarded Racket) but enforces a weaker soundness guarantee
- using the transient method.
-
+Transient Racket uses the same static types as standard, guarded Typed Racket
+ but enforces a weaker soundness guarantee using the transient method.
 The implementation comes with innovations on two levels.
 First, it stands on a generalized theory to support macro-level gradual
  typing and a richer language of static types.
-Second, the code deals with tricky points and makes clever re-use
- of the Typed Racket library.
-Additionally, we describe an experiment adding blame to Transient Racket
- as proscribed by @citet{vss-popl-2017}.
-The theory needs significant work, however, because a faithful implementation
- makes several benchmarks run slower than their worst-case Guarded Racket
- configuration.
-Transient with blame is therefore an important direction for future work.
+Second, the code reuses large parts of the standard Typed Racket compiler,
+ including the type-driven optimizer@~cite{stff-padl-2012}.
+
+The performance of Transient Racket is typically an improvement over
+ Guarded Racket, but both semantics have distinct strengths.
+In particular, Guarded Racket reports errors with precise blame information.
+Transient Racket cannot give precise information, and the best-know
+ imprecise algorithm@~cite{vss-popl-2017} adds tremendous runtime overhead.
+@; Adding blame to Transient is thus an important direction for future work.
+This, among other observations, suggests a need for guarded and transient
+ within the same language.
 
 
 @section{Why Transient}
