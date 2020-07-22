@@ -25,6 +25,33 @@ Acknowledgments:
 
 - - -
 
+update 2020-07-21
+---
+
+Long-awaited
+
+implemented + ran basic transient,
+"distracted" by blame, others,
+
+- practical transient
+  + changes to `typed-context?`, type->contract, optimizer, new rewriter
+  + mix trouble = macros, define-typed/untyped-id
+  + have trusted-ids, need trusted types (make-do-sequence)
+  + pr10350 = cannot trust typed ids = perf. hit
+
+- perf lessons, test viz?
+
+- blame
+  + tried following paper, testing if helpful to programmers,
+    many theory troubles
+    MAJOR perf troubles
+  + [ ] cost of sieve
+  + [ ] retic sieve slow too
+
+(keep it short, remember)
+
+
+
 update 2020-02-21
 ---
 
