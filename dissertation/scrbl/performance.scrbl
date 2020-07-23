@@ -8,8 +8,7 @@
 @;
 @; TODO sort retic benchmarks by N, acknowledge origin somewhere else! re-cache
 @;
-@; extra viz:
-@;  JFP appendix, heartbeat plots, ....
+@; NOTE reticulated here is without blame
 
 
 @(require
