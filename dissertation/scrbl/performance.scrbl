@@ -1,14 +1,8 @@
 #lang greenman-thesis/include
 
-@; TODO, outline:
-@; - [X] method : space, assumptions, goals, exhaustive, approximate, threats
-@;   - [ ] fun, other visualizations from JFP that fell by the wayside
-@; - [X] app TR : benchmarks, protocol, data
-@; - [X] app RP : benchmarks, protocol, data
+@; TODO acknowledge origin of retic benchmarks
 @;
-@; TODO sort retic benchmarks by N, acknowledge origin somewhere else! re-cache
-@;
-@; NOTE reticulated here is without blame
+@; TODO reticulated here is without blame
 
 
 @(require
@@ -1154,22 +1148,21 @@ The following descriptions credit each benchmark's original author,
 @; WARNING: benchmark order matters
 @exact{\bigskip}
 @bm-desc[
-  @bm{futen}
-  #:author (hyperlink "http://blog.amedama.jp/" @tt{momijiame})
-  #:origin "Library"
-  #:purpose "SSH configuration"
-  #:url "https://github.com/momijiame/futen"
-  #:depends
-  (list
-    @rp:lib-desc["fnmatch"]{Filename matching}
-    @rp:lib-desc["os.path"]{Path split, path join, path expand, getenv}
-    @rp:lib-desc["re"]{One regular expression match}
-    @rp:lib-desc["shlex"]{Split host names from an input string}
-    @rp:lib-desc["socket"]{Basic socket operations})]{
-  Converts an @hyperlink["https://www.openssh.com/"]{OpenSSH} configuration
-  file to an inventory file for the
-  @hyperlink["https://www.ansible.com/"]{Ansiable} automation framework.
-  @; 1900 iterations
+  @bm{fannkuch}
+  #:author "Sokolov Yura"
+  #:origin PYBENCH
+  #:purpose "Test integers, vectors"
+  #:url "https://github.com/python/performance"]{
+  Implements a classic LISP microbenchmark@~cite{ar-lp-1994}.
+  @; 1 iteration
+}
+@bm-desc[
+  @bm{nqueens}
+  #:author unknown-author
+  #:origin PYBENCH
+  #:purpose "Puzzle"
+  #:url "https://github.com/python/performance"]{
+  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm 10 times in a row.
 }
 @bm-desc[
   @bm{http2}
@@ -1184,14 +1177,49 @@ The following descriptions credit each benchmark's original author,
   @; 10 iterations
 }
 @bm-desc[
-  @bm{slowSHA}
-  #:author "Stefano Palazzo"
-  #:origin "Library"
-  #:purpose "Hashing"
-  #:url "http://github.com/sfstpala/SlowSHA"
-  #:depends (list @rp:lib-desc["os"]{path split})]{
-  Applies the SHA-1 and SHA-512 algorithms to English words.
+  @bm{nbody}
+  #:author "Kevin Carson"
+  #:origin PYBENCH
+  #:purpose "Test float ops"
+  #:url "https://github.com/python/performance"]{
+  Models the orbits of Jupiter, Saturn, Uranus, and Neptune.
   @; 1 iteration
+}
+@bm-desc[
+  @bm{pidigits}
+  #:author unknown-author
+  #:origin PYBENCH
+  #:purpose "Test big integer ops"
+  #:url "https://github.com/python/performance"]{
+  Microbenchmarks big-integer arithmetic.
+  @; 1 iteration (5,000 digits)
+}
+@bm-desc[
+  @bm{spectralnorm}
+  #:author "Sebastien Loisel"
+  #:origin PYBENCH
+  #:purpose "Test arithmetic"
+  #:url "https://github.com/python/performance"]{
+  Computes the largest singular value of an infinite matrix.
+  @; 10 iterations
+}
+@bm-desc[
+  @bm{call_simple}
+  #:author unknown-author
+  #:origin PYBENCH
+  #:purpose "Test function calls"
+  #:url "https://github.com/python/performance"]{
+  Same as @bm{call_method}, using functions rather than methods.
+}
+@bm-desc[
+  @bm{float}
+  #:author "Factor"
+  #:origin PYBENCH
+  #:purpose "Test float ops"
+  #:url "https://github.com/python/performance"
+  #:depends @list[@rp:lib-desc["math"]{Sin, Cos, Sqrt}]]{
+  Microbenchmarks floating-point operations.
+  @; 1 iteration (200,000 points)
 }
 @bm-desc[
   @bm{call_method}
@@ -1204,45 +1232,6 @@ The following descriptions credit each benchmark's original author,
   keyword arguments, or tuple unpacking.
   @; Consists of @${32*10^5} calls to trivial functions.
   @; 1 iteration
-}
-@bm-desc[
-  @bm{call_simple}
-  #:author unknown-author
-  #:origin PYBENCH
-  #:purpose "Test function calls"
-  #:url "https://github.com/python/performance"]{
-  Same as @bm{call_method}, using functions rather than methods.
-}
-@bm-desc[
-  @bm{chaos}
-  #:author "Carl Friedrich Bolz"
-  #:origin PYBENCH
-  #:purpose "Create fractals"
-  #:url "https://github.com/python/performance"
-  #:depends @list[
-    @rp:lib-desc["math"]{Square root}
-    @rp:lib-desc["random"]{randrange}]]{
-  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{@emph{chaos game}} method.
-  @; 1 iteration
-}
-@bm-desc[
-  @bm{fannkuch}
-  #:author "Sokolov Yura"
-  #:origin PYBENCH
-  #:purpose "Test integers, vectors"
-  #:url "https://github.com/python/performance"]{
-  Implements a classic LISP microbenchmark@~cite{ar-lp-1994}.
-  @; 1 iteration
-}
-@bm-desc[
-  @bm{float}
-  #:author "Factor"
-  #:origin PYBENCH
-  #:purpose "Test float ops"
-  #:url "https://github.com/python/performance"
-  #:depends @list[@rp:lib-desc["math"]{Sin, Cos, Sqrt}]]{
-  Microbenchmarks floating-point operations.
-  @; 1 iteration (200,000 points)
 }
 @bm-desc[
   @bm{go}
@@ -1268,51 +1257,6 @@ The following descriptions credit each benchmark's original author,
   @; 1 iterations (finds at most 6,000 solutions)
 }
 @bm-desc[
-  @bm{nbody}
-  #:author "Kevin Carson"
-  #:origin PYBENCH
-  #:purpose "Test float ops"
-  #:url "https://github.com/python/performance"]{
-  Models the orbits of Jupiter, Saturn, Uranus, and Neptune.
-  @; 1 iteration
-}
-@bm-desc[
-  @bm{nqueens}
-  #:author unknown-author
-  #:origin PYBENCH
-  #:purpose "Puzzle"
-  #:url "https://github.com/python/performance"]{
-  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm 10 times in a row.
-}
-@bm-desc[
-  @bm{pidigits}
-  #:author unknown-author
-  #:origin PYBENCH
-  #:purpose "Test big integer ops"
-  #:url "https://github.com/python/performance"]{
-  Microbenchmarks big-integer arithmetic.
-  @; 1 iteration (5,000 digits)
-}
-@bm-desc[
-  @bm{pystone}
-  #:author "Chris Arndt"
-  #:origin PYBENCH
-  #:purpose "Test integer ops"
-  #:url "https://github.com/python/performance"]{
-  Implements Weicker's @emph{Dhrystone} benchmark.
-  @;footnote{@url{http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf}}
-  @; 50,000 iterations
-}
-@bm-desc[
-  @bm{spectralnorm}
-  #:author "Sebastien Loisel"
-  #:origin PYBENCH
-  #:purpose "Test arithmetic"
-  #:url "https://github.com/python/performance"]{
-  Computes the largest singular value of an infinite matrix.
-  @; 10 iterations
-}
-@bm-desc[
   @bm{Espionage}
   #:author "Zeina Migeed"
   #:origin "Synthetic"
@@ -1334,6 +1278,46 @@ The following descriptions credit each benchmark's original author,
   @; 1 iteration
 }
 @bm-desc[
+  @bm{pystone}
+  #:author "Chris Arndt"
+  #:origin PYBENCH
+  #:purpose "Test integer ops"
+  #:url "https://github.com/python/performance"]{
+  Implements Weicker's @emph{Dhrystone} benchmark.
+  @;footnote{@url{http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf}}
+  @; 50,000 iterations
+}
+@bm-desc[
+  @bm{chaos}
+  #:author "Carl Friedrich Bolz"
+  #:origin PYBENCH
+  #:purpose "Create fractals"
+  #:url "https://github.com/python/performance"
+  #:depends @list[
+    @rp:lib-desc["math"]{Square root}
+    @rp:lib-desc["random"]{randrange}]]{
+  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{@emph{chaos game}} method.
+  @; 1 iteration
+}
+@bm-desc[
+  @bm{futen}
+  #:author (hyperlink "http://blog.amedama.jp/" @tt{momijiame})
+  #:origin "Library"
+  #:purpose "SSH configuration"
+  #:url "https://github.com/momijiame/futen"
+  #:depends
+  (list
+    @rp:lib-desc["fnmatch"]{Filename matching}
+    @rp:lib-desc["os.path"]{Path split, path join, path expand, getenv}
+    @rp:lib-desc["re"]{One regular expression match}
+    @rp:lib-desc["shlex"]{Split host names from an input string}
+    @rp:lib-desc["socket"]{Basic socket operations})]{
+  Converts an @hyperlink["https://www.openssh.com/"]{OpenSSH} configuration
+  file to an inventory file for the
+  @hyperlink["https://www.ansible.com/"]{Ansiable} automation framework.
+  @; 1900 iterations
+}
+@bm-desc[
   @bm{take5}
   #:author "Maha Alkhairy and Zeina Migeed"
   #:origin "Educational"
@@ -1341,6 +1325,16 @@ The following descriptions credit each benchmark's original author,
   #:depends @list[ @rp:lib-desc["random"]{randrange shuffle random seed} @rp:lib-desc["copy"]{deepcopy}]]{
   Implements a card game and a simple player AI.
   @; 500 iterations
+}
+@bm-desc[
+  @bm{slowSHA}
+  #:author "Stefano Palazzo"
+  #:origin "Library"
+  #:purpose "Hashing"
+  #:url "http://github.com/sfstpala/SlowSHA"
+  #:depends (list @rp:lib-desc["os"]{path split})]{
+  Applies the SHA-1 and SHA-512 algorithms to English words.
+  @; 1 iteration
 }
 @bm-desc[
   @bm{sample_fsm}

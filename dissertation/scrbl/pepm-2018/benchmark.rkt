@@ -463,8 +463,23 @@
   stats
 ))
 
+(define (benchmark-name->num-units bm)
+  (performance-info->num-units (benchmark-name->performance-info bm)))
+
+(define (benchmark<? bm0 bm1)
+  (define u0 (benchmark-name->num-units bm0))
+  (define u1 (benchmark-name->num-units bm1))
+  (or (< u0 u1)
+      (and (= u0 u1)
+           (symbol<? bm0 bm1))))
+
 (define MAIN-BENCHMARKS
-  (append DLS-2014-BENCHMARK-NAMES POPL-2017-BENCHMARK-NAMES DLS-2017-BENCHMARK-NAMES))
+  (let ((name* (append DLS-2014-BENCHMARK-NAMES POPL-2017-BENCHMARK-NAMES DLS-2017-BENCHMARK-NAMES)))
+    (parameterize ([*current-cache-directory* cache-dir]
+                   [*current-cache-keys* (list (λ () name*))]
+                   [*with-cache-fasl?* #f])
+      (with-cache (cachefile "sorted-benchmark-names.rktd")
+        (λ () (sort name* benchmark<?))))))
 (define NUM-MAIN-BENCHMARKS (length MAIN-BENCHMARKS))
 
 (define-values [EXHAUSTIVE-BENCHMARKS VALIDATE-BENCHMARKS SAMPLE-BENCHMARKS]
