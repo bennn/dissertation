@@ -1,0 +1,100 @@
+push 2795
+push 7606
+push 4553
+push 3884
+define swapdupdrop46 swap dup drop
+-
+define dropswapoverswapswap47 drop swap over swap swap
+*
+push 8894
+push 118
+push 3671
+swapdupdrop46
+swapdupdrop46
+define swapdupdropdropoverswapdropdropover48 swap dup drop drop over swap drop drop over
+push 8045
+define overswapdropdupoveroveroverdupdupover49 over swap drop dup over over over dup dup over
+push 6678
+push 593
+-
++
+define dropdropdropoverswapoverswapoverswapover50 drop drop drop over swap over swap over swap over
+define over51 over
+push 811
+dropswapoverswapswap47
+push 2261
+push 4688
+push 1715
+define swapdupswapoverdupswapdupdupswapdrop52 swap dup swap over dup swap dup dup swap drop
+define swap53 swap
+define swapoverdupswapoverdupdup54 swap over dup swap over dup dup
+push 7013
+swapdupdropdropoverswapdropdropover48
+push 3732
+swapdupdropdropoverswapdropdropover48
+over51
+overswapdropdupoveroveroverdupdupover49
+swapdupdrop46
+swapoverdupswapoverdupdup54
+define swapdupswapswapdropdrop55 swap dup swap swap drop drop
+push 423
++
+define dropdropswap56 drop drop swap
++
+push 3682
+swap53
+define dupoverdropdrop57 dup over drop drop
+define swapoverswapoveroverdupswap58 swap over swap over over dup swap
+-
+-
+swapoverdupswapoverdupdup54
+swapdupswapoverdupswapdupdupswapdrop52
+define dupoverdropdupdupswapoverswap59 dup over drop dup dup swap over swap
+*
+dropdropswap56
++
+swapdupdropdropoverswapdropdropover48
+push 2382
+define dropswapdupdropswapdup60 drop swap dup drop swap dup
+-
+push 4299
+push 1119
+push 7633
++
+push 2154
+push 2816
+push 6102
+push 998
+dropdropswap56
+define overdropdupoverswapover61 over drop dup over swap over
+*
+swapoverswapoveroverdupswap58
+define dropdupdropdupswapdupdropdupover62 drop dup drop dup swap dup drop dup over
+dropswapoverswapswap47
+push 2167
+-
++
+push 2834
+define dupoverswapdupdropdropdupdupdup63 dup over swap dup drop drop dup dup dup
+swap53
+swap53
+swapdupswapoverdupswapdupdupswapdrop52
+push 2551
+push 362
+push 7939
+push 3981
+push 8935
+dropdropdropoverswapoverswapoverswapover50
+push 1776
+dropdropdropoverswapoverswapoverswapover50
+*
+swap53
+define dropoverdupoverdropdupover64 drop over dup over drop dup over
+push 4074
+push 3832
+*
+dupoverdropdrop57
+define dropdupswapover65 drop dup swap over
+*
+define overoveroverdropdropdupover66 over over over drop drop dup over
+overoveroverdropdropdupover66

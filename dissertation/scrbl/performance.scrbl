@@ -185,7 +185,7 @@ Thus a program with @${N} migratable modules opens a space of @${2^N}
  possibilites (@figure-ref{fig:example-lattice-0})---and no more, because the
  contextual modules are not easily open to modification.
 
-@(let* ((lattice-version "6.4")
+@(let* ((lattice-version "7.7")
         (relative-version "6.2")
         (S (tr:benchmark-name->performance-info 'fsm lattice-version))
         (num-modules (tr:benchmark->num-modules tr:fsm))
@@ -289,7 +289,7 @@ The unlabeled vertical ticks mark, from left-to-right:
 1.2x, 1.4x, 1.6x, 1.8x, 4x, 6x, 8x, 10x, 12x, 14x, 16x, and 18x.
   }
   ""
-  tr:render-overhead-plot
+  (tr:make-render-overhead-plot lattice-version)
   '(fsm)
   #f
 ]
@@ -298,11 +298,11 @@ The unlabeled vertical ticks mark, from left-to-right:
   @elem{
 Overhead plots for @bm{fsm}, on Racket v@|lattice-version|
  and v@|relative-version|.
-The blue curve for v@|lattice-version| is higher, showing a relative improvement.
+The orange curve for v@|lattice-version| is higher, showing a relative improvement.
   }
   ""
   tr:render-relative-overhead-plot
-  (list (cons 'fsm (cons lattice-version relative-version)))
+  (list (cons 'fsm (cons relative-version lattice-version)))
   #f
 ]
 @elem{
@@ -530,7 +530,7 @@ Don't worry about the interpretation of the blue lines for now,
   "fig:tr:validate-sample"
   @elem{Typed Racket sample validation.}
   ""
-  tr:render-validate-plot
+  (tr:make-render-validate-plot "7.7")
   (map tr:benchmark-name (take-right tr:ALL-BENCHMARKS overhead-plots-per-page))
   tr:cache-dir
 ]
@@ -997,7 +997,7 @@ The newest version of the benchmarks should avoid these pathologies.
   "fig:tr:overhead"
   "Typed Racket overhead plots"
   overhead-long-caption
-  tr:render-overhead-plot
+  (tr:make-render-overhead-plot "7.7")
   (map tr:benchmark-name tr:ALL-BENCHMARKS)
   tr:cache-dir]
 

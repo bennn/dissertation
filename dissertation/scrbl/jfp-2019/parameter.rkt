@@ -19,7 +19,7 @@
 (defparam2 *LNM-TABLE-CACHE* Path-String "cache-lnm-table.rktd") ;; Place to store cached lnm table
 (defparam2 *LNM-TABLE-DATA-CACHE* Path-String "cache-lnm-table-data.rktd")
 (defparam2 *LNM-OVERHEAD* (Listof Exact-Rational) '(1/5 3 10))
-(defparam2 *RKT-VERSIONS* (Listof String) '("6.2" "6.3" "6.4"))
+(defparam2 *RKT-VERSIONS* (Listof String) '("7.7") #;'("6.2" "6.3" "6.4"))
 (defparam2 *EXACT-TABLE-CACHE* Path-String "cache-exact-table.rktd")
 
 ;; -----------------------------------------------------------------------------

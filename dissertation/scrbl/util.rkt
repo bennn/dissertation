@@ -10,9 +10,15 @@
   SAMPLE-RATE
   NUM-SAMPLE-TRIALS
 
+  glob-first
+
   log-bg-thesis-info
   log-bg-thesis-warning
   log-bg-thesis-error)
+
+(require
+  file/glob
+  racket/match)
 
 ;; -----------------------------------------------------------------------------
 
@@ -29,3 +35,14 @@
 
 (define SAMPLE-RATE 10)
 (define NUM-SAMPLE-TRIALS 10)
+
+(define (glob-first str)
+  (match (glob str)
+   [(cons r '())
+    r]
+   ['()
+    (raise-user-error 'glob-first "No results for glob '~a'" str)]
+   [r*
+    (printf "WARNING: ambiguous results for glob '~a'. Returning the first.~n" str)
+    (car r*)]))
+

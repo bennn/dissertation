@@ -11,37 +11,23 @@
   num-benchmarks
   ;; natural?
 
-  benchmark-rktd
-  ;; (-> Benchmark Version Path-String)
-
-  benchmark-modulegraph
-  ;; (-> Benchmark ModuleGraph)
-
-  benchmark->num-configurations
   benchmark->num-modules
   ;; (-> Benchmark Natural)
-
-  benchmark->num-iterations
-  ;; (-> Benchmark Version Natural)
-
-  benchmark->module-names
-  ;; (-> Benchmark (Listof String))
 
   benchmark<?
   ;; (-> Benchmark Benchmark Boolean)
 
   (all-from-out greenman-thesis/jfp-2019/parameter)
 
-  NUM-POPL
   MAX-OVERHEAD
 
   render-static-information
   get-ratios-table
   render-ratios-table
-  render-overhead-plot
+  make-render-overhead-plot
   render-exact-plot
   render-relative-overhead-plot
-  render-validate-plot
+  make-render-validate-plot
   render-scatterplot-example
   benchmark-name->performance-info
   benchmark->num-modules
@@ -53,6 +39,7 @@
 
 (require
   (only-in racket/path
+    file-name-from-path
     find-relative-path)
   racket/list
   racket/format
@@ -81,10 +68,9 @@
 (define data-dir (build-path HERE "data"))
 (define cache-dir (build-path HERE "with-cache"))
 
-(define MAX-OVERHEAD (*HI*))
+(define default-rkt-version "7.7")
 
-(define NUM-POPL
-  (length '(sieve morsecode mbta zordoz suffixtree lnm kcfa snake tetris synth gregor quadMB)))
+(define MAX-OVERHEAD (*HI*))
 
 (struct benchmark (
   name         ;; Symbol, canonical name of benchmark, like `fsm`
@@ -93,8 +79,7 @@
   origin       ;; Elem, quick description of where the benchmark came from (educational, synthetic, lib)
   purpose      ;; String, short description of what the benchmark does
   lib*         ;; (U #f (Listof Elem)), external libraries the benchmark uses
-  adjlist      ;; (Listof (Listof String)), module graph structure for the benchmark
-  rktd*        ;; (Listof (Pairof Version Path-String)), map from Racket versions to datasets (.rktd files)
+  adjlist
 ) #:prefab )
 
 (define *ALL-BENCHMARKS* (box '()))
@@ -102,57 +87,11 @@
 
 (define library tt)
 
-(define (glob-first str)
-  (match (glob str)
-   [(cons r '())
-    r]
-   ['()
-    (raise-user-error 'glob-first "No results for glob '~a'" str)]
-   [r*
-    (WARNING "ambiguous results for glob '~a'. Returning the first." str)
-    (car r*)]))
-
 (define-syntax-rule (WARNING msg arg* ...)
   (begin
     (display "WARNING: ")
     (printf msg arg* ...)
     (newline)))
-
-;; (->* (valid-benchmark? valid-version?) (#:tag string?) path-string?)
-(define (data-path bm v [tag "*"])
-  (define str (symbol->string bm))
-  (define bm-str (if (eq? bm 'zordoz) (string-append str "." v) str))
-  (define fname (format "~a-~a.rktd" bm-str tag))
-  (define full-path (simplify-path (glob-first (path->string (build-path HERE "data" v fname)))))
-  (path->string full-path))
-
-;; Resolve a list of unique modulegraphs to a single one.
-(define (choose-modulegraph M* #:src name*)
-  (cond
-   [(null? M*)
-    (raise-user-error 'choose-modulegraph "Failed to infer modulegraphs for '~a'." name*)]
-   [(null? (cdr M*))
-    (car M*)]
-   [else
-    (WARNING "got different modulegraphs for '~a'. Ignoring all but the last." name*)
-    (last M*)]))
-
-(define (name->modulegraph name)
-  '()
-  #;(if (eq? name 'zordoz)
-    (project-name->modulegraph 'zordoz.6.3)
-    (project-name->modulegraph name)))
-
-(define (benchmark->num-iterations b v)
-  (for/fold ([min-iters #f])
-            ([x* (in-vector (file->value (benchmark-rktd b v)))])
-    (define l (length x*))
-    (if (or (not min-iters) (< l min-iters))
-      l
-      min-iters)))
-
-(define (benchmark->num-configurations b)
-  (expt 2 (benchmark->num-modules b)))
 
 (define (benchmark->num-modules b)
   (length (benchmark-adjlist b)))
@@ -188,20 +127,10 @@
         (provide name))]))
 
 (define (make-benchmark name author num-adaptor origin purpose lib*)
-  (define cache-rktd (format "bm-~a.rktd" name))
-  (with-cache (build-path cache-dir cache-rktd)
-    #:read deserialize
-    #:write serialize
-    #:fasl? #false
-    #:keys #f
-    (lambda () (raise-user-error 'make-benchmark "not implemented, use JFP cache files instead"))
-    #;(lambda ()
-      (define M
-        (name->modulegraph name))
-      (define rktd*
-        (for/list ([v (in-list (*RKT-VERSIONS*))])
-          (cons v (data-path name v))))
-      (benchmark name author num-adaptor origin purpose lib* M rktd*))))
+  (define adjlist
+    (map (compose1 path-string->string file-name-from-path)
+         (glob (build-path benchmark-dir (~a name) "untyped" "*rkt"))))
+  (benchmark name author num-adaptor origin purpose lib* adjlist))
 
 (define (register-benchmark! name)
   (set-box! *ALL-BENCHMARKS* (cons name (unbox *ALL-BENCHMARKS*)))
@@ -321,47 +250,17 @@
   #:purpose "Economy Simulator"
 )
 (define-oo-benchmark fsmoo fsm)
-(define-benchmark quadBG
+(define-benchmark quadU
   #:author "Matthew Butterick"
   #:num-adaptor 2
   #:origin (hyperlink "https://github.com/mbutterick/quad" "Application")
   #:purpose "Typesetting"
   #:external-libraries (list (hyperlink "https://github.com/mbutterick/csp" (library "csp")))
 )
-(define-benchmark quadMB quadBG)
-
-(define quad (gensym 'quad))
-(provide quad)
+(define-benchmark quadT quadU)
 
 ;; -----------------------------------------------------------------------------
 ;; --- Assertions & Predicates
-
-;; 2016-08-10 : could check against benchmark/ directory
-;;; Like, zordoz.6.2 and zordoz.6.3 instead of zordoz
-;;; (-> (Listof Symbol) Void)
-;(define (check-missing-benchmarks name*)
-;  (let loop ([expect* (sort BENCHMARK-NAMES name<?)]
-;             [given*  (sort name* symbol<?)])
-;    (cond
-;     [(null? expect*)
-;      (unknown-benchmark-error given*)]
-;     [(null? given*)
-;      (missing-benchmark-error (cdr expect*))]
-;     [else
-;      (define expect (car expect*))
-;      (define given (car given*))
-;      (cond
-;       [(name<? expect given)
-;        (loop (cdr expect*) given*)]
-;       [(in-name? given expect)
-;        (if (and (null? (cdr given*))
-;                 (null? (cdr expect*)))
-;            (void)
-;            (loop expect* (cdr given*)))]
-;       [(name<? expect given)
-;        (missing-benchmark-error expect)]
-;       [else
-;        (unknown-benchmark-error given)])])))
 
 (define (benchmark<? b1 b2)
   (define m1 (benchmark->num-modules b1))
@@ -369,9 +268,6 @@
   (or (< m1 m2)
       (and (= m1 m2)
            (symbol<? (benchmark-name b1) (benchmark-name b2)))))
-
-(define (benchmark-rktd bm v)
-  (assoc/fail v (benchmark-rktd* bm)))
 
 (define (assoc/fail str pair*)
   (or
@@ -394,38 +290,25 @@
         (WARNING msg name*)
         (raise-user-error 'benchmark msg name*)))))
 
-(define (benchmark-modulegraph bm)
-  #f
-  #;
-  (define pn
-    (if (eq? (benchmark-name bm) 'zordoz)
-      "zordoz.6.3"
-      (symbol->string (benchmark-name bm))))
-  #;
-  (modulegraph pn
-               (benchmark-adjlist bm)
-               (build-path (get-git-root) "benchmarks" pn)))
-
-(define (benchmark->module-names bm)
-  (map car (benchmark-adjlist bm)))
-
 (define ALL-BENCHMARKS (sort (unbox *ALL-BENCHMARKS*) benchmark<?))
 
 (define num-benchmarks (length ALL-BENCHMARKS))
 
-(define (benchmark-name->data-file bm-name [version "6.4"])
+(define (benchmark-name->data-file bm-name version)
   (define pp
-    (let* ((name (if (eq? bm-name 'zordoz) (format "~a.~a" bm-name version) bm-name))
+    (let* ((name bm-name)
            (patt (format "~a-*rktd" name)))
       (glob-first (build-path data-dir version patt))))
   (if (file-exists? pp)
     pp
     (raise-argument-error 'benchmark-name->data-file "directory-exists?" pp)))
 
-(define (benchmark-name->performance-info bm-name [pre-version #f])
-  (define version (or pre-version "6.4"))
+(define (benchmark-name->performance-info bm-name version #:full-name? [full-name? #f])
+  (when (and (eq? bm-name 'zordoz)
+             (string=? version "6.4"))
+    (error 'die))
   (define data-dir (benchmark-name->data-file bm-name version))
-  (define extra-name (and pre-version (string->symbol (format "~a-~a" bm-name pre-version))))
+  (define extra-name (and full-name? (string->symbol (format "~a-~a" bm-name version))))
   (make-typed-racket-info data-dir #:name extra-name))
 
 (define (performance-info->sample-info pi #:replacement? [replace? #f])
@@ -440,8 +323,7 @@
 
 (define STATIC-INFO-TITLE*
   (list "Benchmark" (bold "N") "SLOC"))
-
-#;("Untyped LOC" "Typed LOC" "adaptors" "boundaries" "exports")
+  #;("Untyped LOC" "Typed LOC" "adaptors" "boundaries" "exports")
 
 (define (render-static-information bm*)
   (define name*
@@ -471,6 +353,7 @@
       (benchmark->sloc name)))))
 
 (define (benchmark->sloc name)
+  ;; TODO
   ;; hard-coded from JFP table
   (case name
     ((sieve) (+ 35 17))
@@ -491,8 +374,8 @@
     ((tetris) (+ 246 107))
     ((synth) (+ 835 139))
     ((gregor) (+ 945 175))
-    ((quadBG) (+ 6780 221))
-    ((quadMB) (+ 6706 294))))
+    ((quadBG quadU) (+ 6780 221))
+    ((quadMB quadT) (+ 6706 294))))
 
 (define RATIOS-TITLE
   (list "Benchmark" "typed/untyped"))
@@ -519,7 +402,7 @@
     (with-cache (cachefile "ratios-table.rktd")
       (λ ()
         (for/list ([name (in-list name*)])
-          (render-ratios-row name (benchmark-name->performance-info name)))))))
+          (render-ratios-row name (benchmark-name->performance-info name default-rkt-version)))))))
 
 (define (ratios-table-row r* sym)
   (or
@@ -533,17 +416,17 @@
         (bm name)
         (rnd (typed/baseline-ratio pi))))
 
-
-(define (render-overhead-plot bm-name)
-  (define pi (benchmark-name->performance-info bm-name))
-  (define sample? (sample-info? pi))
-  (define f (if sample? samples-plot overhead-plot))
-  (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
-  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
-    (f pi)))
+(define (make-render-overhead-plot rkt-version)
+  (lambda (bm-name)
+    (define pi (benchmark-name->performance-info bm-name rkt-version))
+    (define sample? (sample-info? pi))
+    (define f (if sample? samples-plot overhead-plot))
+    (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
+    (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+      (f pi))))
 
 (define (render-exact-plot bm-name)
-  (define pi (benchmark-name->performance-info bm-name))
+  (define pi (benchmark-name->performance-info bm-name default-rkt-version))
   (define f exact-runtime-plot)
   (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
   (f pi))
@@ -551,17 +434,18 @@
 (define (render-relative-overhead-plot bm-name+v*)
   (define bm-name (car bm-name+v*))
   (define-values [v0 v1] (values (cadr bm-name+v*) (cddr bm-name+v*)))
-  (define pi-0 (benchmark-name->performance-info bm-name v0))
-  (define pi-1 (benchmark-name->performance-info bm-name v1))
+  (define pi-0 (benchmark-name->performance-info bm-name v0 #:full-name? #t))
+  (define pi-1 (benchmark-name->performance-info bm-name v1 #:full-name? #t))
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (overhead-plot (list pi-0 pi-1))))
 
-(define (render-validate-plot bm-name)
-  (define pi (benchmark-name->performance-info bm-name))
-  (define si (performance-info->sample-info pi #:replacement? #f))
-  (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
-  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
-    (validate-samples-plot pi si)))
+(define (make-render-validate-plot rkt-version)
+  (lambda (bm-name)
+    (define pi (benchmark-name->performance-info bm-name rkt-version))
+    (define si (performance-info->sample-info pi #:replacement? #f))
+    (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
+    (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+      (validate-samples-plot pi si))))
 
 (define (render-scatterplot-example bm-name)
   (define pi-collapse
