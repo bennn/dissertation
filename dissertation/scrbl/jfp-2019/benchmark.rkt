@@ -69,6 +69,8 @@
 (define cache-dir (build-path HERE "with-cache"))
 
 (define default-rkt-version "7.7")
+(define untyped "untyped")
+(define typed "typed")
 
 (define MAX-OVERHEAD (*HI*))
 
@@ -129,7 +131,7 @@
 (define (make-benchmark name author num-adaptor origin purpose lib*)
   (define adjlist
     (map (compose1 path-string->string file-name-from-path)
-         (glob (build-path benchmark-dir (~a name) "untyped" "*rkt"))))
+         (glob (build-path benchmark-dir (~a name) untyped "*rkt"))))
   (benchmark name author num-adaptor origin purpose lib* adjlist))
 
 (define (register-benchmark! name)
@@ -353,29 +355,10 @@
       (benchmark->sloc name)))))
 
 (define (benchmark->sloc name)
-  ;; TODO
-  ;; hard-coded from JFP table
-  (case name
-    ((sieve) (+ 35 17))
-    ((forth) (+ 255 30))
-    ((fsm) (+ 182 56))
-    ((fsmoo) (+ 194 83))
-    ((mbta) (+ 266 71))
-    ((morsecode) (+ 159 38))
-    ((zombie) (+ 302 27))
-    ((dungeon) (+ 534 68))
-    ((zordoz) (+ 1378 215))
-    ((lnm) (+ 488 114))
-    ((suffixtree) (+ 537 129))
-    ((kcfa) (+ 229 53))
-    ((snake) (+ 160 51))
-    ((take5) (+ 327 27))
-    ((acquire) (+ 1654 304))
-    ((tetris) (+ 246 107))
-    ((synth) (+ 835 139))
-    ((gregor) (+ 945 175))
-    ((quadBG quadU) (+ 6780 221))
-    ((quadMB quadT) (+ 6706 294))))
+  (for/sum ((rkt (in-glob (build-path benchmark-dir (~a name) typed "*.rkt"))))
+    (racket-sloc rkt)))
+
+(define racket-sloc (make-lang-sloc "lisp"))
 
 (define RATIOS-TITLE
   (list "Benchmark" "typed/untyped"))

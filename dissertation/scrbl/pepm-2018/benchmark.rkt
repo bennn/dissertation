@@ -286,34 +286,7 @@
   (and (path-string? ps)
        (equal? (path-get-extension ps) #".py")))
 
-(define (python-sloc ps)
-  (define ps-str (path-string->string ps))
-  (define arg* (list "--details" "--wide" ps-str))
-  (define all-output (shell "sloccount" arg*))
-  (define cmd-str (string-join (cons "sloccount" arg*)))
-  (define col* (string-split (last (string-split all-output "\n"))))
-  (define-values [loc lang _src sloccount-ps]
-    (if (= 4 (length col*))
-      (apply values col*)
-      (raise-user-error 'python-sloc
-        "failed to parse output of 'sloccount ~a'~n  full output: ~a"
-        ps
-        all-output)))
-  (unless (string=? lang "python")
-    (raise-user-error 'python-sloc
-      "expected SLOCCOUNT to return 'python' language, got '~a' instead.~n  original command: ~a"
-      lang cmd-str))
-  (unless (string=? sloccount-ps ps-str)
-    (raise-user-error 'python-sloc
-      "expected SLOCCOUNT to report path string '~a', got '~a' instead.~nSomething is very wrong!"
-      ps-str
-      sloccount-ps))
-  (define n (string->number loc))
-  (unless (exact-nonnegative-integer? n)
-    (raise-user-error 'python-sloc
-      "expected SLOCCOUNT to report a natural number of lines, got '~a'.~nSomething is very wrong."
-      loc))
-  n)
+(define python-sloc (make-lang-sloc "python"))
 
 (define (benchmark-name->python-info bm-name)
   (define ps (benchmark-name->directory bm-name))
