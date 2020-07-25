@@ -76,3 +76,7 @@ By contrast, removing blame from guarded solves nothing at first;
 
 Transient is a promising wrapper-free approach to gradual typing.
 
+
+
+@; TODO names deep/natural/guarded ... shallow/transient ... prior work
+
