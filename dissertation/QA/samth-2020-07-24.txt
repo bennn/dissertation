@@ -1,0 +1,56 @@
+
+
+On 7/24/20, Sam Tobin-Hochstadt <samth@cs.indiana.edu> wrote:
+> On Thu, Jul 23, 2020 at 10:42 PM Ben Greenman
+> <benjaminlgreenman@gmail.com> wrote:
+>>
+>> Q1 still needs an answer, but for now here are the rest.
+
+Ok, good news on `snake`, my experiment had a bug. The adaptor files
+(in `both/`) were in TR. Changing to transient brings the worst-case
+configuration down from 12s to 2s on my laptop (1.7x).
+
+For an untyped/transient lattice, the `both` files should definitely be
+transient. And when mixing typed/transient, we can experiment with making
+`both` guarded vs. transient.
+
+
+This raises a question about `base/` files, though. Should they be guarded
+or transient?
+
+Since most of `base/` is library code, I think we should leave it as-is
+for the lattice measurements.
+
+But, after, we can see whether changing a typed library to transient makes
+a big difference.
+
+Do these points about `base/` sound good?
+
+
+>> On 7/23/20, Sam Tobin-Hochstadt <samth@cs.indiana.edu> wrote:
+>> > I have a few questions.
+>> >
+>> > 1. Why are things so slow? In particular, what could possibly be
+>> > happening in snake that is 22x overhead?
+>>
+>> It could be because (Listof T) gets the `list?` check instead of
+>> `pair?`. But that was not a problem for us in ICFP'18.
+> 
+> Why use `list?` here? It should be `(or (null? p) (pair? p))`. Also,
+> are there other recursive structure checks?
+
+`list?` is the only recursive structure check. This way, lists get similar
+checks as vectors and hashes. I hoped the performance would be ok because it's
+amortized, makes `cdr` transient-safe, and helps the TR optimizer. So far it
+seems good.
+
+Generally, I've been aiming for "full" type constructor checks and planned
+to fall back if they got too expensive.
+
+I think this idea only mattered for functions and objects/classes, though,
+and my object checks only look for membership. But my function checks look
+at arity and keywords, and this also seems fine.
+
+(I'll need to write up all these shape checks, and measure something about
+ their performance.)
+

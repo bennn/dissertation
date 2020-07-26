@@ -1,0 +1,15 @@
+Q. why is transient zordoz so much worse than typed?
+
+typed has few interactions,
+ according to POPL16,
+ the main <===> zo-find boundary has <1000 crossings,
+ and the others have <10
+so boundaries are not bad
+
+the worst configuration is 01000 roughly, when zo-find is typed,
+ and its require/typed do ask for functions and lists,
+ but those lists get fully traversed
+
+so I guess transient pays for every access, and the other transient checks
+ (where D has nothing) add up past the other boundary costs
+
