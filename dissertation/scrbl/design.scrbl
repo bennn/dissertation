@@ -1,6 +1,10 @@
 #lang greenman-thesis/include
 @(require greenman-thesis/oopsla-2019/main)
 
+@; TODO be careful about Natural vs Deep,
+@;  Natural = semantics,
+@;  Deep = idea = synonym for Nat in other parts of the paper (want Deep, get via Natural)
+
 @title[#:tag "chap:design"]{Design Analysis Method}
 @jointwork[
   #:people* '(
