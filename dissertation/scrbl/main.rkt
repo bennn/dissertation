@@ -137,12 +137,13 @@
 (define (citet . txt*)
   (exact (list "\\citet{" txt* "}")))
 
-(define (jointwork #:people* people* #:paper* [paper* '()])
+(define (jointwork #:people* people* #:paper* [paper* '()] #:extra [e-elem #f])
   (nested-inset
     (emph (list
             "This chapter is based on joint work with: "
             (oxfordize people*)
-            (~cite (string-join paper* ","))))))
+            (~cite (string-join paper* ",")) "."
+            (if e-elem (list " " e-elem) '())))))
 
 (define (disclaimer . arg*)
   (nested-inset

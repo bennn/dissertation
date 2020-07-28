@@ -210,6 +210,12 @@ Programmers need to know where these boundaries are as they write the program,
  and the language needs to track them when it runs.
 
 
+@section{Blame}
+@; TODO
+
+What, why, how.
+
+
 @; ---
 @section[#:tag "sec:non-mt"]{Other Mixed-Typed Methods}
 

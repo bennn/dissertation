@@ -53,7 +53,7 @@ If performance is not an issue,
  then @emph{natural} seems a perfect choice.
 
 Unfortunately, the literature provides little guidance to programmers and
- language designers on how to compare these semantics~(@section-ref{sec:design:properties}).
+ language designers on how to compare these semantics (@section-ref{sec:design:properties}).
 The standard meta-theoretical tools do not articulate what is gained
  and lost in each tradeoff.
 Simply put, the field lacks an apples-to-apples way of comparing different
@@ -75,6 +75,7 @@ The comparison excludes @emph{concrete} because of the
 @figure*[
   "tbl:design:contributions"
   @elem{Informal summary of contributions}
+  @; TODO show deep / shallow / erasure
   @exact|{
   {\deftablemacros{}
    \hfill\(\begin{array}{l@{\qquad}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c}

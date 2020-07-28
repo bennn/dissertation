@@ -17,9 +17,9 @@ Short intro to gradual typing, assumptions, gradual versus migratory.
 Thesis statement:
 
 @nested[#:style 'inset]{
- Honest and lying types can coexist in a way that preserves their formal
- properties; programmers can combine these types to strengthen lying-type
- guarantees, avoid unimportant honest-type runtime errors, and lower the
+ @|sDeep| and @|sShallow| types can coexist in a way that preserves their formal
+ properties; programmers can combine these types to strengthen @|sshallow|-type
+ guarantees, avoid unimportant @|sdeep|-type runtime errors, and lower the
  running time of typed/untyped interactions.
 }
 
@@ -37,7 +37,7 @@ Contributions that led to thesis:
   Transient implemented in Racket, generalized to richer type system, remove type dynamic.
 }
 @item{
-  Integration of Transient and Guarded Typed Racket.
+  Integration of @|sShallow| and @|sDeep| Typed Racket.
 }
 ]
 
@@ -45,7 +45,7 @@ Upcoming chapters outline.
 
 
 
-@section{Specification, Implementation, and Diction}
+@section{Specification, Implementation, and Naming}
 @; http://www.ccs.neu.edu/home/shivers/papers/whats-in-a-name.html
 
 @; TODO names deep/natural/guarded ... shallow/transient ... prior work
@@ -118,13 +118,13 @@ Summarize the different @|snatural| semantics in the literature as a
 }
 
 
-@section{Why Transient?}
+@section{Why @|sTransient|?}
 
 There are several approaches to mixing typed and untyped code (@chapterref{chap:design}).
 Some fail our basic criteria for adding types to an existing language (@chapterref{chap:why}).
-Of the others, the guarded one is a worthwhile ideal because it offers strong
+Of the others, @|snatural| is a worthwhile ideal because it offers strong
  static type guarantees.
-Guarded types require run-time enforcement, however, and the cost of
+These @|sdeep| types require run-time enforcement, however, and the cost of
  enforcement is high and hard to reduce.
 
 @; fork in the road, what can be done?
@@ -134,20 +134,21 @@ Guarded types require run-time enforcement, however, and the cost of
   @; .... nothing else can support existing Dyn lang as intended
 
 A promising compromise is to implement a different, weaker semantics alongside
- guarded types.
-Analyzing the costs of guarded shows that the transient approach is the
+ @|sdeep| types.
+Analyzing the costs of @|snatural| shows that the @|stransient| approach is the
  most promising alternative.
-Guarded slows a program down through soundness checks and blame tracking.
+@|sNatural| slows a program down through soundness checks and blame tracking.
 The checks can be huge, and can require behavioral wrappers.
 Blame requires additional wrappers.
-Transient reduces checks to a minimum, a shape check.
-(Anything less is hard to motivate!)
-Transient can also run without blame simply.
-By contrast, removing blame from guarded solves nothing at first;
+@|sTransient| reduces checks to a minimum, a shape check.
+@|sTransient| can also run without blame simply.
+By contrast, removing blame from @|snatural| solves nothing at first;
  the change must be accompanied by a wholly-new strategy for allocating
  wrappers, and this strategy may require reflection tools for the wrappers
  themselves.
 
-Transient is a promising wrapper-free approach to gradual typing.
+@|sTransient| is a promising wrapper-free approach to gradual typing.
+
+@; gotta talk about other ways to get shallow types, maybe just point ahead
 
 

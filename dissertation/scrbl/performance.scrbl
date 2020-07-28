@@ -25,19 +25,10 @@
     "Matthias Felleisen"
   )
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
+  #:extra @elem{ Spenser Bauman, Cameron Moy, Lukas Lazarek, and Sam Sundar
+   contributed major improvements to the Typed Racket benchmarks.}
 ]
 
-@disclaimer{
-  The Typed Racket data in this chapter is based on an early version
-   of the GTP benchmarks@~cite{gtnffvf-jfp-2019}.
-  These benchmarks have severe limitations that were later fixed,
-   thanks to work by: Sam Tobin-Hochstadt, Lukas Lazarek, Sam Sundar, and
-   Cameron Moy.
-
-  Up-to-date benchmarks with release notes are here:
-
-  @centered{@format-url{https://docs.racket-lang.org/gtp-benchmarks/index.html}}
-}
 
 @; sound GT has cost
 Sound gradual types come with performance overhead.
@@ -67,11 +58,12 @@ Informally, a mixture is good if it is fast enough to use.
 Random sampling can approximate the proportion of good mixtures for programs
  in which exhaustive evaluation is not practical.
 
+@; TODO transition from all/Deep to Natrual/TR ... something more than jumping
+@;   to "experience with ...."
+@; OK RIGHT HERE --- developed for TR, generalized for RP, read all about it
+
 
 @section{Design Criteria}
-@; are there good words, from Asumu?, we can use to talk about criteria/requirements?
-@; "background" assumptions
-
 @; - benchmarks, "representative"
 @; - space = 2^N configurations
 @; - goal = % deliverable
@@ -292,11 +284,11 @@ The unlabeled vertical ticks mark, from left-to-right:
   @elem{
 Overhead plots for @bm{fsm}, on Racket v@|lattice-version|
  and v@|relative-version|.
-The orange curve for v@|lattice-version| is higher, showing a relative improvement.
+The blue curve for v@|lattice-version| is higher, showing a relative improvement.
   }
   ""
   tr:render-relative-overhead-plot
-  (list (cons 'fsm (cons relative-version lattice-version)))
+  (list (cons 'fsm (cons lattice-version relative-version)))
   #f
 ]
 @elem{
@@ -650,7 +642,7 @@ Removing these boundaries has a negligible affect on performance overhead and
 As a first validation of the method, we measured Typed Racket.
 This evaluation proved that the method can give useful summaries and
  helped us refine our visualizations.
-It also revealed significant challenges for Typed Racket's @|sguarded|
+It also revealed significant challenges for Typed Racket's @|snatural|
  approach to gradual typing.
 Overheads of several orders of magnitude were common.
 
@@ -1073,7 +1065,7 @@ For gradual typing, the evaluation served as the first comprehensive test
 Whereas Typed Racket's @|snatural| approach suffers from slowdowns of over
  two orders of magnitude, @|stransient| never exceeded 10x overhead.
 The catch, however, is that the fully-typed configuration is slowest in
- @|stransient| but fastest in @|sguarded|.
+ @|stransient| but fastest in @|snatural|.
 Instead of proving @|stransient| the clear winner, the evaluation revealed
  a tradeoff.
 
@@ -1647,7 +1639,7 @@ We believe that a fine-grained evaluation would support the
 
 
 @; -----------------------------------------------------------------------------
-@section{Digression: Additional Visualizations}
+@section{Additional Visualizations}
 
 The methods presented in this chapter are our most effective answer
  to the question of how to evaluate the performance of a gradual typing system.
