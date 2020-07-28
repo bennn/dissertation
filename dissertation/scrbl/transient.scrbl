@@ -1,6 +1,6 @@
 #lang greenman-thesis/include
 
-@title[#:tag "chap:transient"]{Transient Racket}
+@title[#:tag "chap:transient"]{@|sShallow| Racket}
 
 @; OUTLINE 2020-07-21
 @; transient racket (transient + untyped, that's all)
@@ -48,18 +48,18 @@
 @;   + 
 
 
-The high cost of guarded gradual typing in Typed Racket calls for an
- alternative semantics.
-Of the vetted alternatives (@chapter-ref{chap:design)), Transient is the
+The high cost of @|sdeep| types calls for an alternative semantics
+ with @|sshallow| types.
+Of the vetted alternatives (@chapter-ref{chap:design}), @|stransient| is the
  most promising.
-Transient offers a basic soundness guarantee,
+@|sTransient| offers a basic soundness guarantee,
  requires a low implementation effort,
  and easily supports any combination of typed and untyped code.
 Furthermore, the data for Reticulated Python suggests that the overhead
- of Transient run-time checks never exceeds a 10x slowdown.
+ of @|stransient| run-time checks never exceeds a 10x slowdown (@chapter-ref{chap:performance}).
 
-This chapter presents a Transient semantics for Typed Racket.
-Adapting the theory to Typed Racket required a generalization to
+This chapter presents a @|stransient| semantics for Typed Racket.
+Adapting the theory to the Typed Racket language required a generalization to
  macro-level gradual typing and several insights to handle a richer
  language of static types (@sectionref{sec:transient:theory}).
 In the course of this work, I also adapted the blame algorithm
@@ -69,14 +69,19 @@ The final implementation does not include blame; that said, the implementation
  takes care to reuse large parts of Typed Racket, including the static
  type checker and most of the type-driven optimizer (@sectionref{sec:transient:implementation}).
 
-The performance of Transient Racket is typically an improvement over
- Guarded Racket, but both semantics have distinct strengths (@sectionref{sec:transient:performance}).
-Transient always adds overhead relative to Racket, but is the safer bet
- for mixed-typed programs.
-Guarded has the best performance, even better than untyped, in programs
- that are full of typed code.
-It seems unlikely that Transient can ever run faster than untyped, but
- there are several avenues worth exploring (@sectionref{sec:transient:future}).
+Henceforth, @|sDeep| Racket refers to the original, @|snatural| implementation
+ and @|sShallow| Racket refers to my @|stransient| implementation.
+Typed Racket refers to the common, static parts; namely, the surface language
+ and type system.
+
+The performance of @|sShallow| Racket is typically an improvement over
+ @|sDeep| Racket, but both semantics have distinct strengths (@sectionref{sec:transient:performance}).
+@|sTransient| always adds overhead relative to untyped Racket, but is the
+ safer bet for mixed-typed programs.
+@|sNatural| has better performance in programs with large chunks of typed
+ code, and surpasses untyped Racket in many cases.
+Whether @|sShallow| Racket can ever run faster than untyped code is an open
+ question, but there are several avenues worth exploring (@sectionref{sec:transient:future}).
 
 
 @section[#:tag "sec:transient:theory"]{Theory}
@@ -88,5 +93,6 @@ It seems unlikely that Transient can ever run faster than untyped, but
 @section[#:tag "sec:transient:performance"]{Performance}
 
 @section[#:tag "sec:transient:future"]{Future Challenges}
+@; vsc-dls-2019 has Retic/Pycket faster than untyped, 0.95x best-case
 
 
