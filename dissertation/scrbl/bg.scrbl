@@ -14,7 +14,7 @@
 @;  
 @;  If you want to go even further, we could try a new thesis. 
 
-@title{Temporary and Permanent Types}
+@title{@|sDeep| and @|sShallow| Types}
 @author{Ben Greenman}
 @degree{Doctor of Philosophy}
 @department{Khoury College of Computer Sciences}

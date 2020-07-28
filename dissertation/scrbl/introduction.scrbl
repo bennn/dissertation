@@ -44,6 +44,75 @@ Contributions that led to thesis:
 Upcoming chapters outline.
 
 
+
+@section{Specification, Implementation, and Diction}
+@; http://www.ccs.neu.edu/home/shivers/papers/whats-in-a-name.html
+
+@; TODO names deep/natural/guarded ... shallow/transient ... prior work
+
+This dissertation is about different ways of mixing typed and untyped code
+in a programming language.
+Each ``way'' starts from a rough idea, comes to life via a formal semantics,
+and is tested against formal specifications.
+Different instances of these three concepts need names.
+
+My primary focus is on two rough ideas: @emph[sdeep] types and @emph[sshallow] types.
+@|sDeep| types are nearly as good as static types.
+If types in a statically-typed language provide a certain guarantee, then
+ the @|sdeep| versions of those types strive for the same guarantee no matter
+ what untyped code throws at them.
+@|sShallow| types are weaker than @|sdeep| types, but better than nothing.
+A @|sshallow| type might provide a temporary guarantee, and it might talk
+ about fewer behaviors than the corresponding static type.
+
+These two ideas are accompanied by two leading semantics: @|snatural|
+ and @|stransient| (@chapter-ref{chap:design}).
+@|sNatural| provides @|sdeep| types by carefully monitoring the boundaries
+ between typed and untyped code---either with detailed assertions or proxy
+ wrappers.
+@|sTransient| provides @|sshallow| types by rewriting all typed code to
+ check the basic shape of values anywhere that an untyped value might sneak in.
+
+The two properties that distinguish these semantics, and thereby provide a
+ formal distinction between @|sdeep| and @|sshallow| and weaker ideas,
+ are @|scm| and @|sts| (@chapter-ref{chap:design}).
+@|sNatural| satisfies @|scm| while @|stransient| does not.
+Both @|snatural| and @|stransient| satisfy a non-trivial @|sts|, but weaker
+ mixings do not.
+
+As a final note on word choice, I use informal words to talk about
+ different ``ways of mixing typed and untyped code,'' including: methods,
+ strategies, and approaches.
+There is no hope in trying to be authoritative; the literature is filled with
+ brilliant ideas and future work will continue to find novels ways to mix.
+
+
+@subsection{Names in Prior Work}
+
+@citet{tgpk-dls-2018} introduce the names @|sdeep| and @|sshallow|, but use
+ them to refer to the @|snatural| and @|stransient| implementations.
+@citet{gf-icfp-2018} use @emph{higher-order} for the @|sdeep| idea and
+ @emph{first-order} for the @|sshallow| idea.
+
+@|sNatural| goes by many names.
+@citet{vksb-dls-2014} and several others call it @emph[sguarded] because
+ the semantics keeps a firm barrier between typed and untyped code.
+@citet{clzv-ecoop-2018} introduce the word @emph{behavioral} for both
+ the semantics and its characteristic wrapper values.
+Foundational papers simply call it gradual typing@~cite{st-sfp-2006,htf-hosc-2010}.
+
+The name @|snatural| comes from @citet{mf-toplas-2009}, who use it
+ to describe a proxy method for transporting untyped functions into a
+ typed context.
+Earliers works on: higher-order contracts@~citep{ff-icfp-2002},
+ remote procedure calls@~citep{ok-popl-2003}, and
+ typed foreign function interfaces@~citep{r-jfp-2008}
+ employ a similar method---probably because it seemed like the obvious
+ way to preserve types.
+@citet{nla-popl-2019} present a semantic argument that @|snatural| is indeed
+ the only way to enforce the key properties of static types.
+
+
 @section{Why Transient?}
 
 There are several approaches to mixing typed and untyped code (@chapterref{chap:design}).
@@ -76,7 +145,4 @@ By contrast, removing blame from guarded solves nothing at first;
 
 Transient is a promising wrapper-free approach to gradual typing.
 
-
-
-@; TODO names deep/natural/guarded ... shallow/transient ... prior work
 

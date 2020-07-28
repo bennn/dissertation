@@ -122,6 +122,7 @@ Third, the @|tname| strategy (@sectionref{sec:design:strat:transient})
 
 
 @subsection{\forigins{@|nname|}}
+@; 2020-07-27 TODO remove, repeats intro
 
 The name ``@|nname|'' comes from @citet{mf-toplas-2009}, who use it
  to describe a proxy method for transporting untyped functions into a

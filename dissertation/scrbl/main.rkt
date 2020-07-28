@@ -63,9 +63,21 @@
   overhead-long-caption
   exact-long-caption
 
-  stransient
+  sdeep
   sguarded
   snatural
+  sshallow
+  stransient
+  scm
+  sts
+
+  sDeep
+  sGuarded
+  sNatural
+  sShallow
+  sTransient
+  sCM
+  sTS
 
   parag
   configuration-lattice
@@ -212,9 +224,26 @@
     (if (real? s) (~a s) s))
   (elem pct-elem ($ r-elem ", " s-elem) "-approximation"))
 
+(define (string-1-titlecase str)
+  (if (< 0 (string-length str))
+    (string-append (string-upcase (substring str 0 1)) (substring str 1))
+    str))
+
+(define sdeep "deep")
 (define sguarded "guarded")
-(define snatural sguarded)
+(define snatural "natural")
+(define sshallow "shallow")
 (define stransient "transient")
+(define sts "type soundness")
+(define scm "complete monitoring")
+
+(define sDeep (string-titlecase sdeep))
+(define sGuarded (string-titlecase sguarded))
+(define sNatural (string-titlecase snatural))
+(define sShallow (string-titlecase sshallow))
+(define sTransient (string-titlecase stransient))
+(define sTS (string-1-titlecase sts))
+(define sCM (string-1-titlecase sts))
 
 (define (axes q)
   (elem ($ q) "-axes"))
