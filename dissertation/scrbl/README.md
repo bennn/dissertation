@@ -11,8 +11,10 @@ TODO
 - [X] performance chapter (2), adapt jfp19
 - [X] theory chapter (3)
   ... copy JFP, get building, thats all for now
-- [ ] transient-racket chapter (4), committee update email
-  - [ ] 2020-07-22 : share chap4 outline, diff with first attempt, intro, committee update
+- [ ] transient-racket chapter (4)
+  - [X] committee update email
+  - [X] TR RFC
+  - [X] 2020-07-22 : share chap4 outline, diff with first attempt, intro, committee update
 - [ ] full intro (1)
 
 Style
@@ -37,6 +39,12 @@ sloccount
 2020-06-18 : need to get moving, spend 2 hours/day or more cmon now
 2020-07-09 : we are rolling now, but still way slow progress/hour is pitiful
 2020-07-20 : performance and design chapters are imported, need to get serious about transient / data
+
+
+#### oddball future work
+
+- [ ] graduality => errors theorem (icfp 18)
+- [ ] natural is a nat. trans.
 
 #### outlines
 

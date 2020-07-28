@@ -77,12 +77,12 @@ The two properties that distinguish these semantics, and thereby provide a
  formal distinction between @|sdeep| and @|sshallow| and weaker ideas,
  are @|scm| and @|sts| (@chapter-ref{chap:design}).
 @|sNatural| satisfies @|scm| while @|stransient| does not.
-Both @|snatural| and @|stransient| satisfy a non-trivial @|sts|, but weaker
- mixings do not.
+Both @|snatural| and @|stransient| satisfy a non-trivial @|sts|;
+ weaker mixings do not.
 
 As a final note on word choice, I use informal words to talk about
- different ``ways of mixing typed and untyped code,'' including: methods,
- strategies, and approaches.
+ different ``ways of mixing typed and untyped code,'' including:
+ methods, strategies, and approaches.
 There is no hope in trying to be authoritative; the literature is filled with
  brilliant ideas and future work will continue to find novels ways to mix.
 
@@ -99,7 +99,7 @@ There is no hope in trying to be authoritative; the literature is filled with
  the semantics keeps a firm barrier between typed and untyped code.
 @citet{clzv-ecoop-2018} introduce the word @emph{behavioral} for both
  the semantics and its characteristic wrapper values.
-Foundational papers simply call it gradual typing@~cite{st-sfp-2006,htf-hosc-2010}.
+Foundational papers simply call it gradual typing@~cite{st-sfp-2006,tf-dls-2006,htf-hosc-2010}.
 
 The name @|snatural| comes from @citet{mf-toplas-2009}, who use it
  to describe a proxy method for transporting untyped functions into a
@@ -108,9 +108,14 @@ Earliers works on: higher-order contracts@~citep{ff-icfp-2002},
  remote procedure calls@~citep{ok-popl-2003}, and
  typed foreign function interfaces@~citep{r-jfp-2008}
  employ a similar method---probably because it seemed like the obvious
- way to preserve types.
+ way to preserve input/output behaviors.
 @citet{nla-popl-2019} present a semantic argument that @|snatural| is indeed
  the only way to enforce the key properties of static types.
+
+@futurework{
+Summarize the different @|snatural| semantics in the literature as a
+ natural transformation between two functors.
+}
 
 
 @section{Why Transient?}

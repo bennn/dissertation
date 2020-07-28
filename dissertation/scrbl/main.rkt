@@ -59,6 +59,7 @@
   sraapproximation
   ddeliverable
   kstep
+  futurework
   rkt
   overhead-long-caption
   exact-long-caption
@@ -212,6 +213,32 @@
 
 (define (kstep [k "k"] [d "D"])
   (make-element plain @list{@${k}-step @${d}-deliverable}))
+
+(define (futurework . str*)
+  (exercise* 'RQ str*))
+
+(define (exercise difficulty . str*)
+  (exercise* difficulty str*))
+
+(define (exercise* d str*)
+  (nested #:style (make-style 'code-inset '()) #;never-indents?
+    (list @emph{Exercise}
+          ~
+          (format-difficulty d)
+          ~
+          str*)))
+
+(define (format-difficulty d)
+  (exact "(" (difficulty->tex d) ")"))
+
+(define (difficulty->tex d)
+  (define s "\\(\\star\\)")
+  (case d
+    ((1) s)
+    ((2) (string-append s s))
+    ((3) (string-append s s s))
+    ((RQ) (string-append s s s "\\(\\,\\)\\ldots"))
+    (else (raise-argument-error 'difficulty->tex "difficulty?" d))))
 
 (define (sraapproximation r s [pct #f])
   (define pct-elem
