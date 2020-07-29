@@ -3,6 +3,8 @@
 
 @title[#:tag "sec:design:technical"]{Technical Development}
 
+@; TODO  first-order => shallow !!!
+
 @; % All definitions, minimal descriptions.
 @; % TODO
 @; % - draw HO / FO / EO connection ...

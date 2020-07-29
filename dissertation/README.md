@@ -45,16 +45,17 @@ The table here shows worst-case overheads in a few small benchmarks.
 Transient wins by a lot in `jpeg` and `zombie`, but fares worse in three.
 `snake` is especially bad.
 
-| benchmark |  max TR |  max transient |
-|-----------+---------+----------------|
-| fsm       |   1.25x |          1.06x |
-| jpeg      |  19.98x |          2.04x |
-| kcfa      |   3.81x |          3.78x |
-| mbta      |   1.43x |          1.41x |
-| morsecode |   1.84x |          2.48x |
-| snake     |  15.19x |         22.13x |
-| zombie    |  53.95x |          3.39x |
-| zordoz    |   2.77x |          5.74x |
+| benchmark  |  max TR |  max transient | %dif |
+|------------+---------+----------------+------|
+| suffixtree |  15.56x |         15.34x | 0.99 |
+| fsm        |   1.25x |          1.06x | 0.85 |
+| jpeg       |  19.98x |          2.04x | 0.10 |
+| kcfa       |   3.81x |          3.78x | 0.99 |
+| mbta       |   1.43x |          1.41x | 0.98 |
+| morsecode  |   1.84x |          2.48x | 1.35 |
+| snake      |  15.19x |         22.13x | 1.46 |
+| zombie     |  53.95x |          3.39x | 0.06 |
+| zordoz     |   2.77x |          5.74x | 2.07 |
 
 What to do?
 In the past, my Transient would remove the runtime check around `(f x)` if `f`

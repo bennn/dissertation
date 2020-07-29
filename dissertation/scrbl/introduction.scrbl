@@ -86,6 +86,8 @@ As a final note on word choice, I use informal words to talk about
 There is no hope in trying to be authoritative; the literature is filled with
  brilliant ideas and future work will continue to find novels ways to mix.
 
+@; TODO dynamicially-typed vs. untyped ?
+
 
 @subsection{Names in Prior Work}
 
