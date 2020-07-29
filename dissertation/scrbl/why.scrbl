@@ -249,3 +249,24 @@ More importantly, the dynamic type obscures the boundaries between typed
 @; easy to get many boundaries, hard to point to these
 
 
+@subsection{Micro, Macro}
+@; TODO
+
+The two original papers on gradual/migratory typing begin with different
+ ideas about how to mix typed and untyped code.
+
+@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
+ of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
+ typing@~cite{t-popl-1990}.
+The grammar of static types acquires a new catch-all member that accepts
+ any well-formed piece of code.
+Using this @emph{dynamic type}, a programmer can escape the type checker
+ on any line of otherwise-typed code.
+To allow such flexibility, however, the type checker can no longer affirm
+ that a program is type-correct.
+Programs that use the dynamic type are but plausibly correct; depending
+ on what the dyn-typed code evaluates to, the program may run smoothly.
+
+@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
+
+
