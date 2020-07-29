@@ -107,14 +107,84 @@ Three characteristics of the semantics, however, make it unsuitable for
 This section outlines the design of a suitable model and its properties.
 Scaling the new model up to the full Typed Racket language raised questions
  about how to enforce intricate types.
-@Section-ref{sec:transient:theory:types} explains my design and potential
+@Section-ref{sec:transient:theory:types} explains my design and a few
  alternatives.
 
 
 @subsection[#:tag "sec:transient:theory:dyn"]{From Micro to Macro}
 
-Reticulated Python provides a dynamic type, and therefore the original
+Reticulated Python provides a dynamic type in the micro gradual typing
+ tradition.
+Consequently, every type-checking rule must accomodate the dynamic type
+ in addition to the expected type.
 
+Typed Racket does not have a dynamic type; instead it adds run-time tools
+ so that a non-dynamic type system can make assumptions about untyped input.
+Using this macro approach, only a handful of typing rules need to deal
+ with dynamically-typed values.
+
+The differences between micro and macro typing rules have implications
+ for @|stransient| run-time checks.
+In the original semantics, the evaluation of any expression could bring
+ a dynamically-typed value into a typed context.
+In a macro semantics, only boundaries and elimination forms can introduce
+ an untyped value.
+@Figure-ref{fig:transient:app-compare} illustrates the difference by contrasting
+ the @|stransient| checks needed for a function application.
+On the top, the micro approach requires three checks: two checks in case
+ the function and argument are dynamically-typed, and one to validate the
+ shape of the result.
+On the bottom, macro without blame requires only the result check.
+
+@figure*[
+  "fig:transient:app-compare"
+  @elem{
+   @|sTransient| completion rules for an application under micro (top) and
+   macro (bottom) gradual typing.
+   Both rules insert run-time shape checks.
+   The micro rule depends on type coercion (@${\scoerce})
+   and compatibility (@${\scompat}) metafunctions@~cite{vss-popl-2017}.
+  }
+  @exact|{
+    \begin{mathpar}
+      \inferrule*[lab=Micro]{
+        \stypeenv_0 \sWT \sexpr_0 : \stype_0 \compilesto \sexpr_0'
+        \\
+        \stypeenv_0 \sWT \sexpr_1 : \stype_1 \compilesto \sexpr_1'
+        \\\\
+        \stype_0~\scoerce~\tfun{\stype_2}{\stype_3}
+        \\
+        \stype_1~\scompat~\stype_2
+      }{
+        \stypeenv_0 \sWT \sexpr_0~\sexpr_1 : \stype_3
+        \compilesto
+        \echeckone{\stype_3}{((\echeckone{(\tfun{\stype_2}{\stype_3})}{\sexpr_0'})~(\echeckone{\stype_2}{\sexpr_1'}))}
+      }
+
+      \inferrule*[lab=Macro]{
+        \stypeenv_0 \sWT \sexpr_0 : \tfun{\stype_2}{\stype_3} \compilesto \sexpr_0'
+        \\
+        \stypeenv_0 \sWT \sexpr_1 : \stype_2 \compilesto \sexpr_1'
+      }{
+        \stypeenv_0 \sWT \sexpr_0~\sexpr_1 : \stype_3
+        \compilesto
+        \echeckone{\stype_3}{(\sexpr_0'~\sexpr_1')}
+      }
+    \end{mathpar}
+  }|
+]
+
+Adding blame to macro adds the need for an additional blame-map operation
+ in @figure-ref{fig:transient:app-compare}, but no additional checks.
+The blame map potentially needs an update because the argument flows
+ in to the function.
+There is no need for a check because the argument has a non-dynamic type.
+
+Other rules can be simplified in a similar fashion.
+The benefits are two-fold:
+ macro programs have fewer run-time checks to slow them down,
+ and programmers have fewer places to search if a program manifests a
+ boundary error.
 
 
 @subsection[#:tag "sec:transient:theory:subt"]{Pitfalls of Subtyping}
