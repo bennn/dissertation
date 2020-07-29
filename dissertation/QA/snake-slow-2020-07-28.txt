@@ -1,0 +1,26 @@
+New worst-case results after fixing `both` table issue
+
+Only affects: kcfa, snake, suffixtree
+
+| benchmark  |  max TR | max transient | % diff |
+|------------+---------+---------------+--------|
+| acquire    |   7.02x |         3.71x |   0.53 |
+| fsm        |   1.25x |         1.07x |   0.86 |
+| jpeg       |  19.98x |         2.04x |   0.10 |
+| mbta       |   1.43x |         1.41x |   0.98 |
+| morsecode  |   1.84x |         2.48x |   1.35 |
+| zombie     |  53.95x |         3.91x |   0.07 |
+| zordoz     |   2.77x |         5.74x |   2.07 |
+
+| kcfa       |   3.81x |         1.23x |   0.32 |
+| snake      |  15.19x |        12.09x |   0.80 |
+| suffixtree |  15.56x |         5.83x |   0.37 |
+
+But snake is still slow!
+
+Turning on the unsafe (f x) optimization brings it down to 7.8x
+Tried suffixtree too, got down to 3.4x
+
+So, we really need to look at the literal-lambda table.
+(Don't call it that ... say "transient safe" or something)
+
