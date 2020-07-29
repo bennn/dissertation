@@ -218,6 +218,7 @@
 (define (futurework . str*)
   (exercise* 'RQ str*))
 
+;; TODO index of exercises?
 (define (exercise difficulty . str*)
   (exercise* difficulty str*))
 
