@@ -143,6 +143,8 @@ First, untyped code can supply any input to typed code, breaking soundness.
 Second, the FFI invites untyped-to-typed conversion but requires wholesale
  rewrites, risking mistakes.
 
+@; TODO anticipate need for subtyping
+
 By contrast, a mixed-typed language that uses the same base syntax for typed
  and untyped code offers more than the sum of two languages.
 Programmers can move from untyped to typed by adding annotations, nothing

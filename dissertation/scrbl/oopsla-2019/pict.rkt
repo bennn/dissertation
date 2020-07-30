@@ -7,6 +7,9 @@
   jungle:example-pair*
   jungle:tr-api
   jungle:rp-api
+  jungle:landscape
+  transient:divide
+  transient:subtype
 )
 
 (require
@@ -422,12 +425,102 @@
         "wait_times = (2, \"zero\")"
         "get(\"https://sr.ht\", wait_times)"))))
 
+(define transient:divide
+  (untyped-codeblock '(
+    ";; (-> Real Real (U 'undef Real))"
+    "(define (divide n0 n1)"
+    "  (if (zero? n1)"
+    "    'undef"
+    "    (/ n0 n1)))"
+  )))
+
+(define transient:subtype
+  (make-example-atom-pict
+    '("(define ((lazy-fact (lazy-n : (-> Natural))))"
+      "  (let fact ((n : ??? (lazy-n)))"
+      "    (if (zero? n)"
+      "      1"
+      "      (* n (fact (- n 1))))))")
+    '("((lazy-fact (λ() -4)))")
+    #true
+    #false))
+
+
+(define jungle:landscape
+  ;; TODO
+  ;;;; \begin{tikzpicture}
+  ;;;;   \def\embeddingskip{2cm}
+  ;;;;   \renewcommand{\cite}[1]{}
+  ;;;;   \node (E)
+  ;;;;     [align=left]
+  ;;;;     {\textstrat{\ename{}}};
+  ;;;;   \node (EBOX)
+  ;;;;     [left=of E.south west,anchor=north west,xshift=2.5em,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
+  ;;;;     {ActionScript\cite{rch-popl-2012}\({}^{\mtlangann}\) ~~~
+  ;;;;      Common Lisp\({}^{\mtlangann}\) ~~~
+  ;;;;      mypy\({}^{\mtlangann}_{\dynlangann}\) ~~~
+  ;;;;      Flow\cite{cvgrl-oopsla-2017}\({}^{\mtlangann}_{\dynlangann}\) ~~~
+  ;;;;      Hack\({}^{\mtlangann}_{\dynlangann}\) ~~~
+  ;;;;      Pyre\({}^{\mtlangann}_{\dynlangann}\) ~~~
+  ;;;;      Pytype\({}^{\mtlangann}_{\dynlangann}\) \\[0.4ex]
+  ;;;;      rtc\cite{rtsf-sac-2013}\({}^{\mtlangann}_{\dynlangann}\) \quad
+  ;;;;      Strongtalk\cite{bg-oopsla-1993}\({}^{\mtlangann}\) \quad
+  ;;;;      TypeScript\cite{bat-ecoop-2014}\({}^{\mtlangann}_{\dynlangann}\) \quad
+  ;;;;      Typed Clojure\cite{bdt-esop-2016}\({}^{\mtlangann}\) \quad
+  ;;;;      Typed Lua\cite{mmi-dls-2015}\({}^{\mtlangann}\)};
+
+  ;;;;   \node (NBOX)
+  ;;;;     [below=of EBOX.south west,anchor=north west,xshift=0.5em,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
+  ;;;;     {Gradualtalk\cite{acftd-scp-2013}\({}^{\mtlangann}_{\dynlangann}\) ~~
+  ;;;;      Grift\({}_{\dynlangann}\) \\[0.4ex]
+  ;;;;      Pycket\cite{bbst-oopsla-2017}\({}^{\mtlangann}\) \quad
+  ;;;;      TPD\cite{wmwz-ecoop-2017}\({}^{\mtlangann}\) \\[0.4ex]
+  ;;;;      Typed Racket\cite{tf-popl-2008}\({}^{\mtlangann}\)};
+
+  ;;;;   \node (N)
+  ;;;;     [right=of NBOX.north west,anchor=south west,xshift=-2.5em]
+  ;;;;     {\textstrat{\nname}};
+
+  ;;;;   \node (TBOX)
+  ;;;;     [right=of NBOX.north east,xshift=-1em,anchor=north west,yshift=3mm,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
+  ;;;;     {Grace\cite{rmhn-ecoop-2019} ~~
+  ;;;;      Pallene\cite{gi-sblp-2018}\({}^{\mtlangann}\) \\[0.4ex]
+  ;;;;      Reticulated\cite{vss-popl-2017}\({}^{\mtlangann}_{\dynlangann}\)};
+
+  ;;;;   \node (T)
+  ;;;;     [right=of TBOX.north west,anchor=south west,xshift=-2.5em]
+  ;;;;     {\textstrat{\tname}};
+
+  ;;;;   \node (CBOX)
+  ;;;;     [right=of TBOX.north east,xshift=-0.5em,yshift=-2ex,anchor=north west,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
+  ;;;;     {\csharp{}  \quad
+  ;;;;      Dart 2 \\[0.4ex]
+  ;;;;      Nom\cite{mt-oopsla-2017}\({}_{\dynlangann}\) ~
+  ;;;;      SafeTS\cite{rsfbv-popl-2015} \\[0.4ex]
+  ;;;;      {TS\({}^*\)}\cite{sfrbcsb-popl-2014}};
+
+  ;;;;   \node (C)
+  ;;;;     [right=of CBOX.north west,anchor=south west,xshift=-2.5em]
+  ;;;;     {\textstrat{Concrete}};
+
+  ;;;;   \node (EC)
+  ;;;;     [draw=black!80!white,dashed,ellipse,left=of EBOX.south east,xshift=0.9em,yshift=-1mm,anchor=north,align=center]
+  ;;;;     {\(\!\!\!\)StrongScript\cite{rzv-ecoop-2015}\(\!\!\!\)\\[0.4ex]
+  ;;;;      Thorn\cite{wzlov-popl-2010}};
+
+  ;;;;   \node (ET)
+  ;;;;     [draw=black!80!white,dashed,ellipse,left=of TBOX.south west,xshift=7mm,yshift=-2mm,x radius=10em,anchor=north west,align=center]
+  ;;;;     {~Pyret~};
+
+  ;;;; \end{tikzpicture}
+  (blank))
+
 (module+ raco-pict
   (provide raco-pict)
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        jungle:rp-api
+        transient:subtype
         '()
     )))
 )

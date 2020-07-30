@@ -1,4 +1,8 @@
 #lang greenman-thesis/include
+@(require
+   (only-in greenman-thesis/oopsla-2019/pict
+     transient:divide
+     transient:subtype))
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
@@ -84,12 +88,11 @@ Whether @|sShallow| Racket can ever run faster than untyped code is an open
  question; there are several avenues worth exploring (@sectionref{sec:transient:future}).
 
 
-@section[#:tag "sec:transient:theory"]{Theory}
-@; [ ] macro/micro ... what to say???
+@section[#:tag "sec:transient:theory"]{Theory++}
+@; [X] macro/micro ... what to say???
 @;     - can't remove checks without analysis, but should be easier now
-@;     - fewer cast locations (arguably, we missed <:)
+@;     - fewer cast locations (arguably, we missed <: --- no, its not a boundary and it cannot fail!)
 @;     - "macro" anticipated by chap:design but ... that one is a bit far from impl.
-@;     - 
 @; [ ] all types, sec. for each interesting ... ->* mu U 
 @; [ ] occurrence what to do = nothing
 @; [ ] summary table ... used-for-optz, O(1), O(t), O(n) ....
@@ -142,8 +145,8 @@ On the bottom, macro without blame requires only the result check.
    @|sTransient| completion rules for an application under micro (top) and
    macro (bottom) gradual typing.
    Both rules insert run-time shape checks.
-   The micro rule depends on type coercion (@${\scoerce})
-   and compatibility (@${\scompat}) metafunctions@~cite{vss-popl-2017}.
+   The micro rule depends on a type coercion (@${\scoerce})
+   metafunction@~cite{vss-popl-2017}.
   }
   @exact|{
     \begin{mathpar}
@@ -153,8 +156,6 @@ On the bottom, macro without blame requires only the result check.
         \stypeenv_0 \sWT \sexpr_1 : \stype_1 \compilesto \sexpr_1'
         \\\\
         \stype_0~\scoerce~\tfun{\stype_2}{\stype_3}
-        \\
-        \stype_1~\scompat~\stype_2
       }{
         \stypeenv_0 \sWT \sexpr_0~\sexpr_1 : \stype_3
         \compilesto
@@ -187,7 +188,60 @@ The benefits are two-fold:
  boundary error.
 
 
-@subsection[#:tag "sec:transient:theory:subt"]{Pitfalls of Subtyping}
+@subsection[#:tag "sec:transient:theory:subt"]{Subtyping}
+
+A type system for untyped code must either include a subtyping
+ judgment or force programmers to rewrite their data definitions.
+Rewriting takes time and invites mistakes, therefore a type system
+ that supports migratory typing (@chapter-ref{chap:why}) needs a subtyping
+ judgment.
+
+The dynamic type is not enough because it cannot articulate designs.
+For example, the untyped @codett{divide} function in @figure-ref{fig:transient:divide}
+ either divides two numbers or returns the symbol @tt{'undef} if the divisor
+ is zero.
+Typed Racket lets a programmer express this ad-hoc union of two base types.
+By contrast, the dynamic type can summarize the result but provides no information
+ to callers.
+
+@figure*[
+  "fig:transient:divide"
+  @elem{Untyped division function with exactly two kinds of output.}
+  transient:divide]
+
+Adapting @|stransient| to include subtyping was therefore an essential task
+ for @|sShallow| Racket.
+The addition was straightforward, but revealed a surprising distinction
+ between declaration-site types and use-site types; @|stransient| with
+ subtyping may miss certain type mistakes!
+@Figure-ref{fig:transient:subtype} illustrates the pitfall of @|stransient|
+ subtyping with a lazy factorial function.
+This typed function asks for a thunk that computes a non-negative number
+ and returns a thunk that computes a factorial.
+Because of the type declaration on @codett{lazy-n}, it looks like @|stransient|
+ should check that the call @codett{(lazy-n)} returns a non-negative number.
+The actual behavior, however, depends on the type of the call expression.
+If the language replaces the placeholder @codett{???} with the valid type
+ @codett{Integer}, then @|stransient| checks for an integer and the untyped
+ code at the bottom of the figure enters an infinite loop.
+
+@figure*[
+  "fig:transient:subtype"
+  @elem{Lazy factorial function, may diverge under @|stransient|.}
+  transient:subtype]
+
+In summary, the flexibility of subtyping limits the ability of @|stransient|
+ checks to find mismatches due to type boundaries.
+Checks are based on local uses, while boundaries are claims with a broad scope.
+
+@futurework{
+  Find an effective way to offer subtyping and catch boundary errors.
+  One idea is to use static analysis to identify the different paths from
+   boundaries to a use-site.
+  A second is to record subtyping actions in the blame map, as a loss of precision.
+  The extra metadata, however, will not prevent @codett{lazy-fact} from diverging.
+}
+
 
 @subsection[#:tag "sec:transient:theory:completion"]{Correct Completion}
 

@@ -1766,7 +1766,7 @@ Similarly, the bottom plot shows the best-possible performance after typing
  two untyped modules.
 
 The plots show that significant improvements are possible, but not guaranteed
- even with angelic choice.
+ even in the best case.
 Other large benchmarks typically show similar patterns@~cite{gtnffvf-jfp-2019}.
 }])
 
