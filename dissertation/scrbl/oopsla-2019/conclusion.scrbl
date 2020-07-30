@@ -72,6 +72,7 @@ More precisely, this paper analyzes six distinct semantics via four properties (
   @elem{Technical contributions}
   @exact|{
   {\deftablemacros{}
+   \renewcommand{\hsep}{~~~~~}
    \hfill\(\begin{array}{l@{\qquad}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c}
      & \nscr\LE & \cscr\LE & \fscr\LE & \tscr\EQ & \ascr\LE & \escr
      \\[1.0ex] \textrm{type soundness}
