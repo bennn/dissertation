@@ -100,3 +100,32 @@ acceptance by programmers. In conclusion, though, all three problem areas
 are barely understood and a lot more work remains to be done before the
 community can truly claim to understand this complex design space.
 
+@exercise[2]{
+  Design a semantics, @exact{\xsym}, that eagerly checks pairs like @|nname|
+   and wraps/unwraps functions like @|fname|.
+  Prove that @exact{\xsym} does not satisfy complete monitoring,
+   but can satisfy blame soundness and completeness.
+}
+
+@futurework{
+  Formulate a variant of complete monitoring that distinguishes the @exact{\xsym}
+   semantics of the previous exercise from the @|nname| semantics.
+}
+
+@futurework{
+  Rephrase complete monitoring in terms of types and observable behaviors
+   (instead of syntactic judgments).
+  @; What are the advantages of your semantic theorem relative to the current
+  @;  syntactic one?
+  @; Any ideas to simplify / economize the syntactic theorem?
+}
+
+@futurework{
+  Use the @|nname| and @|fname| semantics to design two compilers into a core
+   language that satisfies graduality@~cite{svcb-snapl-2015,nla-popl-2019}.
+  @exact{\kafka} may be a good starting point@~cite{clzv-ecoop-2018}.
+  Prove that the @|fname| compiler always gives less-precise output according
+   to the term precision relation.
+  Does core-language term precision reflect the surface-language error preorder?
+}
+

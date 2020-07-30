@@ -60,6 +60,7 @@
   ddeliverable
   kstep
   futurework
+  exercise
   rkt
   overhead-long-caption
   exact-long-caption
