@@ -25,6 +25,7 @@
   get-ratios-table
   render-ratios-table
   make-render-overhead-plot
+  make-render-path-plot
   render-exact-plot
   render-relative-overhead-plot
   make-render-validate-plot
@@ -407,6 +408,17 @@
     (log-bg-thesis-info "rendering (~a ~s)" (object-name f) pi)
     (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
       (f pi))))
+
+(define (make-render-path-plot rkt-version)
+  (lambda (n+d)
+    (define bm-name (car n+d))
+    (define max-dist (cdr n+d))
+    (define pi (benchmark-name->performance-info bm-name rkt-version))
+    (define pi%path (typed-racket-info%best-typed-path pi max-dist))
+    (log-bg-thesis-info "rendering (overhead-plot ~s)" pi)
+    (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD)
+                   (*OVERHEAD-SHOW-RATIO* #f))
+      (overhead-plot (list pi pi%path)))))
 
 (define (render-exact-plot bm-name)
   (define pi (benchmark-name->performance-info bm-name default-rkt-version))

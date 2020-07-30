@@ -1729,9 +1729,44 @@ As you can see, however, some points improve and others do not.
 }])
 
 
-@; @subsection{Best-Path Plots}
-@; TODO make new gtp-plot function, draw lines on same plot ... or change pi struct?
-@;  right now, trouble is no way to tell config<
+@subsection{Best-Path Plots}
+@; TR = zombie, suffixtree, take5, snake, synth, quadU, quadT
+@; RP = go, Espionage, PythonFlow ?
 
+@(let ((bm-name 'suffixtree)) @list[
+@render-overhead-plot*[
+  "fig:example-path"
+  @elem{Overhead plots for @bm[bm-name] comparing the base slowdown to
+   the best-possible improvement after adding types to 1 (top) and 2 (bottom)
+   modules.
+  }
+  ""
+  (tr:make-render-path-plot "7.7")
+  (list (cons bm-name 1) (cons bm-name 2))
+  tr:cache-dir
+]
 
+@elem{
+The plots in @section-ref{sec:tr:evaluation} paint a bleak picture of
+ Typed Racket.
+Many benchmarks have many configurations that run far slower than the
+ untyped code.
+But, one wonders, maybe these pitfalls can be avoided with a little extra
+ effort by the programmer.
+If the programmer is willing to convert one or two modules, can performance
+ improve?
+
+@Figure-ref{fig:example-path} presents two plots for the @bm[bm-name] benchmark
+ that compare the original data against the best-possible performance after
+ converting additional modules.
+In the top plot, a configuration is @ddeliverable{X} in the orange curve
+ if it can reach a @ddeliverable{X} configuration from the blue curve after
+ adding types to one module.
+Similarly, the bottom plot shows the best-possible performance after typing
+ two untyped modules.
+
+The plots show that significant improvements are possible, but not guaranteed
+ even with angelic choice.
+Other large benchmarks typically show similar patterns@~cite{gtnffvf-jfp-2019}.
+}])
 
