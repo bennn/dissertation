@@ -150,15 +150,16 @@ The type-shape for a function checks arity; for example,
 The shape for a sized vector checks length.
 And the shape for a list checks for a null-terminated sequence of pairs.
 Not all types correspond to value constructors, though.
-Type @emph{connectives}@~cite{cl-icfp-2017,clps-popl-2019} call for
+These type @emph{connectives}@~cite{cl-icfp-2017,clps-popl-2019} call for
  a recursive interpretation:
- for example, @${\tagof{\stype_0 \cup \stype_1} = \tagof{stype_0} \cup \tagof{\stype_1}}
+ for example, @${\tagof{\stype_0 \cup \stype_1} = \tagof{\stype_0} \cup \tagof{\stype_1}}
  and @${\tagof{\fforall{\alpha_0}{\stype_0}} = \tagof{\stype_0}}.
-Type variables have trivial shapes (@${\tagof{\alpha_0} = \top}).
+Type variables have trivial shapes, @${\tagof{\alpha_0} = \top}.
 @Section-ref{sec:transient:types} goes into more detail about the implementation.
 
 @futurework{
-  Can @|stransient| support any benefits of parametricity?
+  Is there a different way to enforce universal types that offers stronger
+   reasoning principles, in the spirit of parametricity?
 }
 
 
@@ -349,58 +350,92 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
 
-@;@figure*[
-@;  "fig:transient:shapes"
-@;  @elem{Informal summary of type-shapes (@${\tagof{\stype}}) for different
-@;   @|sShallow| Racket types (@${\stype}).
-@;   Costs are either constant, depend on the static type, or depend on run-time values.
-@;   The final column has a check if the Typed Racket optimizer ever uses the shape.
-@;  }
-@;  @exact|{
-@;  {\newcommand{\tblY}{\mbox{\bigcheckmark}}
-@;   \newcommand{\tblN}{\scalebox{0.8}{\bigxmark}}
-@;  \newcommand{\twolinebox}[3]{\parbox[t][][s]{#1}{#2\newline#3}}
-@;  \newcommand{\bpurpose}[2]{\twolinebox{3.2cm}{#1}{#2}}
-@;  \newcommand{\bbshape}[3]{\twolinebox{1.5cm}{#2}{\({}#1~\)#3}}
-@;  \newcommand{\bshapeand}[2]{\bbshape{\wedge}{#1}{#2}}
-@;  \newcommand{\bshapeor}[2]{\bbshape{\vee}{#1}{#2}}
-@;    \begin{tabular}{lllrr}
-@;      \(\stype\) & Purpose & \(\tagof{\stype}\) & Cost & Opt
-@;    \\\hline
-@;      \codett{(Listof Real)} & \bpurpose{Any-length list of}{real numbers} & \codett{list?} & \(O(v)\) & \tblY
-@;    \\[3.8ex]
-@;      \codett{(List Real Real)} & \bpurpose{List of two}{real numbers} & \bshapeand{\codett{list?}}{\codett{len=2}} & \(O(v)\) & \tblY
-@;    \\[3.8ex]
-@;      \codett{(Vectorof Real)} & \bpurpose{Any-length vector}{of real numbers} & \codett{vector?} & \(O(1)\) & \tblY
-@;    \\[3.8ex]
-@;      \codett{(Vector Real)} & \bpurpose{Vector with one}{real number} & \bshapeand{\codett{vector?}}{\codett{len=1}} & \(O(1)\) & \tblY
-@;    \\[3.8ex]
-@;      \codett{(All (A) T)} & {Type abstraction} & \(\tagof{\codett{T}}\) & \(O(\tagof{\codett{T}})\) & {}
-@;    \\[3.8ex]
-@;      \codett{(U Real String)} & {Untagged union} & \bshapeor{\codett{real?}}{\codett{string?}} & \(O(\stype)\) & \tblN
-@;    \\[3.8ex]
-@;      \codett{(-> Real String)} & 
-@;  
-@;    \\[3.8ex]
-@;    \end{tabular}
-@;  }}|
-@;]
-@;
-@;@Figure-ref{fig:transient:shapes} presents a few interesting type shapes in
-@; @|sShallow| Racket.
-@;Each row of the table consists of a static type, a brief description,
-@; the type-shape, an approximate cost, and whether the Typed Racket optimizer
-@; currently uses the full shape to transform code.
-@;The shape for lists is the only one that recursively checks a value;
-@; that being said, the Racket predicate @codett{list?} caches its result.
-@;
-@;
-@;@futurework{
-@;  Improve the Typed Racket optimizer to take advantage of more shapes,
-@;   and remove any checks that the optimizer cannot use.
-@;  How do the changes impact performance?
-@;  Do the removed shape checks make programs more difficult to debug?
-@;}
+@subsection[#:tag "sec:transient:types"]{Example Types and Shapes}
+
+Here are some example types, their shape, their approximate cost,
+ and a few brief comments.
+These are not exactly the shapes in the implementation.
+Costs are either constant, depend on the size of the type,
+ or depend on the size of incoming values.
+The shape for lists is the only one that recursively checks a value;
+ that being said, the Racket predicate @codett{list?} caches its result.
+
+@itemlist[
+@item{
+  type @codett{(Listof Real)}
+
+  shape @codett{list?}
+
+  cost @${O(v)}
+
+  Represents an any-length list of real numbers.
+  The shape accepts only proper lists; @codett{(cons 1 (cons 2 3))} is not allowed.
+}
+@item{
+  type @codett{(List Real Real)}
+
+  shape @codett{(and/c list? (lambda (v) (= 2 (length l))))}
+
+  cost @${O(v)}
+
+  Represents a list with exactly two numbers.
+  The shape checks length to enable optimization; @codett{(list-ref v 1)}
+   becomes @codett{(unsafe-list-ref v 1)}.
+}
+@item{
+  type @codett{(Vectorof Real)}
+
+  shape @codett{vector?}
+
+  cost @${O(1)}
+
+  Any-length vector of numbers.
+}
+@item{
+  type @codett{(Vector Real)}
+
+  shape @codett{(and/c vector? (lambda (v) (= 1 (vector-length v))))}
+
+  cost @${O(1)}
+
+  Vector with one real number.
+}
+@item{
+  type @codett{(All (A) T)}
+
+  shape @${\tagof{\codett{T}}}
+
+  cost @${O(\tagof{\codett{T}})}
+
+  Type abstraction
+}
+@item{
+  type @codett{(U Real String)}
+
+  shape @codett{(or/c real? string?)}
+
+  cost @${O(\stype)}
+
+  Untagged union.
+}
+@item{
+  type @codett{(-> Real String)}
+
+  shape @codett{(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))}
+
+  cost @${O(\stype)}
+
+  Function with one mandatory argument.
+}
+]
+
+
+@futurework{
+  Improve the Typed Racket optimizer to take advantage of more shapes,
+   and remove any checks that the optimizer cannot use.
+  How do the changes impact performance?
+  Do the removed shape checks make programs more difficult to debug?
+}
 
 
 @section[#:tag "sec:transient:performance"]{Performance}
