@@ -29,6 +29,7 @@
   summary
   bm
   codett
+  code-nested
   id
   library
   Section-ref
@@ -179,6 +180,11 @@
 
 (define noindent
   (make-element (make-style "noindent" '()) ""))
+
+;; TODO add name
+;(define (theorem title #:tag tag . content)
+;  (nested #:style "theorem"
+;    (para (latex-label tag) content)
 
 (define (equation tag content)
   (nested #:style "equation"
@@ -476,4 +482,7 @@
     20
     (make-configuration-pict 4 make-migratable-pict)
     (make-configuration-pict 2 make-contextual-pict)))
+
+(define (code-nested . content)
+  (nested #:style 'code-inset (map codett content)))
 

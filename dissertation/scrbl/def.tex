@@ -818,4 +818,8 @@
 \newcommand{\grantsponsor}[3]{\href{#3}{#1}}
 \newcommand{\grantnum}[2]{{\small\texttt{#2}}}
 
-\newcommand{\definitionsketch}[2]{\paragraph{Definition Sketch \textnormal{(#1)}}\leavevmode\\{\em #2}}
+\newcommand{\xxxsketch}[3]{\paragraph{#1 Sketch \textnormal{(#2)}}\leavevmode\\{\em #3}}
+\newcommand{\definitionsketch}[2]{\xxxsketch{Definition}{#1}{#2}}
+\newcommand{\theoremsketch}[2]{\xxxsketch{Theorem}{#1}{#2}}
+
+
