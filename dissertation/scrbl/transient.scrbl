@@ -355,73 +355,190 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 Here are some example types, their shape, their approximate cost,
  and a few brief comments.
 These are not exactly the shapes in the implementation.
-Costs are either constant, depend on the size of the type,
- or depend on the size of incoming values.
-The shape for lists is the only one that recursively checks a value;
- that being said, the Racket predicate @codett{list?} caches its result.
+Come with a few words about optimization.
+Picked to illustrate variety and challenges.
+
+Checks are generally far more than the optimizer needs.
+For example, even @codett{procedure?} unused to compile code.
 
 @itemlist[
 @item{
   @example-type-shape[
     #:type "(Listof Real)"
     #:shape "list?"
-    #:cost "O(v)"]
+    #:cost "O(v)"
+  ]
 
-  The type represents an any-length list of real numbers.
-  The shape accepts only proper lists; @codett{(cons 1 (cons 2 3))} is not allowed.
+  The type represents lists of real numbers.
+  The shape accepts any proper list;
+   an improper list like @codett{(cons 1 (cons 2 3))} is not allowed.
+  The run-time cost depends on the size of input values;
+   that being said, pairs are immutable and the predicate @codett{list?} caches
+   its results.
+  The optimizer uses the shape to rewrite getters.
 }
 @item{
   @example-type-shape[
     #:type "(List Real Real)"
-    #:shape "(and/c list? (lambda (v) (= 2 (length l))))"
-    #:cost "O(v)"]
+    #:shape "(and/c list? (λ(v) (= 2 (length l))))"
+    #:cost "O(v)"
+  ]
 
   Represents a list with exactly two numbers.
-  The shape checks length to enable optimization; @codett{(list-ref v 1)}
-   becomes @codett{(unsafe-list-ref v 1)}.
+  The shape checks lengths.
+  Doing so lets the optimizer change @codett{(list-ref v 1)}
+   to @codett{(unsafe-list-ref v 1)}.
 }
 @item{
   @example-type-shape[
-    #:type "(Vectorof Real)"
-    #:shape "vector?"
+    #:type "(Rec Chain (U Null (Pairof Chain Real)))"
+    #:shape "(or/c null? pair?)"
     #:cost "O(1)"]
 
-  Any-length vector of numbers.
+  The recursive type is isomorphic to @codett{(Listof Real)}, but enforced
+   with a more primitive check.
+  In general, built-in lists have the only shape whose cost depends on input
+   values.
 }
 @item{
   @example-type-shape[
     #:type "(Vector Real)"
-    #:shape "(and/c vector? (lambda (v) (= 1 (vector-length v))))"
+    #:shape "(and/c vector? (λ(v) (= 1 (vector-length v))))"
     #:cost "O(1)"]
 
-  Vector with one real number.
+  Represents a vector that contains exactly one number.
+  The shape checks length; the optimizer uses this fact.
 }
 @item{
   @example-type-shape[
-    #:type "(All (A) (-> Real A))"
-    #:shape "(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))"
+    #:type "(Mutable-Vectorof Real)"
+    #:shape "(and/c vector? (not/c immutable?))"
     #:cost "O(1)"]
 
-  Type abstraction
+  Represents a mutable vector with any number of elements.
+  Vectors can also be immutable; the parent type @codett{Vector} covers both.
+  The optimizer does not look at mutability, but the type checker does
+   to raise static type errors.
+}
+@item{
+  @example-type-shape[
+    #:type "(Weak-HashTable Symbol (-> Void))"
+    #:shape "(and/c hash? hash-weak?)"
+    #:cost "O(1)"]
+
+  Represents a mutable hash table whose keys do not inhibit the garbage collector.
 }
 @item{
   @example-type-shape[
     #:type "(U Real String)"
     #:shape "(or/c real? string?)"
-    #:cost "O(\\stype)"]
+    #:cost "O(1)"]
 
   Untagged union.
+  The shape accepts either a real number or a string.
+  Wider unions, with @${N} types inside, have shapes with @${N} components.
+}
+@item{
+  @example-type-shape[
+    #:type "(Syntaxof String)"
+    #:shape "syntax?"
+    #:cost "O(1)"]
+
+  Represents a syntax object that contains a string.
+  The shape checks for a syntax object.
+}
+@item{
+  @example-type-shape[
+    #:type "(Syntaxof Symbol)"
+    #:shape "identifier?"
+    #:cost "O(1)"]
+
+  Represents a syntax object that contains a symbol; that is, an identifier.
+  The shape check goes deeper and confirms the symbol.
+}
+@item{
+  @example-type-shape[
+    #:type "Integer"
+    #:shape "exact-integer?"
+    #:cost "O(1)"]
+
+  Represents a mathematical integer.
+  The shape checks for exactness; an inexact integer such as @codett{4.0} is
+   not allowed.
+
+  Other numeric types require larger checks for additional properties,
+   for example @codett{Negative-Integer} adds looks for an exact integer that
+   is less than zero.
+
+  To the type system, numeric types are wide unions.
+  Shape enforcement flattens unions wherever possible.
+  Contract enforcement does likewise.
+}
+@item{
+  @example-type-shape[
+    #:type "(Refine [n : Integer] (= n 42))"
+    #:shape "(and/c exact-integer? (=/c 42))"
+    #:cost "O(1)"]
+
+  Represents an integer that is equal to @codett{42}.
+
+  Refinement types attach a predicate to a static type.
+  Predicates are limited to a linear arithmetic.
+  The shape check uses the whole predicate.
+}
+@item{
+  @example-type-shape[
+    #:type "(Class (field [a Natural]) (get-a (-> Natural)))"
+    #:shape "(contract-first-order (class/c (field a) get-a))"
+    #:cost "O(1)"]
+
+  Represents a class with one field and one method.
+  The shape depends on the @codett{racket/contract} library to check simple
+   properties of class shape.
+  Object types have similar checks, using @codett{object/c} instead.
 }
 @item{
   @example-type-shape[
     #:type "(-> Real String)"
-    #:shape "(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))"
-    #:cost "O(\\stype)"]
+    #:shape "(arity-includes/c 1)"
+    #:cost "O(1)"]
 
-  Function with one mandatory argument.
+  Represents a function with one mandatory argument.
+  The shape checks arity.
+}
+@item{
+  @example-type-shape[
+    #:type "(-> Real * Real)"
+    #:shape "(arity-includes/c 0)"
+    #:cost "O(1)"]
+
+  Represents a function that accepts any number of positional arguments.
+  The shape looks for functions that can accept zero arguments,
+   but does not check whether they accept more.
+}
+@item{
+  @example-type-shape[
+    #:type "(case-> (-> Symbol Symbol) (-> Symbol Real Symbol))"
+    #:shape "(and/c (arity-includes/c 1) (arity-includes/c 2))"
+    #:cost "O(1)"]
+
+  Represents an overloaded function.
+  The shape checks both arities.
+
+  Functions can also have optional, keyword, and optional keyword arguments.
+  The shapes for such functions check that the keywords are accepted.
+}
+@item{
+  @example-type-shape[
+    #:type "(All (A) A)"
+    #:shape "any/c"
+    #:cost "O(1)"]
+
+  TODO is this correct? Maybe names should be none/c, does that break things?
+  Well (All (A) (Pairof A A)) would be nontrivial but equally bad to inhabit.
+  And (All (A) (-> A A)) is supposed to work with anything.
 }
 ]
-
 
 @futurework{
   Improve the Typed Racket optimizer to take advantage of more shapes,

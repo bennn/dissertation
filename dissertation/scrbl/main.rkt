@@ -492,8 +492,8 @@
     \(\stype\) & \(=\) & @codett[t-str]
   \\
     \(\tagof{\stype}\) & \(=\) & @codett[s-str]
-  \\
-    cost & \(\approx\) & \(@|c-str|\)
   \end{tabular}})
+@; \\
+@;   cost & \(\approx\) & \(@|c-str|\)
 
 
