@@ -362,68 +362,61 @@ The shape for lists is the only one that recursively checks a value;
 
 @itemlist[
 @item{
-  type @codett{(Listof Real)}
+  @example-type-shape[
+    #:type "(Listof Real)"
+    #:shape "list?"
+    #:cost "O(v)"]
 
-  shape @codett{list?}
-
-  cost @${O(v)}
-
-  Represents an any-length list of real numbers.
+  The type represents an any-length list of real numbers.
   The shape accepts only proper lists; @codett{(cons 1 (cons 2 3))} is not allowed.
 }
 @item{
-  type @codett{(List Real Real)}
-
-  shape @codett{(and/c list? (lambda (v) (= 2 (length l))))}
-
-  cost @${O(v)}
+  @example-type-shape[
+    #:type "(List Real Real)"
+    #:shape "(and/c list? (lambda (v) (= 2 (length l))))"
+    #:cost "O(v)"]
 
   Represents a list with exactly two numbers.
   The shape checks length to enable optimization; @codett{(list-ref v 1)}
    becomes @codett{(unsafe-list-ref v 1)}.
 }
 @item{
-  type @codett{(Vectorof Real)}
-
-  shape @codett{vector?}
-
-  cost @${O(1)}
+  @example-type-shape[
+    #:type "(Vectorof Real)"
+    #:shape "vector?"
+    #:cost "O(1)"]
 
   Any-length vector of numbers.
 }
 @item{
-  type @codett{(Vector Real)}
-
-  shape @codett{(and/c vector? (lambda (v) (= 1 (vector-length v))))}
-
-  cost @${O(1)}
+  @example-type-shape[
+    #:type "(Vector Real)"
+    #:shape "(and/c vector? (lambda (v) (= 1 (vector-length v))))"
+    #:cost "O(1)"]
 
   Vector with one real number.
 }
 @item{
-  type @codett{(All (A) T)}
-
-  shape @${\tagof{\codett{T}}}
-
-  cost @${O(\tagof{\codett{T}})}
+  @example-type-shape[
+    #:type "(All (A) (-> Real A))"
+    #:shape "(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))"
+    #:cost "O(1)"]
 
   Type abstraction
 }
 @item{
-  type @codett{(U Real String)}
-
-  shape @codett{(or/c real? string?)}
-
-  cost @${O(\stype)}
+  @example-type-shape[
+    #:type "(U Real String)"
+    #:shape "(or/c real? string?)"
+    #:cost "O(\\stype)"]
 
   Untagged union.
 }
 @item{
-  type @codett{(-> Real String)}
-
-  shape @codett{(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))}
-
-  cost @${O(\stype)}
+  @example-type-shape[
+    #:type "(-> Real String)"
+    #:shape "(and/c procedure? (lambda (v) (procedure-arity-includes? v 1)))"
+    #:cost "O(\\stype)"]
 
   Function with one mandatory argument.
 }

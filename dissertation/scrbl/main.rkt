@@ -93,6 +93,7 @@
   make-lib
   render-overhead-plot*
 
+  example-type-shape
   make-example-program-pict
 )
 
@@ -485,4 +486,14 @@
 
 (define (code-nested . content)
   (nested #:style 'code-inset (map codett content)))
+
+(define (example-type-shape #:type t-str #:shape s-str #:cost c-str)
+  @exact{\begin{tabular}[t]{lcl}
+    \(\stype\) & \(=\) & @codett[t-str]
+  \\
+    \(\tagof{\stype}\) & \(=\) & @codett[s-str]
+  \\
+    cost & \(\approx\) & \(@|c-str|\)
+  \end{tabular}})
+
 
