@@ -348,18 +348,52 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 @section[#:tag "sec:transient:blame"]{Work-in-progress: Blame}
 @; chap:design says what to do
 
+@;   + why blame
+@;   + transient-blame ideas
+@;     check+update, escape+update, store all v
+@;   + hint at impl. trouble, but focus on theory-only for now
+@;     big map, no gc, much bookkeeping
+@;   + more challenges
+@;     TR accessors, multi-parent, cannot trust base env, types at runtime
+
+
+
+
 @section[#:tag "sec:transient:implementation"]{Implementation}
 
-@subsection[#:tag "sec:transient:types"]{Example Types and Shapes}
+Overview, figure of compiler pipeline, re-use.
 
-Here are some example types, their shape, their approximate cost,
- and a few brief comments.
-These are not exactly the shapes in the implementation.
-Come with a few words about optimization.
-Picked to illustrate variety and challenges.
+Key aspects below:
+ creating shapes,
+ inserting shapes,
+ optimizing accordingly.
+Plus two miscellaneous sections.
 
-Checks are generally far more than the optimizer needs.
-For example, even @codett{procedure?} unused to compile code.
+
+@subsection[#:tag "sec:transient:types"]{From Types to Shapes}
+
+@|sShallow| Racket compiles static types to @emph{type shape} checks.
+Each check enforces first-order properties of a type constructor.
+In general, a successful check means that all well-typed operations
+ should succeed at run-time.
+
+For example, the type @codett{(Pairof String String)} uses the @codett{Pairof}
+ type constructor; its shape check, @codett{pair?}, accepts any kind of
+ pair.
+A successful check @codett{(pair? v)} means that the operations
+ @codett{(car v)} and @codett{(cdr v)} are well-defined, and nothing more.
+Because these two operations are the only elimination forms for the
+ @codett{Pairof} constructor, the shape meets its goal.
+
+Types that support many first-order properties have more complex shape checks.
+For example, an object comes with field and method names.
+The shape check must ensure that type-correct calls to @codett{get-field}
+ and @codett{send} succeed at run-time.
+
+Below are several more example types, chosen to illustrate the variety
+ and challenges of extending @|stransient|.
+Each type comes with a high-level shape that illustrates the implementation
+ and a brief discussion.
 
 @itemlist[
 @item{
@@ -541,9 +575,14 @@ For example, even @codett{procedure?} unused to compile code.
 ]
 
 @futurework{
-  Improve the Typed Racket optimizer to take advantage of more shapes,
-   and remove any checks that the optimizer cannot use.
+  The Typed Racket optimizer does not take advantage of all shapes.
+  In this sense, the check for functions is an unnecessary cost---even
+   @codett{procedure?} would be a waste, because the TR optimizer does
+   not use it.
+  Improve the optimizer where possible and remove other shape checks.
   How do the changes impact performance?
+  Try writing a few programs;
+   perhaps by converting Reticulated benchmarks to @|sShallow| Racket.
   Do the removed shape checks make programs more difficult to debug?
 }
 
