@@ -469,7 +469,9 @@ Each type comes with a high-level shape that illustrates the implementation
     #:cost "O(1)"]
 
   Untagged union.
-  The shape accepts either a real number or a string.
+  The shape accepts either a real number or a string;
+   these predicates are elimination forms for the union because of occurrence
+   typing@~cite{tf-icfp-2010,t-thesis-2010}.
   Wider unions, with @${N} types inside, have shapes with @${N} components.
 }
 @item{
@@ -585,6 +587,9 @@ Each type comes with a high-level shape that illustrates the implementation
    perhaps by converting Reticulated benchmarks to @|sShallow| Racket.
   Do the removed shape checks make programs more difficult to debug?
 }
+
+
+@subsection{Defender}
 
 
 @section[#:tag "sec:transient:performance"]{Performance}
