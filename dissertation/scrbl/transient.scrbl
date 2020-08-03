@@ -1,6 +1,14 @@
 #lang greenman-thesis/include
 @(require
+   (only-in greenman-thesis/shallow/main
+     SHALLOW-CURRENT-BENCHMARK*
+     ratios-row-name
+     ratios-row-deep
+     ratios-row-shallow
+     get-ratios-table
+     render-ratios-table)
    (only-in greenman-thesis/jfp-2019/main
+     MAX-OVERHEAD
      default-rkt-version
      render-relative-exact-plot
      render-relative-overhead-plot)
@@ -656,9 +664,69 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 @; [X] get NSA data
 @; [X] overhead plots ... incrementally
 @; [X] exact plots, for trends
-@; [ ] table, typed/untyped (see perf sections)
+@; [X] table, typed/untyped (see perf sections)
 @; [ ] DEBUG why is fsm7.7 faster untyped than fsm-S ???
+@; [ ] DEBUG why is synth (recent data, 07-31?) so bad?
 @; [ ] blame perf table (use NSA)
+
+
+@|sShallow| Racket trades static guarantees for performance.
+The weakened type soundness and loss of complete monitoring and correct blame
+ must lead to better performance.
+
+This section presents the results of an evaluation using the @|GTP| benchmarks.
+The granularity of the experiment is module-level, same as our Typed Racket
+ experiment reported in @section-ref{sec:tr:evaluation}.
+All data came from a dedicated Linux box with 4 physical i7-4790 3.60GHz cores
+  and 16GB RAM.
+
+
+@subsection[#:tag "sec:transient:ratio"]{Performance Ratios}
+
+@(let* ((RT (get-ratios-table SHALLOW-CURRENT-BENCHMARK*))
+        (deep-win-names+shallow-win-names
+         (let ()
+           (define (deep-wins? row)
+             (<= (ratios-row-deep row) (ratios-row-shallow row)))
+           (define-values [a b] (partition deep-wins? RT))
+           (cons (map ratios-row-name a) (map ratios-row-name b))))
+        (deep-win-names (car deep-win-names+shallow-win-names))
+        (shallow-win-names (cdr deep-win-names+shallow-win-names))
+        (num-deep-wins (length deep-win-names))
+        (num-shallow-<1
+         (for/sum ((row (in-list RT)))
+           (if (< (ratios-row-shallow row) 1) 1 0))))
+@list[
+@figure[
+  "fig:transient:ratio"
+  @elem{Performance ratios for @|sdeep| and @|sshallow| types on the @|GTP| benchmarks.}
+  @render-ratios-table[RT]
+]
+@elem{
+@Figure-ref{fig:transient:ratio} presents typed/untyped ratios for
+ the @|GTP| benchmarks.
+The middle column lists the overhead of fully-typed @|sdeep| code relative
+ to the untyped configuration.
+The right column shows the overhead of fully-typed @|sshallow| types.
+
+Because these @|sshallow| types are implemented with the @|stransient| semantics,
+ one would expect them to be slower than @|sdeep| types.
+The latter has no overhead in completely typed programs.
+Indeed, @integer->word[num-deep-wins]
+ @(if (= 1 num-deep-wins) "benchmark runs" "benchmarks run")
+ faster with deep types.
+The exceptions (@oxfordize[shallow-win-names]) are all programs that depend
+ on untyped library code.
+
+Surprisingly, @integer->word[num-shallow-<1]
+ @(if (= 1 num-shallow-<1) "benchmark runs" "benchmarks run")
+ faster with @|sshallow| types than with no types.
+Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
+ to make the code run faster than untyped.
+}])
+
+
+@subsection{Overhead Plots}
 
 @render-overhead-plot*[
   "fig:transient:overhead"
@@ -668,10 +736,38 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
   ""
   ;; TODO stop at 10x? different title? (deep vs shallow?)
   render-relative-overhead-plot
-  (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
+  (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
     (cons bm-name (cons default-rkt-version stransient)))
   #f
 ]
+
+
+@Figures-ref["fig:transient:overhead" (exact-ceiling (/ (length SHALLOW-CURRENT-BENCHMARK*) overhead-plots-per-page))]
+ plots the overhead of gradual typing
+ in @|sDeep| Racket and @|sShallow| Racket.
+As before, these plots show the proportion of @ddeliverable{D} configurations
+ for values of @${D} between 1x and @~a[MAX-OVERHEAD]x.
+
+@|sShallow| types give a tremendous improvement in TODO benchmarks.
+These benchmarks fall victim to @|sdeep| types; the very-different
+ @|stransient| semantics fares much better.
+
+TODO benchmarks, however, typically run faster with @|sdeep| types.
+Each demands a close look:
+@itemlist[
+@item{
+  @bm{morsecode}
+}
+@item{
+  @bm{zordoz}
+}
+]
+
+Overall, @|sShallow| Racket does not disappoint.
+
+
+
+@subsection{Exact Runtime Plots}
 
 @render-overhead-plot*[
   "fig:transient:exact"
@@ -685,6 +781,31 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
     (cons bm-name (cons default-rkt-version stransient)))
   #f
 ]
+
+@Figures-ref["fig:transient:exact" (exact-ceiling (/ (length SHALLOW-CURRENT-BENCHMARK*) overhead-plots-per-page))]
+ offers a different perspective on @|sdeep| and @|sshallow| types.
+These exact runtime plots show how performance changes as the number of type
+ annotations in a benchmark increases.
+The leftmost column of each plot has one dot for each fully-untyped running
+ time.
+The right-most columns plot the fully-typed running times, and columns in
+ between have data for every point at the same level of the performance lattice.
+
+In @|sDeep| Racket, mixing typed and untyped code can lead to significant overhead.
+Points in the middle columns are for mixed configurations, and can have
+ high cost; @bm{zombie} in particular slows down in the middle.
+Points on the right columns, however, do not suffer.
+After critical boundaries are typed, performance with @|sdeep| types is
+ often excellent.
+
+In @|sShallow| Racket, the trend is simple: adding types slows code down.
+There is a linear, upward trend in every benchmark except @bm{fsm}.
+
+TODO investigate @bm{fsm}, why is transient untyped so much slower?
+And why does it do so well with optimization?
+Seems wrong.
+
+
 
 @section[#:tag "sec:transient:future"]{Future Challenges}
 @; vsc-dls-2019 has Retic/Pycket faster than untyped, 0.95x best-case

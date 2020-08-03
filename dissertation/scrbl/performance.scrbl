@@ -948,7 +948,7 @@ Type annotations add 10 to 300 lines of code, but the count approximates size.
 
 @subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
 
-@figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks.}
+@figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks. Typed Racket v@|tr:default-rkt-version|.}
   @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
 ]
 
