@@ -2,6 +2,8 @@
 @(require
    (only-in greenman-thesis/oopsla-2019/pict
      transient:divide
+     transient:all-type
+     transient:occurrence-type
      transient:subtype))
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
@@ -153,8 +155,9 @@ Not all types correspond to value constructors, though.
 These type @emph{connectives}@~cite{cl-icfp-2017,clps-popl-2019} call for
  a recursive interpretation:
  for example, @${\tagof{\stype_0 \cup \stype_1} = \tagof{\stype_0} \cup \tagof{\stype_1}}
- and @${\tagof{\fforall{\alpha_0}{\stype_0}} = \tagof{\stype_0}}.
-Type variables have trivial shapes, @${\tagof{\alpha_0} = \top}.
+ and @${\tagof{\fforall{\alpha_0}{\stype_0}} = \tagof{\stype_0}}
+ provided @${\tagof{\stype_0}} does not depend on the bound variable.
+Type variables have trivial shapes in other contexts, @${\tagof{\alpha_0} = \top}.
 @Section-ref{sec:transient:types} goes into more detail about the implementation.
 
 @futurework{
@@ -566,14 +569,37 @@ Each type comes with a high-level shape that illustrates the implementation
 }
 @item{
   @example-type-shape[
-    #:type "(All (A) A)"
-    #:shape "any/c"
+    #:type "(All (A) (Box A))"
+    #:shape "box?"
     #:cost "O(1)"]
 
-  TODO is this correct? Maybe names should be none/c, does that break things?
-  Well (All (A) (Pairof A A)) would be nontrivial but equally bad to inhabit.
-  And (All (A) (-> A A)) is supposed to work with anything.
+  Represents a polymorphic mutable cell.
+  The shape checks for a cell.
+  If typed code wants to extract a value from the cell, it must instatiate
+   the polymorphic type.
+  The instantiation provides a shape to check the contents.
 }
+@item{
+  @example-type-shape[
+    #:type "(All (A) A)"
+    #:shape "none/c"
+    #:cost "O(1)"]
+
+  Represents a value that can be instantiated to any type.
+  The shape rejects all values.
+
+  This type could be allowed with the trivial shape @codett{any/c} in an
+   implementation that checks the result of type instantiation.
+  @|sShallow| Racket does nothing at instantiation, and therefore rejects
+   the type to prevent unsoundness (@figure-ref{fig:transient:all-type}).
+}
+]
+
+@figure*[
+  "fig:transient:all-type"
+  @elem{If the shape of a universal type depends on the bound variable, then
+   @|stransient| must reject the program or treat type instantiation as an elimination form.}
+  transient:all-type
 ]
 
 @futurework{
@@ -590,6 +616,35 @@ Each type comes with a high-level shape that illustrates the implementation
 
 
 @subsection{Defender}
+
+@subsection{Optimizer}
+
+@subsection{Surprises}
+
+New abilities.
+See RFC for motivations.
+
+Some programs are still disallowed.
+@Figure-ref{fxg:transient:occurrence-type} is one example.
+It uses @codett{require/typed} to import an untyped function with a nonsensical
+ occurrence type.
+The typechecker trusts that all @codett{require/typed} annotations are valid
+ claims, and so the rest of the program type checks.
+The typechecker assumes that a run-time check will catch any faulty claims.
+In this program, however, the occurrence type adds a side effect claim
+ that is not caught by any check.
+For now, @|sShallow| Racket rejects any program that uses an occurrence type
+ as a claim.
+
+@figure*[
+  "fig:transient:occurrence-type"
+  @elem{
+   @|stransient| must reject the program or treat type instantiation as an elimination form.}
+  transient:occurrence-type
+]
+
+
+@subsection{Bug Reports}
 
 
 @section[#:tag "sec:transient:performance"]{Performance}

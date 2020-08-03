@@ -10,6 +10,8 @@
   jungle:landscape
   transient:divide
   transient:subtype
+  transient:all-type
+  transient:occurrence-type
 )
 
 (require
@@ -445,6 +447,34 @@
     #true
     #false))
 
+(define transient:all-type
+  (typed-codeblock '(
+    "(require/typed racket/base"
+    "  ;; import `cdr`, assume type is correct,"
+    "  ;; depend on run-time check to catch nonsense"
+    "  (cdr (All (A) A)))"
+    ""
+    "(define fake-str : String"
+    "  (inst cdr String))"
+    ""
+    "(string-length fake-str)"
+  )))
+
+(define transient:occurrence-type
+  ;; `ann` needed to eliminate an Intersection type
+  (typed-codeblock '(
+    "(require/typed racket/base"
+    " (values (-> Any Any : String)))"
+    ""
+    "(define x : Any 0)"
+    ""
+    "(define fake-str : String"
+    "  (if (values x)"
+    "    (ann x String)"
+    "    (error 'unreachable)))"
+    ""
+    "(string-length fake-str)"
+  )))
 
 (define jungle:landscape
   ;; TODO
@@ -520,7 +550,8 @@
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        transient:subtype
+        transient:all-type
+        transient:occurrence-type
         '()
     )))
 )
