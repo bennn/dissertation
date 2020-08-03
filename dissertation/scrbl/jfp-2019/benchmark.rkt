@@ -28,6 +28,7 @@
   make-render-path-plot
   render-exact-plot
   render-relative-overhead-plot
+  render-relative-exact-plot
   make-render-validate-plot
   render-scatterplot-example
   benchmark-name->performance-info
@@ -435,6 +436,14 @@
   (define pi-1 (benchmark-name->performance-info bm-name v1 #:full-name? #t))
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (overhead-plot (list pi-0 pi-1))))
+
+(define (render-relative-exact-plot bm-name+v*)
+  (define bm-name (car bm-name+v*))
+  (define-values [v0 v1] (values (cadr bm-name+v*) (cddr bm-name+v*)))
+  (define pi-0 (benchmark-name->performance-info bm-name v0 #:full-name? #t))
+  (define pi-1 (benchmark-name->performance-info bm-name v1 #:full-name? #t))
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+    (exact-runtime-plot (list pi-0 pi-1))))
 
 (define (make-render-validate-plot rkt-version)
   (lambda (bm-name)

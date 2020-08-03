@@ -2,6 +2,7 @@
 @(require
    (only-in greenman-thesis/jfp-2019/main
      default-rkt-version
+     render-relative-exact-plot
      render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
      transient:divide
@@ -657,13 +658,26 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 @; [ ] blame perf table
 
 @render-overhead-plot*[
-  "fig:transient:shallow-vs-deep"
+  "fig:transient:overhead"
   @elem{
   Relative Deep vs Shallow
   }
   ""
   ;; TODO stop at 10x? different title?
   render-relative-overhead-plot
+  (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
+    (cons bm-name (cons default-rkt-version stransient)))
+  #f
+]
+
+@render-overhead-plot*[
+  "fig:transient:exact"
+  @elem{
+  Exact Deep vs Shallow
+  }
+  ""
+  ;; TODO formatting? sync colors
+  render-relative-exact-plot
   (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
     (cons bm-name (cons default-rkt-version stransient)))
   #f
