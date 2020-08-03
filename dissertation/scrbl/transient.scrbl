@@ -1,5 +1,8 @@
 #lang greenman-thesis/include
 @(require
+   (only-in greenman-thesis/jfp-2019/main
+     default-rkt-version
+     render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
      transient:divide
      transient:all-type
@@ -648,10 +651,23 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 
 
 @section[#:tag "sec:transient:performance"]{Performance}
-@; [ ] get NSA data
+@; [X] get NSA data
 @; [ ] overhead plots ... incrementally
 @; [ ] exact plots, for trends
 @; [ ] blame perf table
+
+@render-overhead-plot*[
+  "fig:transient:shallow-vs-deep"
+  @elem{
+  Relative Deep vs Shallow
+  }
+  ""
+  ;; TODO stop at 10x? different title?
+  render-relative-overhead-plot
+  (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
+    (cons bm-name (cons default-rkt-version stransient)))
+  #f
+]
 
 @section[#:tag "sec:transient:future"]{Future Challenges}
 @; vsc-dls-2019 has Retic/Pycket faster than untyped, 0.95x best-case

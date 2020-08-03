@@ -36,6 +36,7 @@
   cache-dir
 
   deliverable*
+  default-rkt-version
 )
 
 (require
@@ -72,6 +73,7 @@
 (define default-rkt-version "7.7")
 (define untyped "untyped")
 (define typed "typed")
+(define transient "transient")
 
 (define MAX-OVERHEAD (*HI*))
 
