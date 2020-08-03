@@ -1478,8 +1478,11 @@ From left to right, these are:
    and the final @integer->word[(- tr-<3.5 tr-<3)] are below @${3.5}x.
 
   @Integer->word[num->] benchmarks have larger @|rp:u/p-ratio|s than @|rp:t/u-ratio|s.
-  Given that an untyped Reticulated program offers the same safety guarantees
-   as Python, it is surprising that the @|rp:u/p-ratio|s are so large.
+  This is surprising; one would expect @|rp:u/p-ratio|s close to 1 because
+   untyped Reticulated need not differ from Python.
+  The implementation, however, duplicates some of Python's run-time checks.
+  For example, Reticulated checks that a method is bound before proceeding
+   with method dispatch.
 }))
 
 

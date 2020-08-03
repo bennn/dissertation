@@ -593,7 +593,8 @@ Each type comes with a high-level shape that illustrates the implementation
   The shape rejects all values.
 
   This type could be allowed with the trivial shape @codett{any/c} in an
-   implementation that checks the result of type instantiation.
+   implementation that checks the result of type instantiation,
+   along the lines of @citet{nja-popl-2020}.
   @|sShallow| Racket does nothing at instantiation, and therefore rejects
    the type to prevent unsoundness (@figure-ref{fig:transient:all-type}).
 }
@@ -653,9 +654,11 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 
 @section[#:tag "sec:transient:performance"]{Performance}
 @; [X] get NSA data
-@; [ ] overhead plots ... incrementally
-@; [ ] exact plots, for trends
-@; [ ] blame perf table
+@; [X] overhead plots ... incrementally
+@; [X] exact plots, for trends
+@; [ ] table, typed/untyped (see perf sections)
+@; [ ] DEBUG why is fsm7.7 faster untyped than fsm-S ???
+@; [ ] blame perf table (use NSA)
 
 @render-overhead-plot*[
   "fig:transient:overhead"
@@ -663,7 +666,7 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
   Relative Deep vs Shallow
   }
   ""
-  ;; TODO stop at 10x? different title?
+  ;; TODO stop at 10x? different title? (deep vs shallow?)
   render-relative-overhead-plot
   (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
     (cons bm-name (cons default-rkt-version stransient)))
