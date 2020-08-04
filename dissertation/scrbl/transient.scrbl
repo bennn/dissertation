@@ -647,114 +647,119 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
   transient:occurrence-type
 ]
 
+@; TODO good occurrence type? listof predicate?
 
-@subsection{Bug Reports}
 
-The development of @|sShallow| Racket exercised many definitions and
- uses of Typed Racket.
-Reason being, @|stransient| turns every type into a runtime check.
-Errors that would go undiscovered until a boundary-crossing are quickly found.
+@subsection{Additional Fixes and Enhancements}
 
-Revealed several issues, suggested fixes.
+@figure*[
+  "fig:transient:pulls"
+  @elem{Pull requests inspired by work on @|sShallow| Racket.}
+  @exact{
+  \begin{tabular}{rll}
+       & kind   & pull request
+  \\\hline
+     1 & bugfix & @github-pull["racket" "htdp" "98"]
+  \\
+     2 & bugfix & @github-pull["racket" "pict" "60"]
+  \\
+     3 & bugfix & @github-pull["racket" "racket" "3182"]
+  \\
+     4 & bugfix & @github-pull["racket" "typed-racket" "926"]
+  \\
+     5 & bugfix & @github-pull["racket" "typed-racket" "919"]
+  \\
+     6 & bugfix & @github-pull["racket" "typed-racket" "916"]
+  \\
+     7 & bugfix & @github-pull["racket" "typed-racket" "914"]
+  \\
+     8 & bugfix & @github-pull["racket" "typed-racket" "912"]
+  \\
+     9 & bugfix & @github-pull["racket" "typed-racket" "923"]
+  \\
+    10 & bugfix & @github-pull["racket" "typed-racket" "921"]
+  \\
+    11 & bugfix & @github-pull["racket" "typed-racket" "918"]
+  \\
+    12 & bugfix & @github-pull["racket" "typed-racket" "913"]
+  \\
+    13 & bugfix & @github-pull["racket" "typed-racket" "884"]
+  \\
+    14 & bugfix & @github-pull["racket" "typed-racket" "855"]
+  \\
+    15 & bugfix & @github-pull["racket" "typed-racket" "612"]
+  \\
+    16 & bugfix & @github-pull["racket" "typed-racket" "600"]
+  \\
+    17 & enhancement & @github-pull["racket" "typed-racket" "927"]
+  \\
+    18 & enhancement & @github-pull["racket" "typed-racket" "925"]
+  \\
+    19 & enhancement & @github-pull["racket" "typed-racket" "911"]
+  \\
+    20 & enhancement & @github-pull["racket" "typed-racket" "907"]
+  \\
+    21 & enhancement & @github-pull["racket" "typed-racket" "917"]
+  \end{tabular}
+}]
 
-Following list, quick summary, check the links for more.
+The development of @|sShallow| Racket led to several improvements in
+ other Racket libraries.
+Debugging sessions occasionally revealed bugs in existing code,
+ and the integration of @|sShallow| and @|sDeep| Racket suggested
+ enhancements for the latter.
+@Figure-ref{fig:transient:pulls} tabulates these fixes and enhancements;
+ the third column contains links with more details.
 
-@; TODO how are these explained? The problem or the fix?
+Most improvements came about through @|stransient| run-time checks.
+During compilation, @|stransient| relies on types embedded in an intermediate
+ representation to generate checks.
+Missing types and imprecise types caused problems at this completion step;
+ on occasion, the problems were due to Typed Racket bugs.
+At run-time, @|stransient| helped identify inaccurate types with its
+ checks.
+The HTDP fix offers a simple example (@github-pull["racket" "htdp" "98"]).
+Here, a library-provided function promised to return a unit value and actually
+ returned a boolean.
+@|sTransient| caught the unsoundness.
 
-@itemlist[#:style 'ordered
-@item{
-  Bugfix @github-pull["racket" "htdp" "98"], mistake in type declaration.
-}
-@item{
-  Bugfix @github-pull["racket" "typed-racket" "919"], malformed contract.
-}
-@item{
-  Enhancement @github-pull["racket" "typed-racket" "917"], share additional contract definitions.
-}
-@item{
-  Bugfix @github-pull["racket" "typed-racket" "916"], test cases were not running.
-}
-@item{
-  Bugfix @github-pull["racket" "typed-racket" "914"], soundness hole in hash table contract.
-}
-@item{
-  Bugfix @github-pull["racket" "typed-racket" "912"], add missing annotations to type-checked code.
-}
-@item{
-  Enhancement @github-pull["racket" "typed-racket" "911"], create special contract for fixed-length list structures.
-  This is arguably a bugfix because a prior author had written code to optimize such contracts.
-}
-@item{
-  Enhancement @github-pull["racket" "typed-racket" "907"], allow submodule paths in a utility form.
-}
-@item{
-  Bugfix @github-pull["racket" "typed-racket" "923"], fix type definition.
-}
-@item{
-  Fix byte-regexp? contract
-  @github-pull["racket" "typed-racket" "921"]
-  Ran Transient on a function that expected a byte-regexp; unlike TR, the
-  function triggers contract-generation
-}
-@item{
-  Add case to values type
-  @github-pull["racket" "typed-racket" "918"]
-  Wrote test that unexpectedly failed, I think
-}
-@item{
-    Remove sc cache (orig = fix empty cache typo)
-  @github-pull["racket" "typed-racket" "913"]
-  Ran type-contract.rkt code expecting improvement / hits
-}
-@item{
-    Pict type-env keyword args
-  @github-pull["racket" "typed-racket" "884"]
-  Used transient to create a pict for thesis proposal
-}
-@item{
-    Sequence bad inference
-  @github-pull["racket" "typed-racket" "855"]
-  Ran Transient on plot, I think (maybe from immutable-vector effort)
-}
-@item{
-    Add function type annotations
-  @github-pull["racket" "typed-racket" "612"]
-  Ran defender.rkt
-}
-@item{
-    Fix list-length/sc
-  @github-pull["racket" "typed-racket" "600/files"]
-  Read static-contracts/combinators/lengths.rkt (maybe from immutable-vector effort)
-}
-@item{
-    Add static check for #:struct clauses
-  @github-pull["racket" "typed-racket" "925"]
-  Inspired by 9 above, TR#923
-}
-@item{
-    Reorder pict struct fields
-  @github-pull["racket" "pict" "60"]
-  Found by testing 17 above, TR#925
-}
-@item{
-    Provide struct info through require/typed
-  @github-pull["racket" "typed-racket" "926"]
-  Found in gregor by mixing guarded and transient, a match-define failed with
-  a syntax error.
-}
-@item{
-    Allow type-environment to provide the constructor
-  @github-pull["racket" "typed-racket" "927"]
-  Found by writing tests for 17 but ignored, got suspicious reading code while
-  working on 19.
-}
-@item{
-    Fix method optional / keyword expansion
-  @github-pull["racket" "racket" "3182"]
-  Found when fsmoo benchmarks failed a Transient check; expected `Real` got
-   `#<unsafe-undefined>`
-}
-]
+The fix to Racket bears special mention (@github-pull["racket" "racket" "3182"]).
+Initially, some @|sshallow|-typed programs failed with a strange error:
+
+@nested[#:style 'inset @codett{Expected a real number, got #<unsafe-undefined>}]
+
+@|noindent|These programs were fully-typed, but somehow a run-time value
+ contradicted the type checker without causing trouble in the @|sDeep| semantics.
+Worse, this particular value (@codett{#<unsafe-undefined>}) did not
+ appear in the source code.
+The problem was due to a disagreement between core Racket and Typed Racket
+ about how to encode a method with optional arguments as a function with
+ a fixed-length argument list.
+Racket used an extra run-time check; Typed Racket thought the check was redundant.
+The fix was indeed to change Racket, but pre-fix versions of Typed Racket
+ are a hair's breadth from a dangerous unsoundness.
+Their saving grace is that the type optimizer does not transform methods;
+ if it did, then user code would receive unsafe-undefined values because
+ of the incorrect type assumption.
+
+
+@; NOTE discuss this TR-env issue?
+@;  the type for `make-do-sequence` is wrong / not enough
+@;  the docs have a better type in an or/c
+@;  but TR doesn't know which or/c-elem to use, when, and stick with the technically-unsound type below
+@;  it's safe thanks to a guard, user code never gets a non-`a` value,
+@;  but transient complains without a hand-coded (but needed, for performance) opt-out
+@;
+@; [make-do-sequence
+@;  (-polydots (a b)
+@;    ((-> (-values (list (a . -> . (make-ValuesDots '() b 'b))
+@;                        (a . -> . a)
+@;                        a
+@;                        (Un (a . -> . Univ) (-val #f))
+@;                        (Un (->... '() (b b) Univ) (-val #f))
+@;                        (Un (->... (list a) (b b) Univ) (-val #f)))))
+@;     . -> . (-seq-dots '() b 'b)))]
+
 
 @section[#:tag "sec:transient:performance"]{Performance}
 @; [X] get NSA data
