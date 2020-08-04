@@ -185,6 +185,15 @@
                              ", "
                              (hyperlink "https://docs.racket-lang.org/math/stats.html" (library "math/statistics")))
 )
+(define-benchmark jpeg
+  #:author "Andy Wingo"
+  #:num-adaptor 0
+  #:origin (hyperlink "https://github.com/wingo/racket-jpeg" "Library")
+  #:purpose "JPEG parser"
+  #:external-libraries (list (hyperlink "https://docs.racket-lang.org/math/array.html" (library "math/array"))
+                             ", "
+                             (hyperlink "https://docs.racket-lang.org/r6rs/R6RS_Libraries.html#(mod-path._rnrs%2Fbytevectors-6)" (library "rnrs/bytevectors-6")))
+)
 (define-benchmark kcfa
   #:author "Matt Might"
   #:num-adaptor 4

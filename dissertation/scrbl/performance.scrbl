@@ -803,6 +803,16 @@ This section concludes with a table summarizing the static characteristics of ea
   @;The benchmark avoids @library{racket/dict} to avoid a type boundary.
 }
 @bm-desc[
+  @bm{jpeg}
+  #:author "Andy Wingo"
+  #:origin "Library"
+  #:purpose "JPEG toolkit"
+  #:url "http://github.com/wingo/racket-jpeg"
+  #:depends (list (make-lib "math/array" "https://docs.racket-lang.org/math/array.html")
+                  (make-lib "rnrs/bytevectors-6" "https://docs.racket-lang.org/r6rs/R6RS_Libraries.html#(mod-path._rnrs%2Fbytevectors-6)"))]{
+  Parses a bytestream of JPEG data to an internal representation, then serializes the result.
+}
+@bm-desc[
   @bm{zordoz}
   #:author "Ben Greenman"
   #:origin "Library"

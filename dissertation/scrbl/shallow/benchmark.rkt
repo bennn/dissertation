@@ -57,11 +57,11 @@
   morsecode
   zombie
   dungeon
+  jpeg
   zordoz
   suffixtree
   kcfa
   snake
-  jpeg
 ))
 
 (define RATIOS-TITLE
