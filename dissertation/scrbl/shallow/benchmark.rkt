@@ -48,7 +48,21 @@
 (define-runtime-path HERE ".")
 (define cache-dir (build-path HERE "with-cache"))
 
-(define SHALLOW-CURRENT-BENCHMARK* '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))
+(define SHALLOW-CURRENT-BENCHMARK* '(
+  sieve
+  forth
+  fsm
+  fsmoo
+  mbta
+  morsecode
+  zombie
+  dungeon
+  zordoz
+  suffixtree
+  kcfa
+  snake
+  jpeg
+))
 
 (define RATIOS-TITLE
   (list "Benchmark"

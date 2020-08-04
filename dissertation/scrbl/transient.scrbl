@@ -20,17 +20,8 @@
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
-@; OUTLINE 2020-07-21
+@; TODO OUTLINE 2020-07-21
 @; transient racket (transient + untyped, that's all)
-@; - why transient
-@; - theory
-@;   + macro vs micro
-@;     no Dyn type, boundaries instead
-@;     why can't remove more checks
-@;   + more types, design choices about checks (list? vs pair?),
-@;     affects soundness + optimizer
-@;     - mu, union, forall, occurrence (noop), class/obj public private init-field
-@;       ->* vs (t -> t) ?
 @; - blame, work in progress
 @;   + why blame
 @;   + transient-blame ideas
@@ -771,7 +762,9 @@ Following list, quick summary, check the links for more.
 @; [X] exact plots, for trends
 @; [X] table, typed/untyped (see perf sections)
 @; [ ] DEBUG why is fsm7.7 faster untyped than fsm-S ???
+@;     maybe BC vs CS, fsm-7.7 might be BC
 @; [ ] DEBUG why is synth (recent data, 07-31?) so bad?
+@; [ ] DEBUG why is fsmoo transient-typed faster than untyped?
 @; [ ] blame perf table (use NSA)
 
 
@@ -882,7 +875,7 @@ Overall, @|sShallow| Racket does not disappoint.
   ""
   ;; TODO formatting? sync colors
   render-relative-exact-plot
-  (for/list ((bm-name (in-list '(fsm jpeg kcfa mbta morsecode snake zombie zordoz))))
+  (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
     (cons bm-name (cons default-rkt-version stransient)))
   #f
 ]
