@@ -87,6 +87,7 @@
 
   github-commit
   github-issue
+  github-pull
 
   GTP
   bm-desc
@@ -368,12 +369,15 @@
     (substring commit 0 7))
   (hyperlink url-str @tt[short-commit]))
 
-(define (github-issue user repo issue-name)
+(define ((make-github-url kind) user repo name)
   (define url-str
-    (format "https://github.com/~a/~a/issues/~a" user repo issue-name))
+    (format "https://github.com/~a/~a/~a/~a" user repo kind name))
   (define short-str
-    (format "~a/~a #~a" user repo issue-name))
+    (format "~a/~a #~a" user repo name))
   (hyperlink url-str (tt short-str)))
+
+(define github-issue (make-github-url "issues"))
+(define github-pull (make-github-url "pull"))
 
 (define GTP
   (exact "\\textsc{gtp}"))

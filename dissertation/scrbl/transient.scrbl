@@ -659,6 +659,111 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 
 @subsection{Bug Reports}
 
+The development of @|sShallow| Racket exercised many definitions and
+ uses of Typed Racket.
+Reason being, @|stransient| turns every type into a runtime check.
+Errors that would go undiscovered until a boundary-crossing are quickly found.
+
+Revealed several issues, suggested fixes.
+
+Following list, quick summary, check the links for more.
+
+@; TODO how are these explained? The problem or the fix?
+
+@itemlist[#:style 'ordered
+@item{
+  Bugfix @github-pull["racket" "htdp" "98"], mistake in type declaration.
+}
+@item{
+  Bugfix @github-pull["racket" "typed-racket" "919"], malformed contract.
+}
+@item{
+  Enhancement @github-pull["racket" "typed-racket" "917"], share additional contract definitions.
+}
+@item{
+  Bugfix @github-pull["racket" "typed-racket" "916"], test cases were not running.
+}
+@item{
+  Bugfix @github-pull["racket" "typed-racket" "914"], soundness hole in hash table contract.
+}
+@item{
+  Bugfix @github-pull["racket" "typed-racket" "912"], add missing annotations to type-checked code.
+}
+@item{
+  Enhancement @github-pull["racket" "typed-racket" "911"], create special contract for fixed-length list structures.
+  This is arguably a bugfix because a prior author had written code to optimize such contracts.
+}
+@item{
+  Enhancement @github-pull["racket" "typed-racket" "907"], allow submodule paths in a utility form.
+}
+@item{
+  Bugfix @github-pull["racket" "typed-racket" "923"], fix type definition.
+}
+@item{
+  Fix byte-regexp? contract
+  @github-pull["racket" "typed-racket" "921"]
+  Ran Transient on a function that expected a byte-regexp; unlike TR, the
+  function triggers contract-generation
+}
+@item{
+  Add case to values type
+  @github-pull["racket" "typed-racket" "918"]
+  Wrote test that unexpectedly failed, I think
+}
+@item{
+    Remove sc cache (orig = fix empty cache typo)
+  @github-pull["racket" "typed-racket" "913"]
+  Ran type-contract.rkt code expecting improvement / hits
+}
+@item{
+    Pict type-env keyword args
+  @github-pull["racket" "typed-racket" "884"]
+  Used transient to create a pict for thesis proposal
+}
+@item{
+    Sequence bad inference
+  @github-pull["racket" "typed-racket" "855"]
+  Ran Transient on plot, I think (maybe from immutable-vector effort)
+}
+@item{
+    Add function type annotations
+  @github-pull["racket" "typed-racket" "612"]
+  Ran defender.rkt
+}
+@item{
+    Fix list-length/sc
+  @github-pull["racket" "typed-racket" "600/files"]
+  Read static-contracts/combinators/lengths.rkt (maybe from immutable-vector effort)
+}
+@item{
+    Add static check for #:struct clauses
+  @github-pull["racket" "typed-racket" "925"]
+  Inspired by 9 above, TR#923
+}
+@item{
+    Reorder pict struct fields
+  @github-pull["racket" "pict" "60"]
+  Found by testing 17 above, TR#925
+}
+@item{
+    Provide struct info through require/typed
+  @github-pull["racket" "typed-racket" "926"]
+  Found in gregor by mixing guarded and transient, a match-define failed with
+  a syntax error.
+}
+@item{
+    Allow type-environment to provide the constructor
+  @github-pull["racket" "typed-racket" "927"]
+  Found by writing tests for 17 but ignored, got suspicious reading code while
+  working on 19.
+}
+@item{
+    Fix method optional / keyword expansion
+  @github-pull["racket" "racket" "3182"]
+  Found when fsmoo benchmarks failed a Transient check; expected `Real` got
+   `#<unsafe-undefined>`
+}
+]
 
 @section[#:tag "sec:transient:performance"]{Performance}
 @; [X] get NSA data
