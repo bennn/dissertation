@@ -59,9 +59,13 @@
   dungeon
   jpeg
   zordoz
+  lnm
   suffixtree
   kcfa
   snake
+  take5
+  acquire
+  synth
 ))
 
 (define RATIOS-TITLE

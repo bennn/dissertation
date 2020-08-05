@@ -449,6 +449,10 @@ hash-ref,
 
 @subsection{Complex Flows, filter / map}
 
+worse than multi-parent, focus on example
+
+poly inst problem?
+
 
 @subsection{Fragile, need Blame Types}
 
@@ -462,6 +466,9 @@ obvious solution is to propagate types, add alongside current type info,
 
 
 @subsection{Cannot Trust Base Env}
+
+? goes without saying?
+
 
 @subsection{Types at Runtime}
 
@@ -940,12 +947,12 @@ Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
 }])
 
 
-@subsection{Overhead Plots}
+@subsection[#:tag "sec:transient:overhead"]{Overhead Plots}
 
 @render-overhead-plot*[
   "fig:transient:overhead"
   @elem{
-  Relative Deep vs Shallow
+  Deep vs. Shallow
   }
   ""
   ;; TODO stop at 10x? different title? (deep vs shallow?)
@@ -981,7 +988,7 @@ Overall, @|sShallow| Racket does not disappoint.
 
 
 
-@subsection{Exact Runtime Plots}
+@subsection[#:tag "sec:transient:exact"]{Exact Runtime Plots}
 
 @render-overhead-plot*[
   "fig:transient:exact"

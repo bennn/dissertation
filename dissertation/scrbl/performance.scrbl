@@ -1665,7 +1665,7 @@ This section presents other visualizations that help answer extra
  questions.
 
 
-@subsection{Exact Runtime Plots}
+@subsection[#:tag "sec:perf:exact"]{Exact Runtime Plots}
 
 @(let* ((bm-name 'nqueens)
         (S (rp:benchmark-name->performance-info bm-name))
