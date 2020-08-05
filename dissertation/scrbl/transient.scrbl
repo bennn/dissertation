@@ -362,7 +362,118 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 @;   + more challenges
 @;     TR accessors, multi-parent, cannot trust base env, types at runtime
 
+Blame is an important part of a migratory typing system because it strengthens
+ the weakest aspect of migratory types.
+Static types guarantee that certain errors cannot occur.
+Migratory types cannot offer the same promise, errors may occur, and that
+ is the biggest weakness of migratory types.
+With blame, however, type-mismatch errors are preferable over others because
+ they come with an action plan for debugging.
+A programmer can follow the blame information to decide what code to edit
+ toward a working program.
 
+@|sShallow| Racket does not come with blame, however, despite the fact that
+ the original presentation of @|stransient| spells out one blame technique@~cite{vss-popl-2017}.
+There are two reasons.
+First, scaling the original blame algorithm to Typed Racket presents
+ significant challenges.
+Second, @|stransient| blame has a tremendous performance cost.
+This section explains the theoretical / scaling challenges.
+@Section-ref{sec:transient:blame-performance} addresses performance.
+
+@subsection{@|stransient| Blame: the Basics}
+
+The idea of @|stransient| blame is to keep a shadow heap on the side
+ with blame information.
+There are no wrappers, so the map solves a major problem.
+Every action in a program updates this map.
+There are two kinds of map entry.
+One records a boundary, that is, a cast.
+The second records a dependency.
+When an error occurs, the idea is to follow dependencies up through the
+ map and report all boundaries.
+
+As the analysis of @chapter-ref{chap:design} shows, the set of boundaries
+ reported by @|stransient| is neither sound nor complete.
+It misses all dependencies in untyped code.
+And it conflates different paths taken by the same value.
+Nevertheless, we expect the heuristic blame should be useful.
+
+@citet{vss-popl-2017} add a final step to refine the balem results.
+They filter blame results using the actual value and the dependency-path taken
+ to reach it.
+This needs an example.
+
+
+Now we have the ingredients:
+@itemlist[
+@item{
+  Record casts in a map; these are roots.
+}
+@item{
+  Update the map whenever an action occurs
+   with a parent pointer and a path element.
+}
+@item{
+  Filter results using the action list and the actual value.
+}
+]
+
+Next, the challenges.
+
+
+@subsection{Richer Language for Paths}
+
+Lets make a table, path and interpretation
+
+Multi dom / cod
+Case dom
+Ditto for methods
+No-op for wrappers
+List elem vs rest, hash key val
+Object field name
+Heterogeneous types
+Struct index
+
+@subsection{Multi-Parent Paths}
+
+append, maybe a non-issue because its a new list,
+indeed thats choice taken by transient
+
+vector copy,
+ still the old vector, no avoiding issue
+
+hash-ref,
+ two possibilities for result
+
+
+@subsection{Complex Flows, filter / map}
+
+
+@subsection{Fragile, need Blame Types}
+
+renaming car affects path results, from recognized accessor to unknown function
+ application
+
+cannot rely on syntax, need some kind of analysis to deal with aliasing
+
+obvious solution is to propagate types, add alongside current type info,
+ how to encode is a challenge, keep in mind the requirements above
+
+
+@subsection{Cannot Trust Base Env}
+
+@subsection{Types at Runtime}
+
+Filtering with types has the following signature.
+
+Need to interpret these types at runtime,
+ get contracts and follow paths.
+Can make whole new library to interpret syntax.
+Or, try to revive types.
+Either way challenging with separate compilation and aliases.
+
+How to deal with generative struct types?
 
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
