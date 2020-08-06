@@ -874,7 +874,11 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 @figure*[
   "fig:transient:occurrence-type"
   @elem{
-   @|stransient| must reject the program or treat type instantiation as an elimination form.}
+    Occurrence types may change the type environment in each branch of
+     an @codett{if} statement.
+    @|sTransient| must either check the changes or disallow occurrence types
+     on untyped functions.
+  }
   transient:occurrence-type
 ]
 
