@@ -366,15 +366,6 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 
 
 @section[#:tag "sec:transient:blame"]{Work-in-progress: Blame}
-@; chap:design says what to do
-
-@;   + why blame
-@;   + transient-blame ideas
-@;     check+update, escape+update, store all v
-@;   + hint at impl. trouble, but focus on theory-only for now
-@;     big map, no gc, much bookkeeping
-@;   + more challenges
-@;     TR accessors, multi-parent, cannot trust base env, types at runtime
 
 Blame is an important part of a migratory typing system because it strengthens
  the weakest aspect of migratory types.
@@ -407,6 +398,9 @@ Except where otherwise noted, @|sshallow| data is this paper is for
 
 
 @subsection{@|sTransient| Blame: the Basics}
+@; TODO better examples (ramble ok for now)
+@;  work through without filter,
+@;  then revisit to explain filter
 
 The @|stransient| blame algorithm uses a global @emph{blame map} to connect
  run-time values to source-code boundaries.
@@ -466,10 +460,10 @@ Checking this type against the bad value helps rule out unimportant boundaries;
 
 @figure*[
   "fig:transient:blame:path"
-  @elem{Sample actions that @|sShallow| Racket must record.}
+  @elem{Sample blame actions in @|sShallow| Racket.}
   @exact{{
   \renewcommand{\twoline}[2]{\parbox[t]{2.2in}{#1\newline#2}}
-  \begin{tabular}{ll}
+  \begin{tabular}{l@"@" {~~}l}
     Action Template & Interpretation
   \\\hline
     @codett{`(dom . ,n)} & @codett{n}-th argument to a function
@@ -478,7 +472,7 @@ Checking this type against the bad value helps rule out unimportant boundaries;
   \\
     @codett{`(case-dom (,k . ,n))} & \twoline{@codett{n}-th argument (of @codett{k} total) to an}{overloaded function}
   \\[3.5ex]
-    @codett{`(object-method (,m . ,n)} & \twoline{@codett{n}-th argument to method @codett{m} of an}{object}
+    @codett{`(object-method (,m . ,n))} & \twoline{@codett{n}-th argument to method @codett{m} of an}{object}
   \\[3.5ex]
     @codett{'list-elem} & Element of a homogeneous list
   \\
@@ -498,24 +492,73 @@ Checking this type against the bad value helps rule out unimportant boundaries;
   \end{tabular}}}
 ]
 
+A check entry in the blame map has two parts: a parent pointer and
+ an action.
+The action informs the type-based filtering.
+Given a type for the parent, the action says what part of the type is
+ relevant to the current value.
 
-A check entry in a blame map comes with an action that explains how
- to traverse a boundary type to get at the part that is relevant to
- this value / entry.
-Whew.
+The model for Reticulated comes with three actions: @codett{Res},
+ @codett{Arg}, and @codett{Deref}.
+These help traverse simple function types (@${\tfun{\stype}{\stype}})
+ and reference cells; for example, starting from the parent type
+ @${\mathsf{ref}\,\tint} and applying the @codett{Deref} action
+ focuses on the element type @${\tint}.
 
-The Reticulatad paper comes with a simple language of actions:
- dom, cod, and ref.
-The implementation is slightly more complex.
-(TODO double check.)
+The implementation of Reticulated adds one action, @codett{Attr},
+ and generalizes @codett{Arg} with an index.
+Starting from the Reticulated type @codett{Function([int, str], float)},
+ the action @codett{[Arg, 1]} focuses on the type @codett{str} of the
+ second positional argument.
+Similarly, the action @codett{[Attr, "foo"]} focuses on the member @codett{"foo"}
+ of an object type.
 
-@Figure-ref{fig:transient:blame:path} presents some of the additions required
- for Typed Racket.
-First of all, functions are far more complex.
-Methods add another dimension.
-Each data structure needs a path element.
-And the unexpected noop is needed for aliases.
+Despite the extensions, the action language in Reticulated suffers from
+ imprecision in two ways.
+First, it has no way to refer to certain parts of a type.
+If a function uses optional or keyword arguments, then Reticulated has no
+ way to test whether the type is irrelevant; such types must appear in the
+ blame output.
+Second, it may conflate types.
+The action @codett{Deref} seems to apply to any data structure.
+If a nested list value crosses the boundaries @codett{List(List(int))}
+ and @codett{List(Dict(str, str))}, and then an elimination returns
+ a string where an @codett{int} was expected, a plain @codett{Deref}
+ focuses both types and incorrectly filters the @codett{Dict} type.
+The user needs to see both types because neither matches the actual value.
+@; TODO can we make a retic example that blames both? So far I'm getting trivial blame  (in retic repo, blame_conflate.py)
 
+@|sShallow| Racket thus comes with an extensive action language to
+ prevent imprecision.
+@Figure-ref{fig:transient:blame:path} lists a few actions, along with
+ a brief interpretation.
+Function actions must handle multiple arguments, multiple results,
+ methods, and overloadings.
+Data structures have tailored actions.
+Lists, for example, require three kinds of actions:
+ @codett{list-elem} to dereference a simple list,
+ @codett{list-rest} to move to the tail of a list keeping the same type,
+ and an indexed element action for fixed-sized lists with distinct types
+ in each position.
+Finally, the @codett{noop} action adds a direct link
+ to track a copy from one data structure to another (@codett{vector-copy!})
+ or a wrapper (@codett{chaperone-procedure}).
+
+
+@subsection{Types at Runtime}
+
+
+
+
+Filtering with types has the following signature.
+
+Need to interpret these types at runtime,
+ get contracts and follow paths.
+Can make whole new library to interpret syntax.
+Or, try to revive types.
+Either way challenging with separate compilation and aliases.
+
+How to deal with generative struct types?
 
 
 @subsection{Multi-Parent Paths}
@@ -551,19 +594,6 @@ obvious solution is to propagate types, add alongside current type info,
 @subsection{Cannot Trust Base Env}
 
 ? goes without saying?
-
-
-@subsection{Types at Runtime}
-
-Filtering with types has the following signature.
-
-Need to interpret these types at runtime,
- get contracts and follow paths.
-Can make whole new library to interpret syntax.
-Or, try to revive types.
-Either way challenging with separate compilation and aliases.
-
-How to deal with generative struct types?
 
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
