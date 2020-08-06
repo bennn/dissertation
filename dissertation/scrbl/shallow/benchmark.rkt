@@ -3,16 +3,31 @@
 ;; Define & describe benchmark programs
 
 (provide
+  (rename-out [cache-dir s:cache-dir])
   get-ratios-table
   render-ratios-table
   ratios-row-name
   ratios-row-deep
   ratios-row-shallow
+  get-blame-table
+  render-blame-table
+  blame-row-name
+  blame-row-blame
+  blame-row-deep
+  blame-row-shallow
+
   SHALLOW-CURRENT-BENCHMARK*
 
+  NSA-num-cores
+  NSA-core-name
+  NSA-core-speed
+  NSA-RAM
+  NSA-timeout-minutes
   )
 
 (require
+  (only-in math/statistics
+    mean)
   (only-in racket/path
     file-name-from-path
     find-relative-path)
@@ -21,6 +36,7 @@
   (only-in racket/random
     random-sample)
   (only-in racket/file
+    file->lines
     file->value)
   racket/match
   racket/serialize
@@ -47,6 +63,15 @@
 
 (define-runtime-path HERE ".")
 (define cache-dir (build-path HERE "with-cache"))
+(define data-dir (build-path HERE "data"))
+
+(define blame "blame")
+
+(define NSA-num-cores 4)
+(define NSA-core-name "i7-4790")
+(define NSA-core-speed "3.60GHz")
+(define NSA-RAM "16GB")
+(define NSA-timeout-minutes 10)
 
 (define SHALLOW-CURRENT-BENCHMARK* '(
   sieve
@@ -74,7 +99,7 @@
         (string-append sshallow "/untyped")))
 
 (define (render-ratios-table row*)
-  ;; TODO copied from JFP
+  ;; TODO copied from JFP ... should we use tex instead?
   (centered
     (tabular
       #:sep (hspace 2)
@@ -86,8 +111,7 @@
 
 (define (get-ratios-table name*)
   ;; TODO copied from JFP
-  (parameterize ([*use-cache?* #f] ;; TODO enable cache
-                 [*current-cache-directory* cache-dir]
+  (parameterize ([*current-cache-directory* cache-dir]
                  [*current-cache-keys* (list (λ () name*))]
                  [*with-cache-fasl?* #f])
     (with-cache (cachefile "ratios-table.rktd")
@@ -110,3 +134,87 @@
 
 (define (ratios-row-shallow r)
   (string->number (cadddr r)))
+
+;; ---
+
+(define BLAME-TITLE
+  (list "Benchmark"
+        "s.blame/untyped"
+        (string-append sshallow "/untyped")
+        (string-append sdeep " worst-case")))
+
+(define (render-blame-table row*)
+  ;; TODO abstraction
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(bottom-border 1)
+      #:column-properties '(left right)
+      (list* BLAME-TITLE
+             (map cdr row*)))))
+
+(define (get-blame-table name*)
+  ;; TODO copied from above
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "blame-table.rktd")
+      (λ ()
+        (for/list ([name (in-list name*)])
+          (make-blame-row name
+                          (benchmark-name->blame-info name)
+                          (benchmark-name->performance-info name stransient)
+                          (benchmark-name->performance-info name default-rkt-version)))))))
+
+(define (make-blame-row name bd pi-shallow pi-deep)
+  (list name
+        (bm name)
+        (format-blame-data bd (performance-info->untyped-runtime pi-shallow))
+        (rnd (typed/baseline-ratio pi-shallow))
+        (rnd (max-overhead pi-deep))))
+
+(define (benchmark-name->blame-info name)
+  (define blame-file (build-path data-dir blame (format "~a.rktd" name)))
+  (define data-line*
+    (let ((l* (file->lines blame-file)))
+      (unless (string=? "#lang gtp-measure/output/file" (car l*))
+        (raise-argument-error 'benchmark-name->blame-info "#lang gtp-measure file" blame-file))
+      (cdr l*)))
+  (cond
+    [(and (null? (cdr data-line*))
+          (string=? "timeout 666000" (car data-line*)))
+     'timeout]
+    [(and (null? (cdr data-line*))
+          (regexp-match? #rx"^/bin/sh: line [0-9]: [0-9]+ Killed" (car data-line*)))
+     'oom]
+    [else
+     (for/list ((dl (in-list data-line*)))
+       (time-string->cpu-time dl))]))
+
+(define (format-blame-data bd u-t)
+  (case bd
+    ((timeout) "timeout")
+    ((oom) "out of memory")
+    (else (rnd (/ (mean bd) u-t)))))
+
+(define (blame-data? x)
+  (or (listof-real? x)
+      (eq? x 'timeout)
+      (eq? x 'oom)))
+
+(define (listof-real? x)
+  (and (list? x) (andmap real? x)))
+
+(define blame-row-name cadr)
+
+(define (blame-row-blame r)
+   (define v (caddr r))
+   (or (string->number v)
+       v))
+
+(define (blame-row-shallow r)
+  (string->number (caddr (cdr r))))
+
+(define (blame-row-deep r)
+  (string->number (cadddr (cdr r))))

@@ -2,11 +2,23 @@
 @(require
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*
+     NSA-num-cores
+     NSA-core-name
+     NSA-core-speed
+     NSA-RAM
+     NSA-timeout-minutes
      ratios-row-name
      ratios-row-deep
      ratios-row-shallow
+     get-blame-table
+     render-blame-table
+     blame-row-name
+     blame-row-blame
+     blame-row-deep
+     blame-row-shallow
      get-ratios-table
-     render-ratios-table)
+     render-ratios-table
+     s:cache-dir)
    (only-in greenman-thesis/jfp-2019/main
      MAX-OVERHEAD
      default-rkt-version
@@ -16,7 +28,9 @@
      transient:divide
      transient:all-type
      transient:occurrence-type
-     transient:subtype))
+     transient:subtype)
+   (only-in math/statistics
+     mean))
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
@@ -967,8 +981,8 @@ The weakened type soundness and loss of complete monitoring and correct blame
 This section presents the results of an evaluation using the @|GTP| benchmarks.
 The granularity of the experiment is module-level, same as our Typed Racket
  experiment reported in @section-ref{sec:tr:evaluation}.
-All data came from a dedicated Linux box with 4 physical i7-4790 3.60GHz cores
-  and 16GB RAM.
+All data came from a dedicated Linux box with @id[NSA-num-cores] physical
+  @id[NSA-core-name] @id[NSA-core-speed] cores and @id[NSA-RAM] RAM.
 
 
 @subsection[#:tag "sec:transient:ratio"]{Performance Ratios}
@@ -1028,7 +1042,7 @@ Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
   render-relative-overhead-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
     (cons bm-name (cons default-rkt-version stransient)))
-  #f
+  s:cache-dir
 ]
 
 
@@ -1069,7 +1083,7 @@ Overall, @|sShallow| Racket does not disappoint.
   render-relative-exact-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
     (cons bm-name (cons default-rkt-version stransient)))
-  #f
+  s:cache-dir
 ]
 
 @Figures-ref["fig:transient:exact" (exact-ceiling (/ (length SHALLOW-CURRENT-BENCHMARK*) overhead-plots-per-page))]
@@ -1091,13 +1105,105 @@ After critical boundaries are typed, performance with @|sdeep| types is
 In @|sShallow| Racket, the trend is simple: adding types slows code down.
 There is a linear, upward trend in every benchmark except @bm{fsm}.
 
-TODO investigate @bm{fsm}, why is transient untyped so much slower?
-And why does it do so well with optimization?
-Seems wrong.
+TODO in @bm{fsm}, transient untyped is slower because it is running on
+ CS rather than BC.
+The 7.7 numbers need to move to CS.
 
+TODO why does @bm{fsm} do so well with optimization?
+
+
+@subsection[#:tag "sec:transient:blame-performance"]{Blame Performance}
+
+@(let* ((BT (get-blame-table SHALLOW-CURRENT-BENCHMARK*))
+        (blame-timeout*
+         (for/list ((r (in-list BT))
+                    #:when (equal? "timeout" (blame-row-blame r)))
+           (blame-row-name r)))
+        (blame-oom*
+         (for/list ((r (in-list BT))
+                    #:when (equal? "out of memory" (blame-row-blame r)))
+           (blame-row-name r)))
+        (deep-beats-blame*
+         (filter values
+          (for/list ((r (in-list BT)))
+            (define n (blame-row-blame r))
+            (if (or (not (number? n))
+                    (< (blame-row-deep r) n))
+              (blame-row-name r)
+              #f))))
+        (x-blame-over-shallow*
+         (for/list ((r (in-list BT))
+                    #:when (number? (blame-row-blame r)))
+           (/ (blame-row-blame r)
+              (blame-row-shallow r))))
+        (avgx-blame-over-shallow
+         (rnd (mean x-blame-over-shallow*)))
+        (worstx-blame-over-shallow
+         (rnd (apply max x-blame-over-shallow*))))
+@list[
+@figure[
+  "fig:transient:blame-performance"
+  @; TODO is "perf ratio" the right word? These are really typed/baseline right?
+  @elem{
+   Performance ratios for @|sShallow| Racket with blame,
+    @|sShallow| without blame, and the worst-case of @|sDeep| types.
+   The @|sShallow| columns are for the fully-typed configuration;
+    the @|sDeep| column uses the slowest configuration.
+   The blame experiments ran on a dedicated Linux machine with @id[NSA-RAM] RAM
+    with a time limit of @id[NSA-timeout-minutes] minutes.
+  }
+  @render-blame-table[BT]
+]
+@elem{
+@Figure-ref{fig:transient:blame-performance} evaluates the overhead of
+ @|sShallow| Racket with blame enabled.
+The second column of this table measures the overhead of blame on
+ the fully-typed configuration.
+For comparison: the third column lists the overhead of the same
+ configuration without blame, and the fourth column lists the absolute
+ worst-case of @|sdeep| types.
+
+This table reports only the fully-typed configuration for @|sshallow| because
+ this configuration contains the greatest number blame-map updates.
+Configurations with fewer typed modules have syntactically fewer locations
+ that must touch the global map.
+
+The data shows that blame adds tremendous overhead to @|sShallow| Racket.
+@Integer->word[(length blame-timeout*)] benchmarks fail to terminate within
+ a generous @id[NSA-timeout-minutes]-minute limit.
+One benchmark, @car[blame-oom*], ends with an OS-level memory error
+ after consuming a huge chunk of a @id[NSA-RAM] RAM pool.
+The rest run far slower than @|sshallow| without blame.
+
+Surprisingly, the fourth column shows that @|sshallow| blame costs
+ more than the worst case of @|sDeep| types in @id[(length deep-beats-blame*)] benchmarks.
+The benchmarks in which @|sDeep| loses all send higher-order values across
+ several boundaries; each crossing makes an expensive wrapper.
+@; TODO mention collapsible here?
+By contrast, @|sShallow| blame slows down every operation by a small factor
+ and allocates a small amount of memory for every value.
+These small costs add up, even in our short-running benchmarks.
+
+Our blame results are far less optimistic than the early report in
+ @citet{vss-popl-2017}, which found an average slowdown on 2.5x and
+ worst-case slowdown of 5.4x on fully-typed configurations.
+The average slowdown of @|sShallow| Racket blame is @id[avgx-blame-over-shallow]x
+ and the worst-case is @id[worstx-blame-over-shallow]x.
+Apparently, these different conclusions are due to the benchmark suites.
+@citet{vss-popl-2017} use smaller benchmarks;
+ compare @figure-ref{fig:tr:static-benchmark} and @figure-ref{fig:rp:static-benchmark}.
+I have successfully reproduced their numbers using Reticulated on their
+ benchmarks.
+Additionally, I adapted the @bm{sieve} benchmark to Python.
+After some trouble with the stack limit, the resulting programs runs
+ in ~40 seconds without blame and times out after 10 minutes with Reticulated blame.
+}])
 
 
 @section[#:tag "sec:transient:future"]{Future Challenges}
 @; vsc-dls-2019 has Retic/Pycket faster than untyped, 0.95x best-case
+
+@; blame filtering seems not worth it, too hard to revive types
+@;  may want to collect fewer boundaries, even more spotty
 
 

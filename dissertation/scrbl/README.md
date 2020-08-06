@@ -15,6 +15,9 @@ TODO
   - [X] committee update email
   - [X] TR RFC
   - [X] 2020-07-22 : share chap4 outline, diff with first attempt, intro, committee update
+  - [ ] blame section
+  - [ ] blame table
+  - [ ] future work
 - [ ] full intro (1)
 
 Style
@@ -26,11 +29,13 @@ Style
   - sec 2 typed=black, untyped=white
   - sec 3 typed=grey, untyped=white ... moving beyond black/white but not sure yet
   - beyond : multi-color for typed components, depends on semantics
+- [ ] print "x" after overheads
+- [ ] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 
 #### dependencies
 
 racket 7.7 +
-python xxx
+python 3.4+
 sloccount
 
 
@@ -39,7 +44,7 @@ sloccount
 2020-06-18 : need to get moving, spend 2 hours/day or more cmon now
 2020-07-09 : we are rolling now, but still way slow progress/hour is pitiful
 2020-07-20 : performance and design chapters are imported, need to get serious about transient / data
-
+2020-08-06 : transient data is coming in ... all bugs fixed?
 
 #### oddball future work
 
