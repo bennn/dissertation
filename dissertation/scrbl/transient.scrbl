@@ -365,75 +365,144 @@ An improved completion would eliminate this, and other, flow-dominated checks.
 Blame is an important part of a migratory typing system because it strengthens
  the weakest aspect of migratory types.
 Static types guarantee that certain errors cannot occur.
-Migratory types cannot offer the same promise, errors may occur, and that
- is the biggest weakness of migratory types.
-With blame, however, type-mismatch errors are preferable over others because
- they come with an action plan for debugging.
+Migratory types are weak because they cannot offer the same promise.
+Errors may occur.
+With blame, however, type-mismatch errors come with an action plan for debugging.
 A programmer can follow the blame information to decide what code to edit
  toward a working program.
 
-@|sShallow| Racket does not come with blame, however, despite the fact that
- the original presentation of @|stransient| spells out one blame technique@~cite{vss-popl-2017}.
-There are two reasons.
-First, scaling the original blame algorithm to Typed Racket presents
+The usefulness of such an action plan depends on the blame strategy.
+The best-know algorithm for @|stransient|, from @citet{vss-popl-2017},
+ blames a set of boundaries.
+The set is unsound and incomplete in the technical sense of
+ @chapter-ref{chap:design}, but one would expect it is worthwhile.
+Some information is better than no information.
+
+That said, early experience with blame in @|sShallow| Racket has identified
  significant challenges.
+First, scaling the original blame algorithm to Typed Racket raises
+ questions about its accuracy.
 Second, @|stransient| blame has a tremendous performance cost.
 This section explains the theoretical / scaling challenges.
 @Section-ref{sec:transient:blame-performance} addresses performance.
 
-@subsection{@|stransient| Blame: the Basics}
-
-The idea of @|stransient| blame is to keep a shadow heap on the side
- with blame information.
-There are no wrappers, so the map solves a major problem.
-Every action in a program updates this map.
-There are two kinds of map entry.
-One records a boundary, that is, a cast.
-The second records a dependency.
-When an error occurs, the idea is to follow dependencies up through the
- map and report all boundaries.
-
-As the analysis of @chapter-ref{chap:design} shows, the set of boundaries
- reported by @|stransient| is neither sound nor complete.
-It misses all dependencies in untyped code.
-And it conflates different paths taken by the same value.
-Nevertheless, we expect the heuristic blame should be useful.
-
-@citet{vss-popl-2017} add a final step to refine the balem results.
-They filter blame results using the actual value and the dependency-path taken
- to reach it.
-This needs an example.
+To be clear, @|sShallow| Racket does not include blame.
+The performance is unacceptable.
+Except where otherwise noted, @|sshallow| data is this paper is for
+ @|stransient| without blame.
 
 
-Now we have the ingredients:
-@itemlist[
+@subsection{@|sTransient| Blame: the Basics}
+
+The @|stransient| blame algorithm uses a global @emph{blame map} to connect
+ run-time values to source-code boundaries.
+This blame map uses heap addresses as keys;
+ every non-primitive value in a program has a heap address, and potentially
+ a blame map entry.
+
+The values in a blame map are collections of entry items.
+There are two kinds of entry:
+@itemlist[#:style 'ordered
 @item{
-  Record casts in a map; these are roots.
+ A @emph{boundary entry} combines a type with a source location.
+ Whenever a value crosses one of the static boundaries between typed
+  and untyped code, the blame map gains a boundary entry for this
+  value.
+ For example, if the function @codett{f} flows out of typed code:
+ @code-nested{
+   (define (f (n : Natural)) : String
+     ....)
+   (provide f)}
+ then the blame map gains an entry for @codett{f} that points to the
+  type @codett{(-> Natural String)} and a nearby source location.
 }
 @item{
-  Update the map whenever an action occurs
-   with a parent pointer and a path element.
-}
-@item{
-  Filter results using the action list and the actual value.
+  A @emph{check entry} combines a parent pointer and an action.
+  The parent refers to another blame map key.
+  The action describes the relation between the current value and its parent.
+
+  Suppose the function @codett{f} from above gets applied to the
+   untyped value @codett{'NaN}.
+  As the value enters the function, the blame map gains a check entry
+   for @codett{'NaN} that points to @codett{f} with the action @codett{'dom},
+   to remember that the current value is an input to the parent.
 }
 ]
 
-Next, the challenges.
+If a @|stransient| run-time check fails, the blame map can supply a set
+ of boundaries; namely, the boundary entries that can be reached by following
+ parent pointers up from the failed value.
+Each parent pointer is partially, or indirectly, responsible for the current
+ value.
+Each boundary at the root of the parent paths contains possibly-unchecked
+ type assumptions.
+The programmer can begin debugging by reviewing these type assumptions.
+
+@citet{vss-popl-2017} suggest a further refinement to this basic idea.
+They filter the set of typed boundaries using the failed value and the
+ action path that led to the boundary.
+The action path gives a list of selectors to apply to the boundary type,
+ ending with a smaller type.
+Checking this type against the bad value helps rule out unimportant boundaries;
+ if the bad value matches the type in a boundary, then that boundary is
+ not worth reporting.
 
 
-@subsection{Richer Language for Paths}
+@subsection{Richer Language for Actions}
 
-Lets make a table, path and interpretation
+@figure*[
+  "fig:transient:blame:path"
+  @elem{Sample actions that @|sShallow| Racket must record.}
+  @exact{{
+  \renewcommand{\twoline}[2]{\parbox[t]{2.2in}{#1\newline#2}}
+  \begin{tabular}{ll}
+    Action Template & Interpretation
+  \\\hline
+    @codett{`(dom . ,n)} & @codett{n}-th argument to a function
+  \\
+    @codett{`(cod . ,n)} & @codett{n}-th result from a function
+  \\
+    @codett{`(case-dom (,k . ,n))} & \twoline{@codett{n}-th argument (of @codett{k} total) to an}{overloaded function}
+  \\[3.5ex]
+    @codett{`(object-method (,m . ,n)} & \twoline{@codett{n}-th argument to method @codett{m} of an}{object}
+  \\[3.5ex]
+    @codett{'list-elem} & Element of a homogeneous list
+  \\
+    @codett{'list-rest} & Tail of a list
+  \\
+    @codett{`(list-elem . ,n)} &  \twoline{Element of a heterogeneous list}{@codett{(List Boolean Number String)}}
+  \\[3.5ex]
+    @codett{'hash-key} & Key of a hashtable
+  \\
+    @codett{'hash-value} & Value of a hashtable
+  \\
+    @codett{`(struct-field . ,n)} & @codett{n}-th field of a structure
+  \\
+    @codett{`(object-field . ,f)} & Field @codett{f} of an object type
+  \\
+    @codett{'noop} & No action; direct link to parent
+  \end{tabular}}}
+]
 
-Multi dom / cod
-Case dom
-Ditto for methods
-No-op for wrappers
-List elem vs rest, hash key val
-Object field name
-Heterogeneous types
-Struct index
+
+A check entry in a blame map comes with an action that explains how
+ to traverse a boundary type to get at the part that is relevant to
+ this value / entry.
+Whew.
+
+The Reticulatad paper comes with a simple language of actions:
+ dom, cod, and ref.
+The implementation is slightly more complex.
+(TODO double check.)
+
+@Figure-ref{fig:transient:blame:path} presents some of the additions required
+ for Typed Racket.
+First of all, functions are far more complex.
+Methods add another dimension.
+Each data structure needs a path element.
+And the unexpected noop is needed for aliases.
+
+
 
 @subsection{Multi-Parent Paths}
 
