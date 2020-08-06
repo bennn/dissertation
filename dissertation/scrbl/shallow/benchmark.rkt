@@ -90,6 +90,7 @@
   snake
   take5
   acquire
+  tetris
   synth
 ))
 

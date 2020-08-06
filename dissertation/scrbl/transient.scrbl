@@ -830,7 +830,7 @@ New abilities.
 See RFC for motivations.
 
 Some programs are still disallowed.
-@Figure-ref{fxg:transient:occurrence-type} is one example.
+@Figure-ref{fig:transient:occurrence-type} is one example.
 It uses @codett{require/typed} to import an untyped function with a nonsensical
  occurrence type.
 The typechecker trusts that all @codett{require/typed} annotations are valid
@@ -1150,7 +1150,7 @@ TODO why does @bm{fsm} do so well with optimization?
    The @|sShallow| columns are for the fully-typed configuration;
     the @|sDeep| column uses the slowest configuration.
    The blame experiments ran on a dedicated Linux machine with @id[NSA-RAM] RAM
-    with a time limit of @id[NSA-timeout-minutes] minutes.
+    for at most @id[NSA-timeout-minutes] minutes.
   }
   @render-blame-table[BT]
 ]
@@ -1187,7 +1187,8 @@ These small costs add up, even in our short-running benchmarks.
 Our blame results are far less optimistic than the early report in
  @citet{vss-popl-2017}, which found an average slowdown on 2.5x and
  worst-case slowdown of 5.4x on fully-typed configurations.
-The average slowdown of @|sShallow| Racket blame is @id[avgx-blame-over-shallow]x
+For @|sShallow| Racket benchmarks that terminate, the average slowdown
+ from blame is @id[avgx-blame-over-shallow]x
  and the worst-case is @id[worstx-blame-over-shallow]x.
 Apparently, these different conclusions are due to the benchmark suites.
 @citet{vss-popl-2017} use smaller benchmarks;

@@ -451,7 +451,8 @@
   (define-values [v0 v1] (values (cadr bm-name+v*) (cddr bm-name+v*)))
   (define pi-0 (benchmark-name->performance-info bm-name v0 #:full-name? #t))
   (define pi-1 (benchmark-name->performance-info bm-name v1 #:full-name? #t))
-  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD)
+                 (*OVERHEAD-FREEZE-BODY* #true))
     (exact-runtime-plot (list pi-0 pi-1))))
 
 (define (make-render-validate-plot rkt-version)
