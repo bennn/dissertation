@@ -949,13 +949,6 @@ Each type comes with a high-level shape that illustrates the implementation
 }
 ]
 
-@figure*[
-  "fig:transient:all-type"
-  @elem{If the shape of a universal type depends on the bound variable, then
-   @|stransient| must reject the program or treat type instantiation as an elimination form.}
-  transient:all-type
-]
-
 @futurework{
   The Typed Racket optimizer does not take advantage of all shapes.
   In this sense, the check for functions is an unnecessary cost---even
@@ -971,24 +964,14 @@ Each type comes with a high-level shape that illustrates the implementation
 
 @subsection[#:tag "sec:transient:defense"]{Defender}
 
-@subsection[#:tag "sec:transient:optimize"]{Optimizer}
+@subsubsection[#:tag "sec:transient:surprise"]{Current Limitations}
 
-@subsection[#:tag "sec:transient:surprise"]{Surprises}
-
-New abilities.
-See RFC for motivations.
-
-Some programs are still disallowed.
-@Figure-ref{fig:transient:occurrence-type} is one example.
-It uses @codett{require/typed} to import an untyped function with a nonsensical
- occurrence type.
-The typechecker trusts that all @codett{require/typed} annotations are valid
- claims, and so the rest of the program type checks.
-The typechecker assumes that a run-time check will catch any faulty claims.
-In this program, however, the occurrence type adds a side effect claim
- that is not caught by any check.
-For now, @|sShallow| Racket rejects any program that uses an occurrence type
- as a claim.
+@figure*[
+  "fig:transient:all-type"
+  @elem{If the shape of a universal type depends on the bound variable, then
+   @|stransient| must either reject the program or treat type instantiation as an elimination form.}
+  transient:all-type
+]
 
 @figure*[
   "fig:transient:occurrence-type"
@@ -1001,7 +984,32 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
   transient:occurrence-type
 ]
 
-@; TODO good occurrence type? listof predicate?
+The current implementation attaches @|stransient| checks at two kinds
+ of syntax: boundaries and run-time elimination forms.
+This approach does not suffice to protect all types.
+Some well-typed programs are currently rejected to ensure soundness.
+
+Unrestricted universal types are one problem.
+If the shape @${\tagof{\stype}} of a universally-quantified type
+ @${\fforall{\alpha}{\stype}} depends on the bound variable, then
+ @|sShallow| Racket rejects the program (@figure-ref{fig:transient:all-type}).
+The trouble is that type instantiation can change the shape of such types,
+ but type instantiation is not a run-time elimination form.
+One solution is to insert a @|stransient| check at every instantiation.
+
+Unverified occurrence types are a second problem.
+A program cannot assign an occurrence type to an untyped value,
+ as in @figure-ref{fig:transient:occurrence-type}
+This program uses @codett{require/typed} to import an untyped function with a nonsensical
+ occurrence type.
+The typechecker trusts that all @codett{require/typed} annotations are valid
+ claims, and so the rest of the program type checks.
+The typechecker assumes that a run-time check will catch any faulty claims.
+In this program, however, the occurrence type adds a side effect claim
+ that is not caught by any check.
+
+
+@subsection[#:tag "sec:transient:optimize"]{Optimizer}
 
 
 @subsection[#:tag "sec:transient:pr"]{Additional Fixes and Enhancements}
