@@ -25,6 +25,7 @@
      render-relative-exact-plot
      render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
+     tr:compiler
      transient:divide
      transient:all-type
      transient:occurrence-type
@@ -690,13 +691,39 @@ It is unclear whether a different approach could solve the generative types
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
 
-Overview, figure of compiler pipeline, re-use.
+@figure*[
+  "fig:transient:tr-overview"
+  @elem{Stages in the @|sDeep| Racket compiler. @|sShallow| can re-use the expander and type checker.}
+  tr:compiler
+]
 
-Key aspects below:
- creating shapes,
- inserting shapes,
- optimizing accordingly.
-Plus two miscellaneous sections.
+@|sShallow| Racket is an extension of the (@|sDeep|) Typed Racket codebase.
+The goal is not to create a fork, but rather to adapt the existing compiler.
+For example, @|sDeep| and @|sShallow| Racket share the same type checker;
+ improvements to the type checker benefit both languages.
+
+@Figure-ref{fig:transient:tr-overview} offers a high-level picture of the
+ Typed Racket compiler.
+Source code goes through a macro-expansion step at the start.
+The type checker operates on expanded code; it validates the program at
+ attaches type annotations as metadata for later passes.
+Third, the compiler turns boundary types into higher-order contracts.
+The last major step is the type-driven optimizer, which uses type annotations
+ to remove unnecessary runtime checks.
+
+@|sShallow| Racket can re-use the expander and type checker as-is.
+The contract and optimize steps require changes.
+Contract generation must create @|stransient| checks rather than
+ @|sdeep| higher-order contracts (@section-ref{sec:transient:types}).
+Additionally, the contract pass must rewrite all typed code with @|stransient|
+ checks (@section-ref{sec:transient:defense}).
+The optimize pass must be restricted because it cannot rely on full types.
+Optimizations that depend only on type constructors can remain (@section-ref{sec:transient:optimize}).
+
+I had expected that @|sShallow| Racket would be able to run any type-correct
+ program; however, the implemenation revealed surprising challenges with universal
+ types and occurrence types (@section-ref{sec:transient:surprise}).
+Also, the implemenetation pleasantly led to several independent fixes (@section-ref{sec:transient:pr}).
 
 
 @subsection[#:tag "sec:transient:types"]{From Types to Shapes}
@@ -942,11 +969,11 @@ Each type comes with a high-level shape that illustrates the implementation
 }
 
 
-@subsection{Defender}
+@subsection[#:tag "sec:transient:defense"]{Defender}
 
-@subsection{Optimizer}
+@subsection[#:tag "sec:transient:optimize"]{Optimizer}
 
-@subsection{Surprises}
+@subsection[#:tag "sec:transient:surprise"]{Surprises}
 
 New abilities.
 See RFC for motivations.
@@ -977,7 +1004,7 @@ For now, @|sShallow| Racket rejects any program that uses an occurrence type
 @; TODO good occurrence type? listof predicate?
 
 
-@subsection{Additional Fixes and Enhancements}
+@subsection[#:tag "sec:transient:pr"]{Additional Fixes and Enhancements}
 
 @figure*[
   "fig:transient:pulls"

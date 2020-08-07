@@ -13,6 +13,7 @@
   transient:all-type
   transient:occurrence-type
   transient:blame:map
+  tr:compiler
 )
 
 (require
@@ -487,6 +488,35 @@
     #false
     "Blame error?"))
 
+(define tr:compiler
+  (let ()
+    (define tiny-x-sep 20)
+    (define pico-y-sep 8)
+    (define tiny-y-sep 10)
+    (define med-x-sep 20)
+    (define (make-pipeline . pp*)
+      (make-pipeline* pp*))
+    (define (make-pipeline* pp*)
+      (for/fold ((acc (blank)))
+                ((pp (in-list pp*))
+                 (i (in-naturals)))
+        (vl-append
+          pico-y-sep
+          acc
+          (hb-append (blank (* i med-x-sep) 0) pp))))
+    (define (make-x-step #:border-color bc str)
+      (add-rounded-border
+        #:radius 8 #:frame-color bc #:frame-width 4 #:background-color "white"
+        #:x-margin tiny-x-sep #:y-margin tiny-y-sep
+        (text str "Inconsolata" 14)))
+    (define (make-natural-step str)
+      (make-x-step #:border-color "light gray" str))
+    (make-pipeline
+      (make-natural-step "Expand")
+      (make-natural-step "Typecheck")
+      (make-natural-step "Contract")
+      (make-natural-step "Optimize"))))
+
 (define jungle:landscape
   ;; TODO
   ;;;; \begin{tikzpicture}
@@ -561,8 +591,7 @@
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        transient:all-type
-        transient:occurrence-type
+        tr:compiler
         '()
     )))
 )
