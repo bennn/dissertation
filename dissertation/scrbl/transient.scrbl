@@ -28,7 +28,8 @@
      transient:divide
      transient:all-type
      transient:occurrence-type
-     transient:subtype)
+     transient:subtype
+     transient:blame:map)
    (only-in math/statistics
      mean))
 
@@ -420,18 +421,19 @@ There are two kinds of entry:
  @code-nested{
    (define (f (n : Natural)) : String
      ....)
+
    (provide f)}
  then the blame map gains an entry for @codett{f} that points to the
   type @codett{(-> Natural String)} and a nearby source location.
 }
 @item{
-  A @emph{check entry} combines a parent pointer and an action.
+  A @emph{link entry} combines a parent pointer and an action.
   The parent refers to another blame map key.
   The action describes the relation between the current value and its parent.
 
   Suppose the function @codett{f} from above gets applied to the
    untyped value @codett{'NaN}.
-  As the value enters the function, the blame map gains a check entry
+  As the value enters the function, the blame map gains a link entry
    for @codett{'NaN} that points to @codett{f} with the action @codett{'dom},
    to remember that the current value is an input to the parent.
 }
@@ -455,8 +457,86 @@ Checking this type against the bad value helps rule out unimportant boundaries;
  if the bad value matches the type in a boundary, then that boundary is
  not worth reporting.
 
+In summary, the success of the blame map rests on three principles:
+@itemlist[
+@item{
+  every type boundary in the source code creates boundary entries in the
+   map---one entry for each value that crosses the boundary at runtime;
+}
+@item{
+  every elimination form adds a link entry with a correct parent and action;
+}
+@item{
+  and there is a run-time function that tests whether a value matches part of
+   a boundary type.
+}
+]
+These principles are relatively easy to satisfy in a model language,
+ but raise surprising implications and challenges for a full language.
+The next sections go into detail.
 
-@subsection{Multi-Parent Paths}
+
+@subsection{Implication: Core Libraries are not Free}
+
+A migratory typing system must be able to re-use host language libraries.
+Racket, for example, comes with a list library that provides a @codett{map}
+ function.
+Both @|sDeep| Racket and @|sShallow| Racket can re-use this function by
+ declaring a static type:
+
+@code-nested{map : (All (A B) (-> (-> A B) (Listof A) (Listof B)))}
+
+@|noindent|Furthermore, both can import @codett{map} at no run-time cost.
+@|sDeep| can trust that the implementation completely follows the type
+ and @|sShallow| without blame can trust that @codett{map} always returns a list.
+
+For @|sShallow| with blame, however, re-use adds run-time cost.
+Initially, @codett{map} must be registered in the blame map with a boundary entry.
+Later, every call to @codett{map} must add link entries for its arguments
+ and its result.
+@Figure-ref{fig:transient:blame:map} illustrates the need for these bookkeeping
+ updates with a tiny example.
+The typed function in this figure expects a list of numbers,
+ applies a trivial @codett{map} to the list,
+ and later finds a bad element in the mapped list.
+@|sTransient| blame should point back to the boundary between the typed
+ function and the untyped list, but cannot do so if @codett{map} does
+ not update the blame map.
+
+@figure*[
+  "fig:transient:blame:map"
+  @elem{
+    Unless @codett{map} updates the blame map, @|stransient| cannot point to
+     any boundaries when @codett{(first nums2)} fails to return a number.
+  }
+  transient:blame:map
+]
+
+
+
+@subsection{Challenge: Complex Flows, Tailored Specifications}
+
+Getting blame right for the @codett{map} function requires careful bookkeeping.
+The result list must have a link entry that points to the input list.
+Additionally, the input function should point to this input list in case
+ it receives a bad result.
+
+Blame in @|sShallow| Racket depends on literal syntax to decide when complex
+ reasoning is needed.
+The original paper used the same method; primitive operations have tailored
+ bookkeeping and other function applications create link entries in a standard
+ way@~cite{vss-popl-2017}.
+
+Obviously, the syntactic approach is brittle.
+Renaming @codett{map} leads to misleading blame errors.
+The same goes for applications of an expression instead of a literal identifier.
+
+@futurework{
+  Design a language of blame types to replace the identifier-based logic.
+}
+
+
+@subsection{Challenge: Multi-Parent Paths}
 
 append, maybe a non-issue because its a new list,
 indeed thats choice taken by transient
@@ -468,30 +548,7 @@ hash-ref,
  two possibilities for result
 
 
-@subsection{Complex Flows, filter / map}
-
-worse than multi-parent, focus on example
-
-poly inst problem?
-
-
-@subsection{Fragile, need Blame Types}
-
-renaming car affects path results, from recognized accessor to unknown function
- application
-
-cannot rely on syntax, need some kind of analysis to deal with aliasing
-
-obvious solution is to propagate types, add alongside current type info,
- how to encode is a challenge, keep in mind the requirements above
-
-
-@subsection{Cannot Trust Base Env}
-
-? goes without saying?
-
-
-@subsection{Richer Language for Actions}
+@subsection{Implication: Richer Language for Actions}
 
 @figure*[
   "fig:transient:blame:path"
@@ -580,7 +637,7 @@ Finally, the @codett{noop} action adds a direct link
  or a wrapper (@codett{chaperone-procedure}).
 
 
-@subsection[#:tag "sec:transient:blame:types"]{Types at Runtime}
+@subsection[#:tag "sec:transient:blame:types"]{Challenge: Types at Runtime}
 
 @|sTransient| needs types at runtime, or a close substitute, to filter
  irrelevant boundaries.

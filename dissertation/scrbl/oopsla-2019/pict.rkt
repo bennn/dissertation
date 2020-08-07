@@ -12,6 +12,7 @@
   transient:subtype
   transient:all-type
   transient:occurrence-type
+  transient:blame:map
 )
 
 (require
@@ -475,6 +476,16 @@
     ""
     "(string-length fake-str)"
   )))
+
+(define transient:blame:map
+  ;; `ann` needed to eliminate an Intersection type
+  (make-example-atom-pict
+    '("(define (use-map (nums : (Listof Number)))"
+      "  (define nums2 (map (λ(x) x) nums))"
+      "  (+ 1 (first nums2)))")
+    '("(use-map (list \"A\" 1))")
+    #false
+    "Blame error?"))
 
 (define jungle:landscape
   ;; TODO
