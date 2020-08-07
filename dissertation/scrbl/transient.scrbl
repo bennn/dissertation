@@ -538,17 +538,32 @@ The same goes for applications of an expression instead of a literal identifier.
 
 @subsection{Challenge: Multi-Parent Paths}
 
-append, maybe a non-issue because its a new list,
-indeed thats choice taken by transient
+A link entry points to one parent.
+Several functions, however, create data with multiple parents.
+One basic example is an @codett{append} function on lists:
 
-vector copy,
- still the old vector, no avoiding issue
+@code-nested{(append xs ys)}
 
-hash-ref,
- two possibilities for result
+@|noindent|The result list contains the elements of both inputs.
+At a minimum, there should be two parents to blame if something goes wrong.
+
+A second, more complicated example is a @codett{hash-ref} function that
+ may return a default value:
+
+@code-nested{(hash-ref h k d)}
+
+@|noindent|If the table @codett{h} has a binding for the key @codett{k},
+ then the result comes from the table.
+Otherwise, the result is computed by the default thunk.
+
+@futurework{
+  Allow multiple parents per link entry
+   and dynamically choose a parent for operations such as @codett{hash-ref}.
+  How do the changes affect blame errors and performance?
+}
 
 
-@subsection{Implication: Richer Language for Actions}
+@subsection{Implication: Expressive Types call for Link-Entry Actions}
 
 @figure*[
   "fig:transient:blame:path"
