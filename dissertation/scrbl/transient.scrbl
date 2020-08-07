@@ -964,6 +964,8 @@ Each type comes with a high-level shape that illustrates the implementation
 
 @subsection[#:tag "sec:transient:defense"]{Defender}
 
+@; TODO
+
 @subsubsection[#:tag "sec:transient:surprise"]{Current Limitations}
 
 @figure*[
@@ -1010,6 +1012,81 @@ In this program, however, the occurrence type adds a side effect claim
 
 
 @subsection[#:tag "sec:transient:optimize"]{Optimizer}
+
+@figure*[
+  "fig:transient:optimize"
+  @elem{TR optimization topics and whether @|sShallow| can re-use.}
+  @exact{{
+  \deftablemacros{}
+  \begin{tabular}{ll}
+    Topic & Safe for @|sShallow|?
+  \\\hline
+    \(\mathsf{apply}\)          & \tblY
+  \\
+    \(\mathsf{box}\)            & \tblY
+  \\
+    \(\mathsf{dead{\mhyphen}code}\)      & \tblN
+  \\
+    \(\mathsf{extflonum}\)      & \tblY
+  \\
+    \(\mathsf{fixnum}\)         & \tblY
+  \\
+    \(\mathsf{float{\mhyphen}complex}\)  & \tblY
+  \\
+    \(\mathsf{float}\)          & \tblY
+  \\
+    \(\mathsf{list}\)           & \tblY
+  \\
+    \(\mathsf{number}\)         & \tblY
+  \\
+    \(\mathsf{optimizer}\)      & \tblY
+  \\
+    \(\mathsf{pair}\)           & \tblN
+  \\
+    \(\mathsf{sequence}\)       & \tblY
+  \\
+    \(\mathsf{string}\)         & \tblY
+  \\
+    \(\mathsf{struct}\)         & \tblY
+  \\
+    \(\mathsf{unboxed{\mhyphen}let}\)    & \tblY
+  \\
+    \(\mathsf{unboxed{\mhyphen}tables}\) & \tblY
+  \\
+    \(\mathsf{vector}\)         & \tblY
+  \end{tabular}}}
+]
+
+Typed Racket uses static types to compile efficient code@~cite{sta-nt-base-types,stff-padl-2012,stf-oopsla-2012}.
+To give a basic example, a dynamically-typed sum @codett{(+ n0 n1)} can be
+ rewritten blindly add its inputs, without first confirming that they are
+ numbers.
+
+In principle, optimizations may rely on full types.
+Such optimizations are not safe for @|sShallow| Racket, because it only
+ guarantees the top type constructor.
+
+@Figure-ref{fig:transient:optimize} lists all optimization topics and shows,
+ suprisingly, that only two are unsafe for @|sshallow| types.
+The @${\mathsf{dead{\mhyphen}code}} pass remove type-inaccessible branches of an overloaded function.
+With @|sdeep| types, run-time contracts make these branches inaccessible.
+@|sShallow| types allow raw functions to flow to untyped code, and therefore
+ the branches are not really dead.
+The @${\mathsf{pair}} pass depends on full types to rewrite nested accessors, such as @codett{cdar},
+ to versions that assume a deep pair structure.
+
+Other passes are re-used in @|sShallow| Racket.
+The benefit of these optimizations is sometimes enough to outweigh the cost
+ of @|stransient| checks (@section-ref{sec:transient:performance}).
+
+Certain passes are risky, though.
+The @${\mathsf{apply}} pass requires all @|sshallow|-typed functions to
+ check their inputs, whether or not they escape to untyped code.
+The @${\mathsf{list}} and @${\mathsf{sequence}} passes depend on the @${O(n)}
+ shape check for list types.
+Finally, the @${\mathsf{unboxed{\mhyphen}let}} pass is only safe by virtue
+ of a conservative escape analysis.
+
 
 
 @subsection[#:tag "sec:transient:pr"]{Additional Fixes and Enhancements}
