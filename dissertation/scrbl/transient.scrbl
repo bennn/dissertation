@@ -456,6 +456,41 @@ Checking this type against the bad value helps rule out unimportant boundaries;
  not worth reporting.
 
 
+@subsection{Multi-Parent Paths}
+
+append, maybe a non-issue because its a new list,
+indeed thats choice taken by transient
+
+vector copy,
+ still the old vector, no avoiding issue
+
+hash-ref,
+ two possibilities for result
+
+
+@subsection{Complex Flows, filter / map}
+
+worse than multi-parent, focus on example
+
+poly inst problem?
+
+
+@subsection{Fragile, need Blame Types}
+
+renaming car affects path results, from recognized accessor to unknown function
+ application
+
+cannot rely on syntax, need some kind of analysis to deal with aliasing
+
+obvious solution is to propagate types, add alongside current type info,
+ how to encode is a challenge, keep in mind the requirements above
+
+
+@subsection{Cannot Trust Base Env}
+
+? goes without saying?
+
+
 @subsection{Richer Language for Actions}
 
 @figure*[
@@ -547,53 +582,38 @@ Finally, the @codett{noop} action adds a direct link
 
 @subsection{Types at Runtime}
 
+@|sTransient| needs types at runtime, or a close substitute, to filter
+ irrelevant boundaries.
+These runtime types must have selectors for
+ each possible action and an interpretation function that checks the
+ shape of a value against the shape of a type.
 
+@|sShallow| Racket's runtime types are a revived version of its static types.
+During compilation, static types get seriazed into a chain of type constructor
+ calls.
+After a runtime error occurs, @|sShallow| Racket re-evaluates the constructor
+ definitions and uses these constructors to revive types.
 
+This revival approach re-uses at least 4,000 lines of code to good effect:
+ roughly 3,000 lines of constructor and selector definitions,
+ @; roughly: 300 type->transient-sc, 60 sc def, 270 sc inst, 450 sc opt
+ and 1,000 lines that turn a type into a @|stransient| check.
+It also handles type aliases nicely.
+The static environment knows all relevant aliases and can serialize them
+ along with the type.
 
-Filtering with types has the following signature.
+Revival unfortunately fails for generative structure types.
+The run-time type and the static type are two different entities;
+ @|sShallow| Racket is unable to parse such types.
+If parsing were to succeed, finding the correct predicate for a generative
+ type is a separate challenge.
+At compile-time, it suffices to generate a correct identifier.
+At run-time, @|stransient| needs to evaluate a correct identifier in
+ the right run-time context to find the predicate.
 
-Need to interpret these types at runtime,
- get contracts and follow paths.
-Can make whole new library to interpret syntax.
-Or, try to revive types.
-Either way challenging with separate compilation and aliases.
-
-How to deal with generative struct types?
-
-
-@subsection{Multi-Parent Paths}
-
-append, maybe a non-issue because its a new list,
-indeed thats choice taken by transient
-
-vector copy,
- still the old vector, no avoiding issue
-
-hash-ref,
- two possibilities for result
-
-
-@subsection{Complex Flows, filter / map}
-
-worse than multi-parent, focus on example
-
-poly inst problem?
-
-
-@subsection{Fragile, need Blame Types}
-
-renaming car affects path results, from recognized accessor to unknown function
- application
-
-cannot rely on syntax, need some kind of analysis to deal with aliasing
-
-obvious solution is to propagate types, add alongside current type info,
- how to encode is a challenge, keep in mind the requirements above
-
-
-@subsection{Cannot Trust Base Env}
-
-? goes without saying?
+For now, types at runtime is an open challenge.
+It is unclear whether a different approach could solve the generative types
+ problem.
 
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
@@ -1189,6 +1209,9 @@ TODO why does @bm{fsm} do so well with optimization?
   @render-blame-table[BT]
 ]
 @elem{
+@; TODO why expensive?
+@;  no gc, give example
+
 @Figure-ref{fig:transient:blame-performance} evaluates the overhead of
  @|sShallow| Racket with blame enabled.
 The second column of this table measures the overhead of blame on
