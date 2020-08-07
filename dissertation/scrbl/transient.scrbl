@@ -580,7 +580,7 @@ Finally, the @codett{noop} action adds a direct link
  or a wrapper (@codett{chaperone-procedure}).
 
 
-@subsection{Types at Runtime}
+@subsection[#:tag "sec:transient:blame:types"]{Types at Runtime}
 
 @|sTransient| needs types at runtime, or a close substitute, to filter
  irrelevant boundaries.
@@ -1264,4 +1264,26 @@ After some trouble with the stack limit, the resulting programs runs
 @; blame filtering seems not worth it, too hard to revive types
 @;  may want to collect fewer boundaries, even more spotty
 
+
+@subsection{Improve or Drop @|sTransient| Blame Filtering}
+
+@|sShallow| Racket makes an effort to filter irrelevant boundaries
+ as suggested by @citet{vss-popl-2017}.
+Some boundaries cannot be filtered, however, because @|sShallow| Racket
+ cannot parse the complex type definitions (@section-ref{sec:transient:blame:types}).
+This challenge motivates two research efforts.
+
+One goal is to improve type parsing and filtering to cover all types.
+If possible, this seems like the way to go.
+But it will be important to measure whether the solution requires additional
+ run-time overhead.
+
+A second goal is to evaluate the usefulness of filtering as-is.
+If filtering is not useful and seems unlikely to help, then removing it can
+ save a tremendous amount of bookkeeping.
+Without the need to filter, the blame map does not need to store types or
+ actions---only pointers and source locations.
+If filtering is useful, it may be helpful to allow types with parse errors
+ because an action path explores only a fraction of a full type.
+The needed portion may not touch the difficult parts.
 
