@@ -38,43 +38,6 @@
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
-@; TODO OUTLINE 2020-07-21
-@; transient racket (transient + untyped, that's all)
-@; - blame, work in progress
-@;   + why blame
-@;   + transient-blame ideas
-@;     check+update, escape+update, store all v
-@;   + hint at impl. trouble, but focus on theory-only for now
-@;     big map, no gc, much bookkeeping
-@;   + more challenges
-@;     TR accessors, multi-parent, cannot trust base env, types at runtime
-@; - eng. adaptation, to racket lang
-@;   + tr overview, transient overview, re-use type checker
-@;   + changes
-@;     > type->contract change
-@;     > rewrite typed code with checks
-@;     > weaken optimizer
-@;     > provide more (macros can leave)
-@;     > assemble #%module-begin
-@;   + issues, surprises
-@;     > optimizer assumed annotation, "dead" code doesn't have them
-@;     > found 21 racket world bugs
-@;     > can't trust typed ids because of require/typed and occurrence types
-@;       (permissiveness vs cost)
-@;     > trusted base ids not enough, really need trusted types (make-do-sequence)
-@; - perf. properties
-@;   + overhead plots
-@;   + exact-points, lattices (what are the trends?)
-@;   + why so slow, what can be done?
-@;     - macros = problem = more typed code than untyped
-@;   + blame perf, looks grim, fully-typed table,
-@; - future work
-@;   + occurrence typing, remove checks
-@;   + blame new algorithm
-@;   + other performance tuning, JIT level (see cifellows proposal)
-@;   + 
-
-
 The high cost of @|sdeep| types calls for an alternative semantics
  with @|sshallow| types.
 Of the vetted alternatives (@chapter-ref{chap:design}), @|stransient| is the
@@ -112,14 +75,6 @@ Whether @|sShallow| Racket can ever run faster than untyped code is an open
 
 
 @section[#:tag "sec:transient:theory"]{Theory++}
-@; [X] macro/micro ... what to say???
-@;     - can't remove checks without analysis, but should be easier now
-@;     - fewer cast locations (arguably, we missed <: --- no, its not a boundary and it cannot fail!)
-@;     - "macro" anticipated by chap:design but ... that one is a bit far from impl.
-@; [ ] all types, sec. for each interesting ... ->* mu U 
-@; [ ] occurrence what to do = nothing
-@; [ ] summary table ... used-for-optz, O(1), O(t), O(n) ....
-@;     maybe work with numbers ... say total num checks instead of tabulating all
 
 @citet{vss-popl-2017} present a first @|stransient| semantics.
 This semantics helped me understand the behavior of Reticulated Python
@@ -362,12 +317,6 @@ The completion for @|sShallow| Racket produces the following term:
  can never fail.
 An improved completion would eliminate this, and other, flow-dominated checks.
 
-@futurework{
-  Adapt Typed Racket's occurrence typing to support a completion pass that
-   avoids dominated checks.
-  Evaluate the performance improvement.
-}
-
 
 @section[#:tag "sec:transient:blame"]{Work-in-progress: Blame}
 
@@ -534,10 +483,6 @@ Obviously, the syntactic approach is brittle.
 Renaming @codett{map} leads to misleading blame errors.
 The same goes for applications of an expression instead of a literal identifier.
 
-@futurework{
-  Design a language of blame types to replace the identifier-based logic.
-}
-
 
 @subsection{Challenge: Multi-Parent Paths}
 
@@ -558,12 +503,6 @@ A second, more complicated example is a @codett{hash-ref} function that
 @|noindent|If the table @codett{h} has a binding for the key @codett{k},
  then the result comes from the table.
 Otherwise, the result is computed by the default thunk.
-
-@futurework{
-  Allow multiple parents per link entry
-   and dynamically choose a parent for operations such as @codett{hash-ref}.
-  How do the changes affect blame errors and performance?
-}
 
 
 @subsection{Implication: Expressive Types call for Link-Entry Actions}
@@ -951,18 +890,6 @@ Each type comes with a high-level shape that illustrates the implementation
    the type to prevent unsoundness (@figure-ref{fig:transient:all-type}).
 }
 ]
-
-@futurework{
-  The Typed Racket optimizer does not take advantage of all shapes.
-  In this sense, the check for functions is an unnecessary cost---even
-   @codett{procedure?} would be a waste, because the TR optimizer does
-   not use it.
-  Improve the optimizer where possible and remove other shape checks.
-  How do the changes impact performance?
-  Try writing a few programs;
-   perhaps by converting Reticulated benchmarks to @|sShallow| Racket.
-  Do the removed shape checks make programs more difficult to debug?
-}
 
 
 @subsection[#:tag "sec:transient:defense"]{Defender}
@@ -1509,10 +1436,60 @@ After some trouble with the stack limit, the resulting programs runs
 
 
 @section[#:tag "sec:transient:future"]{Future Challenges}
-@; vsc-dls-2019 has Retic/Pycket faster than untyped, 0.95x best-case
 
-@; blame filtering seems not worth it, too hard to revive types
-@;  may want to collect fewer boundaries, even more spotty
+@futurework{
+  Adapt Typed Racket's occurrence typing to support a completion pass that
+   avoids dominated checks.
+  Evaluate the performance improvement.
+}
+
+@futurework{
+  Design a language of blame types to replace the identifier-based logic.
+}
+
+@futurework{
+  Allow multiple parents per link entry
+   and dynamically choose a parent for operations such as @codett{hash-ref}.
+  How do the changes affect blame errors and performance?
+}
+
+@futurework{
+  The Typed Racket optimizer does not take advantage of all shapes.
+  In this sense, the check for functions is an unnecessary cost---even
+   @codett{procedure?} would be a waste, because the TR optimizer does
+   not use it.
+  Improve the optimizer where possible and remove other shape checks.
+  How do the changes impact performance?
+  Try writing a few programs;
+   perhaps by converting Reticulated benchmarks to @|sShallow| Racket.
+  Do the removed shape checks make programs more difficult to debug?
+}
+
+
+@subsection{Trust Types}
+
+For now, @|sShallow| Racket includes a whitelist of trustworthy base-library
+ functions.
+Functions like @codett{map} are trusted to return shape-correct results.
+
+Checking identifiers, however, is brittle.
+Furthermore, the current approach cannot trust deeper properties of a type.
+A call to @codett{filter}, for example, guarantees the top shape of the result
+ (a list) and the top shape of every element in the list.
+There should be some way to encode this shape knowledge in a type.
+
+
+@subsection{Identify Trustworthy Typed Identifiers}
+
+@; aka why doesn't @|stransient| optimize more?
+
+Some user-defined functions do not need @|stransient| result checks.
+If a @|stransient| module defines a function @codett{f = (λ (x) ....)}
+ then there is no need for the current module to check its results;
+ static typing guarantees a shape-correct output.
+Other functions in the same module, though, cannot be trusted.
+If @codett{f = (car f*)} then we can only trust the output if functions
+ in the list are good.
 
 
 @subsection{Improve or Drop @|sTransient| Blame Filtering}
@@ -1536,4 +1513,11 @@ Without the need to filter, the blame map does not need to store types or
 If filtering is useful, it may be helpful to allow types with parse errors
  because an action path explores only a fraction of a full type.
 The needed portion may not touch the difficult parts.
+
+
+@subsection{Design a new Blame Algorithm}
+
+The performance costs of the blame algorithm from @citet{vss-popl-2017} are high.
+Is there a different algorithm with lower cost that still provides useful
+ information?
 
