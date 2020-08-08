@@ -31,6 +31,7 @@ Style
   - beyond : multi-color for typed components, depends on semantics
 - [ ] print "x" after overheads
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
+- [ ] too many exercises, looks like everything has holes, save for end
 
 #### dependencies
 

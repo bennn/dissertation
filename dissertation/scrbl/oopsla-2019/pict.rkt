@@ -13,6 +13,8 @@
   transient:all-type
   transient:occurrence-type
   transient:blame:map
+  transient:defense
+  transient:opt
   tr:compiler
 )
 
@@ -516,6 +518,24 @@
       (make-natural-step "Typecheck")
       (make-natural-step "Contract")
       (make-natural-step "Optimize"))))
+
+(define transient:defense
+  (typed-codeblock '(
+    "(define (sum-list (nums : (Listof Real))) : Real"
+    "  (check! list? nums)"
+    "  (for/fold ([acc 0])"
+    "            ([n (in-list nums)])"
+    "    (check! real? n)"
+    "    (+ acc n)))"
+  )))
+
+(define transient:opt
+  (typed-codeblock '(
+    "(: array-append (-> (Listof Array) Array))"
+    "(define (array-append arrs [k 0])"
+    "  ;; append arrays along axis k"
+    "  ....)"
+  )))
 
 (define jungle:landscape
   ;; TODO

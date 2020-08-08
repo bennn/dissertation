@@ -26,10 +26,12 @@
      render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
      tr:compiler
+     transient:defense
      transient:divide
      transient:all-type
      transient:occurrence-type
      transient:subtype
+     transient:opt
      transient:blame:map)
    (only-in math/statistics
      mean))
@@ -690,6 +692,7 @@ It is unclear whether a different approach could solve the generative types
 
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
+@; TODO worth showing the #%module-begin weaving?
 
 @figure*[
   "fig:transient:tr-overview"
@@ -964,7 +967,70 @@ Each type comes with a high-level shape that illustrates the implementation
 
 @subsection[#:tag "sec:transient:defense"]{Defender}
 
-@; TODO
+@figure*[
+  "fig:transient:defense"
+  @elem{A @|sshallow|-typed function defended with @|stransient| checks.}
+  transient:defense
+]
+
+@figure*[
+  "fig:transient:opt"
+  @elem{Type prevents callers from sending an optional argument, but the function body can use the default value.}
+  transient:opt
+]
+
+@|sShallow| Racket rewrites typed code with @|stransient| checks.
+Checks guard the positions where an untyped value might appear
+ (@section-ref{sec:design:tech:transient}); namely:
+@itemlist[
+@item{
+  at the source-code boundaries to untyped code;
+}
+@item{
+  around elimination forms;
+}
+@item{
+  and at the first line of every function.
+}
+]
+
+Boundaries clearly need protection.
+If typed code expects a number and imports a value from untyped code,
+ the value could have any shape.
+
+Elimination forms need protection for the same reason, but are an
+ over-approximation.
+@Figure-ref{fig:transient:defense} provides a concrete example with a
+ for-loop that adds a list of numbers; every step of the loop first
+ checks the current list element.
+If the list came from untyped code, then the checks are clearly needed.
+The list might come from typed code, though, in which case the checks
+ waste time.
+
+@Figure-ref{fig:transient:defense} also contains a function check.
+The inputs to every typed function are checked to validate the type assumptions
+ in the function body.
+These checks might be unnecessary if the function never escapes to untyped code,
+ but escapes are hard to detect.
+A typed function could escape as an argument to a combinator
+ @codett{(map sum-list nss)} or via a macro-introduced reference.
+
+Protecting functions turned out to be the most difficult part of the
+ rewriting --- worse than rewriting classes and other macro-expanded code.
+The tricky detail is that the external type of a function can differ
+ from the types available inside the function body.
+@Figure-ref{fig:transient:opt} presents an example from the @bm{synth}
+ benchmark.
+This @codett{array-append} function accepts an optional argument @codett{k},
+ but the public type requires callers to send only one input.
+Consequently, Typed Racket internally gives @codett{k} the bottom type
+ at the top of the expanded function.
+The bottom type is widened via occurrence typing before any user code
+ appears.
+@|sShallow| Racket needs to work with this widening protocol to insert
+ correct checks; in an early version, every call to @codett{array-append}
+ raised an error.
+
 
 @subsubsection[#:tag "sec:transient:surprise"]{Current Limitations}
 
