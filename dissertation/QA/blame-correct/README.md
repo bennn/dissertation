@@ -74,3 +74,32 @@ spectralnorm mgd-transient
 2.962125
 2.975569
 
+
+### after Matthias, Christos, Lukas meeting
+
+> port the retic benchmarks bottom-up, take 1/2 day, how much slower are
+> they with blame?
+
+retic benchmarks, bottom-up
+
+- [X] call_method_slots --- PS, Zeina has data for this benchmark, but we
+  removed it for the PLATEAU submission (5df1b50e42d1e031b76de49d7c6f4c753af588b0)
+  There is no explanation,
+   but probably to make the figures fit on the page (3 x 5?),
+   and because it's only 1-line different from call_method,
+   and call_method is more normal (not saying much)
+
+- [X] fannkuch
+- [ ] nqueens
+- [ ] nbody
+- [ ] pidigits
+- [ ] spectralnorm
+- [ ] call_simple
+- [ ] float
+- [ ] call_method
+- [ ] go
+- [ ] meteor
+- [ ] pystone
+- [ ] chaos
+
+
