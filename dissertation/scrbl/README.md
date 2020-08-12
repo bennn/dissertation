@@ -11,13 +11,14 @@ TODO
 - [X] performance chapter (2), adapt jfp19
 - [X] theory chapter (3)
   ... copy JFP, get building, thats all for now
-- [ ] transient-racket chapter (4)
+- [X] transient-racket chapter (4)
   - [X] committee update email
   - [X] TR RFC
   - [X] 2020-07-22 : share chap4 outline, diff with first attempt, intro, committee update
-  - [ ] blame section
-  - [ ] blame table
-  - [ ] future work
+  - [X] blame section
+  - [X] blame table
+  - [X] future work
+- [ ] "both" chapter
 - [ ] full intro (1)
 
 Style
@@ -31,7 +32,7 @@ Style
   - beyond : multi-color for typed components, depends on semantics
 - [ ] print "x" after overheads
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
-- [ ] too many exercises, looks like everything has holes, save for end
+- [ ] too many exercises, looks like everything has holes, save those for end
 
 #### dependencies
 
@@ -46,11 +47,14 @@ sloccount
 2020-07-09 : we are rolling now, but still way slow progress/hour is pitiful
 2020-07-20 : performance and design chapters are imported, need to get serious about transient / data
 2020-08-06 : transient data is coming in ... all bugs fixed?
+2020-08-12 : transient, waiting on quad, some untypeds way too slow (fsm*)
 
 #### oddball future work
 
-- [ ] graduality => errors theorem (icfp 18)
-- [ ] natural is a nat. trans.
+(Q = wrote up as `futurework` question)
+
+- [Q] graduality => errors theorem (icfp 18)
+- [Q] natural is a nat. trans.
 
 #### outlines
 

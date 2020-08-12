@@ -21,7 +21,11 @@ Evaluation, to be determined, 2-way vs 3-way lattice, programs where combination
 Threats, especially no blame in Transient.
 
 
-@section[#:tag "sec:both:rules"]{Model Goals}
+@section[#:tag "sec:both:model"]{Model and Properties}
+@; - simple model
+@;   - no worries, properties still hold
+@;   - failed attempts at natural/transient cooperation to reduce checks,
+@;     possible futures (forgetful)
 
 This model compiles our three kinds of types down to a common, simple runtime.
 The compiler removes data about what languages are sitting around a boundary;
@@ -62,8 +66,6 @@ The three evaluation sub-languages can mix via the cast expressions and the
  result satisfies both type soundness (exact guarantee varies by surface sub-lang)
  and complete monitoring (for ``honest'' types only).
 
-
-@section{Model}
 
 @; Similar to @chapter-ref{chap:design}, but simpler more realistic .. condensed?
 @; Worth repeating.
@@ -918,18 +920,15 @@ all T-owners distinct from S/U (the latter can mix)
 }|
 
 
-@subsection{Properties}
+@subsection{Theorems}
 
-@subsubsection{Notation}
+First a notation
 
 @${\ssurface_0 \srr \sexpr_0
  \sdefeq
  \vdash \ssurface_0 : \stspec
   \mbox{ and } \vdash \ssurface_0 : \stspec \scompile \sexpr_1
   \mbox{ and } \sexpr_1 \srr \sexpr_0}
-
-
-@subsubsection{Theorems}
 
 @exact|{
 \begin{theorem}[TS$(\sX,\stypemap)$]
@@ -966,7 +965,7 @@ all T-owners distinct from S/U (the latter can mix)
 }|
 
 
-@subsubsection{Lemmas}
+@subsection{Lemmas}
 
 @exact|{
 \begin{lemma}[$\stypemap$-compile]
@@ -1124,5 +1123,29 @@ all T-owners distinct from S/U (the latter can mix)
   then\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_1}$
 \end{lemma}
 }|
+
+
+@section[#:tag "sec:both:implementation"]{Implementation}
+@; - typed-context? hook = easy
+@; - reuse ctc + type = hard
+@; - require/untyped-contract
+@; - define-typed/untyped-id
+
+
+@section[#:tag "sec:both:evaluation"]{Evaluation}
+
+@subsection[#:tag "sec:both:expressiveness"]{Expressiveness}
+@; new mixed programs, relative to TR alone
+@; - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
+
+
+@subsection[#:tag "sec:both:performance"]{Performance}
+@;      - ?? 2-way lattice? 3-way
+@;      - ?? programs where mix is better than natural-only or transient-only
+
+
+@subsection{Limitations and Threats}
+@; - threats: no blame in transient, 
+
 
 
