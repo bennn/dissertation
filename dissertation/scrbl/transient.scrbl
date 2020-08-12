@@ -1217,6 +1217,17 @@ All data came from a dedicated Linux box with @id[NSA-num-cores] physical
 
 
 @subsection[#:tag "sec:transient:ratio"]{Performance Ratios}
+@; TODO in @bm{fsm}, transient untyped is slower because it is running on
+@;  CS rather than BC.
+@; The 7.7 numbers need to move to CS.
+@; Maybe, should take latest Racket for the (void) fix
+@;
+@; TODO why does @bm{fsm} do so well with optimization?
+
+@; fsmoo should be ~ deep/untyped = 0.59 shal/untyped = 0.64
+@;  .... deep is a little slow, shallow TOO FAST
+@;  .... current shallow-untyped ~ 2000ms (!!!!) shallow-typed ~ 304ms (ok)
+
 
 @(let* ((RT (get-ratios-table SHALLOW-CURRENT-BENCHMARK*))
         (deep-win-names+shallow-win-names
@@ -1335,12 +1346,6 @@ After critical boundaries are typed, performance with @|sdeep| types is
 
 In @|sShallow| Racket, the trend is simple: adding types slows code down.
 There is a linear, upward trend in every benchmark except @bm{fsm}.
-
-TODO in @bm{fsm}, transient untyped is slower because it is running on
- CS rather than BC.
-The 7.7 numbers need to move to CS.
-
-TODO why does @bm{fsm} do so well with optimization?
 
 
 @subsection[#:tag "sec:transient:blame-performance"]{Blame Performance}
