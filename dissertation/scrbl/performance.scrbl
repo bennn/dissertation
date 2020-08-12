@@ -942,7 +942,7 @@ This section concludes with a table summarizing the static characteristics of ea
 }
 
 @figure*["fig:tr:static-benchmark" @elem{
-  Static characteristics of the @|GTP| benchmarks.
+  Static characteristics of the migratable code in the @|GTP| benchmarks.
   @bold{N} = number of components = number of modules.
   SLOC = source lines of fully-typed code as reported by @|SLOCCOUNT|.}
   @tr:render-static-information[tr:ALL-BENCHMARKS]
@@ -1386,7 +1386,7 @@ The following descriptions credit each benchmark's original author,
 }
 
 @figure["fig:rp:static-benchmark" @elem{
-  Static summary of the Reticulated benchmarks.
+  Static summary of the migratable code in the Reticulated benchmarks.
   @bold{N} = number of components = functions + classes + methods.
   SLOC = source lines of code as reported by @|SLOCCOUNT|.}
   @rp:render-static-information[rp:MAIN-BENCHMARKS]]
