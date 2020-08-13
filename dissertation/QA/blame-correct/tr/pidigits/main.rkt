@@ -49,6 +49,6 @@
 (define (main)
   (calc_ndigits NDIGITS))
 
-(time (displayln (main)))
+(time (main))
 ;; goal = 
 
