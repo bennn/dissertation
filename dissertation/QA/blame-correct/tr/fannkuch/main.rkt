@@ -104,5 +104,5 @@
   ;; expected result = 38
   (fannkuch DEFAULT_ARG))
 
-(time (main))
+(time (void (main)))
 
