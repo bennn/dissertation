@@ -90,16 +90,50 @@ retic benchmarks, bottom-up
    and call_method is more normal (not saying much)
 
 - [X] fannkuch
+- [X] nqueens
+- [X] nbody
+- [X] pidigits
+- [X] spectralnorm
+- [X] call_simple
+- [X] float
+- [X] call_method
+- [X] go --- need to compile, this was BIG ; need random numbers
+  2020-08-13 it runs, different results though (and different random numbers)
+- [-] meteor --- skip, the retic version is not interesting, does not find any
+  solutions, may have a deeper type bug (well that would be interesting!)
+  compare to current pybench?
+  -> yes, the real thing actually gets solutions
+- [X] pystone
+- [ ] chaos --- hard to check output (huge) ; need random numbers
+
+
+### first results,
+
+see `tr/blame/1/0-blame.rkt/*out`
+
+several timeouts, yikes
+pystone finishes, but rates 42x, hell no
+
+(Racket is a faster baseline, but no 10min timeout is too too much)
+
+[ ] ... take a look at the pidigits expanded code for both,
+ see what might be going on
+
+[X] also, `go` revealed bugs, transient checks not happening
+  two problems (1) sc optimizer replaced with any/c (2) Name gets any/c
+  instead of object check. Both fixed.
+
+Now, for the initial non-timeouts, things are better
+
+- [X] call_simple +4s ... +infx but thats fine
+- [X] call_method <2x
+- [X] pystone 8x 10x, fine
+
+- [ ] pidigits
+- [ ] fannkuch
 - [ ] nqueens
 - [ ] nbody
-- [ ] pidigits
 - [ ] spectralnorm
-- [ ] call_simple
 - [ ] float
-- [ ] call_method
 - [ ] go
-- [ ] meteor
-- [ ] pystone
-- [ ] chaos
-
 
