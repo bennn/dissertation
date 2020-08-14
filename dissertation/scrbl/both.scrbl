@@ -1140,8 +1140,49 @@ First a notation
 
 
 @subsection[#:tag "sec:both:performance"]{Performance}
-@;      - ?? 2-way lattice? 3-way
-@;      - ?? programs where mix is better than natural-only or transient-only
+@; - worst-case table (can trace "min" line in "fig:transient:overhead"
+@; - 
+@; - ?? 2-way lattice? 3-way
+@; - ?? programs where mix is better than natural-only or transient-only
+
+Offering both @|sDeep| and @|sShallow| types removes the tradeoff evident
+ in @chapter-ref{chap:transient}.
+Programmers can easily switch from one semantics to the other
+ to pick the best performance.
+(Or the best guarantees, if needed.)
+For all benchmarks, the choice improves the worst-case overhead of
+ gradual typing (@section-ref{sec:both:perf:worst}).
+By implication, Typed Racket can offer a new migration story.
+If the plan is to migrate from untyped to fully-typed one module at
+ a time, adding @|sshallow| types greatly reduces the odds of hitting a slow
+ configuration along a randomly-chosen path (@section-ref{sec:both:perf:path}).
+Mixing @|sdeep| and @|sshallow| types in one configuration opens new possibilities
+ (@section-ref{sec:both:perf:both}).
+One especially promising direction is to use @|sshallow| types in
+ library code (@section-ref{sec:both:perf:lib}).
+
+
+@subsubsection[#:tag "sec:both:perf:worst"]{Worst-Case, Table}
+
+@subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
+
+@subsubsection[#:tag "sec:both:perf:both"]{Better Together?}
+
+Are there any mixed lattice points, using guarded and transient, that do
+ better than a "pure" configuration?
+
+For a negative answer, need a lattice on top of every lattice point.
+Can try small benchmarks --- ok, then extrapolate.
+
+
+@subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
+
+For benchmarks that depend on a typed library,
+ excluding gregor and quad for now,
+ how are both lattices when library is transient?
+
+Wider implication for Racket?
+@; really need to check math library asap
 
 
 @subsection{Limitations and Threats}
