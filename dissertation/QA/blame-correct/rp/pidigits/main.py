@@ -51,5 +51,5 @@ def calc_ndigits(n:int)->List(int):
 if __name__ == "__main__":
     t = Timer()
     with t:
-        print(calc_ndigits(NDIGITS))
+        calc_ndigits(NDIGITS)
 
