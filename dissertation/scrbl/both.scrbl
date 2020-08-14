@@ -1,10 +1,20 @@
 #lang greenman-thesis/include
+@(require
+   (only-in greenman-thesis/shallow/main
+     SHALLOW-CURRENT-BENCHMARK*
+     get-mixed-worst-table
+     render-mixed-worst-table
+     s:cache-dir)
+   (only-in greenman-thesis/oopsla-2019/pict
+     )
+   (only-in math/statistics
+     mean))
 
+@title{Guarded and Transient, Combined}
 @; TODO
 @;   Might be able to prove a ``tag error'' lemma, but the elimination forms
 @;    currently don't tell between static-typed and untyped
 
-@title{Guarded and Transient, Combined}
 
 First, simple model of the combination.
 Formal properties preserved.
@@ -1163,6 +1173,29 @@ One especially promising direction is to use @|sshallow| types in
 
 
 @subsubsection[#:tag "sec:both:perf:worst"]{Worst-Case, Table}
+
+@(let* ((WT (get-mixed-worst-table SHALLOW-CURRENT-BENCHMARK*))
+       )
+@list[
+@figure*[
+  "fig:both:mixed-worst-table"
+  @elem{
+   Worst-case overhead after choosing the best of @|sdeep| and @|sshallow|.
+  }
+  @render-mixed-worst-table[WT]
+]
+@elem{
+Allowing @|sdeep| and @|sshallow| types opens up the overhead plots
+ in the previous chapter.
+With the ability to choose one world or the other, programmers can
+ trace the best-case line on such a plot.
+
+@Figure-ref{fig:both:mixed-worst-table} summarizes the consequences
+ of the new freedom by listing the worst-case overhead in each benchmark,
+ after picking the best of either @|sdeep| or @|sshallow|.
+Before, high-overheads were common.
+After, all these perils are avoidable by switching languages.
+}])
 
 @subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
 

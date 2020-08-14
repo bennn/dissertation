@@ -9,12 +9,16 @@
   ratios-row-name
   ratios-row-deep
   ratios-row-shallow
+
   get-blame-table
   render-blame-table
   blame-row-name
   blame-row-blame
   blame-row-deep
   blame-row-shallow
+
+  get-mixed-worst-table
+  render-mixed-worst-table
 
   SHALLOW-CURRENT-BENCHMARK*
 
@@ -219,3 +223,42 @@
 
 (define (blame-row-deep r)
   (string->number (cadddr (cdr r))))
+
+;; ---
+
+(define MIXED-WORST-TITLE
+  (list "Benchmark"
+        "worst before"
+        "worst after"))
+
+(define (render-mixed-worst-table row*)
+  ;; TODO abstraction
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(bottom-border 1)
+      #:column-properties '(left right)
+      (list* MIXED-WORST-TITLE
+             (map cdr row*)))))
+
+(define (get-mixed-worst-table name*)
+  ;; TODO copied from above
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "mixed-worst-table.rktd")
+      (λ ()
+        (for/list ([name (in-list name*)])
+          (make-mixed-worst-row name
+                          (benchmark-name->performance-info name stransient)
+                          (benchmark-name->performance-info name default-rkt-version)))))))
+
+(define (make-mixed-worst-row name pi-shallow pi-deep)
+  (define s-max (max-overhead pi-shallow))
+  (define d-max (max-overhead pi-deep))
+  (list name
+        (bm name)
+        (rnd (max s-max d-max))
+        (rnd (min s-max d-max))))
+

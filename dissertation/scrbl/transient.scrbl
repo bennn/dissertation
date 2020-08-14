@@ -7,6 +7,8 @@
      NSA-core-speed
      NSA-RAM
      NSA-timeout-minutes
+     get-ratios-table
+     render-ratios-table
      ratios-row-name
      ratios-row-deep
      ratios-row-shallow
@@ -16,8 +18,6 @@
      blame-row-blame
      blame-row-deep
      blame-row-shallow
-     get-ratios-table
-     render-ratios-table
      s:cache-dir)
    (only-in greenman-thesis/jfp-2019/main
      MAX-OVERHEAD
@@ -1243,7 +1243,7 @@ All data came from a dedicated Linux box with @id[NSA-num-cores] physical
          (for/sum ((row (in-list RT)))
            (if (< (ratios-row-shallow row) 1) 1 0))))
 @list[
-@figure[
+@figure*[
   "fig:transient:ratio"
   @elem{Performance ratios for @|sdeep| and @|sshallow| types on the @|GTP| benchmarks.}
   @render-ratios-table[RT]
@@ -1377,7 +1377,7 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
         (worstx-blame-over-shallow
          (rnd (apply max x-blame-over-shallow*))))
 @list[
-@figure[
+@figure*[
   "fig:transient:blame-performance"
   @; TODO is "perf ratio" the right word? These are really typed/baseline right?
   @elem{
