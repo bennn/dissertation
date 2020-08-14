@@ -1138,8 +1138,67 @@ First a notation
 @section[#:tag "sec:both:implementation"]{Implementation}
 @; - typed-context? hook = easy
 @; - reuse ctc + type = hard
-@; - require/untyped-contract
-@; - define-typed/untyped-id
+@; X require/untyped-contract
+@; X define-typed/untyped-id
+
+
+@; ---
+
+@; --- struggles = edit old code , 2 of these => new type errors
+
+Typed Racket exposes a limited API to manually tweak typed/untyped interactions.
+Two forms in this API can lead to unexpected results in the new
+ @|deep| + @|sshallow| world.
+
+First is @tt{define-typed/untyped-identifier}.
+As the name suggests, this form creates a new identifier from two old ones.
+The following example defines @tt{f} from two other names:
+
+@code-nested{(define-typed/untyped-identifier f typed-f untyped-f)}
+
+The meaning of the new @tt{f} depends on the context it appears.
+In typed code, @tt{f} expands to @tt{typed-f}.
+In untyped code, an @tt{f} is a synonym for @tt{untyped-f}.
+
+The @tt{typed-f} is intended for @|sdeep|-typed code.
+It cannot be safely used in a @|sshallow| module because it may
+ assume certain interactions.
+Consequently, @|sshallow| code must use the untyped id.
+This means, unfortunately, that changing a @|sdeep| module to @|sshallow|
+ can raise a type checking error.
+In particular, occurrences of @tt{f} that expand to @tt{untyped-f} are
+ untyped identifiers.
+There is no way to uncover the type that a @tt{typed-f} would have, and
+ it is unclear whether such a type is always desirable.
+
+The way forward is to add a third argument to the form so that users can
+ specify behavior for all three contexts.
+Even so, old code needs changes.
+
+@; TODO example use
+Second is @tt{require/untyped-contract}.
+This form is for untyped code to import a typed identifier whose type
+ does not have a @|sdeep| contract.
+Users can give a supertype that has a contract, and use the typed identifier
+ in a more restricted way than typed code does.
+
+This form comes with a surprising design choice.
+If an untyped-contract identifier goes back into typed code, it has its original
+ type, not the supertype.
+The form only talks about contracts, it does not narrow type checking.
+This is a safe thing to do because @|sdeep|-typed code does not use
+ the contract; it can tag along until it hits another boundary.
+
+For @|sshallow| types, the contract is needed.
+It must be applied immediately when the value reaches @|sshallow| code,
+ and this means the original type is misleading because some would-be-type-correct
+ behaviors are certainly ruled out by the contract.
+So the supertype must be used.
+This means, new typechecking errors can occur when changing from @|sdeep|
+ to @|sshallow|.
+
+Third trouble, type environments.
+Users have to modify to remove @|stransient| post-checks.
 
 
 @section[#:tag "sec:both:evaluation"]{Evaluation}
