@@ -489,7 +489,7 @@
     (make-configuration-pict 2 make-contextual-pict)))
 
 (define (code-nested . content)
-  (nested #:style 'code-inset (map codett content)))
+  (nested #:style 'code-inset (add-between (map codett content) (elem "\n"))))
 
 (define (example-type-shape #:type t-str #:shape s-str #:cost c-str)
   @exact{\begin{tabular}[t]{lcl}

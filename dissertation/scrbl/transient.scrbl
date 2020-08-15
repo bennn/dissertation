@@ -19,12 +19,18 @@
      blame-row-deep
      blame-row-shallow
      s:cache-dir)
+   (only-in greenman-thesis/pepm-2018/main
+     retic-commit
+     POPL-2017-BENCHMARK-NAMES)
    (only-in greenman-thesis/jfp-2019/main
      MAX-OVERHEAD
      default-rkt-version
      render-relative-exact-plot
      render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
+     typed-codeblock
+     untyped-codeblock
+
      tr:compiler
      transient:defense
      transient:divide
@@ -1429,14 +1435,51 @@ Our blame results are far less optimistic than the early report in
 For @|sShallow| Racket benchmarks that terminate, the average slowdown
  from blame is @id[avgx-blame-over-shallow]x
  and the worst-case is @id[worstx-blame-over-shallow]x.
-Apparently, these different conclusions are due to the benchmark suites.
-@citet{vss-popl-2017} use smaller benchmarks;
- compare @figure-ref{fig:tr:static-benchmark} and @figure-ref{fig:rp:static-benchmark}.
-I have successfully reproduced their numbers using Reticulated on their
- benchmarks.
-Additionally, I adapted the @bm{sieve} benchmark to Python.
-After some trouble with the stack limit, the resulting programs runs
- in ~40 seconds without blame and times out after 10 minutes with Reticulated blame.
+These different conclusions are due to two factors that let Reticulated
+ insert few checks: the chosen benchmarks and gradual type inference.
+
+Regarding benchmarks, @citet{vss-popl-2017} use small programs from the
+ @|PYBENCH| suite.
+@(let ((num-numeric (length '(pidigits nbody float)))
+       (num-total (length POPL-2017-BENCHMARK-NAMES)))
+  @elem{@Integer->word[num-numeric] of the @integer->word[num-total] benchmarks
+  focus on numeric computations; since the blame map does not track primitive
+  values, adding blame adds little overhead.})
+Among the other benchmarks, the overhead of blame appears to increase with
+ the size of the program.
+Larger Reticulated benchmarks should run on par with @|sShallow| Racket.
+Indeed, I converted the @bm{sieve} benchmark to Reticulated and found that
+ adding blame increases its running time from ~40 seconds to a time out after
+ 10 minutes.
+
+The type inference issue is subtle;
+ Reticulated frequently infers the dynamic type for local variables.
+Doing so is type-sound and lets Reticulated skip many runtime checks
+ and blame-map updates; however, the programmer gets less precise type
+ and blame information.
+For example, the following Python snippet creates a list of numbers,
+ mutates the list, and reads the first element.
+
+@typed-codeblock['(
+  "def set(xs):"
+  "    xs[0] = \"X\""
+  "    return"
+  ""
+  "def main():"
+  "    nums = list(range(3))"
+  "    set(nums)"
+  "    return nums[0] < 1"
+  ""
+  "main()"
+  "# TypeError: unorderable types: str() < int()"
+)]
+
+Reticulated infers the dynamic type for the list @tt{nums} and does
+ not check that @tt{nums[0]} returns a number.
+Running this program leads to a Python exception about comparing strings
+ and integers.
+For the benchmarks, the lack of checks leads to a faster running time,
+ especially in programs that incrementally update local variables in a loop.
 }])
 
 

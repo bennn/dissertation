@@ -33,6 +33,8 @@
   benchmark-name->performance-info
 
   cache-dir
+
+  retic-commit
 )
 
 (require
@@ -42,7 +44,7 @@
   gtp-util
   gtp-util/system
   gtp-plot
-  (only-in greenman-thesis bm)
+  (only-in greenman-thesis bm github-commit)
   greenman-thesis/util
   json
   pict
@@ -493,4 +495,6 @@
 
 (define NUM-EXHAUSTIVE-BENCHMARKS (length EXHAUSTIVE-BENCHMARKS))
 
+(define retic-commit
+  (github-commit "mvitousek" "reticulated" "e478343ce7c0f2bc50d897b0ad38055e8fd9487d"))
 

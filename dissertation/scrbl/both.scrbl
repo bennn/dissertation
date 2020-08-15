@@ -1148,7 +1148,7 @@ First a notation
 
 Typed Racket exposes a limited API to manually tweak typed/untyped interactions.
 Two forms in this API can lead to unexpected results in the new
- @|deep| + @|sshallow| world.
+ @|sdeep| + @|sshallow| world.
 
 First is @tt{define-typed/untyped-identifier}.
 As the name suggests, this form creates a new identifier from two old ones.

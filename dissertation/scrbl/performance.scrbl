@@ -1115,7 +1115,7 @@ Each job:
 }
 @item{
   downloaded fresh copies of @|rp:PYTHON|
-  and Reticulated commit @github-commit["mvitousek" "reticulated" "e478343ce7c0f2bc50d897b0ad38055e8fd9487d"];
+  and Reticulated commit @|rp:retic-commit|;
 }
 @item{
   repeatedly:

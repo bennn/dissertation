@@ -1,6 +1,9 @@
 #lang racket/base
 
 (provide
+  untyped-codeblock
+  typed-codeblock
+
   jungle:example-atom
   jungle:example-atom*
   jungle:example-pair
