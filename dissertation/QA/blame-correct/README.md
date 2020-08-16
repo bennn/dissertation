@@ -116,7 +116,7 @@ pystone finishes, but rates 42x, hell no
 
 (Racket is a faster baseline, but no 10min timeout is too too much)
 
-[ ] ... take a look at the pidigits expanded code for both,
+[X] ... take a look at the pidigits expanded code for both,
  see what might be going on
 
 [X] also, `go` revealed bugs, transient checks not happening
@@ -129,11 +129,87 @@ Now, for the initial non-timeouts, things are better
 - [X] call_method <2x
 - [X] pystone 8x 10x, fine
 
-- [ ] pidigits
+- [X] pidigits
+  + no checks / inputs on arithmetic
+  + avoid arg-cast ... in same file, when expected type matches?
+    they DO have more information, we don't know from type what functions crossed a boundary
+  + yeah, need to skip output checks on arithmetic and lists
+  2777 after
+
 - [ ] fannkuch
+  + still slow after pidigits changes,
+    retic not cheking `perm[i]` etc ... many things
 - [ ] nqueens
+  + still slow
 - [ ] nbody
+  + ?
 - [ ] spectralnorm
+  + ?
 - [ ] float
+  + ?
 - [ ] go
+  + ?
+
+
+### sieve example
+
+retic original
+
+```
+def count_from(n:int)->Stream:
+    def thunk()->Stream:
+        return count_from(n + 1)
+    return make_stream(n, thunk)
+```
+
+
+retic --mgd-transient --print
+= few checks
+
+```
+  def count_from(n):
+      mgd_check_type_int(n, count_from, (1, 0))
+      def thunk():
+          return check0(count_from((n + 1)), count_from, 2)
+      return check0(make_stream(n, thunk), make_stream, 2)
+```
+
+
+
+
+TR original
+
+```
+  (: count-from (-> Natural stream))
+  (define (count-from n)
+    (define (thunk)
+      (count-from (add1 n)))
+    (make-stream n thunk))
+```
+
+TR expanded, has many more checks
+
+```
+  (define (count-from n)
+    (void (transient-assert n exact-nonnegative-integer? '-Nat '(#<path:/Users/ben/code/racket/gtp/transient-tr-benchmark/min_sieve/c-0/main.rkt> 17 20 630 1) (cons count-from '(dom . 0))))
+    (define (thunk)
+      (let ((result
+             (count-from
+              (arg-cast
+                (let ((result (add1 (arg-cast n (cons add1 '(dom . 0))))))
+                  (transient-assert result g14 '-PosInt '(#<path:/Users/ben/code/racket/gtp/transient-tr-benchmark/min_sieve/c-0/main.rkt> 18 40 673 8) (cons add1 '(rng . 0))))
+                (cons count-from '(dom . 0))))))
+        (transient-assert result g18 'g2039 '(#<path:/Users/ben/code/racket/gtp/transient-tr-benchmark/min_sieve/c-0/main.rkt> 18 28 661 21) (cons count-from '(rng . 0)))))
+    (let ((result
+           (make-stream7
+            (arg-cast n (cons make-stream7 '(dom . 0)))
+            (arg-cast thunk (cons make-stream7 '(dom . 1))))))
+      (transient-assert result g18 'g2039 '(#<path:/Users/ben/code/racket/gtp/transient-tr-benchmark/min_sieve/c-0/main.rkt> 18 2 635 49) (cons make-stream7 '(rng . 0)))))
+```
+
+In fact, across the whole `sieve` there are very few casts ... and they never
+ go on function inputs! Only results, or identifiers that are about to be
+ called as functions.
+
+POPL'17 disagrees
 
