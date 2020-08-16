@@ -96,6 +96,8 @@
   acquire
   tetris
   synth
+  gregor
+  quadT
 ))
 
 (define RATIOS-TITLE
