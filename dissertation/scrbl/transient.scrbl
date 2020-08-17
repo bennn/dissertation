@@ -24,7 +24,7 @@
      POPL-2017-BENCHMARK-NAMES)
    (only-in greenman-thesis/jfp-2019/main
      MAX-OVERHEAD
-     default-rkt-version
+     transient-rkt-version
      render-relative-exact-plot
      render-relative-overhead-plot)
    (only-in greenman-thesis/oopsla-2019/pict
@@ -1242,8 +1242,9 @@ All data came from a dedicated Linux box with @id[NSA-num-cores] physical
              (<= (ratios-row-deep row) (ratios-row-shallow row)))
            (define-values [a b] (partition deep-wins? RT))
            (cons (map ratios-row-name a) (map ratios-row-name b))))
-        (deep-win-names (car deep-win-names+shallow-win-names))
-        (shallow-win-names (cdr deep-win-names+shallow-win-names))
+        (deep-win-names '("???") #;(car deep-win-names+shallow-win-names))
+        ;; TODO
+        (shallow-win-names '("???") #;(cdr deep-win-names+shallow-win-names))
         (num-deep-wins (length deep-win-names))
         (num-shallow-<1
          (for/sum ((row (in-list RT)))
@@ -1289,7 +1290,7 @@ Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
   ;; TODO stop at 10x? different title? (deep vs shallow?)
   render-relative-overhead-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
-    (cons bm-name (cons default-rkt-version stransient)))
+    (cons bm-name (cons transient-rkt-version stransient)))
   s:cache-dir
 ]
 
@@ -1330,7 +1331,7 @@ Overall, @|sShallow| Racket does not disappoint.
   ;; TODO formatting? sync colors
   render-relative-exact-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
-    (cons bm-name (cons default-rkt-version stransient)))
+    (cons bm-name (cons transient-rkt-version stransient)))
   s:cache-dir
 ]
 
@@ -1361,7 +1362,7 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
          (for/list ((r (in-list BT))
                     #:when (equal? "timeout" (blame-row-blame r)))
            (blame-row-name r)))
-        (blame-oom*
+        (blame-oom* '("???") #;
          (for/list ((r (in-list BT))
                     #:when (equal? "out of memory" (blame-row-blame r)))
            (blame-row-name r)))
@@ -1378,9 +1379,9 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
                     #:when (number? (blame-row-blame r)))
            (/ (blame-row-blame r)
               (blame-row-shallow r))))
-        (avgx-blame-over-shallow
+        (avgx-blame-over-shallow "???" #;
          (rnd (mean x-blame-over-shallow*)))
-        (worstx-blame-over-shallow
+        (worstx-blame-over-shallow "???" #;
          (rnd (apply max x-blame-over-shallow*))))
 @list[
 @figure*[

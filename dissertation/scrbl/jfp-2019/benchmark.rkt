@@ -38,6 +38,7 @@
 
   deliverable*
   default-rkt-version
+  transient-rkt-version
 )
 
 (require
@@ -72,6 +73,7 @@
 (define cache-dir (build-path HERE "with-cache"))
 
 (define default-rkt-version "7.7")
+(define transient-rkt-version "7.8.0.5")
 (define untyped "untyped")
 (define typed "typed")
 (define transient "transient")

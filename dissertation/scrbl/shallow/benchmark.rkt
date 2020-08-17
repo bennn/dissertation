@@ -78,26 +78,26 @@
 (define NSA-timeout-minutes 10)
 
 (define SHALLOW-CURRENT-BENCHMARK* '(
-  sieve
-  forth
+;  sieve
+;  forth
   fsm
-  fsmoo
-  mbta
-  morsecode
-  zombie
-  dungeon
-  jpeg
-  zordoz
-  lnm
-  suffixtree
-  kcfa
-  snake
-  take5
-  acquire
-  tetris
-  synth
-  gregor
-  quadT
+;  fsmoo
+;  mbta
+;  morsecode
+;  zombie
+;  dungeon
+;  jpeg
+;  zordoz
+;  lnm
+;  suffixtree
+;  kcfa
+;  snake
+;  take5
+;  acquire
+;  tetris
+;  synth
+;  gregor
+;  quadT
 ))
 
 (define RATIOS-TITLE
