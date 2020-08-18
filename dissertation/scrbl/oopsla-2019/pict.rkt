@@ -19,6 +19,10 @@
   transient:defense
   transient:opt
   tr:compiler
+
+  both:model-interaction
+  both:impl-interaction
+  both:model+impl
 )
 
 (require
@@ -46,8 +50,16 @@
 
 (define code-text-style (cons "Inconsolata" 'modern))
 (define code-text-size 14)
+(define sc-text-style (cons "Inconsolata" 'modern))
+(define sc-text-size 14)
 (define title-text-size 12)
 (define title-text-face "Liberation Serif")
+
+(define (te-mode-text str)
+  (define tt (text str (cons 'bold title-text-face) (+ 2 title-text-size)))
+  (add-rounded-border
+    #:x-margin 10 #:y-margin 10
+    tt))
 
 (define (title-text str)
   (text str (cons 'bold title-text-face) title-text-size))
@@ -55,6 +67,10 @@
 (define (code-text str [extra-style #f])
   (define style (if extra-style (cons extra-style code-text-style) code-text-style))
   (text str style code-text-size))
+
+(define (sc-text str)
+  ;; TODO actually sc, match the latex?
+  (code-text str))
 
 (define (success-text str)
   (colorize (code-text str 'bold) success-color))
@@ -128,7 +144,7 @@
     #:color color))
 
 (define (add-code-arrow* pp . arrow*)
-  (for/fold ((acc pp))
+  (for/fold ((pp pp))
             ((arrow (in-list arrow*)))
     (add-code-arrow pp arrow)))
 
@@ -540,6 +556,50 @@
     "  ....)"
   )))
 
+(define (append/line a b)
+  (define line-pict (vline 3 (max (pict-height a) (pict-height b))))
+  (hc-append 8 a line-pict b))
+
+(define both:model-interaction
+  (ppict-do
+    (blank 300 200)
+    #:go (coord 0 10/100 'lt #:abs-x 10)
+    (tag-pict (te-mode-text "Deep") 'deep)
+    #:go (coord 1 10/100 'rt #:abs-x -10)
+    (tag-pict (te-mode-text "Untyped") 'untyped)
+    #:go (coord 1/2 90/100 'cb)
+    (tag-pict (te-mode-text "Shallow") 'shallow)
+    #:set
+    (let* ((pp ppict-do-state)
+           (lbl+arr*
+             (list
+               (cons "noop" (code-arrow 'deep ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid)) ;; UGH
+               (cons "noop" (code-arrow 'untyped ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (cons "noop" (code-arrow 'shallow cb-find 'shallow cb-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               ;;
+               (cons "wrap" (code-arrow 'deep ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (cons "wrap" (code-arrow 'untyped ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               ;;
+               (cons "wrap" (code-arrow 'deep ct-find 'shallow ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (cons "wrap" (code-arrow 'shallow ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               ;;
+               (cons "noop" (code-arrow 'shallow ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (cons "scan" (code-arrow 'untyped ct-find 'shallow ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid)))))
+      (for/fold ((pp pp))
+                ((l+a (in-list lbl+arr*)))
+        (add-code-arrow pp (cdr l+a) #:label (sc-text (car l+a)))))))
+
+(define both:impl-interaction
+  (blank))
+
+(define both:model+impl
+  (add-rectangle-background
+    #:radius 0
+    #:x-margin 20 #:y-margin 10
+    (append/line
+      both:model-interaction
+      both:impl-interaction)))
+
 (define jungle:landscape
   ;; TODO
   ;;;; \begin{tikzpicture}
@@ -614,7 +674,7 @@
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        tr:compiler
+        both:model-interaction
         '()
     )))
 )

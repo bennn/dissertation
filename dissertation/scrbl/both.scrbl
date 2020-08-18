@@ -6,7 +6,7 @@
      render-mixed-worst-table
      s:cache-dir)
    (only-in greenman-thesis/oopsla-2019/pict
-     )
+     both:model-interaction)
    (only-in math/statistics
      mean))
 
@@ -1161,6 +1161,13 @@ This section focuses on challenges for the three-way interaction.
 
 @subsection{Code Re-Use}
 
+@; TODO move figure up, to model?
+@figure*[
+  "fig:both:base-interactions"
+  @elem{@|sDeep|, @|sShallow|, and untyped interactions.}
+  both:model-interaction]
+
+
 Extending Typed Racket to safely share type environments between @|sdeep|
  and @|sshallow| code required significant changes.
 
@@ -1201,8 +1208,8 @@ Achieving both required two changes:
 ]
 
 In the other direction, @|sshallow| code can send plain identifiers to
- @|shallow| and untyped code.
-But @|shallow| cannot go directly to @|sdeep| --- a @|sdeep| module must install
+ @|sshallow| and untyped code.
+But @|sshallow| cannot go directly to @|sdeep| --- a @|sdeep| module must install
  a contract at the boundary.
 TODO how can we do this? 
 
@@ -1224,7 +1231,7 @@ But macros are clearly unsafe in general because they can smuggle a typed
  identifier across a boundary.
 Consider a simple macro that expands to a function application:
 
-@code-inset{(define-syntax-rule (call-f x) (f x))}
+@code-nested{(define-syntax-rule (call-f x) (f x))}
 
 @|noindent|If this macro were used in @|sshallow| code, it could receive
  an argument @tt{x} that does not match its type assumptions.

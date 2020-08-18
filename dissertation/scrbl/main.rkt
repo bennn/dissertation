@@ -19,6 +19,8 @@
   x-axis y-axis
   x-axes y-axes
 
+  render-lib
+
   ~cite
   (rename-out (~cite ~citep))
 
