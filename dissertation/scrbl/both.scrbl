@@ -1140,17 +1140,65 @@ First a notation
 @; - reuse ctc + type = hard
 @; X require/untyped-contract
 @; X define-typed/untyped-id
+@; - reuse G macros in S code
+@; - manual type env needs manual trust
 
 
 @; ---
+@; --- failure to optimize
 
+@subsection{Challenge: Typed/Untyped Utilities}
 @; --- struggles = edit old code , 2 of these => new type errors
 
 Typed Racket exposes a limited API to manually tweak typed/untyped interactions.
+Deals with challenges that arose as users built libraries for mixed-typed users.
 Two forms in this API can lead to unexpected results in the new
  @|sdeep| + @|sshallow| world.
 
-First is @tt{define-typed/untyped-identifier}.
+
+@; --- require/untyped-contract
+
+First is @tt{require/untyped-contract}.
+This form is for untyped code to import a typed identifier whose type
+ does not have a @|sdeep| contract.
+Users can give a supertype that has a contract, and use the typed identifier
+ in a more restricted way than typed code does.
+
+For example, the @bm{jpeg} benchmark depends on a library for multi-dimensional
+ arrays (@render-lib[(make-lib "math/array" "https://docs.racket-lang.org/math/array.html")]).
+This library accepts two kinds of data for array indices:
+ either a vector of natural numbers or a vector of integers.
+Helper functions assert that values with the integer type do not actually
+ contain negative numbers:
+
+@code-nested{(: check-array-shape (-> (U (Vectorof Natural) (Vectorof Integer)) (Vectorof Natural)))}
+
+Such types cannot be turned into useful contracts because Racket does not have
+ true union contracts.
+The work around is to give a supertype:
+
+@code-nested{(require/untyped-contract [check-array-shape (-> (Vectorof Integer) (Vectorof Natural))])}
+
+This form comes with a surprising design choice.
+If an untyped-contract identifier goes back into typed code, it has its original
+ type, not the supertype.
+The form only talks about contracts, it does not narrow type checking.
+This is a safe thing to do because @|sdeep|-typed code does not use
+ the contract; it can tag along until it hits another boundary.
+
+For @|sshallow| types, the contract is needed.
+It must be applied immediately when the value reaches @|sshallow| code,
+ and this means the original type is misleading because some would-be-type-correct
+ behaviors are certainly ruled out by the contract.
+So the supertype must be used.
+This means, new typechecking errors can occur when changing from @|sdeep|
+ to @|sshallow|.
+
+
+@; --- define-typed/untyped-identifier
+@; TODO more extreme version of untyped-contract
+
+Second is @tt{define-typed/untyped-identifier}.
 As the name suggests, this form creates a new identifier from two old ones.
 The following example defines @tt{f} from two other names:
 
@@ -1174,31 +1222,6 @@ There is no way to uncover the type that a @tt{typed-f} would have, and
 The way forward is to add a third argument to the form so that users can
  specify behavior for all three contexts.
 Even so, old code needs changes.
-
-@; TODO example use
-Second is @tt{require/untyped-contract}.
-This form is for untyped code to import a typed identifier whose type
- does not have a @|sdeep| contract.
-Users can give a supertype that has a contract, and use the typed identifier
- in a more restricted way than typed code does.
-
-This form comes with a surprising design choice.
-If an untyped-contract identifier goes back into typed code, it has its original
- type, not the supertype.
-The form only talks about contracts, it does not narrow type checking.
-This is a safe thing to do because @|sdeep|-typed code does not use
- the contract; it can tag along until it hits another boundary.
-
-For @|sshallow| types, the contract is needed.
-It must be applied immediately when the value reaches @|sshallow| code,
- and this means the original type is misleading because some would-be-type-correct
- behaviors are certainly ruled out by the contract.
-So the supertype must be used.
-This means, new typechecking errors can occur when changing from @|sdeep|
- to @|sshallow|.
-
-Third trouble, type environments.
-Users have to modify to remove @|stransient| post-checks.
 
 
 @section[#:tag "sec:both:evaluation"]{Evaluation}
