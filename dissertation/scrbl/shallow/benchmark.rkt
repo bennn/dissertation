@@ -78,19 +78,19 @@
 (define NSA-timeout-minutes 10)
 
 (define SHALLOW-CURRENT-BENCHMARK* '(
-;  sieve
+  sieve
 ;  forth
   fsm
-;  fsmoo
-;  mbta
-;  morsecode
+  fsmoo
+  mbta
+  morsecode
 ;  zombie
 ;  dungeon
 ;  jpeg
 ;  zordoz
-;  lnm
+  lnm
 ;  suffixtree
-;  kcfa
+  kcfa
 ;  snake
 ;  take5
 ;  acquire
