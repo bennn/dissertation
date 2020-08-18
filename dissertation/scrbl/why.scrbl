@@ -60,33 +60,99 @@
 @; doesn’t come across what you want.
 
 @title[#:tag "chap:why"]{Migratory Typing}
-@; why / where-from
+@; whence MT
 
-@; summary:
-@; Migratory typing is a principled way to mix typed and untyped code.
-@; This dissertation helps improve MT,
-@;  and MT is the guiding motivation.
-@; MT axioms and principles influence work.
-@; ... purpose statement ...
+Migratory typing is a new refinement of an old idea: mixing
+ typed and untyped code.
+A typed programming language comes with a strict meta-language (of types)
+ that articulates how a program computes.
+For better or worse, code that does not fit the meta-language may not run.
+An untyped language is willing to see what happens in many more programs,
+ so long as the computations stick to legal values.
+@; TODO cite Hoare hints, "cherished"?
+The mixed-typed idea is to somehow combine good aspects of both.
+A programmer should have some untyped flexibility and some typed guarantees.
 
-@;There are several ways to mixed-typed.
-@;
-@;The research area of @emph{migratory typing} provides motivation and
-@; constraints for my thesis.
+Of course, flexibility and guarantees lie at two ends of a tradeoff.
+More freedom to run programs leads to fewer guarantees about what a new
+ program will do, unless there are run-time checks to catch extreme behaviors.
+Thus a mixed-typed language needs to balance three desires: expressiveness,
+ guarantees, and performance.
+But even before this 3-way tradeoff, a language has to decide what kinds
+ of mixing to allow and what goals it hopes to achieve.
 
-My thesis contributes to the research area of migratory typing.
-The methods, experiments, and proofs that support the thesis
- provide new insights about known migratory typing systems
- and offer starting points into the unknown.
-Before we can present the results, we need to establish the context
- of migratory typing@~cite{tfffgksst-snapl-2017}.
+The goal of migratory typing is to make static typing available in
+ an untyped language so that stable programs can gain the maintenance
+ benefits of types.
+Programmers create a mixed-typed program by writing types for
+ one chunk of untyped code; that is, by migrating the chunk into the typed
+ half of the language.
+Both the goal and the method are a departure from prior mixed-typed efforts
+ (@section-ref{sec:why:related}), but they are grounded in observations
+ about programming (@section-ref{sec:why:observations})
+ and 10+ years of experience with Typed Racket suggests that migratory
+ typing is a major advance.
+This dissertation contributes a novel way to balance
+ expressiveness, guarantees, and performance (@section-ref{sec:why:design}).
 
-@;Besides motivation, migratory typing adds constraints.
-@;Need to introduce before we present the work ahead.
-@;Tell the MT story via steps.
+
+@section[#:tag "sec:why:related"]{Pre-History}
+@; NOTE we are still figuring out the key knobs + concepts
+
+Beyond migratory typing, there are several ways to mix typed and untyped
+ code.
+The main competing alternatives are optional typing and gradual typing.
 
 
-@section{MT Observations}
+@subsection{Optional Typing}
+
+An optional typing system provides types without soundness.
+Unsound types are still useful.
+Many languages follow this design.
+
+My goal is soundness.
+Benefits listed above.
+If academics do not pursue, then nobody will.
+
+
+@subsection{Gradual Typing}
+
+Gradual typing is not necessarily migratory,
+ non-migratory is addressing a dubious problem.
+
+Includes a special dynamic type.
+The type makes it easy to add types to code, no insistence on detail.
+This makes it harder to detect static type errors ... but not much worse
+ than free use of a top type.
+More importantly, the dynamic type obscures the boundaries between typed
+ and untyped code.
+@; easy to get many boundaries, hard to point to these
+
+
+@subsection{Micro, Macro}
+@; TODO
+
+The two original papers on gradual/migratory typing begin with different
+ ideas about how to mix typed and untyped code.
+
+@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
+ of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
+ typing@~cite{t-popl-1990}.
+The grammar of static types acquires a new catch-all member that accepts
+ any well-formed piece of code.
+Using this @emph{dynamic type}, a programmer can escape the type checker
+ on any line of otherwise-typed code.
+To allow such flexibility, however, the type checker can no longer affirm
+ that a program is type-correct.
+Programs that use the dynamic type are but plausibly correct; depending
+ on what the dyn-typed code evaluates to, the program may run smoothly.
+
+@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
+
+
+
+
+@section[#:tag "sec:why:observations"]{MT Observations}
 
 Migratory typing stems from three observations about the practice of
  programming.
@@ -219,56 +285,9 @@ What, why, how.
 
 
 @; ---
-@section[#:tag "sec:non-mt"]{Other Mixed-Typed Methods}
+@section[#:tag "sec:why:design"]{Design Space: Expressiveness, Guarantees, Performance}
 
-Beyond migratory typing, there are several ways to mix typed and untyped
- code.
-The main competing alternatives are optional typing and gradual typing.
+Anticipate the design-space analysis
 
-
-@subsection{Optional Typing}
-
-An optional typing system provides types without soundness.
-Unsound types are still useful.
-Many languages follow this design.
-
-My goal is soundness.
-Benefits listed above.
-If academics do not pursue, then nobody will.
-
-
-@subsection{Gradual Typing}
-
-Gradual typing is not necessarily migratory,
- non-migratory is addressing a dubious problem.
-
-Includes a special dynamic type.
-The type makes it easy to add types to code, no insistence on detail.
-This makes it harder to detect static type errors ... but not much worse
- than free use of a top type.
-More importantly, the dynamic type obscures the boundaries between typed
- and untyped code.
-@; easy to get many boundaries, hard to point to these
-
-
-@subsection{Micro, Macro}
-@; TODO
-
-The two original papers on gradual/migratory typing begin with different
- ideas about how to mix typed and untyped code.
-
-@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
- of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
- typing@~cite{t-popl-1990}.
-The grammar of static types acquires a new catch-all member that accepts
- any well-formed piece of code.
-Using this @emph{dynamic type}, a programmer can escape the type checker
- on any line of otherwise-typed code.
-To allow such flexibility, however, the type checker can no longer affirm
- that a program is type-correct.
-Programs that use the dynamic type are but plausibly correct; depending
- on what the dyn-typed code evaluates to, the program may run smoothly.
-
-@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
 
 
