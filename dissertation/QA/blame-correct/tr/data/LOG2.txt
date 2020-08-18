@@ -1,0 +1,65 @@
+NO BLAME
+
+call_method
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/call_method/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 1919 real time: 1937 gc time: 92
+cpu time: 1887 real time: 1903 gc time: 95
+cpu time: 1904 real time: 2024 gc time: 89
+cpu time: 1853 real time: 1865 gc time: 86
+cpu time: 2186 real time: 2586 gc time: 92
+
+call_simple
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/call_simple/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+
+pystone
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/pystone/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 1090 real time: 1098 gc time: 86
+cpu time: 1063 real time: 1070 gc time: 79
+cpu time: 1096 real time: 1103 gc time: 79
+cpu time: 1207 real time: 1304 gc time: 79
+cpu time: 1206 real time: 1240 gc time: 86
+
+
+BLAME
+
+call_method
+"main.rkt":
+  making #<path:/Users/ben/code/racket/fork/extra-pkgs/typed-racket/typed-racket-lib/typed-racket/base-env/class-prims.rkt>
+  making #<path:/Users/ben/code/racket/fork/extra-pkgs/typed-racket/typed-racket-lib/typed/racket/class.rkt>
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/call_method/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 3452 real time: 3475 gc time: 98
+cpu time: 3396 real time: 3421 gc time: 93
+cpu time: 3290 real time: 3313 gc time: 94
+cpu time: 3205 real time: 3229 gc time: 88
+cpu time: 3307 real time: 3332 gc time: 90
+
+call_simple
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 4920 real time: 4953 gc time: 87
+cpu time: 4968 real time: 5000 gc time: 85
+cpu time: 5032 real time: 5072 gc time: 92
+cpu time: 4939 real time: 4972 gc time: 85
+cpu time: 4995 real time: 5028 gc time: 86
+
+pystone
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/pystone/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 9772 real time: 9863 gc time: 326
+cpu time: 10373 real time: 10513 gc time: 322
+cpu time: 9696 real time: 9749 gc time: 321
+cpu time: 8641 real time: 8646 gc time: 307
+cpu time: 9526 real time: 9560 gc time: 313

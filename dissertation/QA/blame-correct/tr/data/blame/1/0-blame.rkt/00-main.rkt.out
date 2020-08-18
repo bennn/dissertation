@@ -1,0 +1,8 @@
+#lang gtp-measure/output/file
+cpu time: 3202 real time: 3235 gc time: 84
+cpu time: 3551 real time: 3641 gc time: 88
+cpu time: 2888 real time: 2890 gc time: 79
+cpu time: 2919 real time: 2920 gc time: 85
+cpu time: 3023 real time: 3060 gc time: 81
+cpu time: 2946 real time: 2951 gc time: 84
+cpu time: 2889 real time: 2889 gc time: 84

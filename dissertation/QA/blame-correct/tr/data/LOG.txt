@@ -1,0 +1,208 @@
+NO BLAME
+
+call_method
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 661 real time: 664 gc time: 85
+cpu time: 643 real time: 645 gc time: 82
+cpu time: 713 real time: 782 gc time: 115
+cpu time: 598 real time: 599 gc time: 72
+cpu time: 651 real time: 655 gc time: 84
+cpu time: 621 real time: 624 gc time: 86
+cpu time: 628 real time: 628 gc time: 73
+
+call_simple
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+cpu time: 0 real time: 0 gc time: 0
+
+fannkuch
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/fannkuch/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 7268 real time: 8282 gc time: 146
+cpu time: 5868 real time: 6265 gc time: 110
+cpu time: 6331 real time: 6716 gc time: 118
+cpu time: 6562 real time: 7026 gc time: 131
+cpu time: 6166 real time: 6281 gc time: 109
+cpu time: 5914 real time: 6024 gc time: 109
+cpu time: 6224 real time: 6396 gc time: 124
+
+float
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 935 real time: 1018 gc time: 193
+cpu time: 870 real time: 885 gc time: 187
+cpu time: 881 real time: 896 gc time: 178
+cpu time: 889 real time: 937 gc time: 180
+cpu time: 867 real time: 887 gc time: 198
+cpu time: 935 real time: 1048 gc time: 171
+cpu time: 846 real time: 858 gc time: 173
+
+go
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/go/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 21455 real time: 22095 gc time: 134
+cpu time: 21636 real time: 22630 gc time: 140
+cpu time: 18377 real time: 18530 gc time: 137
+cpu time: 20225 real time: 20993 gc time: 131
+cpu time: 19343 real time: 19589 gc time: 129
+cpu time: 18925 real time: 19141 gc time: 117
+cpu time: 20524 real time: 21394 gc time: 129
+
+nbody
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/nbody/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 131 real time: 132 gc time: 65
+cpu time: 145 real time: 145 gc time: 71
+cpu time: 138 real time: 138 gc time: 68
+cpu time: 141 real time: 141 gc time: 66
+cpu time: 145 real time: 145 gc time: 78
+cpu time: 144 real time: 144 gc time: 70
+cpu time: 144 real time: 144 gc time: 68
+
+nqueens
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 1301 real time: 1307 gc time: 195
+cpu time: 1239 real time: 1242 gc time: 197
+cpu time: 1257 real time: 1262 gc time: 195
+cpu time: 1255 real time: 1261 gc time: 195
+cpu time: 1249 real time: 1253 gc time: 195
+cpu time: 1263 real time: 1267 gc time: 198
+cpu time: 1248 real time: 1265 gc time: 193
+
+pidigits
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 2419 real time: 2439 gc time: 102
+cpu time: 2325 real time: 2337 gc time: 102
+cpu time: 2364 real time: 2372 gc time: 101
+cpu time: 2340 real time: 2347 gc time: 95
+cpu time: 2388 real time: 2397 gc time: 101
+cpu time: 2387 real time: 2407 gc time: 105
+cpu time: 2401 real time: 2410 gc time: 102
+
+pystone
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 332 real time: 334 gc time: 72
+cpu time: 344 real time: 345 gc time: 82
+cpu time: 334 real time: 335 gc time: 73
+cpu time: 352 real time: 353 gc time: 70
+cpu time: 357 real time: 359 gc time: 83
+cpu time: 350 real time: 352 gc time: 74
+cpu time: 348 real time: 349 gc time: 73
+
+spectralnorm
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/spectralnorm/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+cpu time: 18 real time: 18 gc time: 2
+cpu time: 21 real time: 21 gc time: 3
+cpu time: 24 real time: 24 gc time: 2
+cpu time: 18 real time: 18 gc time: 2
+cpu time: 22 real time: 22 gc time: 2
+cpu time: 20 real time: 20 gc time: 2
+cpu time: 18 real time: 18 gc time: 2
+
+
+BLAME
+
+call_method
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 3202 real time: 3235 gc time: 84
+cpu time: 3551 real time: 3641 gc time: 88
+cpu time: 2888 real time: 2890 gc time: 79
+cpu time: 2919 real time: 2920 gc time: 85
+cpu time: 3023 real time: 3060 gc time: 81
+cpu time: 2946 real time: 2951 gc time: 84
+cpu time: 2889 real time: 2889 gc time: 84
+
+call_simple
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 4406 real time: 4409 gc time: 77
+cpu time: 4478 real time: 4479 gc time: 74
+cpu time: 4375 real time: 4375 gc time: 74
+cpu time: 4461 real time: 4461 gc time: 75
+cpu time: 4455 real time: 4455 gc time: 76
+cpu time: 4426 real time: 4427 gc time: 75
+cpu time: 4567 real time: 4568 gc time: 74
+
+fannkuch
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/fannkuch/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
+
+float
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
+
+go
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/go/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+transient-assert: value does not match static type
+ value: #<mutable-set: 13180677>
+ type: (make-Set -Int)
+ src: (#<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/go/main.rkt> 93 16 3285 25)
+ context...:
+ /Users/ben/code/racket/fork/extra-pkgs/typed-racket/typed-racket-lib/typed-racket/utils/transient-contract.rkt:74:0:
+ raise-transient-error    .../defender/defender.rkt:267:47: add method in
+ zobristhash%    .../defender/defender.rkt:267:47: move method in square%
+ .../defender/defender.rkt:267:47: move method in board%
+ .../defender/defender.rkt:485:13: Slam9130
+ .../defender/defender.rkt:267:47: play method in uctnode%
+ .../defender/defender.rkt:485:13: Slam9138
+ .../defender/defender.rkt:485:13: Slam9137
+ .../defender/defender.rkt:485:13: Slam9140
+ .../defender/defender.rkt:485:13: Slam9139    time-apply
+ .../optimizer/unboxed-let.rkt:111:12    call-with-values
+ call-in-empty-metacontinuation-frame    body of
+ "/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/go/main.rkt"
+ temp35_0 
+
+nbody
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/nbody/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
+
+nqueens
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
+
+pidigits
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
+
+pystone
+"main.rkt":
+ [already up-to-date at "compiled/ta6osx/main_rkt.zo"]
+cpu time: 14182 real time: 23272 gc time: 670
+cpu time: 13918 real time: 22374 gc time: 642
+cpu time: 14763 real time: 22176 gc time: 717
+cpu time: 14579 real time: 23184 gc time: 680
+cpu time: 14530 real time: 22338 gc time: 658
+cpu time: 14486 real time: 22638 gc time: 686
+cpu time: 14168 real time: 22921 gc time: 672
+
+spectralnorm
+"main.rkt":
+  making #<path:/Users/ben/code/racket/gtp/dissertation/dissertation/QA/blame-correct/tr/spectralnorm/main.rkt>
+ [output to "compiled/ta6osx/main_rkt.zo"]
+timeout 666000
