@@ -1137,18 +1137,143 @@ First a notation
 
 
 @section[#:tag "sec:both:implementation"]{Implementation}
-@; - typed-context? hook = easy
+@; X typed-context? hook = easy
 @; - reuse ctc + type = hard
+@; x #%module-begin, to reuse contract defs save space ... NVM
 @; X require/untyped-contract
 @; X define-typed/untyped-id
 @; X reuse G macros in S code
 @; - manual type env needs manual trust
 
+To combine @|sdeep| and @|sshallow| in a single implementation,
+ we add a new entry point via the language.
+Language @tt{typed/racket} enters the default, @|sdeep| types.
+New language @tt{typed/racket/shallow} gives @|sshallow| types.
+Both enter the same Typed Racket implementation, but set different values
+ for a compile-time flag.
 
-@; ---
-@; --- failure to optimize
+The flag influences several aspects of the compiler:
+ how to protect boundaries,
+ the interpretation of types as contracts,
+ whether to rewrite typed code with @|stransient| checks,
+ and whether to disable certain optimizations.
+This section focuses on challenges for the three-way interaction.
 
-@subsection{Challenge: Typed/Untyped Utilities}
+@subsection{Code Re-Use}
+
+Extending Typed Racket to safely share type environments between @|sdeep|
+ and @|sshallow| code required significant changes.
+
+First, the context.
+Typed Racket supports separate compliation.
+Modules are type-checked individually; once a module is checked, the compiler
+ serializes type environment info so that future modules can re-use the results.
+When one @|sdeep| module imports from another, it gets an identifier that
+ it can look up in the deserialized type environment.
+
+For safe @|sdeep| and untyped interactions, Typed Racket provides identifies
+ through one level of indirection.
+Instead of providing a function @tt{f} directly, Typed Racket provides a
+ macro that expands either to @tt{f} or a contract-protected version.
+This macro chooses based on a compile-time flag; a @tt{typed/racket} module
+ sets the flag while an untyped module leaves it unset.
+
+So, the story so far is that there are two versions of @|sdeep| identifiers.
+One has types and can only be used in @|sdeep| code.
+The other has no types, but is safe for untyped.
+When @|sShallow| Racket imports a @|sdeep| module, it needs both the type
+ and the contract.
+Achieving both required two changes:
+@itemlist[
+@item{
+  First, each @|sdeep| identifier must be serialized with an extra bit to
+  say it is @|sdeep|-typed.
+  Expansion in a @|sshallow|-typed module can then give the identifier for
+   untyped code.
+}
+@item{
+  Second, complile-time type lookups need to undo the contract step.
+  Fortunately, the contract library provides the needed metadata; each
+   contract-provided identifier has a complile-time link to its parent.
+  Type lookup checks for these links and uses them to find the parent's type
+   when checking @|stransient| code.
+}
+]
+
+In the other direction, @|sshallow| code can send plain identifiers to
+ @|shallow| and untyped code.
+But @|shallow| cannot go directly to @|sdeep| --- a @|sdeep| module must install
+ a contract at the boundary.
+TODO how can we do this? 
+
+
+@subsection{Syntax Re-Use (Unsolved)}
+
+Although @|sshallow| code can re-use @|sdeep| type definitions
+ and can access @|sdeep| identifiers through contracts,
+ @|sshallow| cannot re-use @|sdeep| macros.
+Re-use is desirable to avoid copying code, but macros open a soundness hole.
+
+The RackUnit testing library shows the need to re-use macros.
+@|sDeep| Racket comes with a typed wrapper over this untyped testing library.
+The wrapper has 300 lines of type definitions and macro definitions.
+If @|sShallow| Racket were to copy these definitions, then both copies would
+ need to be maintained.
+
+But macros are clearly unsafe in general because they can smuggle a typed
+ identifier across a boundary.
+Consider a simple macro that expands to a function application:
+
+@code-inset{(define-syntax-rule (call-f x) (f x))}
+
+@|noindent|If this macro were used in @|sshallow| code, it could receive
+ an argument @tt{x} that does not match its type assumptions.
+This would break soundness.
+And since there is no static check to tell good macros from dangerous ones,
+ the solution is to prevent @|sdeep| from exporting a macro outside @|sdeep|
+ code.
+
+@; ;; rackunit/rackunit-typed/rackunit/main.rkt
+@;(define-syntax (test-case stx)
+@;  (syntax-case stx ()
+@;    [(_ name expr ...)
+@;     (quasisyntax/loc stx
+@;       (parameterize
+@;           ([current-test-name
+@;             (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])
+@;         (test-begin expr ...)))]))
+@;
+@;(define-syntax (test-begin stx)
+@;  (syntax-case stx ()
+@;    [(_ expr ...)
+@;     (syntax/loc stx
+@;       ((current-test-case-around)
+@;        (lambda ()
+@;          (with-handlers ([(λ (e)
+@;                             (and (exn:fail? e)
+@;                                  (not (exn:test? e))))
+@;                           (λ ([e : exn:fail])
+@;                             (test-log! #f)
+@;                             (raise e))])
+@;          (parameterize ([current-check-handler raise])
+@;            (void)
+@;            expr ...)))))]
+@;    [_
+@;     (raise-syntax-error
+@;      #f
+@;      "Correct form is (test-begin expr ...)"
+@;      stx)]))
+
+To enable re-use for libraries such as RackUnit, the @|sdeep| wrapper can
+ disable optimization and unsafely export macros that pass a manual inspection
+This is a kludge, but the manual inspection is easier than forking.
+And without optimization, unsoundness can only lead to a Racket-level error.
+Perhaps the hand-inspection of these and other macros can suggest
+ techniques for an automated check.
+
+
+
+@subsection{Typed/Untyped Utilities}
 @; --- struggles = edit old code , 2 of these => new type errors
 
 Typed Racket exposes a limited API to manually tweak typed/untyped interactions.
@@ -1223,71 +1348,6 @@ There is no way to uncover the type that a @tt{typed-f} would have, and
 The way forward is to add a third argument to the form so that users can
  specify behavior for all three contexts.
 Even so, old code needs changes.
-
-
-@subsection{Challenge: Macros}
-
-Although @|sshallow| code can re-use @|sdeep| type definitions
- and can access @|sdeep| identifiers through contracts,
- @|sshallow| cannot re-use @|sdeep| macros.
-Re-use is desirable to avoid copying code, but macros open a soundness hole.
-
-The RackUnit testing library shows the need to re-use macros.
-@|sDeep| Racket comes with a typed wrapper over this untyped testing library.
-The wrapper has 300 lines of type definitions and macro definitions.
-If @|sShallow| Racket were to copy these definitions, then both copies would
- need to be maintained.
-
-But macros are clearly unsafe in general because they can smuggle a typed
- identifier across a boundary.
-Consider a simple macro that expands to a function application:
-
-@code-inset{(define-syntax-rule (call-f x) (f x))}
-
-@|noindent|If this macro were used in @|sshallow| code, it could receive
- an argument @tt{x} that does not match its type assumptions.
-This would break soundness.
-And since there is no static check to tell good macros from dangerous ones,
- the solution is to prevent @|sdeep| from exporting a macro outside @|sdeep|
- code.
-
-@; ;; rackunit/rackunit-typed/rackunit/main.rkt
-@;(define-syntax (test-case stx)
-@;  (syntax-case stx ()
-@;    [(_ name expr ...)
-@;     (quasisyntax/loc stx
-@;       (parameterize
-@;           ([current-test-name
-@;             (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])
-@;         (test-begin expr ...)))]))
-@;
-@;(define-syntax (test-begin stx)
-@;  (syntax-case stx ()
-@;    [(_ expr ...)
-@;     (syntax/loc stx
-@;       ((current-test-case-around)
-@;        (lambda ()
-@;          (with-handlers ([(λ (e)
-@;                             (and (exn:fail? e)
-@;                                  (not (exn:test? e))))
-@;                           (λ ([e : exn:fail])
-@;                             (test-log! #f)
-@;                             (raise e))])
-@;          (parameterize ([current-check-handler raise])
-@;            (void)
-@;            expr ...)))))]
-@;    [_
-@;     (raise-syntax-error
-@;      #f
-@;      "Correct form is (test-begin expr ...)"
-@;      stx)]))
-
-To enable re-use for libraries such as RackUnit, the @|sdeep| wrapper can
- disable optimization and unsafely export macros that pass a manual inspection
-This is a kludge, but the manual inspection is easier than forking.
-And without optimization, unsoundness can only lead to a Racket-level error.
-Perhaps the hand-inspection of these and other macros can suggest
- techniques for an automated check.
 
 
 @section[#:tag "sec:both:evaluation"]{Evaluation}
