@@ -12,7 +12,11 @@
 @;
 @; ... gee do we want parts in this book after all?
 
-Short intro to gradual typing, assumptions, gradual versus migratory.
+@; Short intro to gradual typing, assumptions, gradual versus migratory.
+
+The goal is pragmatic migratory typing.
+Have identified two useful methods: @|sDeep| and @|sShallow|.
+Thesis contributes a more-pragmatic-than-ever design with a combination.
 
 Thesis statement:
 
@@ -71,22 +75,21 @@ These two ideas are accompanied by two leading semantics: @|snatural|
  between typed and untyped code---either with detailed assertions or proxy
  wrappers.
 @|sTransient| provides @|sshallow| types by rewriting all typed code to
- check the basic shape of values anywhere that an untyped value might sneak in.
+ check the basic shape of every possibly-untyped value.
 
 The two properties that distinguish these semantics, and thereby provide a
  formal distinction between @|sdeep| and @|sshallow| and weaker ideas,
  are @|scm| and @|sts| (@chapter-ref{chap:design}).
 @|sNatural| satisfies @|scm| while @|stransient| does not.
-Both @|snatural| and @|stransient| satisfy a non-trivial @|sts|;
- weaker mixings do not.
+Both @|snatural| and @|stransient| satisfy a non-trivial @|sts|.
+Weaker mixings are unsound.
 
 As a final note on word choice, I use informal words to talk about
  different ``ways of mixing typed and untyped code,'' including:
  methods, strategies, and approaches.
-There is no hope in trying to be authoritative; the literature is filled with
- brilliant ideas and future work will continue to find novels ways to mix.
-
-@; TODO dynamicially-typed vs. untyped ?
+There is no hope in trying to be authoritative because researchers keep
+ finding creative ways to end up with a mix.
+@; example of interesting mix, or a failed boxing-in?
 
 
 @subsection{Names in Prior Work}
