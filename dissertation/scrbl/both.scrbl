@@ -1363,6 +1363,44 @@ Even so, old code needs changes.
 @; new mixed programs, relative to TR alone
 @; - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
 
+@|sDeep| types need to use wrappers to check and protect mutable values.
+Every kind of mutable value in Racket needs a custom kind of wrapper.
+But some wrappers do not exist yet, and so @|sDeep| Racket conservatively
+rejects some programs.
+
+For example, mutable pairs do not have a wrapper.
+The following good program gives a runtime error with Deep types:
+
+@nested[#:style 'code-inset
+@verbatim|{
+  #lang racket
+
+  (module t typed/racket
+    (: add-mpair (-> (MPairof Real Real) Real))
+    (define (add-mpair mp)
+      (+ (mcar mp) (mcdr mp)))
+    (provide add-mpair))
+
+  (require 't)
+
+  (add-mpair (mcons 2 4))
+  ;; Type Checker: could not convert type to a contract;
+  ;; contract generation not supported for this type
+}|]
+
+@|sShallow| Racket can run the program.
+For @|sShallow| type safety, the typed function checks @tt{mpair?} of its
+ input and @tt{real?} after the getter functions.
+
+Syntax objects also lack wrappers.
+Wrappers are needed for Deep types because a syntax object may contain a
+ mutable value.
+Implementing these wrappers would require changes to basic parts of Racket,
+ including the macro expander.
+@|sShallow| can allow the interaction, enabling types in new places.
+
+@; TODO data .. larger programs that help? Search for no-check packages?
+
 
 @subsection[#:tag "sec:both:performance"]{Performance}
 @; - worst-case table (can trace "min" line in "fig:transient:overhead"
@@ -1411,6 +1449,7 @@ With the ability to choose one world or the other, programmers can
 Before, high-overheads were common.
 After, all these perils are avoidable by switching languages.
 }])
+
 
 @subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
 
