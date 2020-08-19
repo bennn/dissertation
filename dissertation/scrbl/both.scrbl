@@ -10,7 +10,7 @@
    (only-in math/statistics
      mean))
 
-@title{Guarded and Transient, Combined}
+@title{@|sDeep| and @|sShallow|, Combined}
 @; TODO
 @;   Might be able to prove a ``tag error'' lemma, but the elimination forms
 @;    currently don't tell between static-typed and untyped
@@ -1138,7 +1138,7 @@ First a notation
 
 @section[#:tag "sec:both:implementation"]{Implementation}
 @; X typed-context? hook = easy
-@; - reuse ctc + type = hard
+@; X reuse ctc + type = hard
 @; x #%module-begin, to reuse contract defs save space ... NVM
 @; X require/untyped-contract
 @; X define-typed/untyped-id
@@ -1157,7 +1157,8 @@ The flag influences several aspects of the compiler:
  the interpretation of types as contracts,
  whether to rewrite typed code with @|stransient| checks,
  and whether to disable certain optimizations.
-This section focuses on challenges for the three-way interaction.
+This section focuses on the challenging and/or unexpected aspects for
+ three-way interaction.
 
 @subsection{Code Re-Use}
 
@@ -1173,13 +1174,13 @@ Extending Typed Racket to safely share type environments between @|sdeep|
 
 First, the context.
 Typed Racket supports separate compliation.
-Modules are type-checked individually; once a module is checked, the compiler
- serializes type environment info so that future modules can re-use the results.
-When one @|sdeep| module imports from another, it gets an identifier that
- it can look up in the deserialized type environment.
-
-For safe @|sdeep| and untyped interactions, Typed Racket provides identifies
- through one level of indirection.
+Modules are type-checked individually.
+Once a module is checked, the compiler serializes its type environment so that
+ future modules can re-use the results.
+When one @|sdeep| module imports from another, it eventually gets an identifier
+ that it can look up in the deserialized type environment.
+For safe @|sdeep| and untyped interactions, however, Typed Racket provides
+ identifies through one level of indirection.
 Instead of providing a function @tt{f} directly, Typed Racket provides a
  macro that expands either to @tt{f} or a contract-protected version.
 This macro chooses based on a compile-time flag; a @tt{typed/racket} module
@@ -1188,30 +1189,42 @@ This macro chooses based on a compile-time flag; a @tt{typed/racket} module
 So, the story so far is that there are two versions of @|sdeep| identifiers.
 One has types and can only be used in @|sdeep| code.
 The other has no types, but is safe for untyped.
+
 When @|sShallow| Racket imports a @|sdeep| module, it needs both the type
  and the contract.
+Neither of the past identifiers will do because the typed one lacks
+ protection and the protected one lacks a type.
 Achieving both required two changes:
 @itemlist[
 @item{
   First, each @|sdeep| identifier must be serialized with an extra bit to
   say it is @|sdeep|-typed.
-  Expansion in a @|sshallow|-typed module can then give the identifier for
-   untyped code.
+  Expansion in a @|sshallow|-typed module then knows to expand to the
+   protected identifier.
 }
 @item{
-  Second, complile-time type lookups need to undo the contract step.
+  Second, complile-time type lookups go back one step to recover the type.
   Fortunately, the contract library provides the needed metadata; each
    contract-provided identifier has a complile-time link to its parent.
-  Type lookup checks for these links and uses them to find the parent's type
-   when checking @|stransient| code.
+  Type lookup checks for these links and uses them to find the parent's type.
 }
 ]
 
 In the other direction, @|sshallow| code can send plain identifiers to
  @|sshallow| and untyped code.
-But @|sshallow| cannot go directly to @|sdeep| --- a @|sdeep| module must install
- a contract at the boundary.
-TODO how can we do this? 
+But @|sdeep| cannot trust these plain identifiers to match their static type;
+ @|sdeep| needs a contract.
+@|sShallow| Racket re-uses the @|sDeep| machinery for @|sshallow| exports.
+It provides two copies of every variable: a contract-protected one
+ for @|sdeep| and a plain one for untyped and @|sshallow| clients.
+Type lookups in @|sdeep| code must similarly look past one level of contract
+ to find the ``parent'' type of protected identifiers.
+
+That @|sshallow| uses contract tools is a little surprising.
+One would expect those to be confined to @|sdeep| code, which is after all
+ the only place they are needed.
+But the use in @|sshallow| (on provide) is convenient, and is actually
+ delayed until a @|sdeep| client uses an export.
 
 
 @subsection{Syntax Re-Use (Unsolved)}
