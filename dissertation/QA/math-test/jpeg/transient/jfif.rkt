@@ -23,7 +23,7 @@
 
 (require
   "../base/untyped.rkt"
-  (only-in "math/array.rkt"
+  (only-in "newmath/array.rkt"
     for/array
     array-shape
     build-array

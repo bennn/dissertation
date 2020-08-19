@@ -1,4 +1,4 @@
-#lang typed/racket/base #:locally-defensive
+#lang typed/racket/base
 
 (require 
          (only-in racket/performance-hint begin-encourage-inline)

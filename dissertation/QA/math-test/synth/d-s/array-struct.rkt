@@ -1,4 +1,4 @@
-#lang typed/racket/base #:locally-defensive
+#lang typed/racket/base
 
 (require (for-syntax racket/base syntax/parse)
          (only-in racket/fixnum fx+ fx*)

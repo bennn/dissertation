@@ -1,4 +1,4 @@
-#lang typed/racket/base #:locally-defensive
+#lang typed/racket/base #:transient
 
 (provide
   Indexes

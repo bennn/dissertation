@@ -14,6 +14,8 @@ H2. Convert lib to Transient, typed client a LITTLE slower (not a lot)
 Programs
 ---
 
+First thoughts ...
+
 - synth : (yes) one configuration from the synth benchmark
 - jpeg : (yes) untyped configurations from benchmark, uses part of math library
 - lnm : (no) only uses 'mean' from math/statistics not worth it
@@ -22,39 +24,7 @@ Programs
 - array-map : micro-benchmark using array-andmap / ormap
 - stamps : 
 
-Surely there must be others!
-
-
-
-Results
----
-
-TODO adapt math library code to use "locally defensive", can't currently
- at least because of `require/untyped-contract`
-
-TODO use one copy of math!!! no sense doubling array & then matrix
-
-Natural = racket/typed racket master, 8e88408 / e90a2b9e
-Transient = racket master / TR adbf3f
-
-| benchmark | natural | transient |   X |
-|---
-|     synth |   12689 |      1511 |  10 |
-|      jpeg |     778 |       227 |   2 |
-| array-map |    2877 |        27 | 100 |
-| s:anemone |  195700 |      9170 | 100 |
-|   s:penta |    3720 |      1440 |   2 |
-|  s:branch |    9470 |      4840 |   2 |
-| rilou-xor |  152000 |      5370 |  30 |
-| 7 wavelet }   40000 |      3000 |  10 |
-|  aoc-2015 | timeout |     10489 |     |
-
-| l:3d-with }    3170 |      3000 |   0 |
-| 5 wavelet }    3000 |      2250 |   0 |
-|  ruckus-i |      17 |        14 |   0 |
-|  ruckus-h |   13158 |     13500 |   0 |
-|  metapict |     176 |       157 |   0 |
-
+... I found other programs later, they're in the results
 
 All Math
 ---
@@ -160,3 +130,35 @@ tzgeolookup : no, flonum
 unstable-flonum-doc : no, flonum, only docs anyway
 zeromq : no, base
 ```
+
+
+Results
+---
+
+TODO adapt math library code to use "locally defensive", can't currently
+ at least because of `require/untyped-contract`
+
+TODO use one copy of math!!! no sense doubling array & then matrix
+
+Natural = racket/typed racket master, 8e88408 / e90a2b9e
+Transient = racket master / TR adbf3f
+
+| benchmark | natural | transient |   X |
+|---
+|     synth |   12689 |      1511 |  10 |
+|      jpeg |     778 |       227 |   2 |
+| array-map |    2877 |        27 | 100 |
+| s:anemone |  195700 |      9170 | 100 |
+|   s:penta |    3720 |      1440 |   2 |
+|  s:branch |    9470 |      4840 |   2 |
+| rilou-xor |  152000 |      5370 |  30 |
+| 7 wavelet }   40000 |      3000 |  10 |
+|  aoc-2015 | timeout |     10489 |     |
+
+| l:3d-with }    3170 |      3000 |   0 |
+| 5 wavelet }    3000 |      2250 |   0 |
+|  ruckus-i |      17 |        14 |   0 |
+|  ruckus-h |   13158 |     13500 |   0 |
+|  metapict |     176 |       157 |   0 |
+
+
