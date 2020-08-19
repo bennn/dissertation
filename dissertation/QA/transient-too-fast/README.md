@@ -37,5 +37,16 @@ The Deep data is based on BC, the Shallow on CS, so that's a problem, but
 
 - fsm 
 
+OK seems like 2 big problems:
+
+- type (Name: _ _) needs to be resolved and checked,
+  but type (F: _) is trivial, either top or bottom depending on where it appears
+
+- defender needs to say "NO SIDE" when generating, skip the SC optimizer
+  all together
+  side = typed -> optimize all to Top
+  side = untyped -> optimize nothing, but reject occurrence types
+                    because those can't appear in a require/typed
+
 
 
