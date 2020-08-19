@@ -1236,33 +1236,47 @@ Re-use is desirable to avoid copying code, but macros open a soundness hole.
 
 The RackUnit testing library shows the need to re-use macros.
 @|sDeep| Racket comes with a typed wrapper over this untyped testing library.
-The wrapper has 300 lines of type definitions and macro definitions.
+The wrapper has 300 lines of type definitions and macro definitions
+ that help Typed Racket understand uses of the untyped code.
 If @|sShallow| Racket were to copy these definitions, then both copies would
  need to be maintained.
 
-But macros are clearly unsafe in general because they can smuggle a typed
+But macros are unsafe in general because they can smuggle a typed
  identifier across a boundary.
 Consider a simple macro that expands to a function application:
 
 @code-nested{(define-syntax-rule (call-f x) (f x))}
 
-@|noindent|If this macro were used in @|sshallow| code, it could receive
- an argument @tt{x} that does not match its type assumptions.
-This would break soundness.
-And since there is no static check to tell good macros from dangerous ones,
- the solution is to prevent @|sdeep| from exporting a macro outside @|sdeep|
- code.
+@|noindent|If this macro were used in @|sshallow| code, it would expand
+ to an unprotected @tt{f} reference.
+Unless @tt{f} makes no asumptions about its input, the lack of contract
+ protection can lead to unsoundness.
+And unsoundness can lead to a memory error (very bad) if the typed code
+ runs through the optimizer.
+Lacking a static check to tell good macros from bad, the only safe option is
+ is to reject all.
+
+A static check is hard to design.
+Below is one safe macro, @tt{test-case}, from the RackUnit type definitions.
+
+@typed-codeblock{
+  (define-syntax (test-case stx)
+    (syntax-case stx ()
+      [(_ name expr ...)
+       (quasisyntax/loc stx
+         (parameterize
+             ([current-test-name
+               (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])
+           (test-begin expr ...)))]))
+}
+
+@|noindent|This macro is safe for @|sshallow| code, but for complicated reasons.
+First, @tt{ensure-string} is a typed function that accepts any input.
+Second, @tt{test-begin} is a macro (from the same file) that does not
+ expose any unsafe typed code.
+Other identifiers come from untyped Racket.
 
 @; ;; rackunit/rackunit-typed/rackunit/main.rkt
-@;(define-syntax (test-case stx)
-@;  (syntax-case stx ()
-@;    [(_ name expr ...)
-@;     (quasisyntax/loc stx
-@;       (parameterize
-@;           ([current-test-name
-@;             (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])
-@;         (test-begin expr ...)))]))
-@;
 @;(define-syntax (test-begin stx)
 @;  (syntax-case stx ()
 @;    [(_ expr ...)
@@ -1287,10 +1301,8 @@ And since there is no static check to tell good macros from dangerous ones,
 To enable re-use for libraries such as RackUnit, the @|sdeep| wrapper can
  disable optimization and unsafely export macros that pass a manual inspection
 This is a kludge, but the manual inspection is easier than forking.
-And without optimization, unsoundness can only lead to a Racket-level error.
-Perhaps the hand-inspection of these and other macros can suggest
- techniques for an automated check.
-
+And without optimization, accidental future unsoundness can only lead to a
+ Racket-level error.
 
 
 @subsection{Typed/Untyped Utilities}
