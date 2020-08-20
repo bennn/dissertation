@@ -62,8 +62,8 @@
 @title[#:tag "chap:why"]{Migratory Typing}
 @; whence MT
 
-Migratory typing is a new refinement of an old idea: mixing
- typed and untyped code.
+Migratory typing is a novel approach to an old desire:
+ mixing typed and untyped code.
 A typed programming language comes with a strict meta-language (of types)
  that articulates how a program computes.
 For better or worse, code that does not fit the meta-language may not run.
@@ -87,16 +87,17 @@ The goal of migratory typing is to make static typing available in
 Programmers create a mixed-typed program by writing types for
  one chunk of untyped code; that is, by migrating the chunk into the typed
  half of the language.
-Both the goal and the method are a departure from prior mixed-typed efforts
- (@section-ref{sec:why:related}), but they are grounded in observations
- about programming (@section-ref{sec:why:observations})
- and 10+ years of experience with Typed Racket suggests that migratory
- typing is a major advance.
+Both the goal and the method are a major advance over prior mixed-typed efforts
+ (@section-ref{sec:why:related}) because they are grounded in observations
+ about programming (@section-ref{sec:why:observations}).
+Furthermore, 10+ years of experience with Typed Racket suggests that migratory
+ typing is a useful research program.
 This dissertation contributes a novel way to balance
  expressiveness, guarantees, and performance (@section-ref{sec:why:design}).
+@; 2020-08-19 falls flat at end ... but you know that
 
 
-@section[#:tag "sec:why:related"]{Pre-History}
+@section[#:tag "sec:why:related"]{History: Hits and Misses}
 @; NOTE we are still figuring out the key knobs + concepts
 
 Beyond migratory typing, there are several ways to mix typed and untyped
