@@ -6,7 +6,8 @@
      render-mixed-worst-table
      s:cache-dir)
    (only-in greenman-thesis/oopsla-2019/pict
-     both:model-interaction)
+     both:model-interaction
+     typed-codeblock)
    (only-in math/statistics
      mean))
 
@@ -1259,16 +1260,16 @@ Lacking a static check to tell good macros from bad, the only safe option is
 A static check is hard to design.
 Below is one safe macro, @tt{test-case}, from the RackUnit type definitions.
 
-@typed-codeblock{
-  (define-syntax (test-case stx)
-    (syntax-case stx ()
-      [(_ name expr ...)
-       (quasisyntax/loc stx
-         (parameterize
-             ([current-test-name
-               (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])
-           (test-begin expr ...)))]))
-}
+@typed-codeblock['(
+  "(define-syntax (test-case stx)"
+  "  (syntax-case stx ()"
+  "    [(_ name expr ...)"
+  "     (quasisyntax/loc stx"
+  "       (parameterize"
+  "           ([current-test-name"
+  "             (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])"
+  "         (test-begin expr ...)))]))"
+)]
 
 @|noindent|This macro is safe for @|sshallow| code, but for complicated reasons.
 First, @tt{ensure-string} is a typed function that accepts any input.
@@ -1388,6 +1389,8 @@ Even so, old code needs changes.
 @; new mixed programs, relative to TR alone
 @; - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
 
+@|sShallow| enables new programs, it's more expressive.
+
 @|sDeep| types need to use wrappers to check and protect mutable values.
 Every kind of mutable value in Racket needs a custom kind of wrapper.
 But some wrappers do not exist yet, and so @|sDeep| Racket conservatively
@@ -1424,8 +1427,32 @@ Implementing these wrappers would require changes to basic parts of Racket,
  including the macro expander.
 @|sShallow| can allow the interaction, enabling types in new places.
 
-@; TODO data .. larger programs that help? Search for no-check packages?
+@; TODO data
 
+@(let* ((qa-dir "../QA/transient-expressive")
+        (search-begin "2020-08-19")
+        (search-end "2019-12-13")
+        (num-tr-q 6)
+        (num-s-win 3)
+       )
+@elem{
+To assess whether @|sShallow| Racket could help express designs that
+ programmers want to use, I searched the Racket mailing list for
+ questions about Typed Racket from @|search-begin| back to @|search-end|.
+In total, @integer->word[num-tr-q] questions asked about Typed Racket errors.
+Changing to @|sShallow| Racket caused @integer->word[num-s-win] errors
+ to disappear.
+Other problems were due to type checking, or a run-time issue that @|sShallow|
+ Racket does not change.
+The conclusion is: yes, @|sshallow| types can make some programmer-created
+ designs expressible.
+
+That said, there is a risk that further development could run into a delayed
+ error, and perhaps one that the programmer cannot even articulate as a mailing
+ list question.
+But for now I declare victory that @|sshallow| is more
+ expressive.
+})
 
 @subsection[#:tag "sec:both:performance"]{Performance}
 @; - worst-case table (can trace "min" line in "fig:transient:overhead"
