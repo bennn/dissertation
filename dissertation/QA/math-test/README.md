@@ -161,4 +161,13 @@ Transient = racket master / TR adbf3f
 |  ruckus-h |   13158 |     13500 |   0 |
 |  metapict |     176 |       157 |   0 |
 
+synth
+deep lib, untyped client =
+shallow lib, untyped client =
+shallow lib, deep client =
+
+jpeg
+deep lib, untyped client = 463 470
+shallow lib, untyped client = 99 97
+shallow lib, deep client = 431 421
 
