@@ -43,6 +43,10 @@
     (cond [(index? size)  size]
           [else  (error name "array size ~e (for shape ~e) is too large (is not an Index)" size ds)]))
   
+  (: -check-array-shape ((Vectorof Integer) (-> Nothing) -> Indexes))
+  (define (-check-array-shape ds fail)
+    (check-array-shape ds fail))
+
   (: check-array-shape (In-Indexes (-> Nothing) -> Indexes))
   (define (check-array-shape ds fail)
     (define dims (vector-length ds))

@@ -8,5 +8,4 @@
  "typed-utils.rkt"
  [check-array-shape  ((Vectorof Integer) (-> Nothing) -> (Vectorof Index))])
 
-(provide (all-from-out "typed-utils.rkt")
-         check-array-shape)
+(provide (all-from-out "typed-utils.rkt"))

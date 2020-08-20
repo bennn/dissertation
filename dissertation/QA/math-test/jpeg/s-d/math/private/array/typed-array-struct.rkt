@@ -109,6 +109,10 @@
   (define size (check-array-shape-size 'unsafe-build-simple-array ds))
   (Array ds size (box #t) void f))
 
+(: -build-array (All (A) ((Vectorof Integer) (Indexes -> A) -> (Array A))))
+(define (-build-array ds proc)
+  (build-array ds proc))
+
 (: build-array (All (A) (In-Indexes (Indexes -> A) -> (Array A))))
 (define (build-array ds proc)
   (let ([ds  (check-array-shape

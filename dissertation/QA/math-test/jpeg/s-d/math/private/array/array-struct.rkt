@@ -33,6 +33,7 @@
  array-default-strict!
  array-strict?
  build-array
+ -build-array
  build-simple-array
  list->array
  make-unsafe-array-proc

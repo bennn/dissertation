@@ -53,7 +53,7 @@
           (:do-in
            ([(ds size dims js)
              (let*: ([ds : In-Indexes  ds-expr]
-                     [ds : Indexes  (check-array-shape
+                     [ds : Indexes  (-check-array-shape
                                      ds (λ () (raise-argument-error 'in-array-indexes "Indexes"
                                                                          ds)))])
                (define dims (vector-length ds))

@@ -16,7 +16,7 @@
                    [(maybe-type ...)  (if (attribute A) #'(: A) #'())])
        (syntax/loc stx
          (let*: ([ds : In-Indexes  ds-expr]
-                 [ds : Indexes  (check-array-shape
+                 [ds : Indexes  (-check-array-shape
                                  ds (λ () (raise-argument-error 'name "Indexes" ds)))])
            (define vs (for/vector #:length (array-shape-size ds) maybe-fill ...
                         (clause ...) maybe-type ... body ...))
@@ -42,7 +42,7 @@
      (with-syntax ([(maybe-fill ...)  (if (attribute fill-expr) #'(#:fill fill-expr) #'())])
        (syntax/loc stx
          (let* ([ds  ds-expr]
-                [ds  (check-array-shape
+                [ds  (-check-array-shape
                       ds (λ () (raise-argument-error 'name "Indexes" ds)))])
            (define vs (for/vector #:length (array-shape-size ds) maybe-fill ...
                         (clause ...) body ...))

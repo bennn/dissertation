@@ -8,5 +8,5 @@
   Array
   for/array
   array-shape
-  build-array
+  (rename-out [-build-array build-array])
   in-array)
