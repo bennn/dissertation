@@ -8,84 +8,87 @@
 @; - order to design space
 @; - two ideas: deep and shallow types
 
-Quality programming languages (PL) research must balance three dimensions:
- proofs, performance, and people.
-For a mixed-typed language, the three dimensions translate
- to conflicting goals:
+A language that can mix typed and untyped code must balance three conflicting
+ dimensions:
 @exact{\begin{itemize}
+\item[] \emph{Proofs}\/:
+  Static types should be accurate predictions about the way a program
+   behaves at run-time.
+\item[]\emph{Performance}\/:
+  Adding types to part of a codebase should not cripple its running time.
+  On the contrary, a smart compiler should use type-proofs to generate
+   efficient code.
 \item[] \emph{People}:
   Untyped code must be free to create all sorts of values;
-   typed code must be able to interact with many designs.
-\item[] \emph{Proofs}\/:
-  Types must predict run-time behavior.
-\item[]\emph{Performance}\/:
-  Adding types should improve performance by enabling compiler optimizations.
+   typed code must be able to interact with many untyped designs.
 \end{itemize}}
 
-@|noindent|My work on this dissertation began with blah blah.
+@|noindent|
+The ideal mixed-typed language would satisy all three goals,
+ letting programmers add descriptive types to any component in a program
+ and supporting those types with deep guarantees and fast performance.
+This ideal is not here yet.
+Friction between the dimensions raises a whole host of problems
+ about how to enforce types at run-time.
+In particular, @emph{performance} is the driving question.
+Type guarantees that can (in principle) be enforced against untyped code often bring an
+ overwhelming cost, slowing an untyped program down by orders of magnitude.
 
+Researchers have addressed the performance question with designs that
+ advertise low costs, but these designs are incomparable.
+For one, the performance of a new mixed-typed language is intertwined
+ with its host language; comparing performance across different languages
+ is hopeless.
+Second, the new designs compromise on proofs and/or people.
+Lacking an apples-to-apples comparison, it is impossible to decide whether
+ a language has solved the performance question.
 
+The first half of this dissertation untangles the design space.
+I present methods to measure performance, methods to measure type guarantees,
+ and basic requirements for expressiveness.
+I apply these methods and conclude that there are two promising designs:
+ @|sdeep| types via the @|snatural| semantics and @|sshallow| types via
+ the @|stransient| the @|stransient| semantics.
+The second half of this dissertation supports the following thesis statement:
 
-Half of this dissertation is about the methods that led to a right question.
-
-
-finding the right question to ask
-
-@; summary:
-@; Languages that can mix typed and untyped code must come with a way to
-@;  fine-tune the strength of types.
-@; Part 1 = Performance analysis demonstrates the need for tuning.
-@; Part 2 = Design-space analysis shows possible strengths.
-@; Part 3 = Implements one tunable language, demonstrates benefits.
-@;
-@; ... gee do we want parts in this book after all?
-
-@; Short intro to gradual typing, assumptions, gradual versus migratory.
-
-The goal is pragmatic migratory typing.
-Have identified two useful methods: @|sDeep| and @|sShallow|.
-Thesis contributes a more-pragmatic-than-ever design with a combination.
-
-Thesis statement:
-
-@nested[#:style 'inset]{
- @|sDeep| and @|sShallow| types can coexist in a way that preserves their formal
+@exact{\begin{quote}
+ @|sDeep| and @|sshallow| types can coexist in a way that preserves their formal
  properties; programmers can combine these types to strengthen @|sshallow|-type
  guarantees, avoid unimportant @|sdeep|-type runtime errors, and lower the
  running time of typed/untyped interactions.
-}
+\end{quote}}
 
-Contributions that led to thesis:
-@; don't really use an itemize in the end!
-
-@itemlist[
-@item{
-  Performance evaluation method, sampling, apply to TR and Reticulated.
-}
-@item{
-  Theoretical analysis, compromise semantics, complete monitoring, blame soundness and completeness.
-}
-@item{
-  Transient implemented in Racket, generalized to richer type system, remove type dynamic.
-}
-@item{
-  Integration of @|sShallow| and @|sDeep| Typed Racket.
-}
-]
-
-Upcoming chapters outline.
-
+Looking ahead, the first order of business is to lay down ground rules for
+ expressiveness.
+My goal is to combine typed and untyped code in a @emph{migratory typing}
+ system, in which the type system accommodates the grown idioms of an
+ untyped host language (@chapter-ref{chap:why}).
+@; That said, non-migratory mixed-typed languages can still benefit from the
+@;  results in later chapters.
+Next up, @chapter-ref{chap:performance} presents methods to evaluate performance
+ and validates the methods through an empirical study of two migratory
+ typing systems: Typed Racket and Reticulated Python.
+Both languages guarantee type soundness, but come with very different
+ performance; more surpringly, they compute different results for
+ seemingly-equal code.
+@Chapter-ref{chap:design} brings these languages into a common model to
+ articulate the differences and formally compare their guarantees in the
+ context of the mixed-typed design space.
+The design-space analysis motivates a compromise between two semantics.
+@Chapter-ref{chap:transient} presents the first half of the compromise;
+ namely, a @|stransient| semantics for Typed Racket.
+@Chapter-ref{chap:both} formally proves that @|sdeep| and @|sshallow|
+ types can interoperate and reports on a Typed Racket that supports
+ both @|snatural| and @|stransient| behavior.
 
 
 @section{Specification, Implementation, and Naming}
 @; http://www.ccs.neu.edu/home/shivers/papers/whats-in-a-name.html
 
-@; TODO names deep/natural/guarded ... shallow/transient ... prior work
-
 This dissertation is about different ways of mixing typed and untyped code
-in a programming language.
+ in a programming language.
 Each ``way'' starts from a rough idea, comes to life via a formal semantics,
-and is tested against formal specifications.
+ and is tested against formal specifications.
 Different instances of these three concepts need names.
 
 My primary focus is on two rough ideas: @emph[sdeep] types and @emph[sshallow] types.
@@ -115,9 +118,8 @@ Weaker mixings are unsound.
 As a final note on word choice, I use informal words to talk about
  different ``ways of mixing typed and untyped code,'' including:
  methods, strategies, and approaches.
-There is no hope in trying to be authoritative because researchers keep
- finding creative ways to end up with a mix.
-@; example of interesting mix, or a failed boxing-in?
+There is no hope in trying to be authoritative because we are still seeking
+ a best method to combine benefits of static and dynamic typing.
 
 
 @subsection{Names in Prior Work}
