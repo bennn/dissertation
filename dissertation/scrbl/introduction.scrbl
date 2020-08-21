@@ -1,7 +1,35 @@
 #lang greenman-thesis/include
 
 @title{What It's All About}
+@; from abstract, have feelings about:
+@; - type system
+@; - mixed-typed language
+@; - 3way tradeoff
+@; - order to design space
+@; - two ideas: deep and shallow types
 
+Quality programming languages (PL) research must balance three dimensions:
+ proofs, performance, and people.
+For a mixed-typed language, the three dimensions translate
+ to conflicting goals:
+@exact{\begin{itemize}
+\item[] \emph{People}:
+  Untyped code must be free to create all sorts of values;
+   typed code must be able to interact with many designs.
+\item[] \emph{Proofs}\/:
+  Types must predict run-time behavior.
+\item[]\emph{Performance}\/:
+  Adding types should improve performance by enabling compiler optimizations.
+\end{itemize}}
+
+@|noindent|My work on this dissertation began with blah blah.
+
+
+
+Half of this dissertation is about the methods that led to a right question.
+
+
+finding the right question to ask
 
 @; summary:
 @; Languages that can mix typed and untyped code must come with a way to

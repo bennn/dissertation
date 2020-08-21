@@ -1,18 +1,7 @@
 #lang greenman-thesis @parts @pdfspacing
-
-@;  How about this for a title: 
-@;  
-@;  “A Systematic Analysis of the Gradual Typing Design Space” 
-@;  
-@;  Then the introduction follows this pattern: 
-@;  
-@;  — design analysis needs performance 
-@;  — design analysis needs foundational properties 
-@;  — design analysis needs confirmation with the construction of new points in the space 
-@;  
-@;  Since the entire Transitional exercise may not turn out all that well, the revised title shifts the emphasis. 
-@;  
-@;  If you want to go even further, we could try a new thesis. 
+@; TODO
+@; - dedication?
+@; - reorder contents, acks, etc?
 
 @title{@|sDeep| and @|sShallow| Types}
 @author{Ben Greenman}
@@ -20,7 +9,7 @@
 @department{Khoury College of Computer Sciences}
 @university{Northeastern University}
 @location{Boston, Massachusetts}
-@submit-date{December 2020}
+@submit-date{November 2020}
 
 
 @approval{src/approval.pdf}
