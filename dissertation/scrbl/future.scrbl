@@ -1,6 +1,6 @@
 #lang greenman-thesis/include
 
-@title{Future}
+@title[#:tag "chap:future"]{Future}
 
 Transient on Pycket, how does the JIT compare to AOT in apples comparison.
 

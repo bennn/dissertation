@@ -11,7 +11,7 @@
    (only-in math/statistics
      mean))
 
-@title{@|sDeep| and @|sShallow|, Combined}
+@title[#:tag "chap:both"]{@|sDeep| and @|sShallow|, Combined}
 @; TODO
 @;   Might be able to prove a ``tag error'' lemma, but the elimination forms
 @;    currently don't tell between static-typed and untyped

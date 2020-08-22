@@ -1,6 +1,6 @@
 #lang greenman-thesis/include
 
-@title{Conclusion}
+@title[#:tag "chap:conclusion"]{Conclusion}
 
 Summarize previous chapters and whats done.
 
