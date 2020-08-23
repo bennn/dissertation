@@ -138,7 +138,49 @@ In other words, type hints come with all the unsafety of casts in a C-like langu
 @subsection{Soft and Set-Based Inference}
 @; lesson = full inference bad idea
 
-See SNAPL
+In principle, type inference can bring static types to untyped code.
+Research on soft typing pursues this goal in an ideal form
+ by constructing types for any untyped program.
+Soft type systems never raise a type error.
+Instead, a soft type checker widens types as needed
+ and inserts run-time checks to protect implicit down-casts@~cite{f-thesis-1992,w-thesis-1994}.
+
+The key to the soft typing problem is to adapt inference from equalities
+ to inequalities@~cite{tfffgksst-snapl-2017}.
+In a language such as ML, a type describes exactly how a variable
+ may be used.
+Any out-of-bounds use is an error by definition.
+Thus ML inference asks for a solution to a system of equalities between
+ variables and types.
+Inference for an untyped language must relax the equality assumption
+ to deal with the less-structured design of untyped programs.
+Here, the natural types describe sets of values with compatible behavior.
+The inference problem now asks for types that over-approximate the
+ behaviors in a set of values.
+
+There are two known methods to solve type inequalities.
+Soft inference adds slack variables to types and turns the
+ inequalities into equalities@~cite{f-thesis-1992}.
+Set-based inference solves the inequalities by computing a transitive
+ closure over the entire program@~cite{am-popl-1991,awl-popl-1994,f-thesis-1997,ff-pldi-1997,ffkwf-pldi-1996}.
+Both solutions, unfortunately, reveal major challenges for inference:
+@exact{
+\begin{itemize}
+\item
+  Types can quickly become unreadable as inference over-approximates
+   the syntax of a program.
+  Worse, small changes to a program can end in large changes to inferred types.
+\item
+  Type structure depends on the whole program.
+  Set-based analysis, in particular, faces serious performance issues
+   in larger programs@~cite{mfsw-hosc-2005}.
+\end{itemize}}
+
+@citet{w-thesis-1994} notes that user-provided annotations can help with
+ brittleness and readability, despite friction with the soft typing philosophy.
+@citet{m-thesis-2006} improves the performance of set-based analysis
+ by leveraging contracts at module boundaries.
+These work-arounds anticipate the migratory typing approach to mixed-typed code.
 
 
 @subsection{Optional Typing}
@@ -240,7 +282,7 @@ Debugging in untyped code can gradually strengthen it with new type annotations.
 @;  miscommunications and to leverage new strengths.
 
 
-@section{MT Design Choices}
+@section[#:tag "sec:why:decisions"]{MT Design Choices}
 
 @; above hits and misses => lessons ...
 @; - inference bad,
