@@ -106,6 +106,7 @@ The observations, in particular, motivate design choices that characterize
 
 
 @section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
+@; TODO what did Henglein do and how does it fit???
 
 @subsection{Type Hints}
 @; lesson = annotations may work, pitfalls of unsoundness
@@ -167,7 +168,7 @@ Both solutions, unfortunately, reveal major challenges for inference:
 @exact{
 \begin{itemize}
 \item
-  Types can quickly become unreadable as inference over-approximates
+  Types can quickly become unreadable as inference computes supersets based on
    the syntax of a program.
   Worse, small changes to a program can end in large changes to inferred types.
 \item
@@ -180,29 +181,37 @@ Both solutions, unfortunately, reveal major challenges for inference:
  brittleness and readability, despite friction with the soft typing philosophy.
 @citet{m-thesis-2006} improves the performance of set-based analysis
  by leveraging contracts at module boundaries.
-These work-arounds anticipate the migratory typing approach to mixed-typed code.
+Their observations anticipate the migratory typing approach to mixed-typed code.
 
 
 @subsection{Optional Typing}
 @; lesson = annotations work ... possible but lacks ideal
 
+An optional, or pluggable, type system adds a static analysis to an untyped
+ language@~cite{bg-oopsla-1993}.
+The approach is related to type hints in that programmers must add
+ annotations to untyped code.
+Optional types are supported, however, by a full-fledged type checker
+ and a no-op compiler.
+The type checker is the static analysis; it uses types to find logical errors.
+Compilation erases types to arrive at an untyped program that can safely
+ interoperate with the rest of the program.
 
-... cue from type hints
-
-Contemporary with MT ... competitor ... lacking the ideal ...
- (maybe cut)
-
-@;An optional typing system provides types without soundness.
-@;Unsound types are still useful.
-@;Many languages follow this design.
-@;
-@;My goal is soundness.
-@;Benefits listed above.
-@;If academics do not pursue, then nobody will.
+Despite their widespread adoption (@section-ref{sec:design:landscape}),
+ optional types are a badge of shame for the research community because
+ these types are unsound.
+A programmer cannot use optional types to predict the inputs that a function
+ will receive, and likewise a compiler cannot use optional types to justify
+ transformations.
+Unless researchers can design a practical and non-optional mixed-typed language,
+ then work on sound types will remain stuck in a closed world.
 
 
 @subsection{Type Dynamic}
 @; lesson = non-lesson? ... stat->dyn can be done, brings pitfalls
+
+Statically-typed languages often need to interact with untyped data.
+... researchers ... untyped .... then thatte
 
 Opposite direction, state and criticize?
 Link to gradual typing.
