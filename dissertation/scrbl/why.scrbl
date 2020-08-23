@@ -1,6 +1,9 @@
 #lang greenman-thesis/include
 
-@(require racket/format)
+@(require
+   racket/format
+   (only-in greenman-thesis/oopsla-2019/pict
+     untyped-codeblock))
 
 @(define-logger bg-thesis)
 
@@ -107,8 +110,29 @@ The observations, in particular, motivate design choices that characterize
 @subsection{Type Hints}
 @; lesson = annotations may work, pitfalls of unsoundness
 
-Oddly enough, the earliest work mixed comes very close to the MT idea.
-A few more phds would have got it, more writing less hacking
+Early Lisps, including MACLISP@~cite{m-maclisp-1974} and Common Lisp@~cite{s-lisp-1990},
+ have compilers that accept type hints.
+In MACLISP, for example, a programmer can hint that a function expects two
+ floating-point numbers to encourage the compiler to specialize the function
+ body (@figure-ref{fig:maclisp-hint}).
+
+Any speedup due to type hints, however, comes at a risk.
+There is no static type system to prove that hints are sensible claims.
+If a hint is nonsense, then the compiled code may behave in unexpected ways.
+Similarly, there is no dynamic guarantee that compiled code receives valid
+ inputs.
+If the function @tt{F} in @figure-ref{fig:maclisp-hint} is invoked on two
+ strings, it may compute an invalid result.
+In other words, type hints come with all the unsafety of casts in a C-like language.
+
+@figure*[
+  "fig:maclisp-hint"
+  @elem{Example type hint in MACLISP@~cite{p-maclisp-1983}.
+   The compiler may rewrite @tt{PLUS} into code that assumes floating-point inputs.}
+  (untyped-codeblock '(
+    "(DECLARE (FLONUM (F FLONUM FLONUM)))"
+    "(DEFUN (F A B) (PLUS A B))"
+  ))]
 
 
 @subsection{Soft and Set-Based Inference}
@@ -119,6 +143,9 @@ See SNAPL
 
 @subsection{Optional Typing}
 @; lesson = annotations work ... possible but lacks ideal
+
+
+... cue from type hints
 
 Contemporary with MT ... competitor ... lacking the ideal ...
  (maybe cut)
