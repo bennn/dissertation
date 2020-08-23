@@ -42,6 +42,41 @@
    (only-in math/statistics
      mean))
 
+@; TODO fit this somewhere
+@;@;@section{Why @|sTransient|?}
+@;@;
+@;@;There are several approaches to mixing typed and untyped code (@chapterref{chap:design}).
+@;@;Some fail our basic criteria for adding types to an existing language (@chapterref{chap:why}).
+@;@;Of the others, @|snatural| is a worthwhile ideal because it offers strong
+@;@; static type guarantees.
+@;@;These @|sdeep| types require run-time enforcement, however, and the cost of
+@;@; enforcement is high and hard to reduce.
+@;@;
+@;@;@; fork in the road, what can be done?
+@;@;  @; what to do?
+@;@;  @; could improve TR, looking bleak
+@;@;  @; only other option is to pursue a weaker semantics
+@;@;  @; .... nothing else can support existing Dyn lang as intended
+@;@;
+@;@;A promising compromise is to implement a different, weaker semantics alongside
+@;@; @|sdeep| types.
+@;@;Analyzing the costs of @|snatural| shows that the @|stransient| approach is the
+@;@; most promising alternative.
+@;@;@|sNatural| slows a program down through soundness checks and blame tracking.
+@;@;The checks can be huge, and can require behavioral wrappers.
+@;@;Blame requires additional wrappers.
+@;@;@|sTransient| reduces checks to a minimum, a shape check.
+@;@;@|sTransient| can also run without blame simply.
+@;@;By contrast, removing blame from @|snatural| solves nothing at first;
+@;@; the change must be accompanied by a wholly-new strategy for allocating
+@;@; wrappers, and this strategy may require reflection tools for the wrappers
+@;@; themselves.
+@;@;
+@;@;@|sTransient| is a promising wrapper-free approach to gradual typing.
+@;@;
+@;@;@; gotta talk about other ways to get shallow types, maybe just point ahead
+
+
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
 The high cost of @|sdeep| types calls for an alternative semantics
