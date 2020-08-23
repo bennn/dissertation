@@ -74,8 +74,8 @@ The mixed-typed idea is to somehow combine some good aspects of both.
 A programmer should have some untyped flexibility and some typed guarantees.
 
 Of course, flexibility and guarantees lie at two ends of a tradeoff.
-More freedom to run programs leads to fewer guarantees about what a new
- program will do, unless there are run-time checks to catch extreme behaviors.
+More freedom to run programs means less knowledge about what a new
+ program might do, unless there are run-time checks to catch extreme behaviors.
 Run-time checks slow down a computation, thus a mixed-typed language needs to
  balance three desires: expressiveness, guarantees, and performance.
 But even before this 3-way tradeoff, a language has to decide what kinds
@@ -88,14 +88,12 @@ The goal of migratory typing is to add static typing onto a vetted untyped
 Programmers create a mixed-typed program by writing types for
  one chunk of untyped code; that is, by migrating the chunk into the typed
  half of the language.
-Both the goal and the method are a major advance over prior mixed-typed efforts
- (@section-ref{sec:why:related}), partly because they are grounded in
+Both the goal and the method incorporate lessons from earlier mixed-typed efforts
+ (@section-ref{sec:why:related}), along with basic
  observations about programming (@section-ref{sec:why:observations}).
-Furthermore, 10+ years of experience with Typed Racket suggests that migratory
- typing is a useful and feasible ideal.
-@; TODO consider adding section
-@;This dissertation contributes a novel way to balance
-@; expressiveness, guarantees, and performance (@section-ref{sec:why:design}).
+The observations, in particular, motivate design choices that characterize
+ migratory typing (@section-ref{sec:why:decisions}).
+@; and provide central focus for dissertation
 
 @; Keep in mind, however, that the research community is still looking
 @;  for knobs to make turnable.
@@ -103,15 +101,24 @@ Furthermore, 10+ years of experience with Typed Racket suggests that migratory
 @; Looking for timeless truths, move along.
 @; .... a theory
 
+
 @section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
 
 @subsection{Type Hints}
+@; lesson = annotations may work, pitfalls of unsoundness
 
 Oddly enough, the earliest work mixed comes very close to the MT idea.
 A few more phds would have got it, more writing less hacking
 
 
+@subsection{Soft and Set-Based Inference}
+@; lesson = full inference bad idea
+
+See SNAPL
+
+
 @subsection{Optional Typing}
+@; lesson = annotations work ... possible but lacks ideal
 
 Contemporary with MT ... competitor ... lacking the ideal ...
  (maybe cut)
@@ -125,18 +132,11 @@ Contemporary with MT ... competitor ... lacking the ideal ...
 @;If academics do not pursue, then nobody will.
 
 
-@subsection{Soft and Set-Based Inference}
-
-See SNAPL
-
-
 @subsection{Type Dynamic}
+@; lesson = non-lesson? ... stat->dyn can be done, brings pitfalls
 
 Opposite direction, state and criticize?
 Link to gradual typing.
-
-
-@;subsection multi-lang??? ... how do these fit into section thesis???
 
 
 
