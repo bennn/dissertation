@@ -10,6 +10,18 @@ New related work about the combination, other hybrids, like types, Pyret.
 
 
 
+@;@subsection{Gradual Typing}
+@;
+@;Gradual typing is not necessarily migratory,
+@; non-migratory is addressing a dubious problem.
+@;
+@;Includes a special dynamic type.
+@;The type makes it easy to add types to code, no insistence on detail.
+@;This makes it harder to detect static type errors ... but not much worse
+@; than free use of a top type.
+@;More importantly, the dynamic type obscures the boundaries between typed
+@; and untyped code.
+@;@; easy to get many boundaries, hard to point to these
 
 @;@subsection{Soft Typing}
 @;

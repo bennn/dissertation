@@ -70,85 +70,74 @@ For better or worse, code that does not fit the meta-language may not run.
 An untyped language is willing to see what happens in many more programs,
  so long as the computations stick to legal values.
 @; TODO cite Hoare hints, "cherished"?
-The mixed-typed idea is to somehow combine good aspects of both.
+The mixed-typed idea is to somehow combine some good aspects of both.
 A programmer should have some untyped flexibility and some typed guarantees.
 
 Of course, flexibility and guarantees lie at two ends of a tradeoff.
 More freedom to run programs leads to fewer guarantees about what a new
  program will do, unless there are run-time checks to catch extreme behaviors.
-Thus a mixed-typed language needs to balance three desires: expressiveness,
- guarantees, and performance.
+Run-time checks slow down a computation, thus a mixed-typed language needs to
+ balance three desires: expressiveness, guarantees, and performance.
 But even before this 3-way tradeoff, a language has to decide what kinds
- of mixing to allow and what goals it hopes to achieve.
+ of mixing to allow and what goals to strive for.
 
-The goal of migratory typing is to make static typing available in
- an untyped language so that stable programs can gain the maintenance
- benefits of types.
+The goal of migratory typing is to add static typing onto a vetted untyped
+ language.
+@;Code that started off untyped can gain the maintenance benefits of
+@; static types---ideally with no need to rewrite program logic.
 Programmers create a mixed-typed program by writing types for
  one chunk of untyped code; that is, by migrating the chunk into the typed
  half of the language.
 Both the goal and the method are a major advance over prior mixed-typed efforts
- (@section-ref{sec:why:related}) because they are grounded in observations
- about programming (@section-ref{sec:why:observations}).
+ (@section-ref{sec:why:related}), partly because they are grounded in
+ observations about programming (@section-ref{sec:why:observations}).
 Furthermore, 10+ years of experience with Typed Racket suggests that migratory
- typing is a useful research program.
-This dissertation contributes a novel way to balance
- expressiveness, guarantees, and performance (@section-ref{sec:why:design}).
-@; 2020-08-19 falls flat at end ... but you know that
+ typing is a useful and feasible ideal.
+@; TODO consider adding section
+@;This dissertation contributes a novel way to balance
+@; expressiveness, guarantees, and performance (@section-ref{sec:why:design}).
 
+@; Keep in mind, however, that the research community is still looking
+@;  for knobs to make turnable.
+@; This chapter is the world as I see it as of this moment.
+@; Looking for timeless truths, move along.
+@; .... a theory
 
-@section[#:tag "sec:why:related"]{History: Hits and Misses}
-@; NOTE we are still figuring out the key knobs + concepts
+@section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
 
-Beyond migratory typing, there are several ways to mix typed and untyped
- code.
-The main competing alternatives are optional typing and gradual typing.
+@subsection{Type Hints}
+
+Oddly enough, the earliest work mixed comes very close to the MT idea.
+A few more phds would have got it, more writing less hacking
 
 
 @subsection{Optional Typing}
 
-An optional typing system provides types without soundness.
-Unsound types are still useful.
-Many languages follow this design.
+Contemporary with MT ... competitor ... lacking the ideal ...
+ (maybe cut)
 
-My goal is soundness.
-Benefits listed above.
-If academics do not pursue, then nobody will.
-
-
-@subsection{Gradual Typing}
-
-Gradual typing is not necessarily migratory,
- non-migratory is addressing a dubious problem.
-
-Includes a special dynamic type.
-The type makes it easy to add types to code, no insistence on detail.
-This makes it harder to detect static type errors ... but not much worse
- than free use of a top type.
-More importantly, the dynamic type obscures the boundaries between typed
- and untyped code.
-@; easy to get many boundaries, hard to point to these
+@;An optional typing system provides types without soundness.
+@;Unsound types are still useful.
+@;Many languages follow this design.
+@;
+@;My goal is soundness.
+@;Benefits listed above.
+@;If academics do not pursue, then nobody will.
 
 
-@subsection{Micro, Macro}
-@; TODO
+@subsection{Soft and Set-Based Inference}
 
-The two original papers on gradual/migratory typing begin with different
- ideas about how to mix typed and untyped code.
+See SNAPL
 
-@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
- of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
- typing@~cite{t-popl-1990}.
-The grammar of static types acquires a new catch-all member that accepts
- any well-formed piece of code.
-Using this @emph{dynamic type}, a programmer can escape the type checker
- on any line of otherwise-typed code.
-To allow such flexibility, however, the type checker can no longer affirm
- that a program is type-correct.
-Programs that use the dynamic type are but plausibly correct; depending
- on what the dyn-typed code evaluates to, the program may run smoothly.
 
-@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
+@subsection{Type Dynamic}
+
+Opposite direction, state and criticize?
+Link to gradual typing.
+
+
+@;subsection multi-lang??? ... how do these fit into section thesis???
+
 
 
 
@@ -226,6 +215,11 @@ Debugging in untyped code can gradually strengthen it with new type annotations.
 
 @section{MT Design Choices}
 
+@; above hits and misses => lessons ...
+@; - inference bad,
+@; - annotation work
+@; - ....
+
 The goal of migratory typing is to begin with an untyped language and
  incrementally add benefits of static types.
 My work is based on additional design constraints intended to maximize the
@@ -285,10 +279,33 @@ Programmers need to know where these boundaries are as they write the program,
 What, why, how.
 
 
-@; ---
-@section[#:tag "sec:why:design"]{Design Space: Expressiveness, Guarantees, Performance}
+@subsection{Micro, Macro}
+@; TODO
 
-Anticipate the design-space analysis
+The two original papers on gradual/migratory typing begin with different
+ ideas about how to mix typed and untyped code.
+
+@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
+ of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
+ typing@~cite{t-popl-1990}.
+The grammar of static types acquires a new catch-all member that accepts
+ any well-formed piece of code.
+Using this @emph{dynamic type}, a programmer can escape the type checker
+ on any line of otherwise-typed code.
+To allow such flexibility, however, the type checker can no longer affirm
+ that a program is type-correct.
+Programs that use the dynamic type are but plausibly correct; depending
+ on what the dyn-typed code evaluates to, the program may run smoothly.
+
+@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
+
+
+
+
+@;@; TODO need this? 2020-08-22 intro seems to do fine
+@;@section[#:tag "sec:why:design"]{Design Space: Expressiveness, Guarantees, Performance}
+@;
+@;Anticipate the design-space analysis
 
 
 
