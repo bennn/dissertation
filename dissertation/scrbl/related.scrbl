@@ -44,3 +44,7 @@ New related work about the combination, other hybrids, like types, Pyret.
 @;@subsection{Pyret}
 @;@subsection{Like Types}
 @;
+
+@; Interop
+@; @citet{mf-toplas-2009} ... gray ... go older too?
+@;  ... barret ecoop 15
