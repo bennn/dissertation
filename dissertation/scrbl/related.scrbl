@@ -10,8 +10,8 @@ New related work about the combination, other hybrids, like types, Pyret.
 
 
 
-@;@subsection{Gradual Typing}
-@;
+@section[#:tag "sec:related:gradual"]{Gradual Typing}
+
 @;Gradual typing is not necessarily migratory,
 @; non-migratory is addressing a dubious problem.
 @;
@@ -60,3 +60,5 @@ New related work about the combination, other hybrids, like types, Pyret.
 @; Interop
 @; @citet{mf-toplas-2009} ... gray ... go older too?
 @;  ... barret ecoop 15
+
+@; greenberg snapl, somewhere

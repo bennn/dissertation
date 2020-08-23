@@ -210,14 +210,32 @@ Unless researchers can design a practical and non-optional mixed-typed language,
 @subsection{Type Dynamic}
 @; lesson = non-lesson? ... stat->dyn can be done, brings pitfalls
 
-Statically-typed languages often need to interact with untyped data.
-... researchers ... untyped .... then thatte
+Statically-typed languages often need to interact with untyped values,
+ perhaps though a database connection, web socket, or interactive prompt.
+Both @citet{acpp-toplas-1991} and @citet{lm-fpca-1991} thus present static
+ type systems with a special dynamic type.
+Typed code can interact with a untyped value by first testing
+ its structure; the type system records observations.
 
-Opposite direction, state and criticize?
-Link to gradual typing.
+Quasi-static typing extends the type-dynamic idea with implicit structure
+ tests@~cite{t-popl-1990}.
+Instead of asking the user to write and maintain type-testing code, the
+ quasi-static system generates run-time checks.
+Consequently, programmers have less incentive to handle the dynamic type
+ at the boundary to untrusted code.
+The result is a mixed-typed language because entire blocks of code may have
+ the dynamic type throughout.
+Gradual typing emphasizes the mixed-typed idea in quasi-static typing,
+ contributes major technical improvements and discipline@~cite{st-sfp-2006,svcb-snapl-2015},
+ and has inspired a large body of static-to-dynamic research (@section-ref{sec:related:gradual}).
 
-
-
+Implicit coercions to type dynamic, however, weaken the type-proofs in any
+ gradual or quasi-static language.
+Rather than shoving that typed components do fit together, a gradually-typed
+ program is code that can fit together---given good values at each occurrence
+ of the dynamic type.
+@citet{t-popl-1990} aptly introduces the word ``plausibility'' to describe
+ the weakened guarantee.
 
 
 @section[#:tag "sec:why:observations"]{MT Observations}
