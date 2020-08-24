@@ -32,6 +32,8 @@
 (require
   (only-in math/statistics
     mean)
+  (only-in racket/math
+    exact-floor)
   (only-in racket/path
     file-name-from-path
     find-relative-path)
@@ -79,23 +81,23 @@
 
 (define SHALLOW-CURRENT-BENCHMARK* '(
   sieve
-;  forth
+  forth
   fsm
   fsmoo
   mbta
   morsecode
 ;  zombie
-;  dungeon
-;  jpeg
+  dungeon
+  jpeg
 ;  zordoz
   lnm
-;  suffixtree
+  suffixtree
   kcfa
 ;  snake
 ;  take5
-;  acquire
+  acquire
 ;  tetris
-;  synth
+  synth
 ;  gregor
 ;  quadT
 ))
@@ -231,7 +233,8 @@
 (define MIXED-WORST-TITLE
   (list "Benchmark"
         "worst before"
-        "worst after"))
+        "worst after"
+        "% better"))
 
 (define (render-mixed-worst-table row*)
   ;; TODO abstraction
@@ -259,8 +262,12 @@
 (define (make-mixed-worst-row name pi-shallow pi-deep)
   (define s-max (max-overhead pi-shallow))
   (define d-max (max-overhead pi-deep))
+  (define worst-before (max s-max d-max))
+  (define worst-after (min s-max d-max))
+  (define pct-improved (* 100 (/ worst-before worst-after)))
   (list name
         (bm name)
-        (rnd (max s-max d-max))
-        (rnd (min s-max d-max))))
+        (rnd worst-before)
+        (rnd worst-after)
+        (format "~a%" (exact-floor pct-improved))))
 
