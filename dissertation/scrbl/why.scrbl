@@ -229,13 +229,15 @@ Gradual typing emphasizes the mixed-typed idea in quasi-static typing,
  contributes major technical improvements and discipline@~cite{st-sfp-2006,svcb-snapl-2015},
  and has inspired a large body of static-to-dynamic research (@section-ref{sec:related:gradual}).
 
-Implicit coercions to type dynamic, however, weaken the type-proofs in any
+Implicit coercions to type dynamic, however, weaken type-proofs in a
  gradual or quasi-static language.
-Rather than shoving that typed components do fit together, a gradually-typed
- program is code that can fit together---given good values at each occurrence
+Rather than showing that components do fit together, a gradually-typed
+ program is something that can fit together given good values at each occurrence
  of the dynamic type.
-@citet{t-popl-1990} aptly introduces the word ``plausibility'' to describe
- the weakened guarantee.
+Words like ``plausibility''@~cite{t-popl-1990}
+ and ``consistency''@~cite{st-sfp-2006} aptly describe the weakened guarantees;
+ gradual types can only point out implausibilities and inconsistencies among
+ non-dynamic types.
 
 
 @section[#:tag "sec:why:observations"]{MT Observations}
