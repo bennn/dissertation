@@ -84,7 +84,7 @@ Run-time checks slow down a computation, thus a mixed-typed language needs to
 
 Before a language can address the central 3-way tradeoff, its designers
  must decide what kinds of mixing to allow and what goals to strive for.
-Migratory typing is one such philosophy.
+Migratory typing is one such theory.
 The goal of migratory typing is to add static typing onto a vetted untyped
  language.
 @;Code that started off untyped can gain the maintenance benefits of
@@ -188,7 +188,7 @@ Both solutions, unfortunately, reveal major challenges for inference:
 \end{itemize}}
 
 @citet{w-thesis-1994} notes that user-provided annotations can help with
- brittleness and readability, despite friction with the soft typing philosophy.
+ brittleness and readability, despite friction with the tenets of soft typing.
 @citet{m-thesis-2006} improves the performance of set-based analysis
  by leveraging contracts at module boundaries.
 Their observations anticipate the migratory typing approach to mixed-typed code.
@@ -241,10 +241,10 @@ Gradual typing emphasizes the mixed-typed idea in quasi-static typing,
 
 Implicit coercions to type dynamic, however, weaken type-proofs in a
  gradual or quasi-static language.
-Rather than showing that components do fit together, a gradually-typed
- program is something that can fit together given good values at each occurrence
+Rather than showing that components @emph{do} fit together, a gradually-typed
+ program is something that @emph{can} fit together given good values at each occurrence
  of the dynamic type.
-Words like ``plausibility''@~cite{t-popl-1990}
+Words such as ``plausibility''@~cite{t-popl-1990}
  and ``consistency''@~cite{st-sfp-2006} aptly describe the weakened guarantees;
  gradual types can only point out implausibilities and inconsistencies among
  non-dynamic types.
@@ -252,16 +252,16 @@ Words like ``plausibility''@~cite{t-popl-1990}
 
 @section[#:tag "sec:why:observations"]{MT: Observations}
 
-Migratory typing stands on three axioms of programming:
+Migratory typing stands on three observations:
  untyped code exists,
  type annotations improve maintainability,
  and sound types are a worthwhile ideal.
-On the surface, these observations simply motivate a typed/untyped mix;
+On the surface, these basic opinions simply motivate a typed/untyped mix;
  between the lines, however,
  they suggest requirements for an effective mixed-typed language.
 
 
-@subsection{MT-o1: untyped code exists}
+@subsection[#:tag "why:mt-o1"]{MT-o1: untyped code exists}
 @; - exists, quantity
 @; - want to reuse no questions asked, no costly migration
 
@@ -307,7 +307,7 @@ And a tailor-made type system, if one exists, provides an immediate solution
 @;Debugging in untyped code can gradually strengthen it with new type annotations.
 
 
-@subsection{MT-o2: types communicate}
+@subsection[#:tag "why:mt-o2"]{MT-o2: types communicate}
 @; - types catch typos
 @; - type annotations keep intent, checked documentation
 @; - dialog to compiler / runtime
@@ -328,7 +328,7 @@ Additionally, type errors that can point to part of an annotation have a direct
 @; At least for top-level and recursive definitions.
 
 
-@subsection{MT-o3: sound types catch bugs}
+@subsection[#:tag "why:mt-o3"]{MT-o3: sound types catch bugs}
 @; - sound types help programmers
 @; - sound types help compilers
 @; - unless academics try, nobody will
@@ -351,7 +351,7 @@ If a value flows across a type-annotated source position, then future users
  of the value can assume the type---no matter whether these uses are
  statically-typed or untyped code (@chapter-ref{chap:design}).
 In other words, silent disagreements between a type and value cannot arise.
-Every mismatch stops the program before computations can get further derailed.
+Every mismatch stops the program before computations can become further derailed.
 
 
 @section[#:tag "sec:why:decisions"]{MT: Design Choices}
@@ -361,40 +361,59 @@ Every mismatch stops the program before computations can get further derailed.
 @; - annotation work
 @; - ....
 
-Characterizing aspects of MT, what sets it apart.
+Taken broadly, migratory typing studies how to add types to untyped code.
+My dissertation builds on a more focused theory that is grounded in the
+ following principles.
+Typed Racket shares the same theory@~cite{t-thesis-2010,tfffgksst-snapl-2017}.
+Our aim is to maximize the potential benefits of a mixed-typed language,
+ in spite of the risk that some goals may prove unattainable.
+(Research is when it can fail.)
 
-The goal of migratory typing is to begin with an untyped language and
- incrementally add benefits of static types.
-My work is based on additional design constraints intended to maximize the
- benefits of the typed/untyped combination.
+@subsection[#:tag "why:mt-r1"]{MT-r1: types for untyped code}
+
+Migratory typing begins with an independent untyped language and adds
+ a companion type system.
+The new types must express common designs from the untyped world;
+ in other words, a type system that demands re-organized untyped code
+ is not acceptable.
 
 
-@subsection{MT-r1: sound types}
+@subsection[#:tag "why:mt-r2"]{MT-r2: require annotations, reject programs}
+
+Programmers must write type annotations for top-level and recursive
+ definitions.
+Extra, optional annotations may be supplied to guide type inference.
+
+The type checker will reject ill-typed programs instead of creating a
+ run-time cast to bridge unequal types.
+Programmers must deal with the type errors, either by inserting a cast
+ or re-designing the offending code.
+
+
+@subsection[#:tag "why:mt-r3"]{MT-r3: sound types}
 
 Well-typed code must satisfy a non-trivial soundness guarantee.
-Static types must predict some aspect of the values that flow though
- a program, beyond the baseline guarantee that every value is well-formed.
+@|sDeep| and @|sshallow| types are acceptable, but nothing less.
 
-A typical soundness theorem helps programmers debug and helps compilers to
- generate efficient code.
-MT soundness must provide similar benefits, but perhaps to a lesser extent
- if the cost of enforcing ``typical'' soundness is overwhelming.
+@subsubsection{Blame}
 
-@section{Blame}
-@; TODO
+Sound types catch bugs, but make no claims about actionable error outputs.
+Blame is an additional property geared toward useful error messages;
+A mixed-typed language may blame 
+
+...
 
 What, why, how.
 
 
 
-@subsection{MT-r2: descriptive types}
 
-The language of static types must be able to describe idioms from the untyped
- code.
-Untyped code comes first.
-Types must be versatile enough to explain the reasoning behind a well-reasoned
- piece of untyped code without any sort of rewrites.
-ML-style tagging and untagging is not acceptable.
+@subsection[#:tag "why:mt-r4"]{MT-r4: clear boundaries}
+
+ 
+
+
+
 
 
 @subsection{MT-r3: user-supplied annotations}
