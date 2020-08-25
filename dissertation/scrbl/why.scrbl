@@ -282,10 +282,12 @@ An exemplar of the second option is Sweden's pension system, which
  depends on a contract-laden Perl program@~cite{sweden-pluto}.
 The contracts ensure that components in this huge program behave as intended.
 
-A mixed typed language has the potential to revolutionize software development
- for teams in the latter camp, that cannot afford to rewrite their codebase.
-If every untyped language shipped with a companion type system, then teams
- could switch to reliable type information on demand.
+Research on mixed-typed languages can be a great help to teams in this second
+ camp, that cannot afford to rewrite their codebase.
+General knowledge about how to design a companion type system can reduce
+ the development cost of an in-house solution like Sweden's contracts.
+And a tailor-made type system, if one exists, provides an immediate solution
+ to maintenance issues.
 
 @;To see the pitfalls of loose coupling, consider a standard foreign-function
 @; interface (FFI) that translates values in one language into values of
@@ -317,21 +319,39 @@ Even the original author of a function can benefit from reading the types
 For a compiler, annotations are expectations.
 In a full-featured type system with subtyping and other points of ambiguity,
  user-supplied annotations drive choices.
-Moreover, type errors that can point to part of an annotation have a direct
+Additionally, type errors that can point to part of an annotation have a direct
  link to the programmer who needs to deal with the errors.
 
-These benefits offset the costs of writing and maintaining types.
-Languages that can help write types are better off, of course,
- but types belong in source code.
-At least for top-level and recursive definitions.
+@; These benefits offset the costs of writing and maintaining types.
+@; Languages that can help write types are better off, of course,
+@;  but types belong in source code.
+@; At least for top-level and recursive definitions.
 
 
-@subsection{MT-o3: sound types matter}
+@subsection{MT-o3: sound types catch bugs}
 @; - sound types help programmers
 @; - sound types help compilers
 @; - unless academics try, nobody will
 
+All static types can find typo-level mistakes, but only sound types
+ guarantee behavior.
+In a mixed-typed setting, a guarantee can make a world of difference.
+Picture a large untyped codebase made up of several interacting components,
+ and suppose that one component behaves strangely.
+Adding unsound types to that one component can reveal a syntactic mistake, but nothing more.
+Sound types, on the other hand, will halt the program as soon as an incorrect
+ value appears in typed code.
+If the language can additionally report the source of the untyped value
+ and the rationale for the mis-matched type expectation, then the programmer
+ has two clues about where to begin debugging.
 
+Going beyond soundness, a mixed-typed language that satisfies complete
+ monitoring guarantees the deep run-time behavior of every type.
+If a value flows across a type-annotated source position, then future users
+ of the value can assume the type---no matter whether these uses are
+ statically-typed or untyped code (@chapter-ref{chap:design}).
+In other words, silent disagreements between a type and value cannot arise.
+Every mismatch stops the program before computations can get further derailed.
 
 
 @section[#:tag "sec:why:decisions"]{MT: Design Choices}
