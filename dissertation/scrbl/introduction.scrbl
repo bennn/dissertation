@@ -53,14 +53,18 @@ I apply these methods and conclude that there are two promising designs:
  @|sdeep| types via the @|snatural| semantics and @|sshallow| types via
  the @|stransient| semantics.
 The now-obvious question is whether a language can have both.
-Hence the second half of this dissertation, which supports the following thesis statement:
+Hence the second half of this dissertation, which supports my thesis statement.
 
-@exact{\begin{quote}
- @|sDeep| and @|sshallow| types can coexist in a way that preserves their formal
- properties; programmers can combine these types to strengthen @|sshallow|-type
- guarantees, avoid unimportant @|sdeep|-type runtime errors, and lower the
- running time of typed/untyped interactions.
-\end{quote}}
+
+@section{Thesis Statement}
+
+@|sDeep| and @|sshallow| types can coexist in a way that preserves their formal
+properties; programmers can combine these types to strengthen @|sshallow|-type
+guarantees, avoid unimportant @|sdeep|-type runtime errors, and lower the
+running time of typed/untyped interactions.
+
+
+@section{Dissertation Overview}
 
 Looking ahead, the first order of business is to lay down ground rules for
  expressiveness.
