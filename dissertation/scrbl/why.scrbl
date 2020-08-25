@@ -81,9 +81,10 @@ More freedom to run programs means less knowledge about what a new
  program might do, unless there are run-time checks to catch extreme behaviors.
 Run-time checks slow down a computation, thus a mixed-typed language needs to
  balance three desires: expressiveness, guarantees, and performance.
-But even before this 3-way tradeoff, a language has to decide what kinds
- of mixing to allow and what goals to strive for.
 
+Before a language can address the central 3-way tradeoff, its designers
+ must decide what kinds of mixing to allow and what goals to strive for.
+Migratory typing is one such philosophy.
 The goal of migratory typing is to add static typing onto a vetted untyped
  language.
 @;Code that started off untyped can gain the maintenance benefits of
@@ -107,6 +108,15 @@ The observations, in particular, motivate design choices that characterize
 
 @section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
 @; TODO what did Henglein do and how does it fit???
+
+In the days before migratory typing, language designs explored several ways
+ to mix typed and untyped code.
+Some mixtures began with an untyped language and considered
+ whether to demand user-supplied type annotations.
+Others began with a typed language and added untyped flexibility.
+Either way, each design had to decide on run-time guarantees for its
+ generalized types.
+
 
 @subsection{Type Hints}
 @; lesson = annotations may work, pitfalls of unsoundness
@@ -226,7 +236,7 @@ Consequently, programmers have less incentive to handle the dynamic type
 The result is a mixed-typed language because entire blocks of code may have
  the dynamic type throughout.
 Gradual typing emphasizes the mixed-typed idea in quasi-static typing,
- contributes major technical improvements and discipline@~cite{st-sfp-2006,svcb-snapl-2015},
+ contributes major technical improvements and design discipline@~cite{st-sfp-2006,svcb-snapl-2015},
  and has inspired a large body of static-to-dynamic research (@section-ref{sec:related:gradual}).
 
 Implicit coercions to type dynamic, however, weaken type-proofs in a
@@ -240,7 +250,7 @@ Words like ``plausibility''@~cite{t-popl-1990}
  non-dynamic types.
 
 
-@section[#:tag "sec:why:observations"]{MT Observations}
+@section[#:tag "sec:why:observations"]{MT: Observations}
 
 Migratory typing stems from three observations about the practice of
  programming.
@@ -248,7 +258,7 @@ At face value, these basic facts show a need for mixing typed and untyped code.
 Between the lines, details suggest extra requirements.
 
 
-@subsection{Observation 1: untyped code exists}
+@subsection{MT-O1: untyped code exists}
 
 @; where is the untyped code?
 @; why is it good?
@@ -263,7 +273,7 @@ The fact is, untyped code exists and programmers must be able to use it
  as-is to continue being productive.
 
 
-@subsection{Observation 2: types offer benefits}
+@subsection{MT-O2: types offer benefits}
 
 @; ps writing may be harder, don't know. Once written, clear benefits.
 
@@ -280,7 +290,7 @@ A compiler can use the type predictions to generate efficient run-time code
  from easy-to-read sources.
 
 
-@subsection{Observation 3: boundaries matter}
+@subsection{MT-O3: boundaries matter}
 
 If untyped code exists and types offer benefits, then clearly the ideal
  language must stitch together typed and untyped code.
@@ -311,7 +321,7 @@ Debugging in untyped code can gradually strengthen it with new type annotations.
 @;  miscommunications and to leverage new strengths.
 
 
-@section[#:tag "sec:why:decisions"]{MT Design Choices}
+@section[#:tag "sec:why:decisions"]{MT: Design Choices}
 
 @; above hits and misses => lessons ...
 @; - inference bad,
@@ -324,7 +334,7 @@ My work is based on additional design constraints intended to maximize the
  benefits of the typed/untyped combination.
 
 
-@subsection{Requirement 1: sound types}
+@subsection{MT-R1: sound types}
 
 Well-typed code must satisfy a non-trivial soundness guarantee.
 Static types must predict some aspect of the values that flow though
@@ -335,8 +345,14 @@ A typical soundness theorem helps programmers debug and helps compilers to
 MT soundness must provide similar benefits, but perhaps to a lesser extent
  if the cost of enforcing ``typical'' soundness is overwhelming.
 
+@section{Blame}
+@; TODO
 
-@subsection{Requirement 2: descriptive types}
+What, why, how.
+
+
+
+@subsection{MT-R2: descriptive types}
 
 The language of static types must be able to describe idioms from the untyped
  code.
@@ -346,7 +362,7 @@ Types must be versatile enough to explain the reasoning behind a well-reasoned
 ML-style tagging and untagging is not acceptable.
 
 
-@subsection{Requirement 3: user-supplied annotations}
+@subsection{MT-R3: user-supplied annotations}
 
 Programmers must write type annotations.
 These annotations serve three purposes.
@@ -360,7 +376,7 @@ Types are supposed to help find bugs, but flexible type inference may miss
 Third, explicit types help human readers navigate a codebase.
 
 
-@subsection{Requirement 4: clear typed/untyped boundaries}
+@subsection{MT-R4: clear typed/untyped boundaries}
 
 Every boundary between typed and untyped code is a potential channel
  for a communication error.
@@ -369,12 +385,6 @@ The language should help with this debugging challenge.
 In order to help, though, boundaries must be clearly stated in source code.
 Programmers need to know where these boundaries are as they write the program,
  and the language needs to track them when it runs.
-
-
-@section{Blame}
-@; TODO
-
-What, why, how.
 
 
 @subsection{Micro, Macro}
@@ -396,14 +406,5 @@ Programs that use the dynamic type are but plausibly correct; depending
  on what the dyn-typed code evaluates to, the program may run smoothly.
 
 @citet{tf-dls-2006} propose a @emph{macro}-level mixing.
-
-
-
-
-@;@; TODO need this? 2020-08-22 intro seems to do fine
-@;@section[#:tag "sec:why:design"]{Design Space: Expressiveness, Guarantees, Performance}
-@;
-@;Anticipate the design-space analysis
-
 
 
