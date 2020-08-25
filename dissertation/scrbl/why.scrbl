@@ -252,17 +252,20 @@ Words like ``plausibility''@~cite{t-popl-1990}
 
 @section[#:tag "sec:why:observations"]{MT: Observations}
 
-Migratory typing stems from three observations about the practice of
- programming.
-At face value, these basic facts show a need for mixing typed and untyped code.
-Between the lines, details suggest extra requirements.
+Migratory typing stands on three axioms of programming:
+ untyped code exists,
+ type annotations improve maintainability,
+ and sound types are a worthwhile ideal.
+On the surface, these basic observations motivate a typed/untyped mix.
+Between the lines, they suggest requirements for all mixed-typed languages.
 
 
 @subsection{MT-O1: untyped code exists}
+@; - exists, quantity
+@; - want to reuse no questions asked, no costly migration
 
-@; where is the untyped code?
-@; why is it good?
-@; 
+
+
 
 The world is full of good untyped code.
 Many prolific languages on GitHub are untyped.
@@ -272,53 +275,60 @@ Exactly how this code came to be is unimportant.
 The fact is, untyped code exists and programmers must be able to use it
  as-is to continue being productive.
 
-
-@subsection{MT-O2: types offer benefits}
-
-@; ps writing may be harder, don't know. Once written, clear benefits.
-
-Typed code has several advantages over untyped code.
-The static type checker provides assurance against simple logical mistakes.
-Any explicit type annotations communicate the intent of the original author.
-All types on an interface serve as a usage guide to future clients.
-
-Sound types come with additional benefits because they predict behaviors.
-Clients can trust sound types as they design new code.
-These types can speed up debugging tasks because they guarantee certain errors
- cannot occur.
-A compiler can use the type predictions to generate efficient run-time code
- from easy-to-read sources.
-
-
-@subsection{MT-O3: boundaries matter}
-
-If untyped code exists and types offer benefits, then clearly the ideal
- language must stitch together typed and untyped code.
-A careless stitching, however, may be worst of all.
-Indeed, the boundaries between typed and untyped code are key to the success of
- the whole idea.
-
-To see the pitfalls of loose coupling, consider a standard foreign-function
- interface (FFI) that translates values in one language into values of
- another.
-Suppose we have an FFI between an untyped language and a sound typed language.
-The combined language has two major problems.
-First, untyped code can supply any input to typed code, breaking soundness.
-Second, the FFI invites untyped-to-typed conversion but requires wholesale
- rewrites, risking mistakes.
-
-@; TODO anticipate need for subtyping
-
-By contrast, a mixed-typed language that uses the same base syntax for typed
- and untyped code offers more than the sum of two languages.
-Programmers can move from untyped to typed by adding annotations, nothing
- more; the conversion does not risk behavior-changing mistakes.
-Untyped programmers may be more motivated to learn these types than a
- new language.
-Debugging in untyped code can gradually strengthen it with new type annotations.
-
+@;If untyped code exists and types offer benefits, then clearly the ideal
+@; language must stitch together typed and untyped code.
+@;A careless stitching, however, may be worst of all.
+@;Indeed, the boundaries between typed and untyped code are key to the success of
+@; the whole idea.
+@;
+@;To see the pitfalls of loose coupling, consider a standard foreign-function
+@; interface (FFI) that translates values in one language into values of
+@; another.
+@;Suppose we have an FFI between an untyped language and a sound typed language.
+@;The combined language has two major problems.
+@;First, untyped code can supply any input to typed code, breaking soundness.
+@;Second, the FFI invites untyped-to-typed conversion but requires wholesale
+@; rewrites, risking mistakes.
+@;
+@;By contrast, a mixed-typed language that uses the same base syntax for typed
+@; and untyped code offers more than the sum of two languages.
+@;Programmers can move from untyped to typed by adding annotations, nothing
+@; more; the conversion does not risk behavior-changing mistakes.
+@;Untyped programmers may be more motivated to learn these types than a
+@; new language.
+@;Debugging in untyped code can gradually strengthen it with new type annotations.
+@;
 @; A language needs to take care at boundaries, both to protect against
 @;  miscommunications and to leverage new strengths.
+
+
+@subsection{MT-O2: types communicate}
+@; - types catch typos
+@; - type annotations keep intent, checked documentation
+@; - dialog to compiler / runtime
+
+Type annotations are an important channel of communication.
+For human readers, they describe the high-level design of code.
+Even the original author of a function can benefit from reading the types
+ after some time away from the codebase.
+For a compiler, annotations are expectations.
+In a full-featured type system with subtyping and other points of ambiguity,
+ user-supplied annotations drive choices.
+Moreover, type errors that can point to part of an annotation have a direct
+ link to the programmer who needs to deal with the errors.
+
+These benefits offset the costs of writing and maintaining types.
+Languages that can help write types are better off, of course,
+ but types belong in source code.
+At least for top-level and recursive definitions.
+
+
+@subsection{MT-O3: sound types matter}
+@; - sound types help programmers
+@; - sound types help compilers
+@; - unless academics try, nobody will
+
+
 
 
 @section[#:tag "sec:why:decisions"]{MT: Design Choices}
@@ -327,6 +337,8 @@ Debugging in untyped code can gradually strengthen it with new type annotations.
 @; - inference bad,
 @; - annotation work
 @; - ....
+
+Characterizing aspects of MT, what sets it apart.
 
 The goal of migratory typing is to begin with an untyped language and
  incrementally add benefits of static types.
@@ -385,6 +397,8 @@ The language should help with this debugging challenge.
 In order to help, though, boundaries must be clearly stated in source code.
 Programmers need to know where these boundaries are as they write the program,
  and the language needs to track them when it runs.
+
+@; withhout, undermine benefits
 
 
 @subsection{Micro, Macro}
