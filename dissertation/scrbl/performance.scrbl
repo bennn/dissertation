@@ -25,7 +25,7 @@
     "Matthias Felleisen"
   )
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
-  #:extra @elem{ Spenser Bauman, Cameron Moy, Lukas Lazarek, and Sam Sundar
+  #:extra @elem{ In addition, Spenser Bauman, Cameron Moy, Lukas Lazarek, and Sam Sundar
    contributed major improvements to the Typed Racket benchmarks.}
 ]
 
