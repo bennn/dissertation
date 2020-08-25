@@ -367,7 +367,7 @@ My dissertation builds on a more focused theory that is grounded in the
 Typed Racket shares the same theory@~cite{t-thesis-2010,tfffgksst-snapl-2017}.
 Our aim is to maximize the potential benefits of a mixed-typed language,
  in spite of the risk that some goals may prove unattainable.
-(Research is when it can fail.)
+As always, research is when it can fail.
 
 @subsection[#:tag "why:mt-r1"]{MT-r1: types for untyped code}
 
@@ -382,85 +382,69 @@ The new types must express common designs from the untyped world;
 
 Programmers must write type annotations for top-level and recursive
  definitions.
-Extra, optional annotations may be supplied to guide type inference.
+Extra annotations may guide type inference.
 
 The type checker will reject ill-typed programs instead of creating a
  run-time cast to bridge unequal types.
 Programmers must deal with the type errors, either by inserting a cast
- or re-designing the offending code.
+ or re-designing code.
 
 
 @subsection[#:tag "why:mt-r3"]{MT-r3: sound types}
 
 Well-typed code must satisfy a non-trivial soundness guarantee.
-@|sDeep| and @|sshallow| types are acceptable, but nothing less.
+Both @|sdeep| and @|sshallow| types are acceptable, but nothing less.
+
 
 @subsubsection{Blame}
 
 Sound types catch bugs, but make no claims about actionable error outputs.
-Blame is an additional property geared toward useful error messages;
-A mixed-typed language may blame 
-
-...
-
-What, why, how.
-
-
+Blame is an additional property geared toward useful error messages.
+A mixed-typed language should try to give useful blame; that is,
+ a small collection of relevant source locations for each run-time type mismatch.
 
 
 @subsection[#:tag "why:mt-r4"]{MT-r4: clear boundaries}
 
- 
+Typed and untyped code must be linked at static API boundaries.
+In order for a typed module to interact with an untyped value, the module
+ must declare a type specification for the value.
+An untyped module does not need to give specifications, because any
+ typed value that it imports comes with a static specification for correct use.
+
+By contrast, this dissertation is not directly concerned with true gradual
+ languages that include a dynamic type@~cite{svcb-snapl-2015}.
+Such languages can still benefit from my results at an intermediate step,
+ after occurrences of the dynamic type have been replaced with precise types
+ and casts.
+But it is unclear how to communicate intermediate behaviors up to the
+ programmer.
+
+Requiring boundaries greatly simplifies and strengthens the type system.
+It is simpler because there is no dynamic type; standard definitions of
+ types, subtyping, and all the rest suffice for the type checker.
+It is stronger because there is no type precision relation to allow
+ odd constructions in otherwise-typed code.
+Untyped code can only sneak in through a boundary;
+ refer to @section-ref{sec:transient:blame-performance} for a contrary
+ example in Reticulated Python.
 
 
+@subsubsection{Macro, Micro}
 
+Prior works make a distinction between @emph{macro}-level and @emph{micro}-level
+ gradual typing systems@~cite{tfdfftf-ecoop-2015,tfgnvf-popl-2016}.
+These names express the same idea as my boundary requirement,
+ but in terms of granularity and with the term ``gradual typing'' broadly
+ construed to refer to any sound mixed-typed language.
+Macro allows interaction between typed and untyped chunks of code@~cite{tf-dls-2006}
+ whereas micro allows ``fine-grained'' mixing via a dynamic type@~cite{st-sfp-2006}.
 
-
-@subsection{MT-r3: user-supplied annotations}
-
-Programmers must write type annotations.
-These annotations serve three purposes.
-First, they establish the intended level of detail.
-Descriptive types offer a choice between several valid types for one expression.
-Instead of asking the language to pick a level via type inference, which may
- not be feasible, we ask the programmer.
-Second, they help the type checker reject code.
-Types are supposed to help find bugs, but flexible type inference may miss
- errors due to a lack of guidance.
-Third, explicit types help human readers navigate a codebase.
-
-
-@subsection{MT-R4: clear typed/untyped boundaries}
-
-Every boundary between typed and untyped code is a potential channel
- for a communication error.
-If such an error occurs, the programmer needs to find the relevant channels.
-The language should help with this debugging challenge.
-In order to help, though, boundaries must be clearly stated in source code.
-Programmers need to know where these boundaries are as they write the program,
- and the language needs to track them when it runs.
-
-@; withhout, undermine benefits
-
-
-@subsection{Micro, Macro}
-@; TODO
-
-The two original papers on gradual/migratory typing begin with different
- ideas about how to mix typed and untyped code.
-
-@citet{st-sfp-2006} propose a @emph{micro}-level mixing in the spirit
- of type dynamic@~cite{acpp-toplas-1991,lm-fpca-1991} and quasi-static
- typing@~cite{t-popl-1990}.
-The grammar of static types acquires a new catch-all member that accepts
- any well-formed piece of code.
-Using this @emph{dynamic type}, a programmer can escape the type checker
- on any line of otherwise-typed code.
-To allow such flexibility, however, the type checker can no longer affirm
- that a program is type-correct.
-Programs that use the dynamic type are but plausibly correct; depending
- on what the dyn-typed code evaluates to, the program may run smoothly.
-
-@citet{tf-dls-2006} propose a @emph{macro}-level mixing.
-
+Looking back, I believe there were two dimensions at play.
+First is whether to include a dynamic type.
+Second is how to mix: whether to migrate from an untyped host language
+ or to add flexibility to a static type system@~cite{g-snapl-2019}.
+Micro/macro is a useful mnemonic for the first dimension,
+ but it is more direct to talk about dyn/non-dyn and migratory/non-migratory
+ as two choices in the design of a new mixed-typed language.
 
