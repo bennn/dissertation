@@ -256,31 +256,37 @@ Migratory typing stands on three axioms of programming:
  untyped code exists,
  type annotations improve maintainability,
  and sound types are a worthwhile ideal.
-On the surface, these basic observations motivate a typed/untyped mix.
-Between the lines, they suggest requirements for all mixed-typed languages.
+On the surface, these observations simply motivate a typed/untyped mix;
+ between the lines, however,
+ they suggest requirements for an effective mixed-typed language.
 
 
-@subsection{MT-O1: untyped code exists}
+@subsection{MT-o1: untyped code exists}
 @; - exists, quantity
 @; - want to reuse no questions asked, no costly migration
 
+Untyped code is a fact.
+Large companies such as Dropbox, Facebook, and Twitter started as
+ untyped projects.
+Small teams continue to employ untyped languages; most repositories on
+ GitHub use either JavaScript, Python, PHP, or Ruby (@format-url{https://githut.info}).
 
+Once an untyped codebase is off the ground and the lack of reliable type
+ information becomes a maintenance bottleneck, programmers have two options.
+The extreme option is to change languages.
+Twitter, for example, was able to port their Ruby codebase over to Scala@~cite{twitter-scala}.
+Good on them.
+For teams that lack the time and expertise to make a switch, the alternative
+ is to re-create any necessary benefits of types.
+An exemplar of the second option is Sweden's pension system, which
+ depends on a contract-laden Perl program@~cite{sweden-pluto}.
+The contracts ensure that components in this huge program behave as intended.
 
+A mixed typed language has the potential to revolutionize software development
+ for teams in the latter camp, that cannot afford to rewrite their codebase.
+If every untyped language shipped with a companion type system, then teams
+ could switch to reliable type information on demand.
 
-The world is full of good untyped code.
-Many prolific languages on GitHub are untyped.
-These languages are home to useful, unique libraries.
-
-Exactly how this code came to be is unimportant.
-The fact is, untyped code exists and programmers must be able to use it
- as-is to continue being productive.
-
-@;If untyped code exists and types offer benefits, then clearly the ideal
-@; language must stitch together typed and untyped code.
-@;A careless stitching, however, may be worst of all.
-@;Indeed, the boundaries between typed and untyped code are key to the success of
-@; the whole idea.
-@;
 @;To see the pitfalls of loose coupling, consider a standard foreign-function
 @; interface (FFI) that translates values in one language into values of
 @; another.
@@ -297,12 +303,9 @@ The fact is, untyped code exists and programmers must be able to use it
 @;Untyped programmers may be more motivated to learn these types than a
 @; new language.
 @;Debugging in untyped code can gradually strengthen it with new type annotations.
-@;
-@; A language needs to take care at boundaries, both to protect against
-@;  miscommunications and to leverage new strengths.
 
 
-@subsection{MT-O2: types communicate}
+@subsection{MT-o2: types communicate}
 @; - types catch typos
 @; - type annotations keep intent, checked documentation
 @; - dialog to compiler / runtime
@@ -323,7 +326,7 @@ Languages that can help write types are better off, of course,
 At least for top-level and recursive definitions.
 
 
-@subsection{MT-O3: sound types matter}
+@subsection{MT-o3: sound types matter}
 @; - sound types help programmers
 @; - sound types help compilers
 @; - unless academics try, nobody will
@@ -346,7 +349,7 @@ My work is based on additional design constraints intended to maximize the
  benefits of the typed/untyped combination.
 
 
-@subsection{MT-R1: sound types}
+@subsection{MT-r1: sound types}
 
 Well-typed code must satisfy a non-trivial soundness guarantee.
 Static types must predict some aspect of the values that flow though
@@ -364,7 +367,7 @@ What, why, how.
 
 
 
-@subsection{MT-R2: descriptive types}
+@subsection{MT-r2: descriptive types}
 
 The language of static types must be able to describe idioms from the untyped
  code.
@@ -374,7 +377,7 @@ Types must be versatile enough to explain the reasoning behind a well-reasoned
 ML-style tagging and untagging is not acceptable.
 
 
-@subsection{MT-R3: user-supplied annotations}
+@subsection{MT-r3: user-supplied annotations}
 
 Programmers must write type annotations.
 These annotations serve three purposes.
