@@ -25,42 +25,46 @@
     "Matthias Felleisen"
   )
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
-  #:extra @elem{ In addition, Spenser Bauman, Cameron Moy, Lukas Lazarek, and Sam Sundar
-   contributed major improvements to the Typed Racket benchmarks.}
+  #:extra @elem{ The Typed Racket benchmarks presented in this chapter
+   have been improved over the years by:
+   Spenser Bauman, Lukas Lazarek, Cameron Moy, and Sam Sundar.}
 ]
 
 
 @; sound GT has cost
-Sound gradual types come with performance overhead.
-A soundness theorem guarantees that static types are valid claims about the
- run-time behavior of a program.
-Gradual types can mix with untyped code.
-Therefore, a gradual typing system needs run-time checks to protect typed
- code from invalid untyped values.
-These run-time checks impose a cost in proportion to the frequency
- of typed/untyped interactions, the nature of the data that crosses
- these type boundaries, and the strength of the soundness guarantee.
+Sound gradual types come with performance overhead
+ because soundness is a claim about behavior and the only way to control
+ the behavior of untyped code is via run-time checks.
+These checks impose a cost in proportion to
+ the frequency of mixed-typed interactions,
+ the complexity of the type specifications that govern boundaries,
+ and the strength of the soundness guarantee.
 
-@; must measure
-Language designers must measure the overhead of gradual types
- to judge the overall usefulness of a gradual typing system.
- @; ... benefits vs costs
-Users need to know what kind of performance to expect.
-Implementors need a baseline to quantify improvements and
- justify alternative gradual typing approaches.
+Language designers must measure the performance of a mixed-typed language
+ to judge its overall usefulness in light of its guarantees.
+Type-sound code that runs too slowly is worthless.
+At a finer grain, users need an idea of what overhead to expect when they begin
+ experimenting with types.
+Implementors need a comprehensize performance summary to
+ measure improvements to a language and to compare alternative mixed-typed
+ designs.
+Despite these realities, early reports on mixed-typed languages
+ typically lack performance evaluation.
+A few acknowledge performance issues in passing@~cite{tf-popl-2008,acftd-scp-2013,vksb-dls-2014}.
+Others show only the performance of fully-typed code relative to fully-untyped
+ code, skipping the novel configurations in between@~cite{rsfbv-popl-2015,vss-popl-2017}.
+But in their defense, the development of a performance method is a challenge
+ in itself.
 
-This chapter presents a systematic and scalable evaluation method that I
- developed with several collaborators---notably Asumu Takikawa and Zeina
- Migeed.
-The method summarizes performance for the exponentially-many ways that a programmer
- can mix typed and untyped code by focusing on a binary "goodness" measure.
-Informally, a mixture is good if it is fast enough to use.
+This chapter presents systematic and scalable methods to assess the performance
+ of a mixed-typed language.
+The methods summarize performance for the exponentially-many ways that a programmer
+ can mix typed and untyped code by focusing on a binary ``goodness'' measure.
+Informally, a mixture is good if runs within a user-supplied overhead limit.
 Random sampling can approximate the proportion of good mixtures for programs
  in which exhaustive evaluation is not practical.
-
-@; TODO transition from all/Deep to Natrual/TR ... something more than jumping
-@;   to "experience with ...."
-@; OK RIGHT HERE --- developed for TR, generalized for RP, read all about it
+As validation, this chapter evaluates the performance of two
+ mixed-typed languages: Typed Racket and Reticulated Python.
 
 
 @section{Design Criteria}
