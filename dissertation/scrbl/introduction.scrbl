@@ -10,20 +10,21 @@
 
 A language that can mix typed and untyped code must balance three conflicting
  dimensions:
-@exact{\begin{itemize}
-\item[] \emph{Proofs}\/:
+@exact{{\renewcommand{\labelitemi}{{\large\decothreeright}} %{\raisebox{0.4ex}{\tiny\(\bullet\)}}
+\begin{itemize}
+\item \emph{Proofs}\/:
   Static types should be accurate predictions about the way a program
    behaves at run-time.
   If a type makes a claim, then other code---typed or untyped---may
    depend on it.
-\item[]\emph{Performance}\/:
+\item\emph{Performance}\/:
   Adding types to part of a codebase should not cripple its running time.
   On the contrary, a smart compiler should use type-proofs to generate
    efficient code.
-\item[] \emph{People}:
+\item \emph{People}:
   Untyped code must be free to create all sorts of values;
    typed code must be able to interact with many untyped designs.
-\end{itemize}}
+\end{itemize}}}
 
 @|noindent|@;
 The ideal mixed-typed language would satisy all three goals,
