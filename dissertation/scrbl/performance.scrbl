@@ -75,37 +75,43 @@ As validation, this chapter evaluates the performance of two
 
 The goal of performance evaluation is to predict the experiences of future
  users.
-Such users likely agree with the migration plan listed in @chapter-ref{chap:why}
- and are eager to test new typed/untyped combinations.
-Experience with Typed Racket indicates that this is exactly what happens;
- programmers combine typed and untyped code any way that the system allows.
-Applications undergo such transitions in a gradual, step-by-step manner.
+Intuition suggests that the users of a mixed-typed language will begin
+ with an untyped codebase and add types step-by-step.
+Experience with Typed Racket supports the intuition.
+Programmers write types incrementally and test all sorts of combinations.
+When typed libraries enter the picture, untyped programmers unknowingly
+ create mixed-typed applications.
 In a typical evolution, programmers compare the performance of the modified
  program with the previous version.
-If type-driven optimizations result in a performance improvement, all is well.
-Otherwise, the programmer may need to address the overhead with additional
- modifications.
-
+If the current performance is on par with the previous, then all is well.
+Otherwise, the easy solutions are: adding more types, and rewinding to a
+ less-typed version.
 These observations and assumptions about users suggest three basic criteria
  for an evaluation method.
 
-@parag{Begin with representative benchmarks}
-An evaluation method must measure programs, and is in turn limited by the
- chosen benchmarks.
-We need a variety of benchmarks from which to draw conclusions.
-Where possible, benchmarks should be adapted from real programs.
-Otherwise, benchmarks should stress-test specific parts of the language.
+@subsection{Representative Benchmarks}
+
+An evaluation method has to measure programs, and the results of
+ a particular evaluation are limited by the chosen benchmarks.
+Benchmark programs that stem from realistic code and exercise a variety
+ of features are an important step toward generalizable results.
 
 
-@parag{Summarize an exponentially-large space}
+@subsection{Exponential Compression}
+
 @(let ((num-example-configs 5)) (list @elem{
-Gradual typing promises to support exponentially-many combinations of typed
- and untyped code.
-Using Typed Racket, a programmer can add types to any module; thus a program
- with @id[num-example-configs] modules leads to @${2^@id[num-example-configs]}
- possible combinations (@figure-ref{fig:example-lattice-0}).
-Languages that offer types at a finer granularity have even more possibilities.
-In general, an evaluation must treat each combination as equally-likely.
+A mixed-typed language promises to support exponentially-many combinations of
+ typed and untyped code.
+In Typed Racket, for example, a programmer can add types to any module.
+Thus a program with @id[num-example-configs] modules leads to
+ @${2^@id[num-example-configs]} possible combinations (@figure-ref{fig:example-lattice-0}).
+Languages that can mix at a finer granularity support @${2^k} configurations,
+ where @${k} is the number of potentially-typed blocks.
+
+Without evidence against certain mixtures, an evaluation
+ must collect data for every mixed-typed configuration.
+These huge datasets call for a way to compress exponentially-many
+ observations into a compact summary.
 }
 
 @figure["fig:example-lattice-0" @elem{
@@ -126,83 +132,90 @@ In general, an evaluation must treat each combination as equally-likely.
 ))
 
 
-@parag{Focus on overhead}
-@(let ((example-overhead 8)) @elem{
-Because a gradual program starts from an original program, the first question
- is how adding types changes performance.
-Hence we can always assume two versions for any program: the current
- typed/untyped configuration and the same code without any gradual types.
-The latter @emph{baseline} program helps anchor an evaluation.
+@subsection{Report Overheads}
+
+@(let ((example-overhead 13)) @elem{
+Because migratory typing starts from an untyped language, programmers
+ can always revert to an untyped version of their codebase if types
+ prove too expensive.
+The existence of this fully-untyped baseline helps anchor an evaluation.
 If a programmer can tolerate a certain overhead, say @id[example-overhead]x,
  then a single number can summarize the good parts of the exponentially-large
  configuation space; namely, the percent of configurations that run fast enough.
+A second benefit is that overheads make it easy to find points where types
+ improve upon the baseline; look for overheads under 1x.
 })
-
 
 
 @; -----------------------------------------------------------------------------
 @section{Exhaustive Evaluation Method}
 
-We have developed two methods to measure the performance of a gradually-typed
- program: an exhaustive method that considers the entire configuration space,
- and an approximation thereof.
-This section presents the exhaustive method---first by example and then more
- formally.
+An exhaustive evaluation considers all ways that a programmer might
+ toggle type annotations.
+The method begins with a fully-typed codebase,
+ measures all possible mixed-typed configurations,
+ and introduces a compact visualization to summarize the results.
 
 
 @subsection{By Example}
 
-A Typed Racket program is a collection of modules (@figure-ref{fig:example-program}).
-Some modules are under the direct control of the programmer;
- these migratable modules are often identified with the program.
-Other modules are controlled by different programmers.
-These contextual modules may come from the standard library or
- a package registry.
+@;@figure*["fig:example-program" @elem{
+@;  Example Typed Racket program.
+@;  The four @emph{migratable} modules on the left are under the programmer's control.
+@;  The two @emph{contextual} modules on the right represent libraries and core
+@;   language APIs.
+@;  }
+@;  @; TODO white = untyped, black = typed, NON-GRAY = contextual ... pick white or black!
+@;  (make-example-program-pict)
+@;]
 
-@figure*["fig:example-program" @elem{
-  Example Typed Racket program.
-  The four @emph{migratable} modules on the left are under the programmer's control.
-  The two @emph{contextual} modules on the right represent libraries and core
-   language APIs.
-  }
-  @; TODO white = untyped, black = typed, NON-GRAY = contextual ... pick white or black!
-  (make-example-program-pict)
-]
-
-Gradual typing in Typed Racket lets a programmer choose the language
- for each migratable module.
-Thus a program with @${N} migratable modules opens a space of @${2^N}
- possibilites (@figure-ref{fig:example-lattice-0})---and no more, because the
- contextual modules are not easily open to modification.
-
-@(let* ((lattice-version "7.7")
-        (relative-version "6.2")
+@(let* ((lattice-version "6.4")
+        (relative-version "7.7")
         (S (tr:benchmark-name->performance-info 'fsm lattice-version))
         (num-modules (tr:benchmark->num-modules tr:fsm))
        ) @list[
-@elem{
-An exhaustive performance evaluation must consider all @${2^N} possibilities.
-After all, a programmer might choose any one; there is no reason why
- not.
-To give one example, the performance lattice in @figure-ref{fig:example-lattice}
- shows this full dataset for a program named @bm{fsm} that has @id[num-modules]
- migratable modules.
-The @integer->word[(expt 2 num-modules)] configurations are arranged in a
- lattice with the fully-untyped configuration on the bottom and the fully-typed
- configuration on top.
-A given row in the lattice groups configurations with the same number of typed
- modules (black squares).
-For instance, configurations in the second row from the bottom contain two
- typed modules.
-These represent all possible ways of converting two modules in the untyped
- configuration to Typed Racket.
-Similarly, configurations in the third row represent all possible
- configurations a programmer might encounter after applying three such
- @emph{type conversion steps} to the untyped configuration.
-In general, let the notation @${c_1 \rightarrow_k c_2} express the idea
- that a programmer starting from configuration @${c_1} (in row
- @${i}) could reach configuration @${c_2} (in row @${j}) after
- taking at most @${k} type conversion steps (@${j - i \le k}).
+@para{
+A Racket program is a collection of modules.
+Technically, there are two kinds of modules in such a collection:
+ the @emph{migratable} modules that the program's author has direct
+ control over, and the @emph{contextual} modules that come from an
+ external library.
+Typed Racket lets a programmer add types to any module.
+In practice, this usually means that any migratable module can
+ gain type annotations.
+Thus a program with @${N} migratable modules opens a space of @${2^N}
+ mixed-typed configurations, and each configuration depends on
+ the same contextual modules.
+
+For example, @bm{fsm} is a small Racket program that simulates an economy (@section-ref{sec:tr:benchmarks}).
+The main functionality is split across @integer->word[num-modules] modules;
+ with migratory typing, this leads to @integer->word[(expt 2 num-modules)]
+ mixed-typed configurations.
+@Figure-ref{fig:example-lattice} shows all these configurations in a lattice,
+ with the untyped configuration on the bottom and the fully-typed configuration
+ on type.
+Nodes in the middle mix typed and untyped code; each row groups all
+ configurations with the same number of typed modules.
+Lines between nodes represent the addition (or removal) of types from one
+ module.
+
+The label below a configuration node reports its overhead relative to
+ the untyped configuration on Racket version @|lattice-version|.
+With these labels, a language implementor can draw several conclusions about
+ performance overhead in @bm{fsm}.
+A first observation is that the fully-typed code runs equally fast as
+ the untyped baseline.
+This 1x overhead is also the overall best point in the lattice.
+Six other configurations run within a 2x overhead, but the rest suffer
+ from orders-of-magnitude slowdowns.
+Types in @bm{fsm} can come at a huge cost.
+}
+
+@exercise[2]{
+  Are there any paths from bottom to top in the @bm{fsm} lattice that stay
+   under 2x at every point?
+  Can configurations with exactly 1 typed module predict whether such
+   paths exist?
 }
 @figure*["fig:example-lattice" @elem{
 Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
@@ -217,36 +230,26 @@ Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
                  [*LATTICE-CONFIG-LABEL-MARGIN* 1])
     (performance-lattice S))
 ]
-@elem{
-Configurations in @figure-ref{fig:example-lattice} are furthermore labeled
- with their performance overhead relative to the untyped configuration on Racket
- version @|lattice-version|.
-With these labels, a language implementor can draw several conclusions about
- the performance overhead of gradual typing in this program.
-A first observation is that the fully-typed code runs the same speed as untyped.
-This 1x overhead is also the overall best point in the lattice.
-Six other configurations run within a 2x overhead, but the rest suffer
- from orders-of-magnitude slowdowns.
-Gradual typing in @bm{fsm} can come at a huge cost.
-}
-@elem{
+
+@para{
+
 Drawing such conclusions is not easy, however, even for this small program.
-Analyzing a lattice for programs with eight or more modules is clearly infeasible.
+Manually analyzing a lattice for programs with eight or more modules is clearly infeasible.
 @Figure-ref{fig:overhead-plot-example} presents a graphical alternative,
  an @emph{overhead plot},
- that anonymizes configurations and focuses on overhead relative to untyped.
-@; TODO awkward, haven't introduced ddeliv yet!
+ that anonymizes configurations and presents only their overhead relative
+ to the untyped baseline.
 Overhead plots are cumulative distribution functions.
-As the value of @${D} increases along the @|x-axis|, the number of
- @ddeliverable{D} configurations is monotonically increasing.
-The important question is how many configurations are @ddeliverable{D}
- for low values of @${D}.
-If this number is large, then a developer who applies gradual typing to a
- similar program has a large chance that the configuration they arrive at
- is a @ddeliverable{D} configuration.
-The area under the curve is the answer to this question.
-A curve with a large shaded area below it implies that a large number
- of configurations have low performance overhead.
+As the function proceeds left-to-right for numbers @${D} along the @|x-axis|,
+ the curve shows the proportion of all configurations that run at most
+ @${D} times slower than the untyped configuration.
+For short, these are @ddeliverable{D} configurations.
+On the left, there is always at least one @ddeliverable{1} configuration;
+ namely, the fully-untyped configuration itself.
+The question is whether other configurations run fast as well.
+To read such a plot quickly, focus on the area under the curve.
+A large shaded area implies that a large number of configurations
+ have low overhead.
 
 @(let ([d0 "d_0"]
        [d1 "d_1"]) @elem{
@@ -268,8 +271,15 @@ Lastly, the slope of a curve corresponds to the likelihood that
 A flat curve (zero slope) suggests that the performance of a group of
  configurations is dominated by a common set of type annotations.
 Such observations are no help to programmers facing performance issues,
- but may help language designers find inefficiencies in their implementation
- of gradual typing.
+ but may help language designers fix inefficiencies.
+
+Overhead plots scale to arbitrarily large datasets by compressing
+ exponentially-many points into a proportion.
+Furthermore, plotting two curves on one axis compares relative performance.
+@Figure-ref{fig:relative-overhead-plot-example} demonstrates two curves
+ for @bm{fsm}: on Racket v@|lattice-version| and v@|relative-version|.
+The latter curve shows a huge improvement thanks to collapsible contracts@~cite{fgsfs-oopsla-2018}.
+Indeed, every @bm{fsm} configuration is @ddeliverable{4} on Racket v@|relative-version|.
 }
 @render-overhead-plot*[
   "fig:overhead-plot-example"
@@ -295,31 +305,20 @@ The blue curve for v@|lattice-version| is higher, showing a relative improvement
   (list (cons 'fsm (cons lattice-version relative-version)))
   #f
 ]
-@elem{
-An overhead plot in the style of @figure-ref{fig:overhead-plot-example}
- scales to arbitrarily large programs because the @|y-axis|
- plots the proportion of @ddeliverable{D} configurations; in contrast, a
- performance lattice contains exponentially many nodes.
-Furthermore, plotting the overhead for multiple implementations of a gradual
- type system on the same set of axes conveys their relative performance
- (@figure-ref{fig:relative-overhead-plot-example}).
-}
 ])
 
-@; TODO more words here?
-
-To summarize, the exhaustive method has three steps:
-@itemlist[#:style 'ordered
- @item{
-   identify a suite of fully-typed programs;
- }
- @item{
-   measure the performance of all gradually-typed @emph{configurations} of the programs;
- }
- @item{
-   count the number of configurations with performance overhead no greater than a certain limit.
- }
-]
+@; To summarize, the exhaustive method has three steps:
+@; @itemlist[#:style 'ordered
+@;  @item{
+@;    identify a suite of fully-typed programs;
+@;  }
+@;  @item{
+@;    measure the performance of all gradually-typed @emph{configurations} of the programs;
+@;  }
+@;  @item{
+@;    count the number of configurations with performance overhead no greater than a certain limit.
+@;  }
+@; ]
 
 
 @subsection{By Definition}
