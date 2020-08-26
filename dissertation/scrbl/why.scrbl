@@ -399,9 +399,10 @@ Both @|sdeep| and @|sshallow| types are acceptable, but nothing less.
 @subsubsection{Blame}
 
 Sound types catch bugs, but make no claims about actionable error outputs.
-Blame is an additional property geared toward useful error messages.
-A mixed-typed language should try to give useful blame; that is,
- a small collection of relevant source locations for each run-time type mismatch.
+Blame is an additional property geared toward useful errors
+ that tell a programmer where to begin debugging.
+To this end, a mixed-typed language should try to present relevant source
+ locations along with every run-time type mismatch error.
 
 
 @subsection[#:tag "why:mt-r4"]{MT-r4: clear boundaries}

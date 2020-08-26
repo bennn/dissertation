@@ -8,6 +8,7 @@
 @(require
    (prefix-in tr: greenman-thesis/jfp-2019/main)
    (prefix-in rp: greenman-thesis/pepm-2018/main)
+   (only-in greenman-thesis/oopsla-2019/pict untyped-codeblock)
    gtp-plot/configuration-info
    gtp-plot/typed-racket-info
    gtp-plot/performance-info)
@@ -214,7 +215,7 @@ Types in @bm{fsm} can come at a huge cost.
 @exercise[2]{
   Are there any paths from bottom to top in the @bm{fsm} lattice that stay
    under 2x at every point?
-  Can configurations with exactly 1 typed module predict whether such
+  Can the configurations with exactly 1 typed module predict whether such
    paths exist?
 }
 @figure*["fig:example-lattice" @elem{
@@ -255,13 +256,13 @@ A large shaded area implies that a large number of configurations
        [d1 "d_1"]) @elem{
   The second most important aspects of an overhead plot are the two values of @${D}
    where the curve starts and ends.
-  More precisely, if @${h\!:\!\mathbb{R}^+\!\rightarrow\!\mathbb{N}} is a function
-   that counts the percent of @ddeliverable{D}
+  More precisely, if @${h\!:\!\mathbb{R}^+\!\rightarrow\!\mathbb{N}} is the CDF
+   that counts the proportion of @ddeliverable{D}
    configurations in a benchmark, the critical points are the smallest
    overheads @${@|d0|, @|d1|} such
    that @${h(@|d0|)\!>\!0\%} and @${h(@|d1|)\!=\!100\%}.
   An ideal start-value would lie between zero and one; if @${@|d0|\!<\!1} then
-   at least one configuration runs faster than the Python baseline.
+   at least one configuration runs faster than the baseline.
   The end-value @${@|d1|} is the overhead of the slowest-running configuration.
 })
 
@@ -323,38 +324,35 @@ The blue curve for v@|lattice-version| is higher, showing a relative improvement
 
 @subsection{By Definition}
 
-The following definitions capture the intuitions above and generalize
- beyond Typed Racket.
-As a running example, this section will use Reticulated Python to demonstrate
- the generalization.
-Reticulated permits optional types for every parameter to a function,
- every function return type, and every class field.
+The exhaustive evaluation method applies to other mixed-typed languages
+ as well as Typed Racket.
+To encourage adaptations, the following definitions highlight key concepts.
+The prose uses Reticulated Python as a running example.
 
-A gradual typing system enriches a dynamically typed language with a notion of static typing;
- that is, some pieces of a program can be statically typed.
-The @emph{granularity} of a gradual typing system defines the minimum size of
- such pieces in terms of abstract syntax.
-A performance evaluation must define its own granularity to systematically
- explore the ways that a programmer may write type annotations, subject to
- practical constraints.
+In Reticulated, every parameter to a function, every function return position,
+ and every class field can be typed or untyped.
+This is a much finer @emph{granularity} than Typed Racket, in which entire
+ modules must be typed as a unit.
+The added flexibility means that an experimenter must choose whether to explore:
+ coarse, module-grained mixes;
+ fine, function-parameter mixes;
+ or something in between.
 
 @definition["granularity"]{
-  The @emph{granularity} of an evaluation is the syntactic unit at which
-   the evaluation adds or removes type annotations.
+  The @emph{granularity} of an experiment is the syntactic unit at which
+   it adds/removes type annotations.
 }
 
-For example, the evaluation in @citet{tfgnvf-popl-2016} is at the granularity
+For example, @citet{tfgnvf-popl-2016} evaluate Typed Racket at the granularity
  of modules.
-The evaluation in @citet{vss-popl-2017} is at the granularity
- of whole programs.
-@Section-ref{sec:protocol} defines the @emph{function and class-fields} granularity, which we use for this evaluation.
+@citet{vss-popl-2017} evaluate Reticulated at the granularity of whole programs,
+ and @citet{gm-pepm-2018} evaluate Reticulated at the granularity of whole
+ functions and whole class field sets (@section-ref{sec:rp:protocol}).
 
-After defining a granularity, a performance evaluation must define a suite of
+After choosing a granularity, an experimenter must pick a suite of
  programs to measure.
-A potential complication is that such programs may depend on external libraries
- or other modules that lie outside the scope of the evaluation.
-It is important to distinguish these so-called @emph{contextual modules} from the
- focus of the experiment.
+A potential complication is that programs may depend on external libraries
+ or other modules that lie outside the realistic scope of the evaluation.
 
 @definition["migratable, contextual"]{
   The @emph{migratable modules} in a program define its configurations.
@@ -365,80 +363,102 @@ The granularity and migratable modules define the
  @emph{configurations} of a fully-typed program.
 
 @definition["configurations"]{
-  Let @${P \tcstep P'}
-   if and only if program @${P'} can be obtained from
-   @${P} by annotating one syntactic unit in an migratable module.
+  Let @${C \tcstep C'}
+   if and only if program @${C'} can be obtained from program
+   @${C} by annotating one syntactic unit in a migratable module.
   Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
    relation.
-  {The @${\tcstep} relation expresses the notion of a
-   @emph{type conversion step}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
-   The @${\tcmulti} relation expresses the notion of @emph{term precision}@~cite{svcb-snapl-2015}.}
-  @; note^2: `e0 -->* e1` if and only if `e1 <= e0`
-  The @emph{configurations} of a fully-typed program @${P^\tau} are all
-   programs @${P} such that @${P\!\tcmulti P^\tau}.
-  Furthermore, @${P^\tau} is a so-called @emph{fully-typed configuration};
-   an @emph{untyped configuration} @${P^\lambda} has the property @${P^\lambda\!\tcmulti P}
-   for all configurations @${P}.
+  The @emph{configurations} of a fully-typed program @${C_\tau} are all
+   programs @${C} such that @${C\!\tcmulti C_\tau}.
+  Furthermore, @${C_\tau} is a @emph{fully-typed configuration}.
+  An @emph{untyped configuration} @${C_\lambda} has the property @${C_\lambda\!\tcmulti C}
+   for all configurations @${C}.
 }
 
-An evaluation must measure the performance overhead of these configurations
- relative to some default.
-A natural baseline is the performance of the original program, distinct from the
- gradual typing system.
+@|noindent|In terms of prior work, the @${\tcstep} relation includes all
+ possible @emph{type conversion steps}@~cite{tfgnvf-popl-2016,gtnffvf-jfp-2019}.
+The @${\tcmulti} relation corresponds to @emph{term precision}@~cite{svcb-snapl-2015} as follows:
+ @${e_0 \tcmulti\, e_1 \mbox{ only if } e_1 \sqle e_0}.
+
+An evaluation must measure overhead relative to a useful baseline.
+For migratory typing, the correct baseline is the original host-language program.
 
 @definition["baseline"]{
  The @emph{baseline performance} of a program is its running time in the absence
-  of gradual typing.
+  of migratory typing.
 }
 
 In Typed Racket, the baseline is the performance of Racket running the
  untyped configuration.
 In Reticulated, the baseline is Python running the untyped configuration.
-This is not the same as Reticulated running the untyped configuration
- because Reticulated inserts checks in untyped code@~cite{vksb-dls-2014}.
+Be advised, Python-running-untyped differs from Reticulated-running-untyped
+ because Reticulated inserts checks in every migratable module that
+ it sees@~cite{vksb-dls-2014}.
 
 @definition["performance ratio"]{
   A @emph{performance ratio} is the running time of a configuration
-   divided by the baseline performance of the untyped configuration.
+   divided by the baseline performance.
 }
 
-An @emph{exhaustive} performance evaluation measures the performance of every
+An exhaustive performance evaluation measures the performance of every
  configuration.
-The natural way to interpret this data is to choose a notion of
+To summarize the data, choose a notion of 
  ``good performance'' and count the proportion of ``good'' configurations.
 In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
  performance overhead they could deliver to clients.
 
 @definition[@ddeliverable{D}]{
-  For @$|{D \in \mathbb{R}^{+}}|, a configuration is @emph{@ddeliverable{D}}
+  A configuration is @emph{@ddeliverable{D}},
+   for some @$|{D \in \mathbb{R}^{+}}|,
    if its performance ratio is no greater than @${D}.
 }
 
 
-@subsection{Threats and Limitations}
+@subsection{Known Limitations}
 
-Fixed types.
-@; TODO
+Evaluation begins with a fixed set of types, but there are usually many
+ ways to type a piece of code.
+Consider the application of an identity function to a number:
 
-Granularity doesn't go inside type, to allow List(Dyn) etc.
-@; TODO
+@exact{\medskip}
+@untyped-codeblock['(
+  "((λ(x) x) 61)"
+)]
 
-Plots in the style of @figure-ref{fig:overhead-plot-example} rest on two
- assumptions.
-Readers must keep these in mind as they
- interpret the results.
+@|noindent|In Typed Racket, the parameter @tt{x} can be given infinitely many
+ correct types.
+The obvious choices are @tt{Integer} and @tt{Number},
+ but other base types work, including @tt{Real} and @tt{Natural}.
+Untagged unions bring many options: @tt{(U Real String)}, @tt{(U Real String (-> Boolean))},
+ and so on.
+Different choices entail different run-time checks, but the method lacks
+ a systematic way to explore equally-valid typings.
 
+Along the same lines, the definition of granularity does not talk about
+ imprecise types.
+In Reticulated, the type @tt{Function([Str], Int)} has three
+ less-precise variants that incorporate the dynamic type.
+The method only looks at one fully-typed variant, but the others may
+ have notable performance implications.
+
+@futurework{
+ Adapt the notion of granularity to imprecise types such as @tt{List(Dyn)}
+  and @tt{Function([Dyn], Str)}.
+ Compare your new dynamic-type granularity to prior studies that randomly
+  select imprecise types@~cite{kas-pldi-2019,vsc-dls-2019}.
+}
+
+Overhead plots (@figure-ref{fig:overhead-plot-example}) rest on two assumptions.
 @; - assn: log scale
-The first assumption is that configurations with less than 2x overhead
+First is that configurations with less than 2x overhead
  are significantly more practical than configurations with a 10x overhead or more.
-Hence the plots use a log-scaled x-axis to simultaneously encourage
- fine-grained comparison in the 1.2x to 1.6x overhead range and blur the
- distinction between, e.g., 14x and 18x slowdowns.
-
+Hence the plots use a log-scaled x-axis to encourage
+ fine-grained comparison in the 1.2x to 1.6x overhead range and to blur the
+ distinction among larger numbers.
 @; - assn: 20x
-The second assumption is that configurations with more than @id[tr:MAX-OVERHEAD]x
+Second is that configurations with more than @id[tr:MAX-OVERHEAD]x
  overhead are completely unusable in practice.
-Pathologies like the 100x slowdowns in @figure-ref{fig:example-lattice}
+Pathologies like the 1000x slowdowns in @figure-ref{fig:example-lattice}
  represent a challenge for implementors, but if these overheads suddenly
  dropped to 30x, the configurations would still be useless to developers.
 
