@@ -98,6 +98,7 @@
 
   example-type-shape
   make-example-program-pict
+  gtp-url
 )
 
 (require
@@ -383,6 +384,9 @@
 
 (define GTP
   (exact "\\textsc{gtp}"))
+
+(define gtp-url
+  @format-url{https://docs.racket-lang.org/gtp-benchmarks/index.html})
 
 (struct lib [name url] #:prefab)
 

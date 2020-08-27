@@ -86,20 +86,21 @@
   fsmoo
   mbta
   morsecode
-;  zombie
+  zombie
   dungeon
   jpeg
-;  zordoz
+  zordoz
   lnm
   suffixtree
   kcfa
-;  snake
-;  take5
+  snake
+  take5
   acquire
-;  tetris
+  tetris
   synth
 ;  gregor
 ;  quadT
+;  quadU
 ))
 
 (define RATIOS-TITLE
