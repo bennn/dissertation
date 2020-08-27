@@ -4,11 +4,16 @@
 @;
 @; TODO reticulated here is without blame
 
-
 @(require
    (prefix-in tr: greenman-thesis/jfp-2019/main)
    (prefix-in rp: greenman-thesis/pepm-2018/main)
+   (only-in greenman-thesis/shallow/main
+     NSA-num-cores
+     NSA-core-name
+     NSA-core-speed
+     NSA-RAM)
    (only-in greenman-thesis/oopsla-2019/pict untyped-codeblock)
+   (only-in racket/math exact-floor)
    gtp-plot/configuration-info
    gtp-plot/typed-racket-info
    gtp-plot/performance-info)
@@ -414,7 +419,7 @@ In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
 }
 
 
-@subsection{Known Limitations}
+@subsection[#:tag "sec:perf:limits"]{Known Limitations}
 
 Evaluation begins with a fixed set of types, but there are usually many
  ways to type a piece of code.
@@ -583,100 +588,81 @@ To generate a confidence interval for the number of @ddeliverable{D}
  a 95% confidence interval from the proportions.
 This is the simple index method for computing a
  confidence interval from a sequence of ratios (@format-url{https://arxiv.org/pdf/0710.2024v1.pdf}).
-A more precise method may give tighter intervals, if needed@~cite{f-rss-1957}.
+A more advanced method may give tighter intervals, if extra precision is needed@~cite{f-rss-1957}.
 
 
 @section{Benchmark Selection}
 
-Our approach to benchmarks.
-As large as possible.
-As real as possible.
-To this end, "origin" below and credits to original programs author.
-Some however from benchmark suite chosen because prior Python evaluation.
+Representative benchmarks are difficult to come by.
+My best-effort approach is to seek out programs that serve a realistic
+ purpose.
+Several implement games, and re-play a game round.
+Others adapt library code with an example use.
+All of the forthcoming Typed Racket benchmarks follow this approach (@section-ref{sec:tr:benchmarks}).
+Many of the Reticulated benchmarks, however, come from prior work and
+ adapt smaller benchmark scripts instead (@section-ref{sec:rp:benchmarks}).
 
 
-@subsection[#:tag "sec:tr:conversion"]{From Programs to Benchmarks}
+@subsection[#:tag "sec:conversion"]{From Programs to Benchmarks}
 
-To convert a Reticulated program into a benchmark, we:
- (1) build a driver module that runs the program and collects timing information;
- (2) remove any non-determinism or I/O actions;
- (3) partition the program into migratable and contextual modules; and
- (4) add type annotations to the migratable modules.
-That said, @integer->word[(length '(aespython futen http2 slowSHA))]
- benchmarks inadvertantly perform I/O actions, see @section-ref{sec:rp:threats}.
-We modify any Python code that Reticulated's type
- system cannot validate, such as code that requires untagged unions or polymorphism.
+To convert a program into a benchmark, we:
+@itemlist[#:style 'ordered
+@item{
+  partition the program into migratable and contextual modules;
+}
+@item{
+  build a migratable driver module that runs the program and collects timing information;
+}
+@item{
+  remove any non-determinism or I/O actions;
+}
+@item{
+  find typed variants of the migratable modules.
+}]
 
+The final step, finding types, can be difficult.
+If the migratable modules already come with types, the work is straightforward:
+ remove the type annotations and replace casts with equivalent untyped
+ assertions.
+When adding types by hand, complications arise.
 
-@(let* ((TYPED-BM (map bm '(fsm synth quadMB)))
-        (num-typed-bm (length TYPED-BM))) @elem{
-@string-titlecase[@integer->word[(- (tr:*NUM-BENCHMARKS*) num-typed-bm)]] of
- the benchmark programs are adaptations of untyped programs.
-The other @integer->word[num-typed-bm] benchmarks
- (@oxfordize[TYPED-BM]) use most of
- the type annotations and code from originally-typed programs.
-Any differences between the original programs and the benchmarks are due to the
- following five complications.
-})
+First, the type checker may require casts or refactorings to deal with
+ untyped code.
+For example, untyped Racket code may assume that the
+ application @tt{(string->number "42")} returns an integer.
+The assumption is correct, but the type checker cannot follow the reasoning
+ and needs a run-time check.
+Reticulated does not have union types, and therefore falls back to @tt{Dyn}
+ for many common untyped patterns.
+An experimenter must choose whether to rewrite the pattern or accept the
+ trivial typing.
 
-First, the addition of types to untyped code occasionally requires type casts or small refactorings.
-For example, the expression @tt{(string->number "42")} has the Typed Racket
- type @tt{(U Complex #f)}.
-This expression cannot appear in a context expecting an @tt{Integer} without an
- explicit type cast.
-As another example, the @bm{quad} programs call a library function to partition
- a @tt{(Listof (U A B))} into a @tt{(Listof A)} and a
- @tt{(Listof B)} using a predicate for values of type @tt{A}.
-Typed Racket cannot currently prove that values which fail the predicate have
- type @tt{B}, so the @bm{quad} benchmarks replace the call with two
- filtering passes.
+Second, some @|sdeep| type boundaries may lack run-time support.
+Typed Racket cannot enforce the type @tt{(U (-> Real) (-> Integer))}
+ at a boundary because its contracts lack unions for higher-order wrappers.
+The work-around is to rewrite the boundaries or, if possible, simplify
+ the types.
+For the above, @tt{(-> Real)} is a viable choice.
 
-Second, Typed Racket cannot enforce certain types across a type boundary.
-For example, the core datatypes in the @bm{synth} benchmark are monomorphic
- because Typed Racket cannot dynamically enforce parametric polymorphism on
- instances of an untyped structure.
-
-Third, any contracts present in the untyped programs are represented as type
- annotations and in-line assertions in the derived benchmarks.
-The @bm{acquire} program in particular uses contracts to ensure that certain
- lists are sorted and have unique elements.
-The benchmark enforces these conditions with explicit pre and post-conditions
- on the relevant functions.
-
-Fourth, each @emph{static import} of an untyped struct type into typed code
+Third, each static import of a struct type into Typed Racket code
  generates a unique datatype.
 Typed modules that share instances of an untyped struct must therefore
- reference a common static import site.
-The benchmarks include additional contextual modules, called @emph{adaptor
- modules}, to provide this canonical import site; for each module @${M} in the
- original program that exports a struct, the benchmark includes an adaptor
- module that provides type annotations for every identifier exported by @${M}.
-Adaptor modules add a layer of indirection, but this indirection does not add
- measurable performance overhead.
-
-Fifth, some benchmarks use a different modularization than the original program.
-The @bm{kcfa} benchmark is modularized according to comments in the original,
- single-module program.
-The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
- file containing all their data structure definitions; the original programs
- defined these structures in the same module as the functions on the structures.
-Lastly, the @bm{quadBG} benchmark has two fewer modules than @bm{quadMB}
- because it inlines the definitions of two (large) data structures that
- @bm{quadMB} keeps in separate files.
-Removing these boundaries has a negligible affect on performance overhead and
- greatly reduces the number of configurations.
+ reference a common definition.
+Typed Racket benchmarks with this issue include additional contextual
+ modules, called @emph{adaptor modules}, to provide a canonical import.
 
 
 
 @; -----------------------------------------------------------------------------
 @section[#:tag "sec:tr:evaluation"]{Application 1: Typed Racket}
 
-As a first validation of the method, we measured Typed Racket.
-This evaluation proved that the method can give useful summaries and
- helped us refine our visualizations.
-It also revealed significant challenges for Typed Racket's @|snatural|
- approach to gradual typing.
-Overheads of several orders of magnitude were common.
+This section presents an exhaustive evaluation of Typed Racket v7.7
+ on a set of @integer->word[tr:num-benchmarks] benchmark programs;
+ namely, the GTP suite v@|tr:gtp-version| (@|gtp-url|).
+The main purpose of this evaluation is to evalution confirms that the
+ exhaustive method provides a useful summary of a mixed-typed language.
+A secondary result is that it reveals performance challenges
+ that Typed Racket must overcome.
 
 
 @subsection[#:tag "sec:tr:protocol"]{Protocol}
@@ -685,70 +671,37 @@ Overheads of several orders of magnitude were common.
 The granularity of this evaluation is @emph{modules}, same as the granularity
  of Typed Racket.
 One syntactic unit in the experiment is one entire module.
-Converting one unit requires changing the language to Typed Racket and
- adding type annotations throughout.
 
 
 @parag{Data Collection}
 
-For each benchmark and each version of Typed Racket, we apply the following protocol to collect data:
-@itemlist[
-@item{
-  Select a random permutation of the configurations in the benchmark.
-  In principle, there is no need to randomize the order, but doing so helps
-   control against possible confounding variables@~cite{mdhs-asplos-2009}.
-}
-@item{
-  For each configuration: recompile, run once ignoring the result to control
-   against JIT warmup, and run once more and record the running time.
-  Use the standard Racket bytecode compiler, JIT compiler, and runtime settings.
-}
-@item{
-  Repeat the above steps @${N \ge 10} times to produce a sequence of
-   @${N} running times for each configuration.
-}
-@item{
-  Summarize each configuration with the mean of the corresponding running times.
-}
-]
-
-@; two AMD Opteron 6376 2.3GHz processors and 128GB RAM
-@(let ((FREQ-STR "1.40 GHz")
-       (num-processors 2)
-       (num-proc-cores 16)
-       (processor-name "AMD Opteron 6376")
-       (proc-speed "2.3GHz")
-       (proc-ram "128 GB")) @elem{
-Specifically, @hyperlink["https://github.com/nuprl/gradual-typing-performance/blob/master/tools/benchmark-run/run.rkt"]{a Racket script}
- implementing the above protocol collected the data in this paper.
-The script ran on a dedicated Linux machine with two physical
- @id[processor-name] processors (@id[num-proc-cores] cores each) and @id[proc-ram] RAM.
-The Opteron is a NUMA architecture and uses the @tt{x86_64} instruction set.
-For the @bm{quadBG} and @bm{quadMB} benchmarks, the script utilized 30 of the
- machine's physical cores to collect data in parallel.
-Specifically, the script invoked 30 OS processes, pinned each to a CPU core
- using the @tt{taskset} Linux command, waited for each process to report a
- running time, and collected the results.
-For all other benchmarks, the script utilized two physical cores.
-Each core ran at minimum frequency as determined by the @tt{powersave} CPU
- governor (approximately @|FREQ-STR|).
+For each configuration in each benchmark, a control script compiled
+ the whole program, ran once ignoring performance, and ran four more times
+ collecting data.
+These actions used the standard Racket 7.7 BC bytecode compiler,
+ JIT compiler, and runtime settings.
+@(let ((num-processors 1)
+       (num-proc-cores NSA-num-cores)
+       (processor-name NSA-core-name)
+       (proc-speed NSA-core-speed)
+       (proc-ram NSA-RAM)) @elem{
+The control script ran on a dedicated Linux machine with a @id[processor-name]
+ processor.
+The processor has @id[proc-ram] RAM and @integer->word[num-proc-cores] cores,
+ and ran at @|NSA-core-speed|.
 })
 
 
 @subsection[#:tag "sec:tr:benchmarks"]{Benchmarks}
 
-This section introduces @integer->word[tr:num-benchmarks] @emph{gradual typing
- performance} (@|GTP|) benchmark programs that are representative of actual user
- code yet small enough to make exhaustive performance evaluation tractable.
-The following descriptions of the benchmark programs---arranged by size as
- measured in number of migratable modules---briefly summarize their relevant
- characteristics.
-Each description comes with four fields:
+This section summarizes @integer->word[tr:num-benchmarks] benchmark programs.
+These benchmarks are sorted in order of increasing size, as measured by the
+ number of migratable modules.
+Each summary comes with four fields:
  @emph{Origin} indicates the benchmark's source,
  @emph{Purpose} describes what it computes,
  @emph{Author} credits the original author,
- and @emph{Depends} lists any libraries of contextual modules that the benchmark depends on.
-This section concludes with a table summarizing the static characteristics of each benchmark.
+ and @emph{Depends} lists significant contextual libraries that the benchmark depends on.
 
 @; WARNING: benchmark order matters
 @; TODO wrapper function, to sort and check for missing?
@@ -788,9 +741,9 @@ This section concludes with a table summarizing the static characteristics of ea
   #:purpose "Interactive map"
   #:depends (list (make-lib "graph" "http://github.com/stchang/graph"))]{
   Builds a map of Boston's subway system and answers reachability queries.
-  The map encapsulates a boundary to Racket's untyped @library{graph} library;
-   when the map is typed, the (type) boundary to @library{graph} is a
-   performance bottleneck.
+  The map interacts with Racket's untyped @library{graph} library;
+   when the map is typed, the boundary to @library{graph} is a
+   bottleneck.
 }
 @bm-desc[
   @bm{morsecode}
@@ -799,7 +752,7 @@ This section concludes with a table summarizing the static characteristics of ea
   #:purpose "Morse code trainer"
   #:url "https://github.com/jbclements/morse-code-trainer/tree/master/morse-code-trainer"]{
   Computes Levenshtein distances and morse code translations for a fixed sequence of pairs of words.
-  Every function that crosses a type boundary in @bm{morsecode} operates on strings and integers, thus dynamically type-checking these functions' arguments is relatively cheap.
+  Every function that crosses a type boundary in @bm{morsecode} operates on strings and integers, thus run-time checks are fairly cheap.
 }
 @bm-desc[
   @bm{zombie}
@@ -807,7 +760,7 @@ This section concludes with a table summarizing the static characteristics of ea
   #:origin "Research"
   #:purpose "Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
-  Implements a game where players dodge computer-controlled ``zombie'' tokens.
+  Implements a game where players dodge ``zombie'' tokens.
   Curried functions over symbols implement game entities and repeatedly cross type boundaries.
     @;@racket[
     @;  (define-type Point
@@ -843,6 +796,7 @@ This section concludes with a table summarizing the static characteristics of ea
   #:depends (list (make-lib "math/array" "https://docs.racket-lang.org/math/array.html")
                   (make-lib "rnrs/bytevectors-6" "https://docs.racket-lang.org/r6rs/R6RS_Libraries.html#(mod-path._rnrs%2Fbytevectors-6)"))]{
   Parses a bytestream of JPEG data to an internal representation, then serializes the result.
+  Adding types can lead to expensive data structure checks.
 }
 @bm-desc[
   @bm{zordoz}
@@ -863,7 +817,7 @@ This section concludes with a table summarizing the static characteristics of ea
   #:depends (list
               (make-lib "plot" "https://docs.racket-lang.org/plot/")
               (make-lib "math/statistics" "https://docs.racket-lang.org/math/stats.html"))]{
-  Renders overhead plots@~cite{tfgnvf-popl-2016}.
+  Renders overhead plots.
   Two modules are tightly-coupled to Typed Racket libraries; typing both modules improves performance.
 }
 @bm-desc[
@@ -945,24 +899,19 @@ This section concludes with a table summarizing the static characteristics of ea
   The benchmark builds tens of date values and runs unit tests on these values.
 }
 @bm-desc[
-  (list @bm{quadBG} @bm{quadMB})
+  (list @bm{quadT} @bm{quadU})
   #:author "Matthew Butterick"
   #:origin "Application"
   #:purpose "Typesetting"
   #:url "https://github.com/mbutterick/quad"
   #:depends (list (make-lib "csp" "https://github.com/mbutterick/csp"))]{
   Converts S-expression source code to @tt{PDF} format.
-  The two versions of this benchmark differ in their type annotations, but have nearly identical source code.
-
-  The original version, @bm{quadMB}, uses type annotations by the original author.
-  This version has a high typed/untyped ratio
-   because it explicitly compiles types to runtime predicates
-   and uses these predicates to eagerly check data invariants.
-  In other words, the typed configuration is slower than the untyped configuration because it performs more work.
-
-  The second version, @bm{quadBG}, uses identical code but weakens types to match the untyped configuration.
-  This version is therefore suitable for judging the implementation
-   of Typed Racket rather than the user experience of Typed Racket.
+  The two versions of this benchmark came from the original author.
+  First, @bm{quadU} is based on a foundational untyped codebase.
+  Second, @bm{quadT} comes from a migrated, typed codebase with slightly
+   different behavior.
+  Overhead is worse in @bm{quadT}, but the types in @bm{quadU}
+   are far less descriptive.
 
   @; To give a concrete example of different types, here are the definitions
   @;  for the core @tt{Quad} datatype from both @bm{quadMB} and @bm{quadBG}.
@@ -973,6 +922,16 @@ This section concludes with a table summarizing the static characteristics of ea
   @; The predicate for @racket[QuadBG] runs significantly faster.
 }
 
+@Figure-ref{fig:tr:static-benchmark} tabulates the size of the migratable
+ code in the benchmark programs.
+The column labeled @bold{N} reports the number of migratable modules;
+ the configuration space for each program has @${2^N} points.
+The SLOC column reports lines of code in the fully-typed configuration.
+With type annotations, these benchmarks gain between 10 and 300 lines of
+ code.
+For details about the graph structure of each benchmark and
+ the specific types on boundaries, refer to the GTP web page: @|gtp-url|.
+
 @figure*["fig:tr:static-benchmark" @elem{
   Static characteristics of the migratable code in the @|GTP| benchmarks.
   @bold{N} = number of components = number of modules.
@@ -980,43 +939,36 @@ This section concludes with a table summarizing the static characteristics of ea
   @tr:render-static-information[tr:ALL-BENCHMARKS]
 ]
 
-@Figure-ref{fig:tr:static-benchmark} tabulates the size of the migratable
- code in the benchmark programs.
-The column labeled @bold{N} reports the number of migratable modules;
- the configuration space for each program has @${2^N} points.
-The SLOC column reports lines of code in the fully-typed configuration.
-Type annotations add 10 to 300 lines of code, but the count approximates size.
-
 
 @subsection[#:tag "sec:tr:ratio"]{Performance Ratios}
 
-@figure["fig:tr:ratio" @elem{Performance ratios for the @|GTP| benchmarks. Typed Racket v@|tr:default-rkt-version|.}
-  @tr:render-ratios-table[(tr:get-ratios-table tr:ALL-BENCHMARKS)]
+@(let* ((RT (tr:get-ratios-table tr:ALL-BENCHMARKS))
+        (num-total (length RT))
+        (faster-typed (for/list ((rr (in-list RT))
+                                 #:when (< (string->number (caddr rr)) 0.91))
+                        (car rr)))
+        (num-faster-typed (length faster-typed))
+       ) @list[
+@figure[
+  "fig:tr:ratio"
+  @elem{Coarse ratios for the @|GTP| benchmarks v@|tr:gtp-version| on Racket v@|tr:default-rkt-version|.}
+  @tr:render-ratios-table[RT]
 ]
-
-@Figure-ref{fig:tr:ratio} lists the overhead of static types in the benchmarks.
-In @bm{sieve}, for example, the fully-typed configuration runs slightly
+@para{
+@Figure-ref{fig:tr:ratio} lists the overhead of fully-typed code relative
+ to untyped code.
+In @bm{sieve}, for example, the typed configuration runs slightly
  faster than untyped.
-In @bm{forth}, the typed configuration is almost 10x slower.
+In @bm{mbta}, the typed configuration is over 1.5x slower
+ because of a boundary to an untyped contextual module.
 
-@parag{Performance Ratios, Conclusions}
-
-Overall, the typed configurations run slightly slower than the untyped code.
-These small slowdowns are due to type casts on input data and on
- contextual modules.
-
-A few benchmarks, notably @bm{lnm} and @bm{suffixtree}, run faster when
- typed.
-For @bm{lnm}, the speedup is due to a typed contextual module than slows
- down the untyped configuration.
-For @bm{suffixtree}, we have a positive speedup thanks to the Typed Racket
- optimizer.
-
-Three benchmarks suffer tremendously when typed: @bm{forth}, @bm{zombie},
- and @bm{quadMB}.
-Type casts play a large role.
-The newest version of the benchmarks should avoid these pathologies.
-
+Overall, many benchmarks run significantly faster with types
+ (@id[num-faster-typed] of @id[num-total]).
+These programs have few boundaries to untyped contextual modules
+ and benefit from type-directed compilation.
+The highest ratios stay within a 2x overhead.
+Compared to later results, this is a modest cost.
+}])
 
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:tr:overhead"]{Overhead Plots}
@@ -1029,30 +981,27 @@ The newest version of the benchmarks should avoid these pathologies.
   (map tr:benchmark-name tr:ALL-BENCHMARKS)
   tr:cache-dir]
 
-@Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length tr:ALL-BENCHMARKS) overhead-plots-per-page))]
- present the results of measuring the benchmark programs in a series of overhead plots.
-As in @figure-ref{fig:overhead-plot-example}, the plots are
- cumulative distribution functions for @ddeliverable[] configurations.
+@Figures-ref["fig:tr:overhead" (exact-ceiling (/ (length tr:ALL-BENCHMARKS) overhead-plots-per-page))]
+ present an exhaustive evaluation in a series of overhead plots.
+As in @figure-ref{fig:overhead-plot-example}, the plots are cumulative
+ distribution functions for the proportion of @ddeliverable[] configurations.
 
 @; -- overall, bleak picture
-@parag{Conclusions}
 @(let* ([num-bm tr:num-benchmarks]
         [num-bm-str (integer->word num-bm)]
         [num-configs (tr:*TOTAL-NUM-CONFIGURATIONS*)]
         [max-str (format "~a" tr:MAX-OVERHEAD)]
         [suffixtree-num-modules (integer->word 6)]
-        [num-max-deliverable 9] ; TODO, use *MAX-OVERHEAD*
+        [num-max-deliverable (length '(forth fsmoo zombie dungeon jpeg suffixtree take5 synth quadU quadT))]
         [num-max-deliverable-str (integer->word num-max-deliverable)]
-        [num-mostly-2-deliverable 6]
-        [num-mostly-2-deliverable-str (integer->word num-mostly-2-deliverable)]
-        [num-good-slope 8]
-        [num-good-slope-str (integer->word num-good-slope)]
-        [v-max (last (tr:*RKT-VERSIONS*))]
+        [num-fail-2d (length '(sieve forth fsmoo zombie dungeon jpeg suffixtree kcfa snake take5 acquire tetris synth quadT quadU))]
+        [num-fail-10d (length '(forth fsmoo zombie dungeon jpeg suffixtree take5 synth quadU))]
         [format-% (lambda (n) (format "~a%" (round (* 100 (/ n num-configs)))))]
         [lo (number->string (tr:*LO*))]
         [hi (number->string (tr:*HI*))]
+        [v-max tr:default-rkt-version]
         [lo-prop (format-% (tr:deliverable* (tr:*LO*) v-max tr:ALL-BENCHMARKS))]
-        [hi-prop (format-% (- num-configs (tr:deliverable* (tr:*HI*) v-max tr:ALL-BENCHMARKS)))]
+        [hi-prop (format-% (tr:deliverable* (tr:*HI*) v-max tr:ALL-BENCHMARKS))]
        ) @elem{
 Many curves are quite flat; they demonstrate that gradual typing introduces
  large and widespread performance overhead in the corresponding benchmarks.
@@ -1060,35 +1009,52 @@ Among benchmarks with fewer than @|suffixtree-num-modules| modules, the
  most common shape is a flat line near the 50% mark.
 Such lines imply that the performance of a group of configurations is
  dominated by a single type boundary.
-@; For instance, there is one type boundary in @bm{fsm} that adds overwhelming slowdown when present; all eight configurations with this boundary have over @|max-str| overhead.
+For instance, there is one type boundary in @bm{fsmoo} that adds overwhelming
+ slowdown when present; all eight configurations with this boundary have over
+ @|max-str| overhead.
 Benchmarks with @|suffixtree-num-modules| or more modules generally have
  smoother slopes, but five such benchmarks have essentially flat curves.
 The overall message is that for many values of @${D} between 1 and
  @|max-str|, few configurations are @ddeliverable{}.
 
-For example, in @integer->word[(- num-bm num-mostly-2-deliverable)] of the
- @|num-bm-str| benchmark programs, at most half the configurations are
- @ddeliverable{2} on any version.
-The situation is worse for lower (more realistic) overheads, and does not
- improve much for higher overheads.
-Similarly, there are ten benchmarks in which at most half the
- configurations are @ddeliverable{10}.
+In @id[num-fail-2d] benchmarks, no more than half the configurations
+ are @ddeliverable{2}.
+This is quite bad.
+The situation is worse for lower (more realistic) overheads, and rarely
+ improve at slightly higher overheads.
+Even at a generous 10x factor, no more than half the configurations in
+ @integer->word[num-fail-10d] benchmarks are good enough.
 
 The curves' endpoints describe the extremes of gradual typing.
 The left endpoint gives the percentage of configurations that run at least
  as quickly as the untyped configuration.
-Except for the @bm{lnm} benchmark, such configurations are a low proportion of the total.
+With few exceptions, notably @bm{lnm}, such configurations are a low proportion of the total.
 The right endpoint shows how many configurations suffer over 20x performance overhead.
-@string-titlecase[num-max-deliverable-str] benchmarks have at least one such configuration.
+@string-titlecase[num-max-deliverable-str] benchmarks have at least one off the chart.
 
 In summary, the application of the evaluation method projects a negative
  image of Typed Racket's sound gradual typing.
 Only a small number of configurations in the benchmark suite run with low
  overhead; a mere @|lo-prop| of all configurations are @ddeliverable[lo] on
  Racket v@|v-max|.
-Many demonstrate extreme overhead; @|hi-prop| of all configurations are not
- even @ddeliverable[hi] on version @|v-max|.
+Many demonstrate extreme overhead; only @|hi-prop| of all configurations are
+ @ddeliverable[hi] on v@|v-max|.
 })
+
+
+@subsection[#:tag "sec:tr:threats"]{Threats to Validity}
+
+The concerns raised in @section-ref{sec:conversion} affect this evaluation.
+In particular, each benchmark explores one choice of types.
+Different types may lead to different conclusions, as @bm{quadT} and
+ @bm{quadU} demonstrate at a small scale.
+
+Some benchmarks use a different modularization than the original program.
+The @bm{kcfa} benchmark is modularized according to comments in the original,
+ single-module program.
+The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
+ file containing all their data structure definitions, but the original programs
+ defined these structures in the same module as the functions on the structures.
 
 
 @; -----------------------------------------------------------------------------
@@ -1603,7 +1569,6 @@ Unfortunately, this speedup is due to a soundness bug
  (@github-issue["mvitousek" "reticulated" 36]);
  in short, the implementation of Reticulated does not type-check the contents of tuples.
 })
-
 
 
 @subsection[#:tag "sec:rp:threats"]{Threats to Validity}
