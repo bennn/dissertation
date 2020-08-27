@@ -462,26 +462,35 @@ Pathologies like the 1000x slowdowns in @figure-ref{fig:example-lattice}
  represent a challenge for implementors, but if these overheads suddenly
  dropped to 30x, the configurations would still be useless to developers.
 
+The main limitation of exhaustive evaluation, however, is its exhaustiveness.
+With 20 type-able units, an experiment requires over 1 million measurements.
+At a module-level granularity, this limit is somewhat reasonable because each
+ module can be arbitrarily large.
+But at function-level granularity and finer, the practical limit quickly rules
+ out interesting programs.
+
 
 @section{Approximate Evaluation Method}
 
-If an exhaustive performance evaluation is infeasible, an alternative is
- to select configurations via simple random sampling and measure the
- proportion of @ddeliverable{D} configurations in the sample.
-Repeating this sampling experiment yields a @emph{simple random approximation}
- of the true proportion of @ddeliverable{D} configurations.
+The proportion of @ddeliverable{D} configurations in a program can be
+ approximated using random sampling.
+First, choose several configurations and measure the proportion of
+ @ddeliverable{D} configurations in the sample.
+Next, repeat the experiment several times.
+Combining the proportions in a confidence interval provides an estimate
+ for the true proportion.
 
 @definition[@sraapproximation["r" "s" "95"]]{
   Given @${r} samples each containing @${s} configurations chosen uniformly at random,
-   a @emph{@sraapproximation["r" "s" "95"]} is a @${95\%} confidence interval for
+   a simple random approximation is a @${95\%} confidence interval for
    the proportion of @ddeliverable{D} configurations in each sample.
 }
 
-Intuitively, this sampling method should lead to good results because
+Intuitively, this method should lead to good results because
  it randomly samples a stable population.
 If the true proportion of @ddeliverable{D} configurations in a program
- happens to be 10%, then one random selection has a 1 in 10 chance of
- drawing a @ddeliverable{D} configuration.
+ happens to be 10%, then a random configuration has a 1 in 10
+ chance of being @ddeliverable{D}.
 
 A statistical justification depends on the law of large numbers the
  central limit theorem.
@@ -496,12 +505,12 @@ The law of large numbers states that the average of @emph{infinitely}
  of deliverable configurations.
 We cannot draw infinitely many samples, but perhaps this convergence
  property means that the average of ``enough'' samples is ``close'' to @${p}.
-Indeed, the central limit theorem guarantees that any sequence of
+The central limit theorem implies that any sequence of
  such averages is normally distributed around the true proportion.
 A @${95\%} confidence interval generated from sample averages is therefore
  likely to contain the true proportion.
 
-The statistical argument reveals two weaknesses in the sampling method.
+The statistical argument reveals two weaknesses:
 
 @itemlist[
 @item{
@@ -513,27 +522,16 @@ The statistical argument reveals two weaknesses in the sampling method.
   Second, the confidence intervals could be huge.
   A wide interval offers little insight, even if it happens to contain the
    true proportion.
-  (In the extreme, a useless interval says that 0% to 100% of configurations
-   are @ddeliverable{D}.)
+  In the extreme, a totally useless interval says that 0% to 100% of configurations
+   are @ddeliverable{D}.
 }
 ]
 
-The argument does say, however, that an interval is more likely to be useful
- if based on a huge number of samples, each sample containing a huge number
+@|noindent|The argument does say, however, that an interval is very likely to
+ be useful if it is based on a huge number of samples each with a huge number
  of configurations.
-Question is, how well does a manageable experiment size work in practice?
-
-@Figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"] test the
- @sraapproximation["r" "s" "95"] method using 
- @${r\!=\!@id[NUM-SAMPLE-TRIALS]} samples each containing a linear
- number of configurations.
-More precisely, each sample contains @${@id[SAMPLE-RATE]\!*\!N} configurations
- out of the @${2^N} possibilities in the benchmark at hand.
-These plots show both the true data and the result of sampling:
- a solid blue line shows the true proportion of @ddeliverable{D} configurations,
- and an orange interval shows the result of approximation.
-Don't worry about the interpretation of the blue lines for now,
- the application sections go into great detail.
+The challenge is to find parameters that engineer a compromise between
+ size and precision.
 
 @render-overhead-plot*[
   "fig:tr:validate-sample"
@@ -553,28 +551,39 @@ Don't worry about the interpretation of the blue lines for now,
   rp:cache-dir
 ]
 
-In each plot, the sample intervals are both thin and capture the true
- proportion.
-Thus a linear number of samples appears sufficient.
+By comparing sample data to the ground-truth from an exhaustive evaluation,
+ I have found that linear sampling gives small and accurate intervals.
+@Figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"] demonstrate
+ on a few Typed Racket and Reticulated programs.
+The blue curve and shaded area on each plot is the exhaustive data.
+The orange interval is a 95% confidence interval based on
+ @${r\!=\!@id[NUM-SAMPLE-TRIALS]} each containing
+ @${s\!=\!@id[SAMPLE-RATE]\!*\!N} configurations,
+ where @${N} is the number of typed units in the benchmark program.
+The sample intervals all tightly cover the true proportion
+ of @ddeliverable{D} configurations.
 
 
 @subsection{Statistical Protocol}
 
-For readers interested in reproducing the above results, this section describes
- the protocol that generated @figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"].
+For readers interested in reproducing the above results, here are
+ additional details about 
+ the protocol behind @figure-ref["fig:tr:validate-sample" "fig:rp:validate-sample"].
 
 To generate one random sample, select @${@id[SAMPLE-RATE]\!*\!N} configurations
- without replacement and compute their overhead.
-We have tried sampling with replacement and found similar results.
+ uniformly at random and compute their overhead.
+Sampling with replacement gives the same theoretical results as sampling
+ without replacement.
+The figures employ sampling without replacement in the hope of finding
+ new configurations with exceptional overhead.
 
 To generate a confidence interval for the number of @ddeliverable{D}
  configurations based on a group of samples, calculate
  the proportion of @ddeliverable{D} configurations in each sample and generate
  a 95% confidence interval from the proportions.
-This is the simple @emph{index method} for computing a
+This is the simple index method for computing a
  confidence interval from a sequence of ratios (@format-url{https://arxiv.org/pdf/0710.2024v1.pdf}).
-We have not experimented with a more precise method such as
- Fieller's@~cite{f-rss-1957}.
+A more precise method may give tighter intervals, if needed@~cite{f-rss-1957}.
 
 
 @section{Benchmark Selection}
