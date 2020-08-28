@@ -12,7 +12,7 @@
      NSA-core-name
      NSA-core-speed
      NSA-RAM)
-   (only-in greenman-thesis/oopsla-2019/pict untyped-codeblock)
+   (only-in greenman-thesis/oopsla-2019/pict typed-codeblock untyped-codeblock)
    (only-in racket/math exact-floor)
    gtp-plot/configuration-info
    gtp-plot/typed-racket-info
@@ -38,7 +38,7 @@
 
 
 @; sound GT has cost
-Sound gradual types come with performance overhead
+Sound types come with performance overhead in a mixed-typed language
  because soundness is a claim about behavior and the only way to control
  the behavior of untyped code is via run-time checks.
 These checks impose a cost in proportion to
@@ -51,7 +51,7 @@ Language designers must measure the performance of a mixed-typed language
 Type-sound code that runs too slowly is worthless.
 At a finer grain, users need an idea of what overhead to expect when they begin
  experimenting with types.
-Implementors need a comprehensize performance summary to
+Implementors need a comprehensive performance summary to
  measure improvements to a language and to compare alternative mixed-typed
  designs.
 Despite these realities, early reports on mixed-typed languages
@@ -74,10 +74,6 @@ As validation, this chapter evaluates the performance of two
 
 
 @section{Design Criteria}
-@; - benchmarks, "representative"
-@; - space = 2^N configurations
-@; - goal = % deliverable
-@;   -- baseline = no gradual typing
 
 The goal of performance evaluation is to predict the experiences of future
  users.
@@ -312,19 +308,6 @@ The blue curve for v@|lattice-version| is higher, showing a relative improvement
   #f
 ]
 ])
-
-@; To summarize, the exhaustive method has three steps:
-@; @itemlist[#:style 'ordered
-@;  @item{
-@;    identify a suite of fully-typed programs;
-@;  }
-@;  @item{
-@;    measure the performance of all gradually-typed @emph{configurations} of the programs;
-@;  }
-@;  @item{
-@;    count the number of configurations with performance overhead no greater than a certain limit.
-@;  }
-@; ]
 
 
 @subsection{By Definition}
@@ -855,7 +838,7 @@ Each summary comes with four fields:
   #:origin "Educational"
   #:purpose "Game"]{
   Manages a card game between AI players.
-  These players communicate infrequently, so gradual typing adds relatively little overhead.
+  These players communicate infrequently, so migratory typing adds relatively little overhead.
 }
 @bm-desc[
   @bm{acquire}
@@ -1003,7 +986,7 @@ As in @figure-ref{fig:overhead-plot-example}, the plots are cumulative
         [lo-prop (format-% (tr:deliverable* (tr:*LO*) v-max tr:ALL-BENCHMARKS))]
         [hi-prop (format-% (tr:deliverable* (tr:*HI*) v-max tr:ALL-BENCHMARKS))]
        ) @elem{
-Many curves are quite flat; they demonstrate that gradual typing introduces
+Many curves are quite flat; they demonstrate that migratory typing introduces
  large and widespread performance overhead in the corresponding benchmarks.
 Among benchmarks with fewer than @|suffixtree-num-modules| modules, the
  most common shape is a flat line near the 50% mark.
@@ -1025,7 +1008,7 @@ The situation is worse for lower (more realistic) overheads, and rarely
 Even at a generous 10x factor, no more than half the configurations in
  @integer->word[num-fail-10d] benchmarks are good enough.
 
-The curves' endpoints describe the extremes of gradual typing.
+The curves' endpoints describe the extremes of migratory typing.
 The left endpoint gives the percentage of configurations that run at least
  as quickly as the untyped configuration.
 With few exceptions, notably @bm{lnm}, such configurations are a low proportion of the total.
@@ -1033,7 +1016,7 @@ The right endpoint shows how many configurations suffer over 20x performance ove
 @string-titlecase[num-max-deliverable-str] benchmarks have at least one off the chart.
 
 In summary, the application of the evaluation method projects a negative
- image of Typed Racket's sound gradual typing.
+ image of Typed Racket's sound migratory typing.
 Only a small number of configurations in the benchmark suite run with low
  overhead; a mere @|lo-prop| of all configurations are @ddeliverable[lo] on
  Racket v@|v-max|.
@@ -1060,27 +1043,21 @@ The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
 @; -----------------------------------------------------------------------------
 @section[#:tag "sec:rp:evaluation"]{Application 2: Reticulated Python}
 
-Together with Zeina Migeed, I conducted a performance evaluation for Reticulated
- Python.
-This evaluation led to three broad benefits.
+Reticulated Python is the original home of the @|stransient| semantics for
+ mixed-typed programs@~cite{v-thesis-2019}.
+@|sTransient| is a type-sound semantics (@chapter-ref{chap:design}),
+ but does not rely on higher-order wrappers or full run-time checks.
+Instead, @|stransient| uses light ``shape checks'' throughout typed code.
+One would expect fast performance from @|stransient| on mixed-typed code.
+The first-ever evaluation, however, only reports data for untyped and fully-typed
+ programs@~cite{vss-popl-2017}.
 
-In terms of the method, this evaluation required generalizing and scaling.
-It was an opportunity to validate random sampling, and in turn random sampling
- was an essential part of our success.
-
-For gradual typing, the evaluation served as the first comprehensive test
- of the @|stransient| approach.
-Whereas Typed Racket's @|snatural| approach suffers from slowdowns of over
- two orders of magnitude, @|stransient| never exceeded 10x overhead.
-The catch, however, is that the fully-typed configuration is slowest in
- @|stransient| but fastest in @|snatural|.
-Instead of proving @|stransient| the clear winner, the evaluation revealed
- a tradeoff.
-
-Third, the evaluation revealed issues with the implementation of @|stransient|
- in Reticulated Python where benchmarks had anomolous results.
-We found two soundness holes: one with optional function parameters and one
- with tuples.
+This section presents a systematic evaluation of
+ Reticulated without its experimental blame algorithm@~cite{gm-pepm-2018}.
+The data offers a big-picture view of @|stransient|,
+ further validates the approximate method,
+ and identifies bugs in the measured version of Reticulated.
+Overall, @|stransient| checks never exceed a 10x slowdown in the benchmarks.
 
 
 @subsection[#:tag "sec:rp:protocol"]{Protocol}
@@ -1089,22 +1066,42 @@ We found two soundness holes: one with optional function parameters and one
 The granularity of this evaluation is @emph{function and class fields}.
 One syntactic unit in the experiment is either one function,
  one method, or the collection of all fields for one class.
-@; TODO example
-@; TODO connect to static figure ... use N everywhere? ... say "units"?
+@Figure-ref{fig:rp:example-class} demonstrates this granularity with
+ a simple Reticulated module.
+The class @tt{Cash} has two fields and one method that requires three arguments;
+ the module also include a function that creates a @tt{Cash} with exactly
+ 5 dollars.
+Reticulated permits the removal of every type in the figure, giving
+ @${128} possible configurations.
+The granularity for our experiment, however, explores the @${8} configurations
+ obtained by removing types from the field declaration, the method, and/or the
+ function each as a complete unit.
 
+@figure*[
+  "fig:rp:example-class"
+  @elem{Reticulated code that leads to @${2^3} configurations in the experiment, but supports @${2^7} total.}
+  @typed-codeblock['(
+    "@fields({\"dollars\": Int, \"cents\":Int})"
+    "class Cash:"
+    "  def __init__(self:Cash, d:Int, c:Int)->Void:"
+    "    self.dollars = d"
+    "    self.cents = c"
+    ""
+    "def make_five()->Cash:"
+    "  return Cash(5, 0)"
+    )]
+]
 
 @parag{Data Collection}
-For benchmarks with at most @$|{2^{17}}| configurations, we conduct an exhaustive
- evaluation.
-For larger benchmarks we conduct a simple random approximation using
- @integer->word[NUM-SAMPLE-TRIALS] samples each containing @${@id[SAMPLE-RATE]\!*\!(F + C)}
- configurations, where @${F} is the number of functions in the benchmark and
+The data is exhaustive for benchmarks with at most @$|{2^{17}}| configurations
+ and approximate for larger benchmarks.
+The approximations use @integer->word[NUM-SAMPLE-TRIALS] samples
+ each containing @${@id[SAMPLE-RATE]\!*\!(F + C)} configurations,
+ where @${F} is the number of functions in the benchmark and
  @${C} is the number of classes.
-Note that the number @id[SAMPLE-RATE] was chosen simply to collect
- as much data as possible in a reasonable amount of time.
 
-All data in this paper was produced by jobs we sent
- to the @hyperlink["https://kb.iu.edu/d/bezu"]{@emph{Karst at Indiana University}}
+All data comes from jobs that we ran on the
+ @hyperlink["https://kb.iu.edu/d/bezu"]{@emph{Karst at Indiana University}}
  computing cluster.
 Each job:
 @itemlist[#:style 'ordered
@@ -1124,9 +1121,9 @@ Each job:
 ]
 Cluster nodes are IBM NeXtScale nx360 M4 servers with two Intel Xeon E5-2650 v2
  8-core processors, 32 GB of RAM, and 250 GB of local disk storage.
-
-Data collection scripts are online:
+All data collection scripts are online:
  @format-url{https://github.com/nuprl/retic_performance}
+
 
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:rp:benchmarks"]{Benchmarks}
@@ -1162,7 +1159,7 @@ The following descriptions credit each benchmark's original author,
   #:origin PYBENCH
   #:purpose "Puzzle"
   #:url "https://github.com/python/performance"]{
-  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm 10 times in a row.
+  Solves the @hyperlink["https://developers.google.com/optimization/puzzles/queens"]{@${8}-queens} problem by a brute-force algorithm.
 }
 @bm-desc[
   @bm{http2}
@@ -1283,8 +1280,7 @@ The following descriptions credit each benchmark's original author,
   #:origin PYBENCH
   #:purpose "Test integer ops"
   #:url "https://github.com/python/performance"]{
-  Implements Weicker's @emph{Dhrystone} benchmark.
-  @;footnote{@url{http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf}}
+  Implements Weicker's @hyperlink["http://www.eembc.org/techlit/datasheets/ECLDhrystoneWhitePaper2.pdf"]{Dhrystone} benchmark.
   @; 50,000 iterations
 }
 @bm-desc[
@@ -1296,7 +1292,7 @@ The following descriptions credit each benchmark's original author,
   #:depends @list[
     @rp:lib-desc["math"]{Square root}
     @rp:lib-desc["random"]{randrange}]]{
-  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{@emph{chaos game}} method.
+  Creates fractals using the @hyperlink["https://en.wikipedia.org/wiki/Chaos_game"]{chaos game} method.
   @; 1 iteration
 }
 @bm-desc[
@@ -1388,13 +1384,7 @@ The following descriptions credit each benchmark's original author,
   @bold{N} = number of components = functions + classes + methods.
   SLOC = source lines of code as reported by @|SLOCCOUNT|.}
   @rp:render-static-information[rp:MAIN-BENCHMARKS]]
-@; TODO TR has extra columns
-@;  annotation LOC = meaningful but probably less interesting for retic
-@;  #adp = n/a
-@;  #bnd #export = meaningful, but do not have
 
-To assess the run-time cost of gradual typing in Reticulated, we measured
- the performance of @integer->word[rp:NUM-MAIN-BENCHMARKS] benchmark programs.
 @(let* ([column-descr*
          (list
            @elem{number of migratable units (@bold{N} = num. functions + methods + classes)}
@@ -1414,7 +1404,7 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
    structure of the @defn{migratable} portions of these benchmarks.
   The @|num-col| columns report the @oxfordize[column-descr*].
   Most benchmarks are small, with 1--3 modules and fewer than 200 lines of code.
-  That said, the number of gradually-typed configurations in the experiment is
+  The number of mixed-typed configurations in the experiment, however, is
    prohibitively large.
   The relatively small @bm{sample_fsm} describes half a million configurations.
   For the largest two benchmarks, @bm{aespython} and @bm{stats}, exhaustive
@@ -1445,52 +1435,49 @@ To assess the run-time cost of gradual typing in Reticulated, we measured
     (printf "WARNING: performance-ratios expected all retic/python ratios to be < 4.5, but only ~a of ~a are"
             rp-<4.5 (length rp*)))
   (list
+@figure[
+  "fig:rp:ratio"
+  @elem{Performance ratios for three important points in
+  a configuration space: fully-typed code (typed), untyped code run through
+  Reticulated (retic), and untyped code run via Python (python).}
+  @rp:render-ratios-table[rp:RT]
+]
+
 @elem{
-The table in @figure-ref{fig:rp:ratio} lists the extremes of gradual typing in
+The table in @figure-ref{fig:rp:ratio} lists the endpoints of migratory typing in
  Reticulated.
 From left to right, these are:
  the performance of the untyped configuration relative to the Python baseline (the @id[rp:u/p-ratio]),
  the performance of the fully-typed configuration relative to the untyped configuration (the @id[rp:t/u-ratio]),
  and the overall delta between fully-typed and Python (the @id[rp:t/p-ratio]).
-}
 
-@figure["fig:rp:ratio" @elem{Performance ratios for three important points in
- a configuration space: fully-typed code (typed), untyped code run through
- Reticulated (retic), and untyped code run via Python (python).}
-  @rp:render-ratios-table[rp:RT]
-]
+For example, the row for @bm{futen} reports a @|rp:u/p-ratio| of @${@|futen-u/p|}.
+This means that the average time to run the untyped configuration of the
+ @bm{futen} benchmark using Reticulated was that much slower than the
+ average time of running the same code using Python.
+The @|rp:t/u-ratio| for @bm{futen} states that the fully-typed configuration
+ is @${@|futen-t/u|} times slower than the untyped configuration.
 
-@elem{
-  For example, the row for @bm{futen} reports a @|rp:u/p-ratio| of @${@|futen-u/p|}.
-  This means that the average time to run the untyped configuration of the
-   @bm{futen} benchmark using Reticulated was @${@|futen-u/p|} times slower than the
-   average time of running the same code using Python.
-  Similarly, the @|rp:t/u-ratio| for @bm{futen} states that the fully-typed configuration
-   is @${@|futen-t/u|} times slower than the untyped configuration.
-}
+Migrating a benchmark to Reticulated, or from untyped to fully-typed, always
+ adds performance overhead.
+This overhead is always within one order of magnitude.
 
-@parag{Performance Ratios, Conclusions}
-@elem{
-  Migrating a benchmark to
-   Reticulated, or from untyped to fully-typed, always adds performance overhead.
-  The migration never improves performance.
-  The overhead is always within an order-of-magnitude.
+@; Regarding the @|rp:u/p-ratio|s:
+@;  @integer->word[rp-<2] are below @${2}x,
+@;  @integer->word[(- rp-<3 rp-<2)] are between @${2}x and @${3}x, and
+@;  the remaining @integer->word[(- rp-<4.5 rp-<3)] are below @${4.5}x.
+@; The @|rp:t/u-ratio|s are typically lower:
+@;  @integer->word[tr-<2] are below @${2}x,
+@;  @integer->word[(- tr-<3 tr-<2)] are between @${2}x and @${3}x,
+@;  and the final @integer->word[(- tr-<3.5 tr-<3)] are below @${3.5}x.
 
-  Regarding the @|rp:u/p-ratio|s:
-   @integer->word[rp-<2] are below @${2}x,
-   @integer->word[(- rp-<3 rp-<2)] are between @${2}x and @${3}x, and
-   the remaining @integer->word[(- rp-<4.5 rp-<3)] are below @${4.5}x.
-  The @|rp:t/u-ratio|s are typically lower:
-   @integer->word[tr-<2] are below @${2}x,
-   @integer->word[(- tr-<3 tr-<2)] are between @${2}x and @${3}x,
-   and the final @integer->word[(- tr-<3.5 tr-<3)] are below @${3.5}x.
-
-  @Integer->word[num->] benchmarks have larger @|rp:u/p-ratio|s than @|rp:t/u-ratio|s.
-  This is surprising; one would expect @|rp:u/p-ratio|s close to 1 because
-   untyped Reticulated need not differ from Python.
-  The implementation, however, duplicates some of Python's run-time checks.
-  For example, Reticulated checks that a method is bound before proceeding
-   with method dispatch.
+@Integer->word[num->] benchmarks have @|rp:u/p-ratio|s that are larger
+ than their @|rp:t/u-ratio|s.
+One would expect @|rp:u/p-ratio|s close to 1 because
+ untyped Reticulated need not differ from Python.
+But Reticulated duplicates some of Python's run-time checks.
+For example, Reticulated checks that a method is bound before proceeding
+ with method dispatch.
 }))
 
 
@@ -1505,33 +1492,27 @@ From left to right, these are:
   rp:cache-dir
 ]
 
-@Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] summarizes the overhead of gradual typing in the
+@Figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS)
+ overhead-plots-per-page))] summarize the overhead of migratory typing in the
  benchmark programs.
 Each plot reports the percent of @ddeliverable[] configurations (@|y-axis|)
  for values of @${D} between @${1}x overhead and @${@id[rp:MAX-OVERHEAD]}x overhead (@|x-axis|).
-The @|x-axes| are log-scaled to focus on low overheads;
- vertical tick marks appear at @${1.2}x, @${1.4}x, @${1.6}x, @${1.8}x, @${4}x, @${6}x, and @${8}x overhead.
-
-The heading above the plot for a given benchmark states the benchmark's name
- and indicate whether the data is exhaustive or approximate.
-If the data is exhaustive, this heading lists the number of configurations
- in the benchmark.
-If the data is approximate, the heading lists the number of samples
+The heading above a plot states the benchmark's name and indicates whether the
+ data is exhaustive or approximate.
+Exhaustive plots show the total number of configurations.
+Approximate plots show the number of samples
  and the number of randomly-selected configurations in each sample.
 
-The curves for the approximate data
- (i.e., the curves for @bm{sample_fsm}, @bm{aespython}, and @bm{stats}) are intervals
+The curves for the approximate data---@bm{sample_fsm}, @bm{aespython}, and @bm{stats}---are intervals
  rather than fixed-width lines.
 For instance, the height of an interval at @${x\!=\!4} is the range of the
  @sraapproximation[NUM-SAMPLE-TRIALS (format "[~a(F+C)]" SAMPLE-RATE) "95"]
  for the number of @ddeliverable[4] configurations.
 These intervals are thin because there is little variance in the proportion
  of @ddeliverable{D} configurations across the @integer->word[NUM-SAMPLE-TRIALS]
- samples; that said, the @bm{sample_fsm} curve is visibly thicker than the
+ samples, but the @bm{sample_fsm} curve is slightly thicker than the
  @bm{aespython} curve.
 
-
-@parag{Overhead Plot, Conclusions}
 Curves in @figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] typically cover a large area and reach the
  top of the @|y-axis| at a low value of @${D}.
 This value is always less than @${@id[rp:MAX-OVERHEAD]}.
@@ -1565,43 +1546,19 @@ This is to be expected, given the @|rp:u/p-ratio|s in @figure-ref{fig:rp:ratio} 
 In these benchmarks, the fully-typed configuration is one of the slowest configurations.
 The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
  runs faster than @${@id[S-SLOWER]\%} of all configurations.
-Unfortunately, this speedup is due to a soundness bug
- (@github-issue["mvitousek" "reticulated" 36]);
- in short, the implementation of Reticulated does not type-check the contents of tuples.
+Unfortunately, this speedup is due to a soundness bug; Reticulated
+ at commit @|rp:retic-commit| does not type-check the contents of tuples
+ (@github-issue["mvitousek" "reticulated" 36]).
 })
 
 
 @subsection[#:tag "sec:rp:threats"]{Threats to Validity}
 
-We have identified five sources of systematic
- bias.
-@(let* ( @; See `src/PyPI-ranking/README.md` to reproduce these claims
-        [lib-data* '((simplejson 50 "https://github.com/simplejson/simplejson")
-                     (requests 200 "https://github.com/kennethreitz/requests")
-                     (Jinja2 600 "https://github.com/pallets/jinja/tree/master/jinja2"))]
-        [rank-info @elem{PyPI Ranking (@format-url{http://pypi-ranking.info/alltime})}]
-        [lib-info (authors*
-                    (for/list ([ld (in-list lib-data*)]
-                               [long-style? (in-sequences '(#t)
-                                                          (in-cycle '(#f)))])
-                      @elem{
-                        @(if long-style? "The" "the")
-                        @hyperlink[(caddr ld)]{@tt[@symbol->string[(car ld)]]}
-                        library contains over @${@id[(cadr ld)]}@;
-                        @(if long-style? " functions and methods" "")}))]
-       ) @elem{
-  First, the experiment consists of a small suite of benchmarks, and these
-   benchmarks are rather small.
-  For example, an ad-hoc sample of the @|rank-info| reveals that even small
-   Python packages have far more functions and methods than our benchmarks.
-  @|lib-info|.
-})
-
-Second, the experiment considers one fully-typed configuration per benchmark;
- however, there are many ways of typing a given program.
-The types in this experiment may differ from types ascribed by another Python
- programmer, which, in turn, may lead to different performance overhead.
-
+We have identified five sources of systematic bias.
+Three have been noted above:
+ the decision to measure one set of type annotations (@section-ref{sec:perf:limits}),
+ the coarse granularity (@section-ref{sec:rp:protocol}),
+ and the imprecision of Reticulated types (@section-ref{sec:conversion}).
 @(let ([missing-types '(take5)]
        [retic-limited '(pystone stats)]
        [format-bm* (lambda (bm*) (authors* (map bm bm*)))]
@@ -1625,40 +1582,52 @@ The types in this experiment may differ from types ascribed by another Python
        @; - stats uses the Dyn type
        @;   - for polymorphism, "rank polymorphism", and union types
       ) @elem{
-  Third, some benchmarks use dynamic typing.
-  The @bm{take5} benchmark contains one function that accepts optional arguments,
-   and is therefore dynamically typed (@github-issue["mvitousek" "reticulated" 32]).
+  Here, we can offer a few details on type-expressiveness.
+  The @bm{take5} benchmark contains one function that must stay untyped because
+   it accepts optional arguments (@github-issue["mvitousek" "reticulated" 32]).
   The @bm{go} benchmark uses dynamic typing because Reticulated cannot validate
    its use of a recursive class definition.
-  Two other benchmarks use dynamic typing to overcome Reticulated's lack of
+  @Integer->word[(length retic-limited)] other benchmarks use dynamic typing to overcome Reticulated's lack of
    untagged union types; namely, @format-bm*[retic-limited]
 })
 
+@(let* ( @; See `src/PyPI-ranking/README.md` to reproduce these claims
+        [lib-data* '((simplejson 50 "https://github.com/simplejson/simplejson")
+                     (requests 200 "https://github.com/kennethreitz/requests")
+                     (Jinja2 600 "https://github.com/pallets/jinja/tree/master/jinja2"))]
+        [rank-info @elem{PyPI Ranking (@format-url{http://pypi-ranking.info/alltime})}]
+        [lib-info (authors*
+                    (for/list ([ld (in-list lib-data*)]
+                               [long-style? (in-sequences '(#t)
+                                                          (in-cycle '(#f)))])
+                      @elem{
+                        @(if long-style? "The" "the")
+                        @hyperlink[(caddr ld)]{@tt[@symbol->string[(car ld)]]}
+                        library contains over @${@id[(cadr ld)]}@;
+                        @(if long-style? " functions and methods" "")}))]
+       ) @elem{
+  A third issue is that the experiment uses rather small benchmarks.
+  An ad-hoc sample of the @|rank-info| shows that widely-used
+   Python packages have far more functions and methods.
+  @|lib-info|.
+})
+
 @(let ([use-io* '(aespython futen http2 slowSHA)]) @elem{
-  Fourth, the @(authors* (map bm use-io*)) benchmarks read from a file
+  Fourth and last, the @(authors* (map bm use-io*)) benchmarks read from a file
    within their timed computation.
   We nevertheless consider our results representative.
 })
-
-Fifth, Reticulated supports a finer granularity of type annotations than the
- experiment considers.
-Function signatures can leave some arguments untyped, and class field
- declaractions can omit types for some members.
-We believe that a fine-grained evaluation would support the
- conclusions presented in this paper.
 
 
 @; -----------------------------------------------------------------------------
 @section{Additional Visualizations}
 
 The methods presented in this chapter are our most effective answer
- to the question of how to evaluate the performance of a gradual typing system.
+ to the question of how to evaluate the performance of a mixed-typed language.
 In particular, the notion of @ddeliverable{} configurations is a
  clear and scalable way to summarize performance.
-
-That said, a gradual typing system has other interesting properties besides
- the number of @ddeliverable{} configurations.
-This section presents other visualizations that help answer extra
+But a mixed-typed language has other interesting properties.
+This section presents visualizations that help answer different, targeted
  questions.
 
 
@@ -1680,10 +1649,11 @@ The raw data behind an overhead plot is a sequence of running times for
  every configuration.
 An overhead plot summarizes the running times into an average, and uses
  these averages to group configurations into buckets.
-Unfortunately, this method hides outliers in the data and syntactic similarities among
- configurations.
+Unfortunately, this method hides outliers in the data
+ and syntactic relations (think back to the lattice, @figure-ref{fig:example-lattice-0})
+ among configurations.
 
-@Figure-ref{fig:example-exact-plot} addresses both concerns.
+Figure-ref{fig:example-exact-plot} addresses both concerns.
 Instead of summarizing one configuration with its average runtime,
  the plot contains one point for every running time in the dataset.
 These points are sorted left-to-right in one of the @integer->word[num-units]
@@ -1691,12 +1661,10 @@ These points are sorted left-to-right in one of the @integer->word[num-units]
  horizontal lines, the underlying dataset may have irregular running times.
 Each column contains all configurations that have the same number of types.
 In terms of the configuration lattice (@figure-ref{fig:example-lattice-0}),
- the left-most column contains the bottom level and successive columns
- present successive levels.
+ the left-most column contains the bottom level and each successive column
+ present a higher levels.
 At a glance, @figure-ref{fig:example-exact-plot} therefore shows the overall
  effect of adding types.
-This high-level view can be useful for comparing different approaches to
- gradual typing.
 }])
 
 
@@ -1706,26 +1674,22 @@ This high-level view can be useful for comparing different approaches to
 @figure*[
   "fig:example-scatterplot"
   @elem{Scatterplot comparing @bm[bm-name] configurations before
-   and after a proposed change (collapsible contracts).
-   The @|x-axis| ranges over after-change overhead and the @|y-axis|
-    ranges over before-change overhead.
-   A point @${(x, y)} directly compares overhead.
-   Points above the line are better for collapsible.
+   and after collapsible contracts.
+   The @|x-axis| ranges over collapsible overhead and the @|y-axis|
+    ranges over baseline overhead.
+   A point @${(x, y)} is a head-to-head comparison;
+    points above the diagonal are better for collapsible.
   }
   (tr:render-scatterplot-example bm-name)
 ]
 
 @elem{
-Together with Daniel Feltey, Christophe Scholliers, Robert Bruce Findler,
- and Vincent St-Amour, I evaluated the effect of collapsible contracts
- on gradual typing@~cite{fgsfs-oopsla-2018}.
-In brief, collapsible contracts are a new representation for run-time type
- checks.
+Collapsible contracts are a new representation for @|sdeep| run-time type
+ checks@~cite{fgsfs-oopsla-2018}.
 The representation greatly improves some mixed-typed programs, but can
  slow down others.
-
-To quantify the speedup/slowdown tradeoff in our implementation of collapsible
- contracts, we used a scatterplot technique due to Spenser Bauman@~cite{bbst-oopsla-2017}.
+To assess the implementation of collapsible,
+ we used a scatterplot technique due to Spenser Bauman@~cite{bbst-oopsla-2017}.
 @Figure-ref{fig:example-scatterplot} shows one representative example from our work.
 Each point in the scatterplot shows how collapsible affects one configuration.
 Points above the diagonal line are improved;
