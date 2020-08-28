@@ -121,10 +121,13 @@ community can truly claim to understand this complex design space.
 }
 
 @futurework{
-  Use the @|nname| and @|fname| semantics to design two compilers into a core
+  The error preorder (@${\sbehavioreq}) looks a lot like the term precision
+   relation (@${\sqle}) from the gradual typing literature@~cite{svcb-snapl-2015}.
+  To investigate whether there is a deeper connection,
+   use the @|nname| and @|fname| semantics to design two compilers into a core
    language that satisfies graduality@~cite{svcb-snapl-2015,nla-popl-2019}.
   @exact{\kafka} may be a good starting point@~cite{clzv-ecoop-2018}.
-  Prove that the @|fname| compiler always gives less-precise output according
+  Prove that the @|fname| compiler always gives less-precise expressions according
    to the term precision relation.
   Does core-language term precision reflect the surface-language error preorder?
 }
