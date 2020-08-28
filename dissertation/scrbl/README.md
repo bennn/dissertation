@@ -18,8 +18,10 @@ TODO
   - [X] blame section
   - [X] blame table
   - [X] future work
+- [X] full intro (1)
 - [ ] "both" chapter
-- [ ] full intro (1)
+- [ ] related
+- [ ] conclusion ... other chapters?
 
 Style
 - [ ] ABC00 cite style, like theory papers
@@ -33,6 +35,7 @@ Style
 - [ ] print "x" after overheads
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [ ] too many exercises, looks like everything has holes, save those for end
+- [ ] shallow/CACHE too big, why are files so huge?
 
 #### dependencies
 
