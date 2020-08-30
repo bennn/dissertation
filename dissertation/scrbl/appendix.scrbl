@@ -40,3 +40,16 @@ man alive on the strength of them.''
 
 Michel de Montaigne 
 
+
+``Writing is nature's way of letting you know how sloppy your thinking is.''
+
+Dick Guindon
+
+
+``A computer is simply an instrument whose music is ideas.''
+
+Alan Kay
+
+
+
+
