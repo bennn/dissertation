@@ -14,4 +14,8 @@
 
 @; marrynig a software engineer? benefits marginal, never forget its her money
 
+
+@; pre-phd 8 yrs for stock options 6 for phd not bad but oh no did not anticipate
+@; the value added from mf (specifics)
+
 Thanks
