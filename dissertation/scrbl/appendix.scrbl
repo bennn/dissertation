@@ -51,5 +51,9 @@ Dick Guindon
 Alan Kay
 
 
+``In the end, everybody must learn for himself``
+
+Per Martin-Loef
+
 
 
