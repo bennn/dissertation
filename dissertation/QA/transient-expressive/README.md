@@ -64,8 +64,7 @@ https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ
 
 #### 2020-08-18 -- 2017-11-28
 
-(did 150 messages so far)
-
+150 messages so far,
 6 winners
 
 - https://groups.google.com/g/racket-users/c/IKTFoqwQ6yQ/m/vBGhck4TAgAJ
