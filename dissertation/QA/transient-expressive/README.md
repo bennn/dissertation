@@ -38,14 +38,39 @@ Another search, `typed/racket/no-check`, 0 results.
 
 ### mailing list
 
-#### case study, JSON
+#### case study, plot
 
-https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ
+- https://groups.google.com/g/racket-users/c/sRDGG6azTDU/m/-1dE6f85CgAJ
+  John Clements, 3d plots unusable after 6.11
+  -> plot master  = bit slow, but runs
+  -> plot deep    = marginally slower? ... did collapsible help?
+     --- defined by swapping `unsafe-provide` with `provide`
+  -> plot shallow = gotta convert ENTIRE codebase, but ok
+     --- see `transient` branch
+  DISCUSSION ... plot3d = from plot-gui-lib,
+  = plot3d-frame, returns (Instance Frame%)
+    previously hidden via (U (Instance Snip%) Void)
+    no contract vs. shape check
 
-can transient avoid the O(n)? well yes. but is it better after?
+[X] TODO try without collapsible, is deep slow?
+    ... disable `->-contract-has-collapsible-support?`
+    = still quick enough, not fast but not deadly
+[ ] try transient-alone again, for minimal number of files
+    I really thought this was a wrapper over untyped
+    should not need to change entire codebase
 
 
-#### case study, TR stream
+- https://groups.google.com/g/racket-users/c/ooPDibJC5PM/m/oXB7xYxVBAAJ
+  evdubs, sluggish from 7.2 to 7.3
+  .... inconclusive whether there is a problem, and no fix committed
+  -> plot master  = fine, pretty fast
+  -> plot deep    = fine, pretty fast response to mouse actions
+     ... if slower, very hard to notice
+  -> plot shallow = hey seems faster
+    - switching only plot-gui-lib/plot/private/gui/plot3d.rkt is fast too
+
+
+#### FAIL case study, TR stream
 
 motivation
 : https://groups.google.com/g/racket-users/c/1N6bXSQmmHQ/m/m23l2aOvAQAJ
@@ -55,10 +80,20 @@ work-around Deep package
 
 can transient avoid the dance between macros and functions?
 
+FAIL, no it cannot, no help. Issue is untyped macro introduces untyped id's
+This is a static type-check issue
+
 
 #### case study, msgpack
 
 https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ
+
+
+#### FAIL case study, JSON
+
+??? cannot find the link
+
+can transient avoid the O(n)? well yes. but is it better after?
 
 
 
