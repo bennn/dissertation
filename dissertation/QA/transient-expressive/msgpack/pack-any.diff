@@ -1,0 +1,51 @@
+diff --git a/msgpack/pack.rkt b/msgpack/pack.rkt
+index 3ee2df1..2b05def 100644
+--- a/msgpack/pack.rkt
++++ b/msgpack/pack.rkt
+@@ -34,7 +34,7 @@
+ (define-type PackableList      (Listof    Packable))
+ (define-type PackableHashTable (HashTable Packable Packable))
+ 
+-(: pack-to (-> Output-Port Packable * Any))
++(: pack-to (-> Output-Port Any * Any))
+ (define (pack-to out . data)
+   (define (pack-datum datum)
+     (cond
+@@ -46,15 +46,15 @@
+       [(real?           datum) (pack-flonum   datum                    #t out)]
+       [(string?         datum) (pack-string   datum                       out)]
+       [(bytes?          datum) (pack-bytes    datum                       out)]
+-      [(vector?         datum) (pack-sequence (cast datum PackableVector) out)]
+-      [(list?           datum) (pack-sequence (cast datum PackableList)   out)]
+-      [(hash?           datum) (pack-hash     (cast datum PackableHashTable) out)]
++      [(vector?         datum) (pack-sequence datum out)]
++      [(list?           datum) (pack-sequence datum   out)]
++      [(hash?           datum) (pack-hash     datum out)]
+       [(ext?            datum) (pack-ext      datum                       out)]
+       [else (error "Type of " datum " not supported by MessagePack")]))
+   (for ([datum (in-list data)])
+     (pack-datum datum)))
+ 
+-(: pack (-> Packable * Bytes))
++(: pack (-> Any * Bytes))
+ (define (pack . data)
+   (call-with-output-bytes
+     (λ (out)
+@@ -164,7 +164,7 @@
+ 
+ 
+ ;;; ===[ Arrays ]=============================================================
+-(: pack-sequence (-> (U PackableVector PackableList)
++(: pack-sequence (-> (U VectorTop (Listof Any)) #;(U PackableVector PackableList)
+                      Output-Port
+                      Any))
+ (define (pack-sequence seq out)
+@@ -189,7 +189,7 @@
+ 
+ 
+ ;;; ===[ Maps ]===============================================================
+-(: pack-hash (-> PackableHashTable Output-Port Any))
++(: pack-hash (-> HashTableTop #;PackableHashTable Output-Port Any))
+ (define (pack-hash hash out)
+   (define len (hash-count hash))
+   (cond

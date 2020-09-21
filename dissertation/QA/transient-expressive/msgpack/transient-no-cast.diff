@@ -1,0 +1,94 @@
+diff --git a/msgpack/ext.rkt b/msgpack/ext.rkt
+index 524321b..45c447c 100644
+--- a/msgpack/ext.rkt
++++ b/msgpack/ext.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang typed/racket/base #:transient
+ 
+ 
+ ;;; The MessagePack ext type does not have a direct correspondence to a Racket
+diff --git a/msgpack/main.rkt b/msgpack/main.rkt
+index c51c28e..13745e1 100644
+--- a/msgpack/main.rkt
++++ b/msgpack/main.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang typed/racket/base #:transient
+ 
+ (require racket/contract/base
+          "ext.rkt"
+diff --git a/msgpack/pack.rkt b/msgpack/pack.rkt
+index 3ee2df1..e6647ad 100644
+--- a/msgpack/pack.rkt
++++ b/msgpack/pack.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang typed/racket/base #:transient
+ 
+ (require (only-in racket/port call-with-output-bytes)
+          "ext.rkt"
+@@ -30,11 +30,11 @@
+ 
+ 
+ ;;; ===[ Generic packing ]====================================================
+-(define-type PackableVector    (Vectorof  Packable))
+-(define-type PackableList      (Listof    Packable))
+-(define-type PackableHashTable (HashTable Packable Packable))
++(define-type PackableVector    VectorTop)
++(define-type PackableList      (Listof    Any))
++(define-type PackableHashTable HashTableTop)
+ 
+-(: pack-to (-> Output-Port Packable * Any))
++(: pack-to (-> Output-Port Any * Any))
+ (define (pack-to out . data)
+   (define (pack-datum datum)
+     (cond
+@@ -46,9 +46,9 @@
+       [(real?           datum) (pack-flonum   datum                    #t out)]
+       [(string?         datum) (pack-string   datum                       out)]
+       [(bytes?          datum) (pack-bytes    datum                       out)]
+-      [(vector?         datum) (pack-sequence (cast datum PackableVector) out)]
+-      [(list?           datum) (pack-sequence (cast datum PackableList)   out)]
+-      [(hash?           datum) (pack-hash     (cast datum PackableHashTable) out)]
++      [(vector?         datum) (pack-sequence datum out)]
++      [(list?           datum) (pack-sequence datum   out)]
++      [(hash?           datum) (pack-hash     datum out)]
+       [(ext?            datum) (pack-ext      datum                       out)]
+       [else (error "Type of " datum " not supported by MessagePack")]))
+   (for ([datum (in-list data)])
+diff --git a/msgpack/packable.rkt b/msgpack/packable.rkt
+index 3eec63d..0df775e 100644
+--- a/msgpack/packable.rkt
++++ b/msgpack/packable.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang typed/racket/base #:transient
+ 
+ (require "ext.rkt")
+ 
+diff --git a/msgpack/unpack.rkt b/msgpack/unpack.rkt
+index 64e4ed2..00f8b56 100644
+--- a/msgpack/unpack.rkt
++++ b/msgpack/unpack.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang typed/racket/base #:transient
+ 
+ (require (only-in racket/port call-with-input-bytes)
+          "ext.rkt"

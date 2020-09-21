@@ -1,0 +1,392 @@
+diff --git a/msgpack/ext.rkt b/msgpack/ext.rkt
+index 524321b..86cd7bd 100644
+--- a/msgpack/ext.rkt
++++ b/msgpack/ext.rkt
+@@ -15,15 +15,15 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang racket/base
+ 
+ 
+ ;;; The MessagePack ext type does not have a direct correspondence to a Racket
+ ;;; type.
+ (struct ext
+-  ([type : Integer] [data : Bytes])
++  (type data)
+   #:transparent
+-  #:type-name Ext
++  ;;#:type-name Ext
+   #:guard (λ (type data name)
+             (unless (<= -128 type 127)  ; Must be signed 8-bit integer
+               (raise-arguments-error 'ext "type must be within [-128, 127]"
+@@ -31,4 +31,4 @@
+                                      "data" data))
+             (values type data)))
+ 
+-(provide (struct-out ext) Ext)
++(provide (struct-out ext) #;Ext)
+diff --git a/msgpack/main.rkt b/msgpack/main.rkt
+index c51c28e..86692c7 100644
+--- a/msgpack/main.rkt
++++ b/msgpack/main.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang racket/base
+ 
+ (require racket/contract/base
+          "ext.rkt"
+diff --git a/msgpack/pack.rkt b/msgpack/pack.rkt
+index 3ee2df1..b8a0436 100644
+--- a/msgpack/pack.rkt
++++ b/msgpack/pack.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang racket/base
+ 
+ (require (only-in racket/port call-with-output-bytes)
+          "ext.rkt"
+@@ -30,11 +30,11 @@
+ 
+ 
+ ;;; ===[ Generic packing ]====================================================
+-(define-type PackableVector    (Vectorof  Packable))
+-(define-type PackableList      (Listof    Packable))
+-(define-type PackableHashTable (HashTable Packable Packable))
++;(define-type PackableVector    (Vectorof  Packable))
++;(define-type PackableList      (Listof    Packable))
++;(define-type PackableHashTable (HashTable Packable Packable))
+ 
+-(: pack-to (-> Output-Port Packable * Any))
++;(: pack-to (-> Output-Port Any * Any))
+ (define (pack-to out . data)
+   (define (pack-datum datum)
+     (cond
+@@ -46,15 +46,15 @@
+       [(real?           datum) (pack-flonum   datum                    #t out)]
+       [(string?         datum) (pack-string   datum                       out)]
+       [(bytes?          datum) (pack-bytes    datum                       out)]
+-      [(vector?         datum) (pack-sequence (cast datum PackableVector) out)]
+-      [(list?           datum) (pack-sequence (cast datum PackableList)   out)]
+-      [(hash?           datum) (pack-hash     (cast datum PackableHashTable) out)]
++      [(vector?         datum) (pack-sequence datum out)]
++      [(list?           datum) (pack-sequence datum out)]
++      [(hash?           datum) (pack-hash     datum out)]
+       [(ext?            datum) (pack-ext      datum                       out)]
+       [else (error "Type of " datum " not supported by MessagePack")]))
+   (for ([datum (in-list data)])
+     (pack-datum datum)))
+ 
+-(: pack (-> Packable * Bytes))
++;(: pack (-> Any * Bytes))
+ (define (pack . data)
+   (call-with-output-bytes
+     (λ (out)
+@@ -62,45 +62,45 @@
+ 
+ 
+ ;;; ===[ Nil ]================================================================
+-(: pack-void (-> Output-Port Any))
++;(: pack-void (-> Output-Port Any))
+ (define (pack-void out)
+   (write-byte #xC0 out))
+ 
+ 
+ ;;; ===[ Boolean ]============================================================
+-(: pack-boolean (-> Boolean Output-Port Any))
++;(: pack-boolean (-> Boolean Output-Port Any))
+ (define (pack-boolean b out)
+   (write-byte (if b #xC3 #xC2) out))
+ 
+ 
+ ;;; ===[ Integers ]===========================================================
+ ;;; These predicates make things easier
+-(: +fixint? (-> Integer Boolean))
++;(: +fixint? (-> Integer Boolean))
+ (define (+fixint? x) (and (exact-nonnegative-integer? x) (< x 128)))
+-(: -fixint? (-> Integer Boolean))
++;(: -fixint? (-> Integer Boolean))
+ (define (-fixint? x) (and (exact-integer? x) (negative? x) (<= -32 x -1)))
+-(: uint8? (-> Integer Boolean))
++;(: uint8? (-> Integer Boolean))
+ (define (uint8? x) (and (exact-nonnegative-integer? x) (< x (expt 2  8))))
+-(: uint16? (-> Integer Boolean))
++;(: uint16? (-> Integer Boolean))
+ (define (uint16? x) (and (exact-nonnegative-integer? x) (< x (expt 2 16))))
+-(: uint32? (-> Integer Boolean))
++;(: uint32? (-> Integer Boolean))
+ (define (uint32? x) (and (exact-nonnegative-integer? x) (< x (expt 2 32))))
+-(: uint64? (-> Integer Boolean))
++;(: uint64? (-> Integer Boolean))
+ (define (uint64? x) (and (exact-nonnegative-integer? x) (< x (expt 2 64))))
+-(: int8? (-> Integer Boolean))
++;(: int8? (-> Integer Boolean))
+ (define (int8?   x) (and (exact-integer? x) (<= (- (expt 2  7)) x (sub1 (expt 2  7)))))
+-(: int16? (-> Integer Boolean))
++;(: int16? (-> Integer Boolean))
+ (define (int16?  x) (and (exact-integer? x) (<= (- (expt 2 15)) x (sub1 (expt 2 15)))))
+-(: int32? (-> Integer Boolean))
++;(: int32? (-> Integer Boolean))
+ (define (int32?  x) (and (exact-integer? x) (<= (- (expt 2 31)) x (sub1 (expt 2 31)))))
+-(: int64? (-> Integer Boolean))
++;(: int64? (-> Integer Boolean))
+ (define (int64?  x) (and (exact-integer? x) (<= (- (expt 2 63)) x (sub1 (expt 2 63)))))
+ 
+-(: pack-integer (-> Integer Output-Port Any))
++;(: pack-integer (-> Integer Output-Port Any))
+ (define (pack-integer i out)
+   (if (< i 0) (pack-int i out) (pack-uint i out)))
+ 
+-(: pack-uint (-> Integer Output-Port Any))
++;(: pack-uint (-> Integer Output-Port Any))
+ (define (pack-uint uint out)
+   (cond
+     ;; In case of a fixint we don't need a tag, just write the byte
+@@ -112,7 +112,7 @@
+     [else (error "Unsigned integer must not be larger than 2^64 - 1")])
+   (write-bytes (integer->bytes uint #f) out))
+ 
+-(: pack-int (-> Integer Output-Port Any))
++;(: pack-int (-> Integer Output-Port Any))
+ (define (pack-int int out)
+   (cond
+     ;; In case of a fixint we don't need a tag, just write the byte
+@@ -126,17 +126,17 @@
+ 
+ 
+ ;;; ===[ Floating point numbers ]=============================================
+-(: pack-flonum (-> Real Boolean Output-Port Any))
++;(: pack-flonum (-> Real Boolean Output-Port Any))
+ (define (pack-flonum f single? out)
+   (write-byte (if single? #xCA #xCB) out)
+   (write-bytes (real->floating-point-bytes f (if single? 4 8) #t) out))
+ 
+ 
+ ;;; ===[ Unicode strings ]====================================================
+-(: pack-string (-> String Output-Port Any))
++;(: pack-string (-> String Output-Port Any))
+ (define (pack-string str out)
+   (define len (bytes-length (string->bytes/utf-8 str)))
+-  (: pack-str-n (-> Integer Integer Any))
++;  (: pack-str-n (-> Integer Integer Any))
+   (define (pack-str-n len tag)
+     (write-byte tag out)
+     (write-bytes (integer->bytes len #f) out))
+@@ -151,7 +151,7 @@
+ 
+ 
+ ;;; ===[ Binary strings ]=====================================================
+-(: pack-bytes (-> Bytes Output-Port Any))
++;(: pack-bytes (-> Bytes Output-Port Any))
+ (define (pack-bytes bstr out)
+   (define len (bytes-length bstr))
+   (cond
+@@ -164,9 +164,9 @@
+ 
+ 
+ ;;; ===[ Arrays ]=============================================================
+-(: pack-sequence (-> (U PackableVector PackableList)
+-                     Output-Port
+-                     Any))
++;(: pack-sequence (-> (U VectorTop (Listof Any))
++;                     Output-Port
++;                     Any))
+ (define (pack-sequence seq out)
+   (define len
+     (cond
+@@ -189,7 +189,7 @@
+ 
+ 
+ ;;; ===[ Maps ]===============================================================
+-(: pack-hash (-> PackableHashTable Output-Port Any))
++;(: pack-hash (-> HashTableTop Output-Port Any))
+ (define (pack-hash hash out)
+   (define len (hash-count hash))
+   (cond
+@@ -209,7 +209,7 @@
+ 
+ 
+ ;;; ===[ Extensions ]=========================================================
+-(: pack-ext (-> Ext Output-Port Any))
++;(: pack-ext (-> Ext Output-Port Any))
+ (define (pack-ext ext out)
+   (define len (bytes-length (ext-data ext)))
+   (cond
+@@ -239,10 +239,10 @@
+ ;;; are allowed and we determine the length of the byte string automatically.
+ ;;; Ideally we would use 'integer->integer-bytes', but that function does not
+ ;;; support 8-bit integers, so we need this for the time being.
+-(: integer->bytes (->* (Integer Boolean) ((U #f 1 2 4 8)) Bytes))
++;(: integer->bytes (->* (Integer Boolean) ((U #f 1 2 4 8)) Bytes))
+ (define (integer->bytes int signed? [size #f])
+   ;; Pick size if none is specified
+-  (define (number-of-bytes) : (U 1 2 4 8)
++  (define (number-of-bytes) ;: (U 1 2 4 8)
+     (cond [(uint8?  int) 1]
+           [(uint16? int) 2]
+           [(uint32? int) 4]
+diff --git a/msgpack/packable.rkt b/msgpack/packable.rkt
+index 3eec63d..014506f 100644
+--- a/msgpack/packable.rkt
++++ b/msgpack/packable.rkt
+@@ -15,29 +15,29 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang racket/base
+ 
+ (require "ext.rkt")
+ 
+-(provide Packable packable?)
++(provide #;Packable packable?)
+ 
+-(define-type PackableVector    (Vectorof  Packable))
+-(define-type PackableList      (Listof    Packable))
+-(define-type PackableHashTable (HashTable Packable Packable))
++;(define-type PackableVector    (Vectorof  Packable))
++;(define-type PackableList      (Listof    Packable))
++;(define-type PackableHashTable (HashTable Packable Packable))
++;
++;(define-type Packable
++;  (U Void
++;     Boolean
++;     Integer
++;     Real
++;     String
++;     Bytes
++;     PackableVector
++;     PackableList
++;     PackableHashTable
++;     Ext))
+ 
+-(define-type Packable
+-  (U Void
+-     Boolean
+-     Integer
+-     Real
+-     String
+-     Bytes
+-     PackableVector
+-     PackableList
+-     PackableHashTable
+-     Ext))
+-
+-(: packable? (-> Any Boolean))
++;(: packable? (-> Any Boolean))
+ (define (packable? x)
+   (cond
+     [(void?    x) #t]
+diff --git a/msgpack/unpack.rkt b/msgpack/unpack.rkt
+index 64e4ed2..5418a57 100644
+--- a/msgpack/unpack.rkt
++++ b/msgpack/unpack.rkt
+@@ -15,7 +15,7 @@
+ ;;;;     You should have received a copy of the GNU General Public License
+ ;;;;     along with MessagePack.rkt.  If not, see
+ ;;;;     <http://www.gnu.org/licenses/>.
+-#lang typed/racket/base
++#lang racket/base
+ 
+ (require (only-in racket/port call-with-input-bytes)
+          "ext.rkt"
+@@ -81,24 +81,24 @@
+           (integer-bytes->integer (bytes tag-var) #t #t)]
+          [else (error "Unknown tag " tag-var)])]))
+ 
+-(: unpack-from (-> Input-Port Packable))
++;(: unpack-from (-> Input-Port Packable))
+ (define (unpack-from in)
+   (define tag (read-byte in))
+   (cond
+     [(byte? tag) (dispatch-on-case tag in)]
+     [else (raise-eof-exception)]))
+ 
+-(: unpack (-> Bytes Packable))
++;(: unpack (-> Bytes Packable))
+ (define (unpack bstr)
+   (define-values (obj _) (unpack/rest bstr))
+   obj)
+ 
+-(: unpack/rest (-> Bytes (Values Packable Bytes)))
++;(: unpack/rest (-> Bytes (Values Packable Bytes)))
+ (define (unpack/rest bstr)
+   (define n 0)
+   (values
+     (call-with-input-bytes bstr
+-      (λ ((in : Input-Port))
++      (λ (in) #;((in : Input-Port))
+         (define obj (unpack-from in))
+         (set! n (file-position in))
+         obj))
+@@ -110,7 +110,7 @@
+ 
+ 
+ ;;; ===[ Integers ]===========================================================
+-(: unpack-integer (-> Integer Boolean Input-Port Integer))
++;(: unpack-integer (-> Integer Boolean Input-Port Integer))
+ (define (unpack-integer size signed? in)
+   (define in-bytes (read-bytes size in))
+   (cond
+@@ -119,7 +119,7 @@
+ 
+ 
+ ;;; ===[ Floating point numbers ]=============================================
+-(: unpack-float (-> Integer Input-Port Real))
++;(: unpack-float (-> Integer Input-Port Real))
+ (define (unpack-float size in)
+   (define in-bytes (read-bytes size in))
+   (cond
+@@ -128,7 +128,7 @@
+ 
+ 
+ ;;; ===[ Byte strings ]=======================================================
+-(: unpack-bytes (-> Integer Input-Port Bytes))
++;(: unpack-bytes (-> Integer Input-Port Bytes))
+ (define (unpack-bytes size in)
+   (define bstr (read-bytes size in))
+   (cond
+@@ -137,7 +137,7 @@
+ 
+ 
+ ;;; ===[ Unicode strings ]====================================================
+-(: unpack-string (-> Integer Input-Port String))
++;(: unpack-string (-> Integer Input-Port String))
+ (define (unpack-string size in)
+   (define in-bytes (read-bytes size in))
+   (cond
+@@ -146,22 +146,22 @@
+ 
+ 
+ ;;; ===[ Arrays ]=============================================================
+-(: unpack-array (-> Integer Input-Port (Vectorof Packable)))
++;(: unpack-array (-> Integer Input-Port (Vectorof Packable)))
+ (define (unpack-array size in)
+-  (for/vector : (Vectorof Packable) #:length size ([_ (in-range size)])
++  (for/vector #;#;: (Vectorof Packable) #:length size ([_ (in-range size)])
+     (unpack-from in)))
+ 
+ 
+ ;;; ===[ Maps ]===============================================================
+-(: unpack-map (-> Integer Input-Port (HashTable Packable Packable)))
++;(: unpack-map (-> Integer Input-Port (HashTable Packable Packable)))
+ (define (unpack-map size in)
+-  (for/hash : (HashTable Packable Packable) ([_ (in-range size)])
++  (for/hash #;#;: (HashTable Packable Packable) ([_ (in-range size)])
+     (values (unpack-from in)
+             (unpack-from in))))
+ 
+ 
+ ;;; ===[ Extensions ]=========================================================
+-(: unpack-ext (-> Integer Input-Port Ext))
++;(: unpack-ext (-> Integer Input-Port Ext))
+ (define (unpack-ext size in)
+   (define type (read-bytes    1 in))
+   (define data (read-bytes size in))

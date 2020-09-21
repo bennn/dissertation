@@ -58,6 +58,7 @@ Another search, `typed/racket/no-check`, 0 results.
 [ ] try transient-alone again, for minimal number of files
     I really thought this was a wrapper over untyped
     should not need to change entire codebase
+[ ] MF suggestion ... try drracket
 
 
 - https://groups.google.com/g/racket-users/c/ooPDibJC5PM/m/oXB7xYxVBAAJ
@@ -87,6 +88,75 @@ This is a static type-check issue
 #### case study, msgpack
 
 https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ
+
+"tr lowered my perf."
+ narrowed some types from Any
+ tanked perf, vector / hash tests slow
+
+type / contract for `pack`
+ok, and it's because the input contract wraps mutable data
+
+transient should help!
+
+installed, `make check` ~ 6 minutes
+ in particular `raco test test/pack/array.rkt` = 44.34 sec
+
+changed pack types to Any
+ `raco test test/pack/array.rkt` = 1.78 sec
+ see msgpack/pack-any.diff
+
+changed pack.rkt to Transient
+ `raco test test/pack/array.rkt` = 9.48 sec
+
+changed pack.rkt + packable.rkt to Transient
+ `raco test test/pack/array.rkt` = 9.60 sec
+
+changed pack.rkt + packable.rkt + ext.rkt to Transient
+ `raco test test/pack/array.rkt` = 10.85 sec
+ yikes!
+
+changed pack.rkt + packable.rkt + ext.rkt + main.rkt to Transient
+ `raco test test/pack/array.rkt` = 9.91 sec
+
+changed ALL to Transient
+ `raco test test/pack/array.rkt` = 10.76 sec
+
+changed ALL to Transient + removed cast, weakened types to Any and _Top
+ `raco test test/pack/array.rkt` = 2.26 sec
+ hmmph guess the cast is the problem
+
+OK TRY AGAIN, is there a case here, keeping the casts?
+ yes there is
+
+master
+ `raco test test/pack/array.rkt` = 44.68 sec
+
+changed pack.rkt to transient
+ `raco test test/pack/array.rkt` = 10.57 sec
+
+changed pack.rkt + main.rkt to transient
+ `raco test test/pack/array.rkt` =  9.90 sec
+
+HOW ABOUT ALL TESTS
+
+master ; make setup ; time make check
+ make check  319.89s user 6.75s system 94% cpu 5:44.25 total
+
+pack.rkt transient ;  make setup ; time make check
+ make check  204.33s user 6.52s system 96% cpu 3:37.97 total
+ wow, better but NOT BY MUCH!
+
+ALL transient ;  make setup ; time make check
+ make check  202.33s user 8.22s system 81% cpu 4:18.76 total
+ hah
+
+ok what if we take sam's fix, no casts?
+ make check  117.10s user 5.58s system 96% cpu 2:07.08 total
+ I see, well ... is it just a lot of tests in here?
+
+what about untyped
+ make check  24.13s user 3.43s system 97% cpu 28.332 total
+ holy crow!
 
 
 #### FAIL case study, JSON
