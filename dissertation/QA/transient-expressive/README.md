@@ -85,7 +85,7 @@ FAIL, no it cannot, no help. Issue is untyped macro introduces untyped id's
 This is a static type-check issue
 
 
-#### case study, msgpack
+#### PASS case study, msgpack
 
 https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ
 
@@ -150,9 +150,15 @@ ALL transient ;  make setup ; time make check
  make check  202.33s user 8.22s system 81% cpu 4:18.76 total
  hah
 
-ok what if we take sam's fix, no casts?
+ok what if we take sam's fix, no casts? (all Deep)
  make check  117.10s user 5.58s system 96% cpu 2:07.08 total
  I see, well ... is it just a lot of tests in here?
+
+sam's fix, no casts? (all Shallow)
+ make check  66.57s user 4.16s system 98% cpu 1:12.03 total)
+
+no casts, only pack.rkt Shallow rest Deep
+ make check  101.15s user 4.42s system 97% cpu 1:47.94 total
 
 what about untyped
  make check  24.13s user 3.43s system 97% cpu 28.332 total

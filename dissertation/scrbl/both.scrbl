@@ -1388,6 +1388,8 @@ Even so, old code needs changes.
 @subsection[#:tag "sec:both:expressiveness"]{Expressiveness}
 @; new mixed programs, relative to TR alone
 @; - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
+@; - higher-order / any errors, gone
+@; - indexof ... weird result, gone
 
 @|sShallow| enables new programs, it's more expressive.
 
@@ -1512,6 +1514,31 @@ Are there any mixed lattice points, using guarded and transient, that do
 
 For a negative answer, need a lattice on top of every lattice point.
 Can try small benchmarks --- ok, then extrapolate.
+
+@; if we have a few of these, organize into a figure with descriptions below
+@; ... or use a "benchmarks" format to convey the bottom line
+@parag{MsgPack}
+@hyperlink["http://msgpack.org/"]{MessagePack} is a serialization format.
+@hyperlink["https://gitlab.com/HiPhish/MsgPack.rkt"]{MsgPack} is a Typed Racket
+ library that maps Racket values to binary data according to the format.
+The author of this library
+ @hyperlink["https://groups.google.com/g/racket-users/c/6KQxpfMLTn0/m/lil_6qSMDAAJ"]{reported a performance hit}
+ after narrowing some types from @tt{Any} to a more-precise union type for serializable inputs.
+Tests that formerly passed on the package server timed out after the change.
+
+I cloned MsgPack commit @github-commit["HiPhish" "MsgPack.rkt"]{64a60986b149703ff9436877da1dd3e86c6e4094}
+ and found that running all unit tests took 320 seconds.
+Changing one file to use Shallow types brought the time down to 204 seconds ---
+ a huge improvement for a one-line switch.
+Moving the rest of the library from deep to shallow types adds only a slight
+ improvement (down to 202 seconds), which suggests that a mix of deep and
+ shallow is best.
+
+@; can do even better after changing the code:
+@;  Deep, no pack casts = 117 seconds
+@;  Shallow, no pack casts = 67 seconds
+@;  untyped = 24 seconds!!!
+
 
 
 @subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
