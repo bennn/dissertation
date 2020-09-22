@@ -162,9 +162,10 @@ Transient = racket master / TR adbf3f
 |  metapict |     176 |       157 |   0 |
 
 synth
-deep lib, untyped client =
-shallow lib, untyped client =
-shallow lib, deep client =
+deep lib, deep client = 809 821 834 771 733
+deep lib, untyped client = 11440 11040 11004 11923 11672
+shallow lib, untyped client = 1645 1664 1558 1576 1539
+shallow lib, deep client = 7823 7885 9002 7955 8279
 
 jpeg
 deep lib, untyped client = 463 470
