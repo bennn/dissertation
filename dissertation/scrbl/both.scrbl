@@ -1515,6 +1515,42 @@ Are there any mixed lattice points, using guarded and transient, that do
 For a negative answer, need a lattice on top of every lattice point.
 Can try small benchmarks --- ok, then extrapolate.
 
+
+@parag{synth}
+@(let* ((synth-url "http://github.com/stamourv/synth")
+        (synth-data
+         (hash
+           'd-lib-d-client '(809 821 834 771 733)
+           'd-lib-u-client '(11440 11040 11004 11923 11672)
+           's-lib-u-client '(1645 1664 1558 1576 1539)
+           's-lib-d-client '(7823 7885 9002 7955 8279)))
+        (deep-delta (exact-round (/ (mean (hash-ref synth-data 'd-lib-u-client))
+                                    (mean (hash-ref synth-data 'd-lib-d-client)))))
+        (shallow-delta (exact-round (/ (mean (hash-ref synth-data 's-lib-d-client))
+                                       (mean (hash-ref synth-data 's-lib-u-client)))))
+        (ds-fast (exact-round (/ (mean (hash-ref synth-data 's-lib-u-client))
+                                 (mean (hash-ref synth-data 'd-lib-d-client)))))
+        (ds-slow-sec (quotient
+                       (- (mean (hash-ref synth-data 'd-lib-u-client))
+                          (mean (hash-ref synth-data 's-lib-d-client)))
+                       1000))
+        (ds-slow (rnd (/ (mean (hash-ref synth-data 'd-lib-u-client))
+                         (mean (hash-ref synth-data 's-lib-d-client))))))
+  @elem{
+The @bm{synth} benchmark is derived from @hyperlink[synth-url]{an untyped program}
+ that interacts with part of a typed math library.
+When the library code uses @|sdeep| types, the original client runs with
+ high overhead---@~a[deep-delta]x slower that a @|sdeep|-typed client.
+
+Changing the library to use @|sshallow| types improves
+ the gap between an untyped and @|sdeep|-typed client to
+ @~a[shallow-delta]x and makes the untyped client run faster a @|sdeep|-typed version.
+This fast configuration is about @~a[ds-fast]x slower that the fast
+ @|sdeep|-@|sdeep| configuration, but the worst-case is @~a[ds-slow]x
+ (@~a[ds-slow-sec] seconds) faster than before.
+Overall, the @|sshallow| library is a better tradeoff for @bm{synth}.
+})
+
 @; if we have a few of these, organize into a figure with descriptions below
 @; ... or use a "benchmarks" format to convey the bottom line
 @parag{MsgPack}
@@ -1530,9 +1566,9 @@ I cloned MsgPack commit @github-commit["HiPhish" "MsgPack.rkt"]{64a60986b149703f
  and found that running all unit tests took 320 seconds.
 Changing one file to use Shallow types brought the time down to 204 seconds ---
  a huge improvement for a one-line switch.
-Moving the rest of the library from deep to shallow types adds only a slight
- improvement (down to 202 seconds), which suggests that a mix of deep and
- shallow is best.
+Moving the rest of the library from @|sdeep| to @|sshallow| types adds only a slight
+ improvement (down to 202 seconds), which suggests that a mix of @|sdeep| and
+ @|sshallow| is best.
 
 @; can do even better after changing the code:
 @;  Deep, no pack casts = 117 seconds

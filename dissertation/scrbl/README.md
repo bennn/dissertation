@@ -24,6 +24,7 @@ TODO
 - [ ] conclusion ... other chapters?
 
 Style
+- [ ] careful about common lisp characterization ... free to ignore, opt non-mand
 - [ ] ABC00 cite style, like theory papers
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
