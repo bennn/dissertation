@@ -1576,6 +1576,34 @@ Moving the rest of the library from @|sdeep| to @|sshallow| types adds only a sl
 @;  untyped = 24 seconds!!!
 
 
+@parag{External Data}
+Typed code that deals with data from an external source is often better off
+ with @|sshallow| types because they lazily validate data as it is accessed.
+By contrast, the @|sdeep|-type guarantee requires a full traversal to validate
+ data as soon as it reaches a type boundary.
+If the boundary types allow mutable values, then the traversal is even more
+ expensive because it creates wrappers as it copies the dataset.
+
+@(let* ((script_name "QA/transient-expressive/json/custom.rkt")
+        (s* '(169 157 162 159 162))
+        (t* '(3007 2991 2920 3096 3308))
+        (t/s (/ (mean t*) (mean s*)))
+        (slowdown (if (< 10 t/s) "over 10x" (format "~ax" (rnd t/s)))))
+  @elem{
+To illustrate the pitfall, I wrote a typed script that reads a large dataset of
+ apartment data using on off-the-shelf JSON parser and accesses one field
+ from each object in the dataset.
+@|sDeep| types make the script run @|slowdown| slower than @|sshallow| types.
+})
+
+In principle, @|sdeep| code can avoid the slowdown with a custom parser
+ that validates data as it reads it.
+Indeed, Phil Nguyen has written a @hyperlink["https://github.com/philnguyen/json-type-provider"]{library}
+ for JSON that mitigates the overhead of @|sdeep| types.
+Such libraries are ideal, but until we have them for the next data exchange
+ format (SQL, XML, YAML, ...) @|sshallow| types get the job for the parsers
+ that are available today.
+ 
 
 @subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
 

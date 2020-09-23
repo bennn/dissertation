@@ -167,9 +167,60 @@ what about untyped
 
 #### FAIL case study, JSON
 
-??? cannot find the link
+https://groups.google.com/g/racket-users/c/8YS0vxj4ZBc/m/l1mbb3NnBwAJ
 
 can transient avoid the O(n)? well yes. but is it better after?
+too small for a case study, nothing here
+
+
+#### FAIL case study, quad
+
+https://github.com/mbutterick/quad
+
+oh dear, quad is untyped now .... don't know natural break point
+
+
+#### case study, prl-website
+
+#### case study, grift
+
+#### case study, phil json validator
+
+https://github.com/philnguyen/json-type-provider
+
+... find data thats expensive
+(even with ignored fields?)
+... conclude that library better off typed,
+    spot-checks for S U,
+    usable in T not too slow
+
+- currently unusable in S right? YES, untyped macro used in typed code
+- hmph, tried a few configurations and no luck
+  transient client
+   - t-read t-main s-client = cannot run
+   - t-read t-main (unsafe) s-client = ~386 sec
+   - t-read s-main s-client = ~290 sec
+   - s-read s-main s-client = ~345 sec
+   - t-read t-main t-client = ~280 sec
+  untyped client
+   - t t t u ~ 350 336 334 324 337
+   - s s s u ~ 385 380 378 378 383
+   - t s s u ~ 353 352 365 340 353
+   - t t s u ~ 278 253 276 252 272
+  untyped client, bigger data
+   - t t o u ~ 2200
+   - t s s u ~ 2500
+   - s s s u ~ 2600
+   - t t t u ~ 2190
+
+fully-typed seems fastest! I think because the parser goes datum-at-a-time,
+ so transient ends up double-checking everything
+
+... this library is too good
+
+after parsing there's a boundary, but both shallow and untyped have to deal with it
+
+ok, "custom.rkt" shows a difference for end-to-end parsing using 'json' as-is.
 
 
 
@@ -205,7 +256,7 @@ can transient avoid the O(n)? well yes. but is it better after?
 - https://groups.google.com/g/racket-users/c/i9jVuzfDGt4/m/Nhk71Z1WBwAJ
   X : syntax error in Racket v6.0 (vs 6.1 and later)
 - https://groups.google.com/g/racket-users/c/8YS0vxj4ZBc/m/l1mbb3NnBwAJ
-  X : help getting (Listof String) out of a JSExpr union, why O(n) cost
+  O : help getting (Listof String) out of a JSExpr union, why O(n) cost, transient does avoid the O(N) up-front cost
 - https://groups.google.com/g/racket-users/c/plrpS2ZCWNA/m/trGDdbi-BAAJ
   X : low-level segfault, fixed for 7.4 release
 - https://groups.google.com/g/racket-users/c/ozT9sVpfPZE/m/lXm9jkTuCQAJ
