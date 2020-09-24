@@ -21,6 +21,8 @@
 
   render-lib
 
+  shorturl
+
   ~cite
   (rename-out (~cite ~citep))
 
@@ -75,6 +77,7 @@
   stransient
   scm
   sts
+  ename cname fname aname nname tname
 
   sDeep
   sGuarded
@@ -277,6 +280,16 @@
 (define stransient "transient")
 (define sts "type soundness")
 (define scm "complete monitoring")
+
+(define ename (exact "\\ename{}"))
+(define aname (exact "\\aname{}"))
+(define tname (exact "\\tname{}"))
+(define fname (exact "\\fname{}"))
+(define cname (exact "\\cname{}"))
+(define nname (exact "\\nname{}"))
+
+(define (shorturl a b)
+  (hyperlink (string-append a b) b))
 
 (define sDeep (string-titlecase sdeep))
 (define sGuarded (string-titlecase sguarded))

@@ -98,6 +98,8 @@ An evaluation method has to measure programs, and the results of
 Benchmark programs that stem from realistic code and exercise a variety
  of features are an important step toward generalizable results.
 
+@; TODO say more, please
+
 
 @subsection{Exponential Compression}
 
@@ -1513,7 +1515,7 @@ These intervals are thin because there is little variance in the proportion
  samples, but the @bm{sample_fsm} curve is slightly thicker than the
  @bm{aespython} curve.
 
-Curves in @figures-ref["fig:rp:overhead" (exact-ceiling (/ (length rp:MAIN-BENCHMARKS) overhead-plots-per-page))] typically cover a large area and reach the
+Curves in these figures typically cover a large area and reach the
  top of the @|y-axis| at a low value of @${D}.
 This value is always less than @${@id[rp:MAX-OVERHEAD]}.
 In other words, every configuration in the
@@ -1587,8 +1589,9 @@ Three have been noted above:
    it accepts optional arguments (@github-issue["mvitousek" "reticulated" 32]).
   The @bm{go} benchmark uses dynamic typing because Reticulated cannot validate
    its use of a recursive class definition.
-  @Integer->word[(length retic-limited)] other benchmarks use dynamic typing to overcome Reticulated's lack of
-   untagged union types; namely, @format-bm*[retic-limited]
+  @Integer->word[(length retic-limited)] other benchmarks, @format-bm*[retic-limited],
+   use dynamic typing to overcome Reticulated's lack of
+   untagged union types.
 })
 
 @(let* ( @; See `src/PyPI-ranking/README.md` to reproduce these claims
@@ -1615,7 +1618,8 @@ Three have been noted above:
 @(let ([use-io* '(aespython futen http2 slowSHA)]) @elem{
   Fourth and last, the @(authors* (map bm use-io*)) benchmarks read from a file
    within their timed computation.
-  We nevertheless consider our results representative.
+  Despite the unpredictable running times of system calls,
+   we believe our results are representative.
 })
 
 
@@ -1653,7 +1657,7 @@ Unfortunately, this method hides outliers in the data
  and syntactic relations (think back to the lattice, @figure-ref{fig:example-lattice-0})
  among configurations.
 
-Figure-ref{fig:example-exact-plot} addresses both concerns.
+@Figure-ref{fig:example-exact-plot} addresses both concerns.
 Instead of summarizing one configuration with its average runtime,
  the plot contains one point for every running time in the dataset.
 These points are sorted left-to-right in one of the @integer->word[num-units]
