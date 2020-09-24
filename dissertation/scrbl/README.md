@@ -24,7 +24,6 @@ TODO
 - [ ] conclusion ... other chapters?
 
 Style
-- [ ] careful about common lisp characterization ... free to ignore, opt non-mand
 - [ ] ABC00 cite style, like theory papers
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
@@ -34,9 +33,10 @@ Style
   - sec 3 typed=grey, untyped=white ... moving beyond black/white but not sure yet
   - beyond : multi-color for typed components, depends on semantics
 - [ ] print "x" after overheads
-- [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [ ] too many exercises, looks like everything has holes, save those for end
 - [ ] shallow/CACHE too big, why are files so huge?
+- [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
+- [X] careful about common lisp characterization ... free to ignore, opt non-mand
 
 #### dependencies
 

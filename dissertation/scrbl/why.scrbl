@@ -5,48 +5,6 @@
    (only-in greenman-thesis/oopsla-2019/pict
      untyped-codeblock))
 
-@(define-logger bg-thesis)
-
-@(define (Section-ref tag)
-   (list "Section" ~ (secref tag)))
-
-@(define (section-ref tag)
-   (list "section" ~ (secref tag)))
-
-@(define mix-principle* '(
-   new-tool-for-new-code
-   reuse-old-code
-   can-improve-old-code
-))
-
-@(define migratory-principle* '(
-   reject-ill-typed-code
-   explicit-annotations
-   only-add-types
-   no-catchall
-   clear-boundary
-))
-
-@(define mt-principle* (append mix-principle* migratory-principle*))
-
-@(define num-mt-principle (length mt-principle*))
-
-@(define-values [define-mt-principle assert-mt-principle]
-   (let ([undefined-mt* (box migratory-principle*)])
-     (values
-       (lambda (p-id . title*)
-         (set-box! undefined-mt* (remove p-id (unbox undefined-mt*)))
-         (apply subsection title*))
-       (lambda ()
-         (unless (null? (unbox undefined-mt*))
-           (log-bg-thesis-error "missing definition for MT principles: ~s" (unbox undefined-mt*)))))))
-
-@(define (mt-observation . str*)
-   (apply section (cons "Observation: " str*)))
-
-@(define (mt-requirement . str*)
-   (apply section (cons "Requirement: " str*)))
-
 @; -----------------------------------------------------------------------------
 
 @; --- MF
@@ -134,7 +92,7 @@ Similarly, there is no dynamic guarantee that compiled code receives valid
  inputs.
 If the function @tt{F} in @figure-ref{fig:maclisp-hint} is invoked on two
  strings, it may compute an invalid result.
-In other words, type hints come with all the unsafety of casts in a C-like language.
+In other words, type hints come with all the perils of casts in a C-like language.
 
 @figure*[
   "fig:maclisp-hint"
@@ -214,7 +172,15 @@ A programmer cannot use optional types to predict the inputs that a function
  will receive, and likewise a compiler cannot use optional types to justify
  transformations.
 Unless researchers can design a practical and non-optional mixed-typed language,
- then work on sound types will remain stuck in a closed world.
+ then work on sound types is limited to closed-world programs that do not
+ interoperate with untyped code.
+
+@emph{History Note:}
+To be fair, optional typing is one valid way to use Lisp type hints.
+A Lisp compiler need not optimize based on type hints, and it may even ignore
+ types completely@~cite{m-maclisp-1974,s-lisp-1990}.
+@citet{bg-oopsla-1993} deserve credit not for inventing the optional style,
+ but for explaining why it is a practical mode of use.
 
 
 @subsection{Type Dynamic}
