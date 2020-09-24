@@ -53,6 +53,7 @@
     [figure-ref figureref]
     [Table-ref Tableref]
     [table-ref tableref])
+  programref Programref
 
   noindent
   leavevmode
@@ -289,7 +290,7 @@
 (define nname (exact "\\nname{}"))
 
 (define (shorturl a b)
-  (hyperlink (string-append a b) b))
+  (hyperlink (string-append a b) (tt b)))
 
 (define sDeep (string-titlecase sdeep))
 (define sGuarded (string-titlecase sguarded))

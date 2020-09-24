@@ -426,9 +426,9 @@
     #:callback-x-sep 0
     #:callback-y-sep -1
     #:callback-start-angle 3/100
-    #:callback-start-pull 125/100
+    #:callback-start-pull 145/100
     #:callback-end-angle 47/100
-    #:callback-end-pull 115/100
+    #:callback-end-pull 135/100
     #:extra-x-pad 30
     (untyped-mod
       "requests"
