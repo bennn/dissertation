@@ -3,16 +3,17 @@
 
 @title[#:tag "sec:design:basic"]{Evaluation Framework}
 
-This section introduces the basic ideas of the evaluation framework.
+This section introduces the basic ideas of the evaluation framework;
+ detailed formal definitions are deferred to @sectionref{sec:design:technical}.
 To formulate different type-enforcement stategies on an equal footing,
  the framework begins with one mixed-typed surface language (@sectionref{sec:design:basic:surface})
  and models stategies as distinct semantics (@sectionref{sec:design:semantic-framework}).
 The properties listed above support an analysis.
-Type soundness (@sectionref{sec:design:basic:ts}) and complete monitoring (@sectionref{sec:design:laws})
+Type soundness (@sectionref{sec:design:basic:ts}) and complete monitoring (@sectionref{sec:design:cm})
  characterize the type mismatches that a semantics detects.
 Blame soundness and blame completeness (@sectionref{sec:design:ownership})
  measure the quality of error messages.
-The error preorder (@sectionref{sec:design:basic:preorder}) enables direct comparisons.
+The error preorder (@sectionref{sec:design:basic:preorder}) enables direct behavioral comparisons.
 
 
 @section[#:tag "sec:design:basic:surface"]{Surface Language}
@@ -32,14 +33,16 @@ Note that @${\tdyn} is not the flexible dynamic type that is compatible with
  any static type@~citep{t-popl-1990,st-sfp-2006},
  rather, it is the uni-type that describes all well-formed untyped
  expressions@~citep{mf-toplas-2009}.
-Consequently, there is no type consistency judgment in the surface language.
-All typed/untyped interaction must occur though boundary expressions.
-To add a dynamic type, uses of that type must be translated to boundaries@~citep{afsw-popl-2011,svcb-snapl-2015}.
-@; %Whether to include a dynamic type, what its behavior should be,
-@; % and what flexibility it offers is a separate issue@~citep{svcb-snapl-2015,gct-popl-2016,nla-popl-2019}.
+Consequently, there is no need for a type precision judgment in the surface language
+ because all mixed-typed interactions occur through boundary expressions.
+How to add a dynamic type is a separate dimension that is orthogonal to the
+ question of how to enforce types;
+ whether or not a language has a dynamic type, our results
+ apply to its type-enforcement strategy.
+Whether the dynamic type is useful is a question for another time@~citep{g-snapl-2019}.
 
 The core statically-typed (@${\svaluestat}) and dynamically-typed (@${\svaluedyn})
- values consist of integers, natural numbers, pairs, and functions.
+ values are mirror images, and consist of integers, natural numbers, pairs, and functions.
 This common set of values is the basis for typed-untyped communication.
 Types @${\stype} summarize values:
 
@@ -52,9 +55,7 @@ Types @${\stype} summarize values:
     \\
     \svaluedyn & \BNFeq &
       \sint \mid \snat \mid \epair{\svaluedyn}{\svaluedyn} \mid \efun{\svar}{\sexprdyn}
-  \end{langarray}
-  \qquad\qquad
-  \begin{langarray}
+    \\[1ex]
     \stype & \BNFeq &
       \tint \mid \tnat \mid \tfun{\stype}{\stype} \mid \tpair{\stype}{\stype}
   \end{langarray}
@@ -68,30 +69,32 @@ First, the values include
 Second, the natural numbers @${\snat} are a subset of the integers @${\sint} to
  motivate a subtyping judgment for the typed half of the language.
 Subtyping helps the model distinguish between two type-sound methods of
-enforcing types (declaration-site vs. use-site) and demonstrates how the
-model can scale to include true union types, which must be part of any type
-system for originally-untyped code@~citep{tf-icfp-2010,cl-icfp-2017,tfffgksst-snapl-2017}.
+ enforcing types (declaration-site vs. use-site) and demonstrates how the
+ model can scale to include true union types, which must be part of any type
+ system for originally-untyped code@~citep{tf-icfp-2010,cl-icfp-2017,tfffgksst-snapl-2017}.
 
 Surface expressions include function application, primitive operations, and
  boundaries.
-The details of the first two are standard, and are deferred to @sectionref{sec:design:technical}.
-@; TODO awkward
-Boundary expressions are the glue that enables mixed-typed programs.
+The details of the first two are fairly standard (@sectionref{sec:design:surface-language}),
+ but note that function application comes with an explicit @${\sapp} operator (@${\sapp~\sexpr_0~\sexpr_1}).
+Boundary expressions are the glue that enables mixed-typed programming.
 A program starts with named chunks of code, called components.
 Boundary expressions link these chunks together with a static type
  to describe the types of values that may cross the boundary.
 Suppose that a typed component named @${\sowner_0} imports and applies an
  untyped function from component @${\sowner_1}:
 
+
 @exact|{
+%% 2020-09-24 : still using tikz to get the fonts right
 \begin{equation}
   \label{eq:bnd:e0}
-  \begin{minipage}{25mm}
+  \begin{minipage}{27mm}
     {\hfill\(\sowner_1\)~~}\\[-3mm]
-    \begin{mdframed}[style=dynframestyle,userdefinedwidth=25mm]\(
+    \begin{mdframed}[style=dynframestyle,userdefinedwidth=27mm]\(
       \efun{\svar_0}{\ssum~\svar_0~2}
     \)\end{mdframed}
-  \end{minipage}\begin{minipage}{23mm}\begin{tikzpicture}
+  \end{minipage}\begin{minipage}{24mm}\begin{tikzpicture}
     \node (A) {};
     \node (B) [right of=A,xshift=3em] {};
     \draw[->] (A)
@@ -99,14 +102,14 @@ Suppose that a typed component named @${\sowner_0} imports and applies an
       node [above] {\raisebox{0pt}[0pt]{$\tfun{\tnat}{\tnat}$}}
       node [below,yshift=-3mm] {\raisebox{0pt}[0pt]{$f$}}
       (B);
-  \end{tikzpicture}\end{minipage}\begin{minipage}{9mm}
+  \end{tikzpicture}\end{minipage}\begin{minipage}{11mm}
     {\hfill\(\sowner_0\)~~~}\\[-3mm]
-    \begin{mdframed}[style=staframestyle,userdefinedwidth=9mm]\(f~9\)\end{mdframed}
+    \begin{mdframed}[style=staframestyle,userdefinedwidth=11mm]\(f~9\)\end{mdframed}
   \end{minipage}
 \end{equation}
 }|
 
-@exact{\noindent{}}The surface language can model the composition of these components with a boundary
+@|noindent|The surface language can model the composition of these components with a boundary
  expression that embeds an untyped function in a typed context.
 The boundary expression is annotated with a @emph{boundary specification}
  @${\obnd{\sowner_0}{\tfun{\tnat}{\tnat}}{\sowner_1}} to explain that
@@ -119,22 +122,23 @@ The boundary expression is annotated with a @emph{boundary specification}
 \end{displayrrarray}
 }|
 
-@exact{\noindent{}}In turn, this two-component expression may be part of a larger
+@|noindent|In turn, this two-component expression may be imported into a larger
  untyped component.
 The sketch below shows an untyped component in the center that imports
  two typed components:
- the expression @exact{\eqref{eq:bnd:e0}} from above (on the right),
- and a new typed function (on the left).
+ a new typed function on the left and the expression @exact{\eqref{eq:bnd:e0}}
+ on the right.
 
 @exact|{
 \begin{equation}
+  %% 2020-09-24 : still using tikz to get the fonts right
   \label{eq:bnd:e1}
-  \begin{minipage}{36mm}
+  \begin{minipage}{39mm}
     {\hfill\(\sowner_3\)~~~}\\[-3mm]
-    \begin{mdframed}[style=staframestyle,userdefinedwidth=36mm]\(
+    \begin{mdframed}[style=staframestyle,userdefinedwidth=39mm]\(
       \efun{\tann{\svar_1}{\tpair{\tint}{\tint}}}{\sfst~\svar_1}
     \)\end{mdframed}
-  \end{minipage}\begin{minipage}{30mm}\begin{tikzpicture}
+  \end{minipage}\begin{minipage}{32mm}\begin{tikzpicture}
     \node (A) {};
     \node (B) [right of=A,xshift=5em] {};
     \node (vspace) [below of=A,yshift=7mm] {};
@@ -143,10 +147,10 @@ The sketch below shows an untyped component in the center that imports
       node [above] {\raisebox{0pt}[0pt]{$\tfun{(\tpair{\tint}{\tint})}{\tint}$}}
       node [below,yshift=-2mm] {\raisebox{0pt}[0pt]{$g$}}
       (B);
-  \end{tikzpicture}\end{minipage}\begin{minipage}{9mm}
+  \end{tikzpicture}\end{minipage}\begin{minipage}{10mm}
     {\hfill\(\sowner_2\)~~}\\[-3mm]
-    \begin{mdframed}[style=dynframestyle,userdefinedwidth=9mm]\(g~x\)\end{mdframed}
-  \end{minipage}\begin{minipage}{16mm}\begin{tikzpicture}
+    \begin{mdframed}[style=dynframestyle,userdefinedwidth=10mm]\(g~x\)\end{mdframed}
+  \end{minipage}\begin{minipage}{17mm}\begin{tikzpicture}
     \node (A) {};
     \node (B) [right of=A,xshift=1em] {};
     \draw[<-] (A)
@@ -160,7 +164,7 @@ The sketch below shows an untyped component in the center that imports
 \end{equation}
 }|
 
-@exact{\noindent{}}When linearized to the surface language, this term becomes:
+@|noindent|When linearized to the surface language, this term becomes:
 
 @exact|{
 \begin{displayrrarray}
@@ -175,7 +179,9 @@ Technically, a boundary expression combines a boundary specification @${\sbnd}
 The specification includes the names of the client and sender components,
  in that order, along with a type to describe values that are intended to cross
  the boundary.
-It is up to a semantics to enforce the types in these boundaries.
+Names, such as @${\sowner_0}, come from some countable set @${\sowner}.
+The boundary types guide the static type checker, but are mere suggestions
+ unless a semantics decides to enforce them.
 
 @exact|{
 \smallskip
@@ -193,7 +199,7 @@ It is up to a semantics to enforce the types in these boundaries.
       \obnd{\sowner}{\stype}{\sowner}
     \\
     \sowner & \BNFeq &
-      \textrm{\scountable{} set}
+      \textrm{\scountable{} set of names}
   \end{langarray}
 \smallskip
 }|
@@ -206,7 +212,7 @@ Conversely, a well-formed untyped expression may include any typed expression
 
 @exact|{
 \smallskip
- {\hfill
+{\hfill
   \begin{minipage}{0.45\columnwidth}
     {\noindent\parbox[t]{\columnwidth}{{\fbox{$\stypeenv \sWT \sexpr : \stype$}}\\[-4mm]
     \begin{mathpar}
@@ -233,7 +239,7 @@ Each surface-language component must have a name,
  drawn from a set @${\sowner} of labels.
 These names must be @emph{coherent} according to a judgment that validates an
  expression relative to a current name and a mapping from variables to names
- (@${\sownerenv; \sowner \sWL \sexpr}).
+ (@exact{\hyperref[fig:surface-ownership]{$\sownerenv; \sowner \sWL \sexpr$}}, @sectionref{sec:design:surface-language}).
 All boundary specifications must have a client name that matches the current
  name, and variables bound in one component cannot appear free in a different
  one.
@@ -250,14 +256,16 @@ If one component is responsible for the value and the language can find both the
  or the value-source must change.
 
 
+
+
 @section[#:tag "sec:design:semantic-framework"]{Semantic Framework}
 
 The surface language enables the construction of mixed-typed expressions.
 The next step is to assign behaviors to these programs via formal semantics.
-Each semantics must have equivalent behavior on boundary-free expressions.
+Semantics that correspond to different type-enforcement strategies
+must have equivalent behavior on boundary-free expressions.
 Fully-typed terms, for instance, must compute equivalent values.
-Starting from this constraint, the choice of type-enforcement strategy
- guides the design for the rest.
+Starting from this constraint, the central design problem is how to enforce boundary types.
 
 The first ingredient of a semantics is the set of result values @${\svalue} that
  expressions may reduce to.
@@ -265,16 +273,22 @@ A result set typically extends the core typed and untyped values mentioned above
  (@${\svalue \supseteq \svaluestat \cup \svaluedyn}).
 Potential reasons for the extended value set include the following:
 @itemlist[#:style 'ordered
-@item{
+  @item{
     to permit untyped values in typed code, and vice versa;
-}@item{
+  }
+  @item{
     to track the identity of values on a heap;
-}@item{ @exact{\label{val:monitor}}
-    to associate a value with a delayed type-check for later uses; and
-}@item{ @exact{\label{val:trace}}
+  }
+  @item{
+    @latex-label{val:monitor}
+    to associate a value with a delayed type-check; and
+  }
+  @item{
+    @latex-label{val:trace}
     to record the boundaries that a value has previously crossed.
-}]
-Reasons @exact{\ref{val:monitor}} and @exact{\ref{val:trace}} introduce two kinds of
+  }
+]
+Reasons @latex-ref{val:monitor} and @latex-ref{val:trace} introduce two kinds of
  wrapper value.
 A guard wrapper, written @${\emon{\sbnd}{\svalue}}, associates a boundary
  specification with a value to achieve delayed type checks.
@@ -284,14 +298,20 @@ Guards are similar to boundary expressions; they separate a context
  component from a value component.
 Trace wrappers simply annotate values.
 
-@; %% TODO draw monitor ... but how? Need to illustrate evaluation ... maybe
-@; %%  show "yes" and "no" steps
-@; %% TODO discussion here
+Note: a language with the dynamic type will need a third
+  wrapper for basic values that have been assigned type dynamic.
+We conjecture that this wrapper is the only change needed to transfer our
+ positive results.
+Our negative results do not require changes for the dynamic type because
+ such a language can express all our ``precisely-typed'' counterexample terms.
 
 Second, a semantics must give reduction rules for boundary expressions.
 These rules initiate a type-enforcement strategy.
-For example, the @|nname| semantics (@sectionref{sec:design:tech:natural}) admits the
- following two reductions:
+For example, the @|nname| semantics (@sectionref{sec:design:tech:natural})
+ enforces full types via classic techniques@~citep{ff-icfp-2002,mf-toplas-2009}.
+It admits the following two reductions.
+Note a filled triangle (@${\snreddyn}) describes a step in untyped
+ code and an open triangle (@${\snredsta}) is for statically-typed code:
 
 @exact|{
 \begin{displayrrarray}
@@ -305,14 +325,14 @@ For example, the @|nname| semantics (@sectionref{sec:design:tech:natural}) admit
 \begin{displayrrarray}
   \rrnum{b} \edynb{\obnd{\sowner_0}{(\tfun{\tint}{\tnat})}{\sowner_1}}{(\efun{\svar_0}{{-8}})}
   & \nredNS
-  & \emon{\obnd{\sowner_0}{(\tfun{\tint}{\tnat})}{\sowner_1}}{(\efun{\svar_0}{{-8}})}
+  \\\qquad\qquad\zerowidth{\emon{\obnd{\sowner_0}{(\tfun{\tint}{\tnat})}{\sowner_1}}{(\efun{\svar_0}{{-8}})}}
 \end{displayrrarray}
 }|
 
-@exact{\noindent{}}The first rule lets a typed number enter an untyped context.
+@|noindent|The first rule lets a typed number enter an untyped context.
 The second rule gives typed code access to an untyped function through a newly-created
  guard wrapper.
-Guard wrappers are a @emph{higher-order} mechanism for enforcing higher-order types.
+Guard wrappers are a @emph{higher-order} tool for enforcing higher-order types.
 As such, wrappers require elimination rules.
 The @|nname| semantics includes the following rule to unfold
  the application of a typed, guarded function into two boundaries:
@@ -321,17 +341,19 @@ The @|nname| semantics includes the following rule to unfold
 \begin{displayrrarray}
    \rrnum{c} \sapp~{(\emon{\obnd{\sowner_0}{(\tfun{\tint}{\tnat})}{\sowner_1}}{(\efun{\svar_0}{{-8}})})}~{1}
    & \nredNS
-   \\\qquad\quad\zerowidth{\edynb{\obnd{\sowner_0}{\tnat}{\sowner_1}}{(\sapp~{(\efun{\svar_0}{{-8}})}~{(\estab{\obnd{\sowner_1}{\tint}{\sowner_0}}{1})})}}
+   \\\qquad\qquad\zerowidth{\edynb{\obnd{\sowner_0}{\tnat}{\sowner_1}}{(\sapp~{(\efun{\svar_0}{{-8}})}~{(\estab{\obnd{\sowner_1}{\tint}{\sowner_0}}{1})})}}
 \end{displayrrarray}
 }|
 
-@exact{\noindent{}}Other semantics have different behavior at boundaries and
+@|noindent|Other semantics have different behavior at boundaries and
  different supporting rules.
-The @|tname| semantics (@sectionref{sec:design:tech:transient})
- takes a @emph{first-order} approach to boundaries.
-Instead of using wrappers, it checks shapes at a boundary and guards later
+The @|tname| semantics (@sectionref{sec:design:tech:transient}) takes a @emph{first-order}
+ approach to boundaries.
+Instead of using wrappers, it checks shapes at a boundary and guards
  elimination forms with shape-check expressions.
-For example, the following simplified reduction demonstrates a successful check:
+For example, the following simplified reduction demonstrates a successful check.
+The triangle is filled gray (@${\nredXsym}) because @|tname| is defined
+ via one notion of reduction that handles both typed and untyped code:
 
 @exact|{
 \begin{displayrrarray}
@@ -382,21 +404,21 @@ The function maps surface types to observations that one can make about a result
 The judgment @${\sWTX} matches a value with a description.
 
 @exact|{
-\definitionsketch{$\sXproj{}$-type soundness}{
+\definitionsketch{$\sXproj{}$-\textrm{type soundness}}{
   \begin{minipage}[t]{0.50\columnwidth}
     If\/ $\sexpr_0$ has static type\/ $\stype_0$ (\/$\sWT \sexpr_0 : \stype_0$),\\
      then one of the following holds:
      \vspace{-1ex}
     \begin{itemize}
       \item
-        $\sexpr_0$ reduces to a value\/ $\svalue_0$\\ and\/ $\sWTX \svalue_0 : \fXproj{\svalue_0}$
+        $\sexpr_0$ reduces to a value\/ $\svalue_0$\\ and\/ $\sWTX \svalue_0 : \fXproj{\stype_0}$
       \item
         $\sexpr_0$ reduces to an allowed error
       \item
-        $\sexpr_0$ reduces endlessly
+        $\sexpr_0$ reduces endlessly.
     \end{itemize}
-  \end{minipage}\begin{minipage}[t]{0.46\columnwidth}
-    If\/ $\sexpr_0$ is well-formed ($\sWT \sexpr_0 : \tdyn$),\\
+  \end{minipage}\begin{minipage}[t]{0.48\columnwidth}
+    If\/ $\sexpr_0$ is untyped ($\sWT \sexpr_0 : \tdyn$),\\
      then one of the following holds:
      \vspace{-1ex}
     \begin{itemize}
@@ -405,84 +427,141 @@ The judgment @${\sWTX} matches a value with a description.
       \item
         $\sexpr_0$ reduces to an allowed error
       \item
-        $\sexpr_0$ reduces endlessly
+        $\sexpr_0$ reduces endlessly.
     \end{itemize}
   \end{minipage}
-}}|
+}
+}|
 
 
-@section[#:tag "sec:design:laws"]{Complete Monitoring}
+@section[#:tag "sec:design:cm"]{Complete Monitoring}
 
-@; %% ??? show examples of bad labels?
-@; %% ??? give illustration for our model syntax, and that stat/dyn/G are the only boundaries?
+Complete monitoring tests whether a mixed-typed semantics has control over
+ every interaction between typed and untyped code.
+If the property holds, then a programmer can rely on the language to insert
+ check at the proper points, for example, between the library and client
+ demonstrated in @figureref{fig:tr-example}.
+Concretely, if a value passes through the type @${(\tfun{\tint}{\tint})}
+ then complete monitoring guarantees that the language has control over
+ every input to the function and every result that the function computes,
+ regardless of whether these interactions occur in a typed or untyped context.
 
-Complete monitoring asks whether a mixed-typed semantics performs all the
- run-time checks necessary to ensure that interactions between typed and untyped
- code respect the type annotations in a program.
-If the property holds, then a programmer can use types to predict behavior.
-For example, a value that passes through the type @${(\tfun{\tint}{\tint})} is
- guaranteed to act like an integer function whether or not it is statically
- typed; if an untyped value misbehaves, then a run-time check halts
- the program.
+Because all such interactions originate at the boundaries
+ between typed and untyped code,
+ a first-draft way to formalize complete monitoring is to ask whether each
+ boundary comes with a full run-time check when possible and an error otherwise.
+A language that meets this strict requirement certainly has full control.
+However, other good designs fail.
+Suppose typed code expects a pair of integers and a semantics initially
+ admits any pair at the boundary but eventually checks that the pair contains integers.
+Despite the incomplete check at the boundary, this delayed-checking semantics eventually
+ performs all necessary checks and should satisfy a complete monitoring theorem.
+Higher-order values raise a similar question because a single run-time check
+ cannot prove that a function value always behaves a certain way.
+Nevertheless, a language that checks every call and return is in full control
+ of the interactions between a function and its context.
 
-Because all typed/untyped interactions take place at boundaries,
- a simplistic way to formalize complete monitoring is to ask whether each
- boundary comes with a full type check.
-A language that meets this strict requirement certainly respects type
- annotations; however, other good designs fail.
-Suppose typed code expects a pair of integers and a semantics
- admits any pair at the boundary and later checks that such pairs contain integers.
-This lazy semantics eventually checks all type obligations, despite using
- a partial check at the boundary.
-Higher-order values pose a similar challenge.
-A single run-time check cannot prove that an untyped function always behaves
- a certain way; nevertheless, a language that carefully guards such values
- satisfies the high-level idea of complete monitoring.
+Our definition of complete monitoring translates these intuitions about
+ interactions and control into statements about @emph{ownership labels}@~citep{dfff-popl-2011}.
+At the start of an evaluation, no interactions have occurred yet and every
+ expression has one owner: the enclosing component.
+The reduction of a boundary term is the semantics of an interaction in which
+ a value flows from one sender component to a client.
+At this point, the sender loses full control over the value.
+If the value fully matches the type expectations of the client, then the loss
+ of control is no problem and the client gains full ownership.
+Otherwise, the sender and client may have to assume joint ownership of the value,
+ depending on the nature of the reduction relation.
+If a semantics can create a value with multiple owners, then it admits that
+ a component may lose full control over its interactions with other components.
 
-Our statement of complete monitoring therefore introduces
- @emph{ownership labels} @~citep{dfff-popl-2011} to indirectly reach the goal.
-An ownership label @$|{{}^\sowner_0}| names one component in the source code of a program.
-Expressions and values can carry ownership labels---for example,
- @${\obars{42}{\sowner_0}}---to show the responsible components.
-With labels as a syntactic tool, a complete monitoring theorem is
- two steps away.
-First, a reduction relation @${\samplerred} must propagate labels to
- reflect communications and checks.
-Second, the language requires a well-formedness judgment @${\sWL}
- to test whether every value in an expression has one unique owner.
+Technically, an ownership label @${{}^{\sowner_0}} names one source-code component.
+Expressions and values come with at least one ownership label;
+ for example, @${\obars{42}{\sowner_0}} is an integer with one owner
+ and @${\obars{\obars{\obars{42}{\sowner_0}}{\sowner_1}}{\sowner_2}} is an
+ integer with three owners, written @${\obbars{42}{\fconcat{\sowner_0}{\fconcat{\sowner_1}{\sowner_2}}}} for short.
+A complete monitoring theorem requires two ingredients that manage these labels.
+First, a reduction relation @${\samplerred}
+ must propagate ownership labels to reflect interactions and checks.
+Second, a single-ownership judgment @${\sWL} must test whether every value in an
+ expression has a unique owner.
+To satisfy complete monitoring, reduction must preserve single-ownership.
+
+The key single-ownership rules deal with labeled expressions and boundary terms:
 
 @exact|{
-\definitionsketch{complete monitoring}{
+\smallskip
+\lbl{\fbox{$\sownerenv; \sowner \sWL \sexpr$}}{\begin{mathpar}
+    \inferrule*{
+      \sownerenv_0; \sowner_0 \sWL \sexpr_0
+    }{
+      \sownerenv_0; \sowner_0 \sWL \obars{\sexpr_0}{\sowner_0}
+    }
+
+    \inferrule*{
+      \sownerenv_0; \sowner_1 \sWL \sexpr_0
+    }{
+      \sownerenv_0; \sowner_0 \sWL \edynb{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\sexpr_0}
+    }
+
+\end{mathpar}}
+}|
+
+@|noindent|Values such as @${\obbars{42}{\fconcat{\sowner_0}{\sowner_1}}}
+ represent a communication that slipped through the run-time checking protocol,
+ and therefore fail to satisfy single ownership.
+@bold{Sneak preview} one way that a semantics can transfer a higher-order value
+without creating a joint-ownership is by providing controlled access through
+a wrapper.
+The client owns the wrapper, and the sender retains ownership of the enclosed value.
+
+
+@exact|{
+\definitionsketch{\textrm{complete monitoring}}{
   For all\/ ${}\sWL \sexpr_0$,
   any reduction\/ $\sexpr_0 \samplerred \sexpr_1$
-  implies\/ ${}\sWL \sexpr_1$
+  implies\/ ${}\sWL \sexpr_1$.
 }\smallskip
 }|
 
-If @${\samplerred} starts from a base semantics and uses labels to track
- un-checked responsibilities, then the above theorem means that
- a raw value never enters typed code before discharging all its boundary
- obligations.
+The definition of complete monitoring is deceptively simple because it assumes
+ a reduction relation that correctly propagates labels.
+In practice, a language comes with an unlabeled reduction relation,
+ and it is up to a researcher to design a lifted relation that handles labeled terms.
+Lifting requires insight to correctly transfer labels
+ and to ensure that labels do not change the behavior of programs.
+If labels do not transfer correctly, then a complete monitoring theorem becomes
+ meaningless.
+And if the lifted relation depends on labels to compute a result, then
+ a complete monitoring theorem says nothing about the original reduction relation.
 
 
-@subsection{How to lift a reduction relation}
 
-The models in @sectionref{sec:design:technical} present six reduction relations.
-Each one is the basis for a @emph{lifted} reduction relation that assigns
- the same behavior to labeled terms, but also propagates labels in a
- way that enables a meaningful complete monitoring theorem.
-These lifted relations come about in a semi-automatic way
- according to the following informal laws (in the sense of natural laws).
+@subsection[#:tag "sec:design:laws"]{How to lift a reduction relation}
 
-Each law informally describes one way that labels may be transferred or dropped
+The models in @sectionref{sec:design:technical} present six reduction relations
+ for a mixed-typed language.
+Each relation needs a lifted version to support an attempt at a complete
+ monitoring proof.
+These lifted reduction relations are deferred to supplementary material,
+ but come about semi-automatically through the
+ following informal guidelines, or ``natural laws,'' for labeling.
+
+Each law describes one way that labels may be transferred or dropped
  during evaluation.
-To convey the general idea, each law comes with a brief illustration; namely,
+To convey the general idea, each law also comes with a brief illustration, namely,
  an example reduction and a short comment.
-The example reductions use a hypothetical @${\samplerrarrow} relation.
-Take the transitions (@${\sexpr\!\samplerrarrow\!\sexpr}) as given and focus on the labels.
+The example reductions use a hypothetical @${\samplerrarrow} relation
+ over the surface language.
+Recall that @${\sstat} and @${\sdyn} are boundary terms; they link two
+ components, a context and an enclosed expression, via a type.
+When reading an example, accept the transitions
+ @${\sexpr\!\samplerrarrow\!\sexpr} as axioms and focus on how the labels change
+ in response.
 
 @exact|{
- {\begin{enumerate}
+{\begin{enumerate}
+    %% NOTE when editing laws, remember there is an 8th in technical.tex for transient
     \itemsep1ex
     \item \label{law:base}
       If a base value reaches a boundary with a matching base type,
@@ -523,12 +602,16 @@ Take the transitions (@${\sexpr\!\samplerrarrow\!\sexpr}) as given and focus on 
     \subitem\hfill
       $\newcommand{\thevalue}{\epair{8}{6}}
        \obars{\sapp~{\obbars{\efun{\svar_0}{\sfst~{\svar_0}}}{\fconcat{\sowner_0}{\sowner_1}}}~{\obars{\thevalue}{\sowner_2}}}{\sowner_3}
-       \samplerrarrow
-       \obars{\obbars{\sfst~{\obbars{\thevalue}{\fconcat{\sowner_2}{\fconcat{\sowner_3}{\fconcat{\sowner_1}{\sowner_0}}}}}}{\fconcat{\sowner_0}{\sowner_1}}}{\sowner_3}$
+       \samplerrarrow$
     \subitem\hfill
-      \emph{The argument value\/ $\epair{8}{6}$ is input to the function. The substituted body flows out}
+       $\newcommand{\thevalue}{\epair{8}{6}}
+        \obars{\obbars{\sfst~{\obbars{\thevalue}{\fconcat{\sowner_2}{\fconcat{\sowner_3}{\fconcat{\sowner_1}{\sowner_0}}}}}}{\fconcat{\sowner_0}{\sowner_1}}}{\sowner_3}$
     \subitem\hfill
-      \emph{of the function, and by @exact{\lawref{law:pos}} acquires the function's labels.}
+      \emph{The argument value\/ $\epair{8}{6}$ is input to the function.} 
+    \subitem\hfill
+      \emph{The substituted body flows out of the function, and}
+    \subitem\hfill
+      \emph{by \lawref{law:pos} acquires the function's labels.}
 
     \item \label{law:new}
       A primitive operation ($\sdelta$) may remove labels on incoming base values.
@@ -552,15 +635,16 @@ Take the transitions (@${\sexpr\!\samplerrarrow\!\sexpr}) as given and focus on 
   \end{enumerate}}
 }|
 
-To show how these laws inform the design of a lifted reduction relation,
- the following four rules show lifted variants of the examples
- from @sectionref{sec:design:semantic-framework}.
-The first rule demonstrates a base-type boundary (@exact{\lawref{law:base}}).
-The second demonstrates a higher-order boundary (@exact{\lawref{law:cross}}); the
+To show how these laws generate a lifted reduction relation,
+ the following rules lift the examples from @sectionref{sec:design:semantic-framework}.
+Each rule accepts input with any sequence of labels (@${\sownerlist}),
+ pattern-matches the important ones, and shuffles via the guidelines.
+The first rule (a') demonstrates a base-type boundary (@exact{\lawref{law:base}}).
+The second (b') demonstrates a higher-order boundary (@exact{\lawref{law:cross}}); the
  new guard on the right-hand side implicitly inherits the context label.
-The third rule sends an input (@exact{\lawref{law:neg}}) and creates new application
+The third rule (c') sends an input (@exact{\lawref{law:neg}}) and creates new application
  and boundary expressions.
-The fourth rule applies @exact{\lawref{law:pos}} for an output.
+The fourth rule (d') applies @exact{\lawref{law:pos}} for an output.
 
 @exact|{
 \begin{displayrrarray}
@@ -582,70 +666,72 @@ The fourth rule applies @exact{\lawref{law:pos}} for an output.
 \begin{displayrrarray}
   \rrnum{c'} \obars{\sapp~{\obbars{\emon{\obnd{\sowner_0}{(\tfun{\tint}{\tnat})}{\sowner_1}}{\obars{\svalue_0}{\sowner_2}}}{\sownerlist_3}}~{\obbars{1}{\sownerlist_4}}}{\sowner_5}
   & \nredNS &
-  \\[0.5ex]\qquad\quad\zerowidth{\obars{\edynb{\obnd{\sowner_0}{\tnat}{\sowner_1}}{\obars{\sapp~{\svalue_0}~{(\estab{\obnd{\sowner_1}{\tint}{\sowner_0}}{\obbars{1}{\fconcat{\sownerlist_4}{\fconcat{\sowner_5}{\frev{\sownerlist_3}}}}})}}{\sowner_2}}}{\sowner_5}}
+  \\[0.5ex]\qquad\zerowidth{\obars{\edynb{\obnd{\sowner_0}{\tnat}{\sowner_1}}{\obars{\sapp\,{\svalue_0}\,{(\estab{\obnd{\sowner_1}{\tint}{\sowner_0}}{\obbars{1}{\fconcat{\sownerlist_4}{\fconcat{\sowner_5}{\frev{\sownerlist_3}}}}})}}{\sowner_2}}}{\sowner_5}}
 \end{displayrrarray}
 }|
 
 @exact|{
 \begin{displayrrarray}
   \rrnum{d'} \obars{\echecktwo{(\tpair{\tnat}{\tnat})}{\obbars{\epair{\obbars{{-1}}{\sownerlist_0}}{\obbars{{-2}}{\sownerlist_1}}}{\sownerlist_2}}{}}{\sowner_3}
-  & \!\!\!\!\nredTX\!\!\!\! &
-  \obbars{\epair{\obbars{{-1}}{\sownerlist_0}}{\obbars{{-2}}{\sownerlist_1}}}{\fconcat{\sownerlist_2}{\sowner_3}}\!\!\!\!\!
+  & \nredTX
+  \\[0.5ex]\qquad\qquad\zerowidth{\obbars{\epair{\obbars{{-1}}{\sownerlist_0}}{\obbars{{-2}}{\sownerlist_1}}}{\fconcat{\sownerlist_2}{\sowner_3}}}
 \end{displayrrarray}
 }|
 
-Ultimately, the design of a useful lifted reduction relation is a challenge
- for the language at hand.
-The only certain rule is that lifting can add metadata but cannot change
- behavior.
-Nevertheless, the laws in this section have been useful in our formalization
- and may prove useful in future work.
+Although the design of a lifted reduction relation is a challenge
+ for every language at hand,
+ the laws in this section bring across the intuition behind prior
+ formalizations of complete monitoring@~citep{dfff-popl-2011,dtf-esop-2012,tsdtf-oopsla-2012,mdffc-oopsla-2016}
+ and may help guide future work.
 
 
 @section[#:tag "sec:design:ownership"]{Blame Soundness, Blame Completeness}
 
 Blame soundness and blame completeness
  ask whether a semantics can identify the responsible parties
- in the event of a run-time type mismatch.
+ in the event of a run-time mismatch.
 A type mismatch occurs when a typed context receives an unexpected value.
 The value may be the result of a boundary expression or an elimination form,
  and the underlying issue may lie with either the value,
  the current type expectation, or some prior communication.
-In any event, a programmer needs to know which components are responsible
- for the value to begin debugging.
+In any event, a programmer needs to know which components previously handled
+ the value to begin debugging.
+A semantics offers information by blaming a set of boundaries (@${\sbset});
+ the meta-question is whether those boundaries have any connection to the
+ value at hand.
 
-Ownership labels provide a means to track responsibilities.
-Suppose that a reduction blames the labeled value
- @${\obbars{\svalue_0}{\fconcat{\sowner_0}{\fconcat{\ldots}{\sowner_n}}}} for a type mismatch.
-The programmer needs to know the component names that correspond to the labels.
-The technical question is whether the sender names in these boundaries
- (the @${\sowner_1} in each @${\obnd{\sowner_0}{\stype_0}{\sowner_1}})
- match the ownership labels.
-Blame soundness states that the sender names are a subset of the true labels.
-Blame completeness guarantees a superset of the true labels.
-Together, the two properties imply that a type mismatch reports the whole
- list of responsible components and nothing more.
+Suppose that a reduction halts on the value @${\svalue_0} and blames
+ the set @${\sbset_0} of boundaries.
+Ideally, the names in these boundaries should list exactly the components that
+ have handled this value.
+Ownership labels let us state the question precisely.
+The lifted variant of the same reduction provides an independent specification
+ of the responsible components; namely, the owners that get attached to
+ @${\svalue_0} as it crosses boundaries.
+Relative to this source-of-truth, blame soundness asks whether the
+ names in @${\sbset_0} are a subset of the true owners.
+Blame completeness asks for a superset of the true owners.
 
 A semantics can trivially satisfy blame soundness alone by reporting an empty
  set of boundaries.
 Conversely, the trivial way to achieve blame completeness is to blame
  every boundary for every possible mismatch.
-The real challenge is to satisfy both, or reach a pragmatic tradeoff.
+The real challenge is to satisfy both or implement a pragmatic tradeoff.
 
 @exact|{
-\definitionsketch{blame soundness}{
+\definitionsketch{\textrm{blame soundness}}{
   For all reductions that end in a mismatch for value\/ $\svalue_0$
   blaming boundaries\/ $\sbset_0$,
-  the senders in\/ $\sbset_0$
+  the names in\/ $\sbset_0$
   are a \textbf{\emph{subset}} of the labels on\/ $\svalue_0$.
 }
 }|
 
 @exact|{
-\definitionsketch{blame completeness}{
+\definitionsketch{\textrm{blame completeness}}{
   For all reductions that end in a mismatch for value\/ $\svalue_0$
   blaming boundaries\/ $\sbset_0$,
-  the senders in\/ $\sbset_0$
+  the names in\/ $\sbset_0$
   are a \textbf{\emph{superset}} of the labels on\/ $\svalue_0$.
 }\smallskip
 }|
@@ -655,8 +741,7 @@ The propagation laws above (@sectionref{sec:design:laws}) specify one way
 But other ground-truth strategies are possible,
  and may provide insights about semantics that fail to be blame-sound and
  blame-complete with the standard labeling.
-
-As a case in point, the upcoming @|tname| semantics uses heap addresses
+As a case in point, the @|tname| semantics (@sectionref{sec:design:tech:transient}) uses heap addresses
  to allow mixed-typed interaction without wrapper expressions.
 The evaluation of a function, for example, draws a fresh heap address @${\eloc_0}
  and stores the function on a value heap (@${\vstore}).
@@ -665,12 +750,12 @@ The evaluation of a function, for example, draws a fresh heap address @${\eloc_0
 \begin{displayrrarray}
   \conf{(\efun{\svar_0}{\svar_0})}{\vstore_0}{\bstore_0}
   &  \nredTX
-  &  \conf{\eloc_0}{(\eset{\vrecord{\eloc_0}{(\efun{\svar_0}{\svar_0})}} \cup \vstore_0)}{(\eset{\brecord{\eloc_0}{\semptymap}} \cup {\bstore_0})}
+  &  \conf{\eloc_0}{(\eset{\vrecord{\eloc_0}{(\efun{\svar_0}{\svar_0})}} \cup \vstore_0)}{(\eset{\brecord{\eloc_0}{\semptymap}} \cup {\bstore_0})}\!\!\!\!
   \\\sidecond{where $\ffresh{\eloc_0}{\vstore_0\mbox{ and }\bstore_0}$}
 \end{displayrrarray}
 }|
 
-@exact{\noindent{}}When this function pointer @${\eloc_0} crosses a boundary,
+@|noindent|When this function pointer @${\eloc_0} crosses a boundary,
  the semantics records the crossing on a blame heap (@${\bstore}).
 The blame heap provides a set of boundaries if a type mismatch occurs,
  but this set is typically unsound because it conflates different
@@ -678,9 +763,6 @@ The blame heap provides a set of boundaries if a type mismatch occurs,
 Propagating labels onto the heap, however, enables a conjecture
  that @|tname| blames only boundaries that are relevant to the address of the
  incompatible value.
-
-@; %% TODO transient heap, check, fail rule?
-@; %% ... not sure anymore if we need to show them
 
 
 @section[#:tag "sec:design:basic:preorder"]{Error Preorder}
@@ -701,17 +783,17 @@ When two semantics agree about which expressions raise run-time errors,
  another.
 
 @exact|{
-\definitionsketch{error preorder $\sbehaviorle$}{
+\definitionsketch{\textrm{error preorder }$\sbehaviorle$}{
   $\xsym \sbehaviorle \ysym$
   iff\/ $\eset{\sexpr_0 \mid \fexists{\svalue_0}{\sexpr_0 \rredX \svalue_0}} \subseteq \eset{\sexpr_1 \mid \fexists{\svalue_1}{\sexpr_1 \rredY \svalue_1}}$.
 }
 }|
 
 @exact|{
-\definitionsketch{error equivalence $\sbehavioreq$)}{
+\definitionsketch{\textrm{error equivalence }$\sbehavioreq$}{
   $\xsym \sbehavioreq \ysym$
   iff\/ $\xsym \sbehaviorle \ysym$
   and\/ $\ysym \sbehaviorle \xsym$.
 }
+\vspace{-4ex}
 }|
-
