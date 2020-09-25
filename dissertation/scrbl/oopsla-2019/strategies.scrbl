@@ -3,9 +3,7 @@
 
 @title[#:tag "sec:design:strategies"]{Overview of Type-Enforcement Strategies}
 
-@; %% TODO change intro
-To validate the expressiveness of the framework, this section models six
- semantics from the literature.
+To validate the expressiveness of the framework, this section models six semantics from the literature.
 Three semantics have been implemented for full-fledged languages:
  @|nname|, @|tname|, and @|ename| (@sectionref{sec:design:jungle}).
 One, @|aname|, explores a theoretical tradeoff to improve the blame guarantees of the
@@ -13,36 +11,30 @@ One, @|aname|, explores a theoretical tradeoff to improve the blame guarantees o
 The remaining two, @|cname| and @|fname|, originate in prior work@~citep{g-popl-2015,gf-icfp-2018}
  and explore the gap between the @|nname| and @|tname| strategies.
 
-@; % TODO need to discuss higher-order / first-order before this! 2020-01-23 could use more explanation, but I guess its clear
-
 This section presents an informal overview of the type-enforcement strategies;
  all technical definitions and properties appear in @sectionref{sec:design:technical}.
 The discussion begins with the semantics that is lowest on the error
  preorder (@|nname|) and ascends (@|ename|):
 
-@exact|{
-\smallskip
-\noindent{}\begin{tabular}{l@{~~}c@{~~}l}
-  \
-  \textstrat{@|nname|}
-  & : & Wrap higher-order values; eagerly validate first-order values.
-  \\[0.3ex]
-  \textstrat{@|cname|}
-  & : & Wrap higher-order and first-order values.
-  \\[0.3ex]
-  \textstrat{@|fname|}
-  & : & Wrap higher-order and first-order values, but drop inner wrappers.
-  \\[0.3ex]
-  \textstrat{@|tname|}
-  & : & Check the shape of all values that appear in typed code.
-  \\[0.3ex]
-  \textstrat{@|aname|}
-  & : & Check shapes like @|tname|; use wrappers to remember boundaries.
-  \\[0.3ex]
-  \textstrat{@|ename|}
-  & : & Check nothing. Do not enforce static types at runtime.
-\end{tabular}
-}|
+@itemlist[
+  @item{@exact{\textstrat{\nname{}}}
+   : Wrap higher-order values; eagerly validate first-order values.
+  }
+  @item{@exact{\textstrat{\cname{}}}
+  : Wrap higher-order and first-order values.
+  }
+  @item{@exact{\textstrat{\fname{}}}
+  : Wrap higher-order and first-order values, but drop inner wrappers.
+  }
+  @item{@exact{\textstrat{\tname{}}}
+  : Check the shape of all values that appear in typed code.
+  }
+  @item{@exact{\textstrat{\aname{}}}
+  : Check shapes like @|tname|; use wrappers to remember boundaries.
+  }
+  @item{@exact{\textstrat{\ename{}}}
+  : Check nothing. Do not enforce static types at runtime.
+  }]
 
 
 @section[#:tag "sec:design:strat:natural"]{@|nname|}
@@ -52,8 +44,8 @@ Every time a typed context imports an untyped value,
  the value receives a comprehensive check.
 For first-order data, the full check implies a deep traversal of the incoming
  value.
-For higher-order data, a full check is impossible; instead,
- @|nname| wraps the incoming value to monitor its future behavior.
+For higher-order data, a full check at the time of crossing the boundary is
+ impossible; instead, @|nname| wraps the incoming value to monitor its future behavior.
 
 More formally, when an untyped value @${\svalue} flows into a context
  that expects some value of type @${\stype},
@@ -63,7 +55,7 @@ The strategy on the right protects a typed value from an untyped
  context:
 
 @exact|{
-\formatapproach{@|nname|}{
+\formatapproach{\nname{}}{
   check that $\svalue$ is an integer
 }{
   check that $\svalue$ is a tuple and recursively validate its elements
@@ -73,7 +65,7 @@ The strategy on the right protects a typed value from an untyped
 }{
   check nothing
 }{
-  recursively protect the elements
+  recursively protect elements
   \\
 }{
   wrap $\svalue$ to
@@ -88,7 +80,7 @@ Implementations of the @|nname| approach have struggled with the performance
  and have inspired semantics with tighter time and space
  bounds@~citep{htf-hosc-2010,stw-pldi-2015,g-popl-2015,bbst-oopsla-2017,fgsfs-oopsla-2018,kas-pldi-2019}.
 A glance at the sketch above suggests three sources for this overhead:
- the act of @emph{checking} that a value matches a type,
+ @emph{checking} that a value matches a type,
  the layer of @emph{indirection} that a wrapper adds,
  and the @emph{allocation} cost.
 
@@ -97,7 +89,7 @@ Testing whether a value is an integer or a function is a cheap operation in
  languages that support dynamic typing.
 Pairs, however, illustrate the potential for serious overhead.
 When a deeply-nested pair value reaches a boundary, @|nname| follows the type
- to conduct an eager and comprehensize check.
+ to conduct an eager and comprehensive check.
 The cost of a successful check is linear in the size of the type.
 In a language with recursive types---perhaps for lists---the
  cost is linear in the size of the incoming value.
@@ -121,8 +113,10 @@ Third, the @|tname| strategy (@sectionref{sec:design:strat:transient})
  removes wrappers altogether by enforcing a weaker invariant.
 
 
+@; TODO \forigins
+@; TODO fix bib
+@; TODO smaller list item sep
 @subsection{\forigins{@|nname|}}
-@; 2020-07-27 TODO remove, repeats intro
 
 The name ``@|nname|'' comes from @citet{mf-toplas-2009}, who use it
  to describe a proxy method for transporting untyped functions into a
@@ -147,7 +141,7 @@ Allocation and indirection costs may increase, however, because first-order
  values now receive wrappers.
 
 @exact|{
-\formatapproach{@|cname|}{
+\formatapproach{\cname{}}{
   check that $\svalue$ is an integer
 }{
   check that $\svalue$ is a tuple and wrap $\svalue$ to
@@ -167,26 +161,19 @@ Allocation and indirection costs may increase, however, because first-order
 }
 }|
 
-@; %% Because the wrappers eventually perform the same checks as @|nname|, the
-@; %%  @|cname| method satisfies the same type soundness and complete monitoring
-@; %%  properties.
-@; %% It may fail to detect a mismatch that @|nname| reports, however, if the
-@; %%  program does not depend on the incompatible value.
-
 
 @subsection{\forigins{@|cname|}}
 
-The @|cname| strategy introduces a small amount of laziness;
- every immutable data structure gets a guard wrapper.
-@citet{fgr-ifl-2007} implement exactly this strategy for Racket struct contracts.
+The @|cname| strategy introduces a small amount of laziness.
+By contrast to @|nname|, which eagerly validates immutable data structures,
+ @|cname| waits until an elimination form.
+The choice is analogous to the question of initial algebra vs. final algebra
+ semantics for such datatypes@~citep{w-jcss-1979,c-lfp-1980,bt-siam-1983},
+ hence the prefix ``Co'' is a reminder that
+ some checks now happen at an opposite time.
+@citet{fgr-ifl-2007} implement exactly the @|cname| strategy for Racket struct contracts.
 Other researchers have explored variations on lazy contracts@~citep{hjl-flops-2006,df-toplas-2011,c-icfp-2012,dtw-pepm-2012};
- for instance, by delaying base-type checks until a computation depends on the value.
-
-@; % - conjecture : others satisfy CM
-@; % - note big implementation cost for new wrappers
-@; % - note big cognitive cost of changing semantics
-@; % - note big compiler (optimization) cost of changing semantics
-@; % - tgpk-dls-2018 suggests that programmers want eager checks everywhere, but wonder if blame errors would be acceptable
+ for instance, by delaying even shape checks until a computation depends on the value.
 
 
 @section[#:tag "sec:design:strat:forgetful"]{@|fname|}
@@ -204,13 +191,9 @@ An untyped value gets one wrapper when it enters a typed
 A typed value gets a ``sticky'' inner wrapper the first time
  it exits typed code and gains a ``temporary'' outer wrapper whenever
  it re-enters a typed context.
-@; %%Each temporary wrapper protects a typed client from a value.
-@; %%Each inner wrapper protects a higher-order, typed value against future clients.
-@; %% TODO illustrate for (maybe) pairs and (definitely) functions
-@; %%  ... pairs are the difficult ones to motivate, gotta think inside
 
 @exact|{
-\formatapproach{@|fname|}{
+\formatapproach{\fname{}}{
   check that $\svalue$ is an integer
 }{
   check that $\svalue$ is a tuple and wrap $\svalue$ to
@@ -235,8 +218,8 @@ A typed value gets a ``sticky'' inner wrapper the first time
 @citet{g-popl-2015} introduces forgetful manifest contracts and proves
  type soundness; the extended version of the paper contains a detailed
  discussion, including the observation that forgetful types cannot support
- abstraction and information hiding (@format-url{https://arxiv.org/abs/1410.2813}).
-\citet{cl-icfp-2017} present a forgetful and type sound semantics for a
+ abstraction and information hiding (@shorturl["https://" "arxiv.org/abs/1410.2813"]).
+@citet{cl-icfp-2017} present a forgetful and type sound semantics for a
  mixed-typed language.
 
 By contrast to @|fname|, there are other strategies that limit the number of
@@ -266,7 +249,7 @@ The following table describes the checks that happen at a boundary;
  the extra checks in typed code perform dynamic-to-static checks.
 
 @exact|{
-\formatapproach{@|tname|}{
+\formatapproach{\tname{}}{
   check that $\svalue$ is an integer
 }{
   check that $\svalue$ is a pair
@@ -295,9 +278,11 @@ Static analysis can reduce the number of checks@~citep{vsc-dls-2019}.
 
 @subsection{\forigins{@|tname|}}
 
-@citet{v-thesis-2019} invented @|tname|.
-The method was introduced for Python@~citep{vksb-dls-2014,vss-popl-2017},
- has been adapted to Typed Racket@~citep{gf-icfp-2018}
+\cite{v-thesis-2019} invented @|tname| for Reticulated Python.
+The name suggests the nature of its run-time checks; transient type-enforcement
+ enforces local assumptions in typed code, but has no long-lasting ability
+ to influence untyped behaviors@~citep{vksb-dls-2014}.
+@|tname| has been adapted to Typed Racket@~citep{gf-icfp-2018}
  and has inspired a closely-related approach for Grace@~citep{rmhn-ecoop-2019}.
 
 
@@ -327,10 +312,9 @@ Conversely, a typed function that flows to untyped code and back @${N{+}1} times
  three wrappers: an outer guard to protect its
  current typed client, a middle trace to record its last @${N} trips, and an
  inner guard to protect its body.
-@; %% TODO illustrate?
 
 @exact|{
-\formatapproach{@|aname|}{
+\formatapproach{\aname{}}{
   check that $\svalue$ is an integer
 }{
   check that $\svalue$ is a tuple and wrap $\svalue$ to
@@ -341,11 +325,11 @@ Conversely, a typed function that flows to untyped code and back @${N{+}1} times
 }{
   check nothing
 }{
-  if $\svalue$ has a guard wrapper, remove and record it;
-   otherwise wrap $\svalue$
+  if $\svalue$ has a guard wrapper, replace with a trace;
+   otherwise guard $\svalue$
 }{
-  if $\svalue$ has a guard wrapper, remove and record it;
-   otherwise wrap $\svalue$
+  if $\svalue$ has a guard wrapper, replace with a trace;
+   otherwise guard $\svalue$
 }
 }|
 
@@ -353,8 +337,9 @@ Conversely, a typed function that flows to untyped code and back @${N{+}1} times
 @subsection{\forigins{@|aname|}}
 
 @|aname| is a synthesis of @|fname| and @|tname| that
- demonstrates how our framework can guide the design of new strategies@~citep{gfd-oopsla-2019}.
-@; %% contributes a novel technique for theoretically-useful error messages
+ demonstrates how our framework can guide the design of new checking strategies@~citep{gfd-oopsla-2019}.
+The name suggests a connection to forgetful, and the Greek influence of the
+ one collaborator.
 
 
 @section[#:tag "sec:design:strat:erasure"]{@|ename|}
@@ -366,7 +351,7 @@ At runtime, types are meaningless.
 Any value may flow into any context:
 
 @exact|{
-\formatapproach{@|ename|}{
+\formatapproach{\ename{}}{
   check nothing
 }{
   check nothing
@@ -382,7 +367,7 @@ Any value may flow into any context:
 }|
 
 Despite the complete lack of type enforcement, the @|ename| strategy is
- widely used (@figure-ref{fig:landscape}) and has a number of pragmatic benefits.
+ widely used (@figureref{fig:landscape}) and has a number of pragmatic benefits.
 The static type checker can point out logical errors in type-annotated code.
 An IDE may use the static types in auto-completion and refactoring tools.
 An implementation does not require any instrumentation to enforce types.

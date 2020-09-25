@@ -795,5 +795,4 @@ When two semantics agree about which expressions raise run-time errors,
   iff\/ $\xsym \sbehaviorle \ysym$
   and\/ $\ysym \sbehaviorle \xsym$.
 }
-\vspace{-4ex}
 }|
