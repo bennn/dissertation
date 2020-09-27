@@ -42,68 +42,42 @@
    (only-in math/statistics
      mean))
 
-@; TODO fit this somewhere
-@;@;@section{Why @|sTransient|?}
-@;@;
-@;@;There are several approaches to mixing typed and untyped code (@chapterref{chap:design}).
-@;@;Some fail our basic criteria for adding types to an existing language (@chapterref{chap:why}).
-@;@;Of the others, @|snatural| is a worthwhile ideal because it offers strong
-@;@; static type guarantees.
-@;@;These @|sdeep| types require run-time enforcement, however, and the cost of
-@;@; enforcement is high and hard to reduce.
-@;@;
-@;@;@; fork in the road, what can be done?
-@;@;  @; what to do?
-@;@;  @; could improve TR, looking bleak
-@;@;  @; only other option is to pursue a weaker semantics
-@;@;  @; .... nothing else can support existing Dyn lang as intended
-@;@;
-@;@;A promising compromise is to implement a different, weaker semantics alongside
-@;@; @|sdeep| types.
-@;@;Analyzing the costs of @|snatural| shows that the @|stransient| approach is the
-@;@; most promising alternative.
-@;@;@|sNatural| slows a program down through soundness checks and blame tracking.
-@;@;The checks can be huge, and can require behavioral wrappers.
-@;@;Blame requires additional wrappers.
-@;@;@|sTransient| reduces checks to a minimum, a shape check.
-@;@;@|sTransient| can also run without blame simply.
-@;@;By contrast, removing blame from @|snatural| solves nothing at first;
-@;@; the change must be accompanied by a wholly-new strategy for allocating
-@;@; wrappers, and this strategy may require reflection tools for the wrappers
-@;@; themselves.
-@;@;
-@;@;@|sTransient| is a promising wrapper-free approach to gradual typing.
-@;@;
-@;@;@; gotta talk about other ways to get shallow types, maybe just point ahead
-
 
 @title[#:tag "chap:transient"]{@|sShallow| Racket}
 
-The high cost of @|sdeep| types calls for an alternative semantics
- with @|sshallow| types.
-Of the vetted alternatives (@chapter-ref{chap:design}), @|stransient| is the
- most promising.
-@|sTransient| offers a basic soundness guarantee,
- requires a low implementation effort,
- and easily supports any combination of typed and untyped code.
-Furthermore, the data for Reticulated Python suggests that the overhead
- of @|stransient| run-time checks never exceeds a 10x slowdown (@chapter-ref{chap:performance}).
-
-This chapter presents a @|stransient| semantics for Typed Racket.
-Adapting the theory to the Typed Racket language required a generalization to
- macro-level gradual typing and several insights to handle a richer
- language of static types (@sectionref{sec:transient:theory}).
-In the course of this work, I also adapted the blame algorithm
- of @citet{vss-popl-2017} and identified several challenges (@sectionref{sec:transient:blame});
- first and foremost, the basic algorithm is prohibitively slow.
-The final implementation does not include blame; that said, the implementation
- takes care to reuse large parts of Typed Racket, including the static
- type checker and most of the type-driven optimizer (@sectionref{sec:transient:implementation}).
+The high costs of @|sdeep| types @;(@chapter-ref{chap:performance})
+ and the weak guarantees of @|sshallow| types @;(@chapter-ref{chap:design})
+ motivate a compromise.
+In a language that supports both, programmers can mix @|sdeep| and
+ @|sshallow| types to find an optimal tradeoff.
+This chapter presents the first half of a compromise; namely, a @|sshallow| semantics for Typed Racket.
+By default, Typed Racket provides @|sdeep| types via the @|snatural| semantics.
+My work brings the @|stransient| semantics to the Typed Racket surface syntax.
 
 Henceforth, @|sDeep| Racket refers to the original, @|snatural| implementation
  and @|sShallow| Racket refers to my @|stransient| implementation.
-Typed Racket refers to the common, static parts; namely, the surface language
- and type system.
+Typed Racket refers to the common parts: the surface language and the type system.
+
+@|sTransient| is a promising companion to @|snatural| because it pursues an
+ opposite kind of implementation.
+Whereas @|snatural| eagerly enforces full types with guard wrappers, @|stransient|
+ lazily checks only top-level shapes.
+The lazy strategy means that @|stransient| does not need wrappers, which removes
+ the main source of @|snatural| overhead.
+@|sTransient| can also run without blame, removing another form of run-time cost.
+By contrast, simply removing blame from @|snatural| changes little because
+ blame information tags along with the guard wrappers.
+To fully benefit, @|snatural| needs a new strategy for allocating wrappers in
+ the first place.
+
+Adapting the theory of @|stransient|@~cite{vss-popl-2017} to Typed Racket required
+ several generalizations and insights (@sectionref{sec:transient:theory}).
+In the course of this work, I also adapted the @|stransient| heap-based blame
+ algorithm and identified several challenges (@sectionref{sec:transient:blame});
+ first and foremost, the basic algorithm is prohibitively slow.
+The final implementation takes care to reuse large parts of Typed Racket,
+ including the static type checker and most of the type-driven optimizer
+ (@sectionref{sec:transient:implementation}).
 
 The performance of @|sShallow| Racket is typically an improvement over
  @|sDeep| Racket, but both semantics have distinct strengths (@sectionref{sec:transient:performance}).
@@ -112,7 +86,8 @@ The performance of @|sShallow| Racket is typically an improvement over
 @|sNatural| has better performance in programs with large chunks of typed
  code, and surpasses untyped Racket in many cases.
 Whether @|sShallow| Racket can ever run faster than untyped code is an open
- question; there are several avenues worth exploring (@sectionref{sec:transient:future}).
+ question.
+For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
 
 
 @section[#:tag "sec:transient:theory"]{Theory++}
