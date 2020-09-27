@@ -17,7 +17,7 @@
 Over the years, several approaches to mixing typed and untyped code have
  emerged.
 Typed Racket and Reticulated are but two implementations in a wide design space.
-To a first approximation, the designs fall into four broad strategies:
+To a first approximation, the underlying designs fall into four broad strategies:
 
 @itemlist[
   @item{

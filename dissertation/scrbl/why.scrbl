@@ -43,7 +43,7 @@ Run-time checks slow down a computation, thus a mixed-typed language needs to
 Before a language can address the central 3-way tradeoff, its designers
  must decide what kinds of mixing to allow and what goals to strive for.
 Migratory typing is one such theory.
-The goal of migratory typing is to add static typing onto a vetted untyped
+The goal is to add static typing onto an independent untyped
  language.
 @;Code that started off untyped can gain the maintenance benefits of
 @; static types---ideally with no need to rewrite program logic.
@@ -234,7 +234,7 @@ On the surface, these basic opinions simply motivate a typed/untyped mix;
 Untyped code is a fact.
 Large companies such as Dropbox, Facebook, and Twitter started as
  untyped projects.
-Small teams continue to employ untyped languages; most repositories on
+Small teams continue to employ untyped languages; indeed, most repositories on
  GitHub use either JavaScript, Python, PHP, or Ruby (@format-url{https://githut.info}).
 
 Once an untyped codebase is off the ground and the lack of reliable type

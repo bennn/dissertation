@@ -8,7 +8,7 @@
 @degree{Doctor of Philosophy}
 @department{Khoury College of Computer Sciences}
 @university{Northeastern University}
-@location{Boston, Massachusetts}
+@location{Boston, Mass.}
 @submit-date{November 2020}
 
 

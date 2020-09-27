@@ -70,11 +70,11 @@ running time of typed/untyped interactions.
 Looking ahead, the first order of business is to lay down ground rules for
  expressiveness.
 My goal is to combine typed and untyped code in a @emph{migratory typing}
- system, in which types accommodates the grown idioms of an
+ system, in which types accommodate the grown idioms of an
  untyped host language (@chapter-ref{chap:why}).
 Languages that fail the expressiveness criteria, however, can still benefit
  from the results in later chapters.
-Next up, @chapter-ref{chap:performance} presents methods to evaluate performance
+@Chapter-ref{chap:performance} presents methods to evaluate performance
  and validates the methods through an empirical study of two migratory
  typing systems: Typed Racket and Reticulated Python.
 Both languages guarantee type soundness, but come with very different
@@ -139,7 +139,7 @@ As a final note on word choice, I use informal words to talk about
  different ``ways of mixing typed and untyped code,'' including:
  methods, strategies, and approaches.
 There is no hope in trying to be authoritative because the research community
- is still seeking a best method for a best combination.
+ is still seeking a best method for a useful combination.
 
 
 @subsection{Names in Prior Work}

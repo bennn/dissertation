@@ -24,9 +24,10 @@ TODO
 - [ ] conclusion ... other chapters?
 
 Style
+- [ ] shallow/CACHE too big, why are files so huge?
+      could zip them
 - [ ] hyperlinks broken because scribble labels
 - [ ] ABC00 cite style, like theory papers
-- [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections
 - [ ] why not scribble/text ???
 - [ ] color-code ideas:
@@ -35,9 +36,9 @@ Style
   - beyond : multi-color for typed components, depends on semantics
 - [ ] print "x" after overheads
 - [ ] too many exercises, looks like everything has holes, save those for end
-- [ ] shallow/CACHE too big, why are files so huge?
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [X] careful about common lisp characterization ... free to ignore, opt non-mand
+- [X] start every chapter with acks, papers, people
 
 #### dependencies
 
