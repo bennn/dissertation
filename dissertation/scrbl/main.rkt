@@ -520,12 +520,11 @@
   (nested #:style 'code-inset (add-between (map codett content) (elem "\n"))))
 
 (define (example-type-shape #:type t-str #:shape s-str #:cost c-str)
-  @exact{\begin{tabular}[t]{lcl}
-    \(\stype\) & \(=\) & @codett[t-str]
+  @exact{\begin{tabular}[t]{l@"@" {\hspace{1mm}}c@"@" {\hspace{1mm}}l}
+    \(\stype\) & \(=\) & @codett[t-str]\!\!\!\!
   \\
-    \(\tagof{\stype}\) & \(=\) & @codett[s-str]
+    \(\tagof{\stype}\) & \(=\) & @codett[s-str]\!\!\!\!
   \end{tabular}})
-@; \\
-@;   cost & \(\approx\) & \(@|c-str|\)
+
 
 

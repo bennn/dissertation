@@ -514,17 +514,15 @@
     (define tiny-x-sep 20)
     (define pico-y-sep 8)
     (define tiny-y-sep 10)
-    (define med-x-sep 20)
+    (define med-x-sep 32)
     (define (make-pipeline . pp*)
       (make-pipeline* pp*))
     (define (make-pipeline* pp*)
-      (for/fold ((acc (blank)))
-                ((pp (in-list pp*))
-                 (i (in-naturals)))
-        (vl-append
-          pico-y-sep
-          acc
-          (hb-append (blank (* i med-x-sep) 0) pp))))
+      (for/fold ((acc (car pp*)))
+                ((pp (in-list (cdr pp*))))
+        (let* ((sep (blank med-x-sep 0))
+               (pp+ (hc-append 4 acc sep pp)))
+          (pin-arrow-line 6 pp+ sep lc-find sep rc-find #:line-width 2 #:color "black"))))
     (define (make-x-step #:border-color bc str)
       (add-rounded-border
         #:radius 8 #:frame-color bc #:frame-width 4 #:background-color "white"
