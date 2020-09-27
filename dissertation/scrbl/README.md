@@ -24,6 +24,7 @@ TODO
 - [ ] conclusion ... other chapters?
 
 Style
+- [ ] hyperlinks broken because scribble labels
 - [ ] ABC00 cite style, like theory papers
 - [ ] start every chapter with acks, papers, people
 - [ ] paragraph style looks bad with subsections

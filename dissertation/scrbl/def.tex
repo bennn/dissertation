@@ -67,6 +67,7 @@
 \newenvironment{displayrrarray}{\smallskip\(\begin{array}{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)\smallskip}
 \newenvironment{langarray}{\(\begin{array}[t]{l@{\hspace{0.5em}}c@{\hspace{0.5em}}l}}{\end{array}\)}
 \newcommand{\sidecond}[1]{\multicolumn{3}{l}{\mbox{\quad #1}}}
+\newcommand{\sidestep}[1]{\multicolumn{3}{r}{#1}}
 \newcommand{\wideas}[2]{\makebox[\widthof{$#2$}][l]{$#1$}}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -74,6 +75,7 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{example}[theorem]{Example}
 \newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
 \newenvironment{proofsketch}{\renewcommand{\proofname}{Proof Sketch}\begin{proof}}{\end{proof}}
 
 \newcommand{\nsym}{N}
@@ -176,8 +178,8 @@
 \newcommand{\formatapproach}[7]{
   \paragraph{#1} \hfill $\sdyn = $ dynamic to static,\quad$\ssta = $ static to dynamic
 
-  \begin{minipage}[t]{0.48\columnwidth}
-  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize}
+  \noindent{}\begin{minipage}[t]{0.50\columnwidth}
+  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize} \itemsep0ex
     \item
       $\fromuntyped{v}{\tint}$
     \item[] #2
@@ -188,8 +190,8 @@
       $\fromuntyped{v}{(\tfun{\tau_0}{\tau_1})}$
     \item[] #4
   \end{itemize}
-  \end{minipage}\begin{minipage}[t]{0.48\columnwidth}
-  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize}
+  \end{minipage}\noindent{}\begin{minipage}[t]{0.50\columnwidth}
+  \noindent{}\renewcommand{\labelitemi}{\approachbullet}\begin{itemize} \itemsep0ex
     \item
       $\fromtyped{v}{\tint}$
     \item[] #5
@@ -302,6 +304,14 @@
 \newcommand{\sbndcod}{\sfont{cod}}
 \newcommand{\sincr}{\sfont{add1}}
 \newcommand{\sresult}{r}
+\newcommand{\scheck}{\sfont{check}}
+\newcommand{\sprevalue}{\sfont{w}}
+\newcommand{\sloc}{\sfont{p}}
+\newcommand{\sdirection}{\sfont{d}}
+\newcommand{\sforwards}{\sfont{\hookrightarrow}}
+\newcommand{\sbackwards}{\sfont{\hookleftarrow}}
+\newcommand{\stag}{s}
+\newcommand{\semptymap}{\emptyset}
 \newcommand{\sdiverge}{\Omega}
 \newcommand{\stagerror}{\sfont{TagErr}}
 \newcommand{\sscanerror}{\sfont{ScanErr}}
@@ -397,12 +407,12 @@
 \newcommand{\sctxhole}{\bullet}
 \newcommand{\sdynproj}{\mathbf{0}}
 \newcommand{\sidproj}{\mathbf{1}}
-\newcommand{\stagproj}{\mktagproj{\cdot}}
+\newcommand{\stagproj}{\mathbf{\stag}}
 \newcommand{\sXproj}{F}
 \newcommand{\sWT}{\vdash}
 \newcommand{\sWTO}{\mathrel{\thickjbar{\sWT}}}
 \newcommand{\sWTfull}{\sWT_{\sidproj}}
-\newcommand{\sWTtag}{\sWT_{\kern-0.3em{\raisebox{0.5ex}{\(\mktagproj{~}\)}}}} % maybe \vdash_K ?
+\newcommand{\sWTtag}{\sWT_{\sWT_{\stagproj}}}
 \newcommand{\sWTnone}{\sWT_{\sdynproj}}
 \newcommand{\sWS}{\sWT}
 \newcommand{\sWD}{\sWT}
@@ -697,7 +707,10 @@
 \newcommand{\fexists}[2]{\exists\,#1.~#2}
 \newcommand{\fforall}[2]{\forall\,#1.~#2}
 \newcommand{\forigins}[1]{\sorigins{} of the {#1} strategy}
-\newcommand{\fproperties}[1]{Properties of #1}
+\newcommand{\spropbase}{Semantics, Type Soundness}
+\newcommand{\spropown}{Lifted Semantics, Complete Monitoring, Blame}
+\newcommand{\fpropsim}[1]{Relation to #1}
+\newcommand{\fproperties}[1]{#1{} and its Properties}
 \newcommand{\fdynproj}[1]{\sdynproj(#1)}
 \newcommand{\fidproj}[1]{\sidproj(#1)}
 \newcommand{\ftagproj}[1]{\mktagproj{#1}}
@@ -726,6 +739,7 @@
 \newcommand{\Xectionref}[2]{{#1}ection~\ref{#2}}
 \newcommand{\Xableref}[2]{{#1}able~\ref{#2}}
 \newcommand{\Xheoremref}[2]{{#1}heorem~\ref{#2}}
+\newcommand{\Xemarkref}[2]{{#1}emark~\ref{#2}}
 \newcommand{\Xefinitionref}[2]{{#1}efinition~\ref{#2}}
 \newcommand{\Xemmaref}[2]{{#1}emma~\ref{#2}}
 \newcommand{\Xlauseref}[2]{{#1}lause~\ref{#2}}
@@ -739,6 +753,7 @@
 \newcommand{\secref}[1]{\sectionref{#1}}
 \newcommand{\thmref}[1]{\Xheoremref{t}{#1}}
 \newcommand{\theoremref}[1]{\thmref{#1}}
+\newcommand{\remarkref}[1]{\Xemarkref{r}{#1}}
 \newcommand{\definitionref}[1]{\Xefinitionref{d}{#1}}
 \newcommand{\lemmaref}[1]{\Xemmaref{l}{#1}}
 \newcommand{\clauseref}[1]{\Xlauseref{c}{#1}}
@@ -757,15 +772,6 @@
 \newcommand{\Clauseref}[1]{\Xlauseref{C}{#1}}
 \newcommand{\Lawref}[1]{\Xawref{L}{#1}}
 \newcommand{\Programref}[1]{\Xrogramref{P}{#1}}
-
-\newcommand{\scheck}{\sfont{check}}
-\newcommand{\sprevalue}{\sfont{w}}
-\newcommand{\sloc}{\sfont{p}}
-\newcommand{\sdirection}{\sfont{d}}
-\newcommand{\sforwards}{\sfont{\hookrightarrow}}
-\newcommand{\sbackwards}{\sfont{\hookleftarrow}}
-\newcommand{\stag}{K}
-\newcommand{\semptymap}{\emptyset}
 
 \newcommand{\knat}{\tnat}
 \newcommand{\kint}{\tint}
@@ -871,9 +877,9 @@
   \newcommand{\TSfull}{\sidproj}
   \newcommand{\TStag}{\raisebox{0.5ex}{$\stagproj$}}
   \newcommand{\TSnone}{\sdynproj}
-  \newcommand{\Bpath}{\emph{path}}
+  \newcommand{\Bpath}{\tblY}
   \newcommand{\Bheap}{\emph{heap}}
-  \newcommand{\hsep}{~~~~~~~~~}
+  \newcommand{\hsep}{~~~~~~~~}
   \newcommand{\offsetbox}[1]{\zerowidth{~~##1}}
   \newcommand{\LE}{\offsetbox{\sbehaviorle}}
   \newcommand{\EQ}{\offsetbox{\sbehavioreq}}}

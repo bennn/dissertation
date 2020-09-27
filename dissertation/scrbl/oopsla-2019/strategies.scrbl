@@ -113,10 +113,8 @@ Third, the @|tname| strategy (@sectionref{sec:design:strat:transient})
  removes wrappers altogether by enforcing a weaker invariant.
 
 
-@; TODO \forigins
-@; TODO fix bib
 @; TODO smaller list item sep
-@subsection{\forigins{@|nname|}}
+@subsection{@forigins{@|nname|}}
 
 The name ``@|nname|'' comes from @citet{mf-toplas-2009}, who use it
  to describe a proxy method for transporting untyped functions into a
@@ -162,7 +160,7 @@ Allocation and indirection costs may increase, however, because first-order
 }|
 
 
-@subsection{\forigins{@|cname|}}
+@subsection{@forigins{@|cname|}}
 
 The @|cname| strategy introduces a small amount of laziness.
 By contrast to @|nname|, which eagerly validates immutable data structures,
@@ -213,7 +211,7 @@ A typed value gets a ``sticky'' inner wrapper the first time
 }|
 
 
-@subsection{\forigins{@|fname|}}
+@subsection{@forigins{@|fname|}}
 
 @citet{g-popl-2015} introduces forgetful manifest contracts and proves
  type soundness; the extended version of the paper contains a detailed
@@ -276,9 +274,9 @@ In general, @|tname| checks add up to a greater number of run-time validation
 Static analysis can reduce the number of checks@~citep{vsc-dls-2019}.
 
 
-@subsection{\forigins{@|tname|}}
+@subsection{@forigins{@|tname|}}
 
-\cite{v-thesis-2019} invented @|tname| for Reticulated Python.
+@citet{v-thesis-2019} invented @|tname| for Reticulated Python.
 The name suggests the nature of its run-time checks; transient type-enforcement
  enforces local assumptions in typed code, but has no long-lasting ability
  to influence untyped behaviors@~citep{vksb-dls-2014}.
@@ -334,11 +332,11 @@ Conversely, a typed function that flows to untyped code and back @${N{+}1} times
 }|
 
 
-@subsection{\forigins{@|aname|}}
+@subsection{@forigins{@|aname|}}
 
 @|aname| is a synthesis of @|fname| and @|tname| that
  demonstrates how our framework can guide the design of new checking strategies@~citep{gfd-oopsla-2019}.
-The name suggests a connection to forgetful, and the Greek influence of the
+The name suggests a connection to forgetful, and the Greek influence of
  one collaborator.
 
 
@@ -376,7 +374,7 @@ Users that are familiar with the host language do not need to learn
 Finally, @|ename| runs equally fast as a host-language program.
 
 
-@subsection{\forigins{@|ename|}}
+@subsection{@forigins{@|ename|}}
 
 @|ename| is also known as @emph{optional typing} and dates back to the type hints
  of MACLISP@~citep{m-maclisp-1974} and Common Lisp@~citep{s-lisp-1990}.

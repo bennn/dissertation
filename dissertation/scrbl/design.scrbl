@@ -147,10 +147,10 @@ The supplementary material contains a complete formal account of our results.
 
 @; -----------------------------------------------------------------------------
 
-@;@include-section{oopsla-2019/jungle.scrbl}
-@;@include-section{oopsla-2019/properties.scrbl}
-@;@include-section{oopsla-2019/basic.scrbl}
-@;@include-section{oopsla-2019/strategies.scrbl}
-@;@include-section{oopsla-2019/technical.scrbl}
-@;@include-section{oopsla-2019/conclusion.scrbl}
+@include-section{oopsla-2019/jungle.scrbl}
+@include-section{oopsla-2019/properties.scrbl}
+@include-section{oopsla-2019/basic.scrbl}
+@include-section{oopsla-2019/strategies.scrbl}
+@include-section{oopsla-2019/technical.scrbl}
+@include-section{oopsla-2019/conclusion.scrbl}
 

@@ -30,6 +30,8 @@
 
   jointwork
   disclaimer
+  forigins
+  fproperties
   summary
   bm
   codett
@@ -159,6 +161,12 @@
 (define (disclaimer . arg*)
   (nested-inset
     (list (bold "Note:") ~ arg*)))
+
+(define (forigins . str*)
+  (list "Origins of the " str* " strategy"))
+
+(define (fproperties . str*)
+  (list str* " and its Properties"))
 
 (define (summary . txt*)
   (nested-inset txt*))
