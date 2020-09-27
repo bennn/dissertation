@@ -2,6 +2,7 @@
 @(require greenman-thesis/oopsla-2019/main greenman-thesis/oopsla-2019/pict)
 
 @title[#:tag (list "sec:design:landscape" "sec:design:jungle")]{Assorted Behaviors by Example}
+@latex-label{sec:design:jungle}
 
 @figure*[
   "fig:landscape"
@@ -102,9 +103,8 @@ The @|nname| languages come from academic teams that are interested in
 Nevertheless, several languages explore a hybrid approach.
 StrongScript and Thorn offer a choice of concrete and erased types@~citep{wzlov-popl-2010,rzv-ecoop-2015}.
 Pyret uses @|nname|-style checks to validate fixed-size data and @|tname|-style checks
- for recursive types (e.g. lists) and higher-order
- types.
-(Personal communication with Benjamin Lerner and Shriram Krishnamurthi.)
+ for recursive types (e.g. lists) and higher-order types
+ (personal communication with Benjamin Lerner and Shriram Krishnamurthi).
 The literature presents additional languages, as formal semantics, that defy a broad categorization.
 @citet{cl-icfp-2017} drop certain higher-order wrappers.
 @citet{svctg-esop-2015} give a monotonic semantics for references.
@@ -247,7 +247,7 @@ These sample behaviors are indicative of a wider difference;
 @Figure-ref["fig:tr-example" "fig:retic-example"] present excerpts
  from realistic programs that mix typed and untyped code.
 These examples follow the same general structure:
- an untyped client interacts with an untyped library through a thin layer of typed code.
+ an untyped client interacts with an untyped library via a thin layer of typed code.
 Both programs also signal run-time errors, but for different reasons and
  with different implications for the programmer.
 
@@ -272,12 +272,13 @@ The client application clearly relies on the type specification from @codett{typ
 Unfortunately for the client, the type declaration in @figureref{fig:tr-example}
  is buggy.
 The library applies the first callback of
- @codett{call/input-url} to a URL struct, not a string.
+ @codett{call/input-url} to a URL struct,
+ rather than a string as the developer expects.
 
 Fortunately for the developer, Typed Racket compiles types to contracts and
  thereby catches the mismatch.
-Here, the compilation of @codett{typed/net/url} generates a higher-order
- function contract for @codett{call/input-url}.
+Here, the compilation of @codett{typed/net/url} generates a
+ contract for @codett{call/input-url}.
 The generated contract ensures that the untyped client provides three
  type-matching argument values and that the library applies the callback to a
  string.
@@ -294,7 +295,7 @@ A quick look confirms that the contract---that is, the type
 @Figure-ref{fig:retic-example} presents an arrangement of three Transient
  Reticulated modules, similar to the code in @figureref{fig:tr-example}.
 The module on the top left exports a function that retrieves data from a URL
-(@shorturl["https://" "github.com/psf/requests"]).
+(adapted from the @tt{requests} library, @shorturl["https://" "github.com/psf/requests"]).
 This function accepts several optional and keyword arguments.
 The typed adaptor module on the right formulates types for one valid use of the
  function; a client may supply a URL as a string and a timeout as a pair of floats.

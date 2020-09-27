@@ -13,7 +13,7 @@ A strategy determines:
 All of these decisions imply consequences for the programmer and the language
 designer.
 
-The examples in @sectionref{sec:design:jungle} illustrate that 
+The examples in @sectionref{sec:design:jungle} show that
  various languages choose different points in this multi-faceted design space.
 But, while they can motivate a systematic analysis, examples
  cannot serve as the basis of such an endeavor: the selection of example programs
@@ -87,7 +87,7 @@ Different behaviors arise, however, from four translations of a mixed-typed
 One can observe the behaviors, but the model does not characterize them.
 
 @citet{nla-popl-2019} distinguish gradual typing systems via @emph{equivalence preservation}.
-Starting from a set of axioms for fully-typed expressions---for
+Starting from a set of axioms for typed expressions---for
  example, @${\beta} and @${\eta} equations---they ask whether interactions with
  untyped code can violate the axioms.
 Equivalence preservation does define a spectrum;

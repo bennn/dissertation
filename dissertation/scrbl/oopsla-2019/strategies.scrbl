@@ -2,6 +2,7 @@
 @(require greenman-thesis/oopsla-2019/main)
 
 @title[#:tag "sec:design:strategies"]{Overview of Type-Enforcement Strategies}
+@latex-label{sec:design:strategies}
 
 To validate the expressiveness of the framework, this section models six semantics from the literature.
 Three semantics have been implemented for full-fledged languages:
@@ -106,7 +107,7 @@ Creating an unbounded number of wrappers incurs a proportional cost,
 
 These theoretical costs motivate the next three strategies.
 First, the @|cname| strategy (@sectionref{sec:design:strat:conatural}) reduces the
- up-front cost of checks with additional wrappers.
+ up-front cost of checks via additional wrappers.
 Second, the @|fname| strategy (@sectionref{sec:design:strat:forgetful}) reduces indirection
  by keeping at most two wrappers on any value and discarding the rest.
 Third, the @|tname| strategy (@sectionref{sec:design:strat:transient})
@@ -229,7 +230,7 @@ These methods require a protocol for merging wrappers, whereas
 @section[#:tag "sec:design:strat:transient"]{@|tname|}
 
 The @|tname| method ensures that typed code
- does not ``go wrong''@~citep{m-jcss-1978} in the sense of applying a
+ does not ``go wrong'' in the sense of applying a
  primitive operation to a value outside its domain.
 Every application @${(\sexpr_0~\sexpr_1)} in typed code can, for example,
  trust that the value of @${\sexpr_0} is a function.

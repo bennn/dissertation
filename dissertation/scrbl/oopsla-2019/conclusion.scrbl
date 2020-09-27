@@ -50,7 +50,7 @@ More precisely, this paper analyzes six distinct semantics via four properties (
   @item{
    Blame soundness states that every boundary in a blame message is potentially
     responsible.
-   Four strategies satisfy blame soundness relative to a path-based notion of
+   Four strategies satisfy blame soundness relative to a standard, path-based notion of
     responsibility.
    @|tname| satisfies blame soundness only if the notion of responsibility is weakened to
     merge distinct references to the same heap-allocated value.
@@ -94,7 +94,7 @@ Perhaps a future design can strengthen the wrapper-free guarantees.
    \medskip
    \hfill
      \begin{tabular}{c@{~~}l}
-     $\dagger$ & {indirectly satisfies $\propts{\sidproj}$ by a bisimulation to $\ascr{}$ (\theoremref{thm:TAsim})}\!\!\!\!
+     $\dagger$ & {indirectly satisfies $\propts{\sidproj}$ by simulation to $\ascr{}$ (\theoremref{thm:TAsim})}
      \\
      $\ddagger$ & {satisfiable by adding $\ascr{}$-style trace wrappers, see supplement}\!\!\!\!
      \end{tabular}

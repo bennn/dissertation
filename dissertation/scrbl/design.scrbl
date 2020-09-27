@@ -5,7 +5,7 @@
 @;  Natural = semantics,
 @;  Deep = idea = synonym for Nat in other parts of the paper (want Deep, get via Natural)
 
-@title[#:tag "chap:design"]{Design Analysis Method}
+@title[#:tag '("sec:design:introduction" "chap:design")]{Design Analysis Method}
 @jointwork[
   #:people* '(
     "Christos Dimoulas"
@@ -70,7 +70,7 @@ With this semantic framework, one can directly observe the possible behaviors
  for a single program.
 
 The chosen models illustrate @emph{natural} (@${\nscr}), @emph{transient} (@${\tscr}),
- @emph{optional} (henceforth @emph{erasure}, @${\escr}),
+ @emph{optional} (also known as @emph{erasure}, @${\escr}),
  and three theoretical strategies (@${\cscr}, @${\fscr}, @${\ascr}).
 The comparison excludes two classes of prior work:
  @emph{concrete}, because of the constraints it places on untyped code (@sectionref{sec:design:anti-concrete}),
@@ -130,7 +130,7 @@ Sections @exact{\ref{sec:design:jungle}} through @exact{\ref{sec:design:strategi
  @emph{what}, @emph{why}, and @emph{how} of our design-space analysis.
 There is a huge body of work on mixed-typed language that desperately
  needs organizing principles (@sectionref{sec:design:jungle}).
-Prior attempts to organize fall short; by contrast,
+Past attempts to organize fall short; by contrast,
  the properties that frame @tableref{tbl:contributions} offer an expressive and scalable
  basis for comparison (@sectionref{sec:design:properties}).
 These properties guide an apples-to-apples method that begins

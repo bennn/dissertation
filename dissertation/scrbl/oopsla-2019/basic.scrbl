@@ -133,9 +133,9 @@ The sketch below shows an untyped component in the center that imports
 \begin{equation}
   %% 2020-09-24 : still using tikz to get the fonts right
   \label{eq:bnd:e1}
-  \begin{minipage}{39mm}
+  \begin{minipage}{42mm}
     {\hfill\(\sowner_3\)~~~}\\[-3mm]
-    \begin{mdframed}[style=staframestyle,userdefinedwidth=39mm]\(
+    \begin{mdframed}[style=staframestyle,userdefinedwidth=42mm]\(
       \efun{\tann{\svar_1}{\tpair{\tint}{\tint}}}{\sfst~\svar_1}
     \)\end{mdframed}
   \end{minipage}\begin{minipage}{32mm}\begin{tikzpicture}
@@ -206,7 +206,7 @@ The boundary types guide the static type checker, but are mere suggestions
 
 The typing judgments for typed and untyped expressions require a mutual
  dependence to handle boundary expressions.
-A well-typed expression may include any well-formed dynamically-typed code.
+A well-typed expression may include any well-formed untyped code.
 Conversely, a well-formed untyped expression may include any typed expression
  that matches the specified annotation:
 
@@ -264,7 +264,6 @@ The surface language enables the construction of mixed-typed expressions.
 The next step is to assign behaviors to these programs via formal semantics.
 Semantics that correspond to different type-enforcement strategies
 must have equivalent behavior on boundary-free expressions.
-Fully-typed terms, for instance, must compute equivalent values.
 Starting from this constraint, the central design problem is how to enforce boundary types.
 
 The first ingredient of a semantics is the set of result values @${\svalue} that
@@ -461,7 +460,7 @@ Higher-order values raise a similar question because a single run-time check
 Nevertheless, a language that checks every call and return is in full control
  of the interactions between a function and its context.
 
-Our definition of complete monitoring translates these intuitions about
+Our definition of complete monitoring translates these ideas about
  interactions and control into statements about @emph{ownership labels}@~citep{dfff-popl-2011}.
 At the start of an evaluation, no interactions have occurred yet and every
  expression has one owner: the enclosing component.
@@ -508,7 +507,7 @@ The key single-ownership rules deal with labeled expressions and boundary terms:
 }|
 
 @|noindent|Values such as @${\obbars{42}{\fconcat{\sowner_0}{\sowner_1}}}
- represent a communication that slipped through the run-time checking protocol,
+ represent a communication that slipped past the run-time checking protocol,
  and therefore fail to satisfy single ownership.
 @bold{Sneak preview} one way that a semantics can transfer a higher-order value
 without creating a joint-ownership is by providing controlled access through
@@ -538,6 +537,7 @@ And if the lifted relation depends on labels to compute a result, then
 
 
 @subsection[#:tag "sec:design:laws"]{How to lift a reduction relation}
+@latex-label{sec:design:laws}
 
 The models in @sectionref{sec:design:technical} present six reduction relations
  for a mixed-typed language.
@@ -547,7 +547,7 @@ These lifted reduction relations are deferred to supplementary material,
  but come about semi-automatically through the
  following informal guidelines, or ``natural laws,'' for labeling.
 
-Each law describes one way that labels may be transferred or dropped
+Each law describes a way that labels may be transferred or dropped
  during evaluation.
 To convey the general idea, each law also comes with a brief illustration, namely,
  an example reduction and a short comment.
@@ -755,7 +755,7 @@ The evaluation of a function, for example, draws a fresh heap address @${\eloc_0
 \end{displayrrarray}
 }|
 
-@|noindent|When this function pointer @${\eloc_0} crosses a boundary,
+@|noindent|When the pointer @${\eloc_0} crosses a boundary,
  the semantics records the crossing on a blame heap (@${\bstore}).
 The blame heap provides a set of boundaries if a type mismatch occurs,
  but this set is typically unsound because it conflates different

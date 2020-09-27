@@ -243,7 +243,7 @@ Every function application and operator application comes with a type
  specification @${\stoptional} for the expected result.
 These annotations serve two purposes:
  to determine the behavior of the @|tname| and @|aname| semantics,
- and to disambiguate statically-typed and dynamically-typed redexes.
+ and to tell apart statically-typed and dynamically-typed redexes.
 An implementation could easily infer valid annotations.
 The model keeps them explicit to more easily formulate examples where subtyping
  affects behavior; for instance, the terms @${\eunopt{\tnat}{\sexpr_0}} and
@@ -582,7 +582,8 @@ One component, the sender, provided the enclosed value.
 A second client component rejected the value.
 The accompanying set of witness boundaries suggests potential sources for the fault;
  intuitively, this set should include the client--sender boundary.
-As an example, the error @${\boundaryerror{\eset{\obnd{\sowner_0}{\stype_0}{\sowner_1}}}{\svalue_0}}
+The error @${\boundaryerror{\eset{\obnd{\sowner_0}{\stype_0}{\sowner_1}}}{\svalue_0}},
+ for example,
  says that a mismatch between value @${\svalue_0} and type @${\stype_0} prevented
  the value sent by the @${\sowner_1} component from entering the @${\sowner_0} component.
 
@@ -613,9 +614,9 @@ A trace is metadata, so @${\sshallow} looks past it.
 
 The final components of @figureref{fig:evaluation-common} are the @${\delta}
  metafunctions.
-These provide a standard and partial specification of the primitive operations.
+These provide a standard, partial specification of the primitive operations.
 
-@Figureref{fig:evaluation-meta} defines additional metafunctions for boundaries
+@Figureref{fig:evaluation-meta} lists extra metafunctions for boundaries
  and ownership labels.
 For boundaries, @${\srev} flips every client and sender name in
  a set of specifications.
@@ -716,7 +717,7 @@ The term
 
 The higher-order evaluation syntax (@figureref{fig:evaluation-ho}) introduces the two wrapper values
  described in @sectionref{sec:design:semantic-framework}.
-A guard wrapper @${(\emon{\obnd{\sowner}{\stype}{\sowner}}{\svalue})}
+A guard @${(\emon{\obnd{\sowner}{\stype}{\sowner}}{\svalue})}
  represents a boundary between two components.
 A trace wrapper @${(\ehist{\sbset}{\svalue})} attaches metadata to a value.
 
@@ -1412,14 +1413,14 @@ The @|nname| approach additionally keeps boundary types honest throughout the
   By showing that a lifted variant of the $\rredN$ relation preserves
    single-owner consistency ($\sWLsingle$).
   Full lifted rules for \nname{} appear in the supplementary
-   material, but one can derive the rules by applying the guidelines from @sectionref{sec:design:laws}.
+   material, but one can derive the rules by applying the guidelines from \sectionref{sec:design:laws}.
   For example, consider the $\nredND$ rule that wraps a function.
   The lifted version accepts a term with arbitrary ownership labels
    and propagates these labels to the result:
 
   \begin{displayrrarray}
     \obars{\estab{\obnd{\sowner_0}{(\tfun{\stype_0}{\stype_1})}{\sowner_1}}{\obbars{\svalue_0}{\sownerlist_2}}}{\sowner_3}
-    & \nredNDanns
+    & \nredNDanns & \hspace{3cm}~
     \\\sidestep{\obars{\emon{\obnd{\sowner_0}{(\tfun{\stype_0}{\stype_1})}{\sowner_1}}{\obbars{\svalue_0}{\sownerlist_2}}}{\sowner_3}}
     \\\sidecond{if $\fshallow{\ftagof{\tfun{\stype_0}{\stype_1}}}{\svalue_0}$}
   \end{displayrrarray}
@@ -1613,7 +1614,7 @@ Nevertheless, @|cname| and @|nname| can behave differently.
   \cname{} satisfies $\propcm{}$.
 \end{theorem}
 \begin{proofsketch}
-  By preservation of single-owner consistency for the lifted
+  $\!\!\!$ By preservation of single-owner consistency for the lifted
    $\rredC$ relation.
   Consider the lifted rule that applies a wrapped function:
 
@@ -1644,14 +1645,14 @@ Nevertheless, @|cname| and @|nname| can behave differently.
   $\nsym{} \sbehaviorle \csym{}$.
 \end{theorem}
 \begin{proofsketch}
-  By a stuttering simulation between \nname{} and \cname{}.
-  \nname{} takes additional steps when a pair reaches a boundary because it
+  By a stuttering simulation.
+  \nname{} takes extra steps when a pair reaches a boundary because it
    immediately checks the contents; \cname{} creates a guard wrapper.
   \cname{} takes additional steps when eliminating a wrapped pair.
   The supplement defines the simulation relation.
 
   The pair wrappers in \cname{} imply $\csym{} \not\sbehaviorle \nsym{}$.
-  Consider a statically-typed expression that imports an untyped pair
+  Consider a typed expression that imports an untyped pair
    with an ill-typed first element.
 
   \begin{displayrrarray}
@@ -1803,8 +1804,9 @@ A typed value acquires at most two wrappers: one to protect itself from
 }|
 
 @|fname| enforces this two-wrapper limit by removing the outer wrapper of
- any guarded value that flows to untyped code.
-An untyped-to-typed boundary always makes a new wrapper, but these wrappers do not
+ any guarded value that exits typed code.
+Re-entering typed code makes a new wrapper,
+ but these wrappers do not
  accumulate because a value cannot enter typed code twice in a row; it
  must first exit typed code and lose one wrapper.
 
@@ -1893,7 +1895,7 @@ So, @|fname| fails to satisfy blame completeness.
   The judgment asks whether the owners on a value contain at least the name
    of the current component.
   \fname{} easily satisfies this invariant because the ownership
-   guidelines ( @sectionref{sec:design:laws}) never drop an un-checked label.
+   guidelines (\sectionref{sec:design:laws}) never drop an un-checked label.
   Thus, when a boundary error occurs:
 
   \begin{displayrrarray}
@@ -2341,7 +2343,7 @@ Nevertheless, they help characterize @|tname|:
    \end{mathpar}}
   }|]
 
-@exact|{
+@exact{
 \begin{theorem}\leavevmode
   \tname{} satisfies $\propbsheap$.
 \end{theorem}
@@ -2368,7 +2370,7 @@ Nevertheless, they help characterize @|tname|:
 
   \begin{displayrrarray}
     \obars{\eapp{\stoptional}{\obbars{\eloc_0}{\sownerlist_0}}{\obbars{\svalue_0}{\sownerlist_1}}}{\sowner_0}; \ldots
-    &  \nredTXanns
+    &  \nredTXanns & \hspace{2cm}~
     \\\sidestep{ \obars{\boundaryerror{\ldots}{\obbars{\svalue_0}{\fconcat{\sownerlist_1}{\fconcat{\sowner_0}{\frev{\sownerlist_0}}}}}}{\sowner_0}; \ldots }
   \end{displayrrarray}
 
@@ -2378,7 +2380,7 @@ Nevertheless, they help characterize @|tname|:
   Thanks to heap-based ownership, the technical justification is that
    adding these boundaries preserves the $\propbsheap$\/ property.
 \end{proofsketch}
-}|
+}
 
 @exact|{
 \begin{theorem}\leavevmode
@@ -2407,7 +2409,7 @@ Nevertheless, they help characterize @|tname|:
 
 @figure*[
   "fig:amnesic-reduction"
-  @elem{@|aname| notions of reduction}
+  @elem{@|aname| notions of reduction (1/2)}
 
   @exact|{
   \lbl{\fbox{\aname{} Syntax}~extends \hyperref[fig:evaluation-ho]{\syntaxho{}}}{
@@ -2465,8 +2467,13 @@ Nevertheless, they help characterize @|tname|:
                   and $\sbnd_1 \sassign \obnd{\sowner_1}{\stype_1}{\sowner_0}$}
     \end{rrarray}
   }
+}|]
 
-  \bigskip
+@figure*[
+  "fig:amnesic-reduction2"
+  @elem{@|aname| notions of reduction (2/2)}
+
+  @exact|{
   \lbl{\fbox{$\sexpr \nredAD \sexpr$}~\missingrules{}}{
     \begin{rrarray}
       \estab{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\svalue_0}
@@ -2692,7 +2699,7 @@ This information leads to sound and complete blame messages.
   \end{mathpar}}
   }|]
 
-@exact|{
+@exact{
 \begin{theorem}
   \aname{} satisfies $\propbspath$\/ and $\propbcpath$.
 \end{theorem}
@@ -2716,7 +2723,7 @@ This information leads to sound and complete blame messages.
   Thus the new labels on the result match the sender names on the two new
    boundaries in the trace.
 \end{proofsketch}
-}|
+}
 
 @exact|{
 \begin{theorem}\label{thm:TAsim}
@@ -2748,7 +2755,7 @@ This information leads to sound and complete blame messages.
   $\fsym{} \sbehaviorle \asym{}$.
 \end{theorem}
 \begin{proofsketch}
-  By a lock-step bisimulation.
+  $\!\!$ By a lock-step bisimulation.
   The only difference between \fname{} and \aname{} comes from subtyping.
   \fname{} uses wrappers to enforce the type on a boundary.
   \aname{} uses boundary types only for an initial shape check, and instead uses the static types
