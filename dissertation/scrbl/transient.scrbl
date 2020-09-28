@@ -1169,7 +1169,7 @@ A library-provided function promised to return a unit value and actually
 @|sTransient| caught the unsoundness.
 
 The fix to Racket is especially interesting (@github-pull["racket" "racket" "3182"]).
-Before the fix, some @|sshallow|-typed programs failed with a strange error:
+It came about because some @|sshallow|-typed programs failed with a strange error message:
 
 @nested[#:style 'inset @codett{Expected a real number, got #<unsafe-undefined>}]
 
@@ -1210,36 +1210,27 @@ Their saving grace is that the type optimizer does not transform methods;
 @; [X] overhead plots ... incrementally
 @; [X] exact plots, for trends
 @; [X] table, typed/untyped (see perf sections)
-@; [ ] DEBUG why is fsm7.7 faster untyped than fsm-S ???
-@;     maybe BC vs CS, fsm-7.7 might be BC
-@; [ ] DEBUG why is synth (recent data, 07-31?) so bad?
-@; [ ] DEBUG why is fsmoo transient-typed faster than untyped?
-@; [ ] blame perf table (use NSA)
+@; [X] DEBUG why is fsm7.7 faster untyped than fsm-S ???
+@;     maybe BC vs CS, fsm-7.7 might be BC (yes fixed)
+@; [X] DEBUG why is synth (recent data, 07-31?) so bad?
+@; [X] DEBUG why is fsmoo transient-typed faster than untyped? (class code not protected)
+@; [X] blame perf table (use NSA)
 
 
-@|sShallow| Racket trades static guarantees for performance.
-The weakened type soundness and loss of complete monitoring and correct blame
- must lead to better performance.
+@|sShallow| Racket sacrifices static guarantees for a wrapper-free implementation.
+The loss of wrappers implies a loss of full type soundness, complete monitoring,
+ and correct blame.
+As compensation, @|sshallow| needs to demonstrate improved performance.
 
-This section presents the results of an evaluation using the @|GTP| benchmarks.
-The granularity of the experiment is module-level, same as our Typed Racket
- experiment reported in @section-ref{sec:tr:evaluation}.
-All data came from a dedicated Linux box with @id[NSA-num-cores] physical
+This section applies the methods from @chapter-ref{chap:performance} to evaluate
+ @|sShallow| Racket on the @|GTP| benchmarks.
+The granularity of the experiment is module-level, same as our @|sDeep| Racket
+ experiment from @section-ref{sec:tr:evaluation}.
+All data is from a dedicated Linux box with @id[NSA-num-cores] physical
   @id[NSA-core-name] @id[NSA-core-speed] cores and @id[NSA-RAM] RAM.
 
 
 @subsection[#:tag "sec:transient:ratio"]{Performance Ratios}
-@; TODO in @bm{fsm}, transient untyped is slower because it is running on
-@;  CS rather than BC.
-@; The 7.7 numbers need to move to CS.
-@; Maybe, should take latest Racket for the (void) fix
-@;
-@; TODO why does @bm{fsm} do so well with optimization?
-
-@; fsmoo should be ~ deep/untyped = 0.59 shal/untyped = 0.64
-@;  .... deep is a little slow, shallow TOO FAST
-@;  .... current shallow-untyped ~ 2000ms (!!!!) shallow-typed ~ 304ms (ok)
-
 
 @(let* ((RT (get-ratios-table SHALLOW-CURRENT-BENCHMARK*))
         (deep-win-names+shallow-win-names
@@ -1248,10 +1239,10 @@ All data came from a dedicated Linux box with @id[NSA-num-cores] physical
              (<= (ratios-row-deep row) (ratios-row-shallow row)))
            (define-values [a b] (partition deep-wins? RT))
            (cons (map ratios-row-name a) (map ratios-row-name b))))
-        (deep-win-names '("???") #;(car deep-win-names+shallow-win-names))
-        ;; TODO
-        (shallow-win-names '("???") #;(cdr deep-win-names+shallow-win-names))
+        (deep-win-names (car deep-win-names+shallow-win-names))
+        (shallow-win-names (cdr deep-win-names+shallow-win-names))
         (num-deep-wins (length deep-win-names))
+        (deep-wins-all? (= num-deep-wins (length RT)))
         (num-shallow-<1
          (for/sum ((row (in-list RT)))
            (if (< (ratios-row-shallow row) 1) 1 0))))
@@ -1263,25 +1254,28 @@ All data came from a dedicated Linux box with @id[NSA-num-cores] physical
 ]
 @elem{
 @Figure-ref{fig:transient:ratio} presents typed/untyped ratios for
- the @|GTP| benchmarks.
+ the benchmarks.
 The middle column lists the overhead of fully-typed @|sdeep| code relative
  to the untyped configuration.
 The right column shows the overhead of fully-typed @|sshallow| types.
 
 Because these @|sshallow| types are implemented with the @|stransient| semantics,
- one would expect them to be slower than @|sdeep| types.
-The latter has no overhead in completely typed programs.
-Indeed, @integer->word[num-deep-wins]
- @(if (= 1 num-deep-wins) "benchmark runs" "benchmarks run")
- faster with deep types.
-The exceptions (@oxfordize[shallow-win-names]) are all programs that depend
- on untyped library code.
-
-Surprisingly, @integer->word[num-shallow-<1]
- @(if (= 1 num-shallow-<1) "benchmark runs" "benchmarks run")
- faster with @|sshallow| types than with no types.
-Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
- to make the code run faster than untyped.
+ one would expect them to run slower than @|sdeep| types because the
+ latter has no overhead in completely typed programs.
+@(if deep-wins-all?
+  @elem{Indeed, @|sdeep| runs faster in every row and has a worst-case overhead under 2x.}
+  @elem{Indeed, @integer->word[num-deep-wins]
+        @(if (= 1 num-deep-wins) "benchmark runs" "benchmarks run")
+         faster with deep types.
+        The exceptions (@oxfordize[shallow-win-names]) are all programs that depend
+         on untyped library code.})
+@|sShallow| typically does well, with overhead under 5x, but a few benchmarks
+ have larger slowdowns due to @|stransient| checks.
+The worst is @bm{zombie}, which suffers a 30x ovehead because of the many
+ elimination forms in typed code.
+A better completion pass may be able to reduce this high cost.
+The best case for @|stransient| is @bm{lnm}, which nearly runs faster than
+ the fully-untyped configuration.
 }])
 
 
@@ -1302,28 +1296,24 @@ Despite the cost of @|stransient| checks, the Typed Racket optimizer is able
 
 
 @Figures-ref["fig:transient:overhead" (exact-ceiling (/ (length SHALLOW-CURRENT-BENCHMARK*) overhead-plots-per-page))]
- plots the overhead of gradual typing
- in @|sDeep| Racket and @|sShallow| Racket.
+ plot the overhead of @|sDeep| and @|sShallow| Racket.
 As before, these plots show the proportion of @ddeliverable{D} configurations
  for values of @${D} between 1x and @~a[MAX-OVERHEAD]x.
 
-@|sShallow| types give a tremendous improvement in TODO benchmarks.
-These benchmarks fall victim to @|sdeep| types; the very-different
- @|stransient| semantics fares much better.
-
-TODO benchmarks, however, typically run faster with @|sdeep| types.
-Each demands a close look:
-@itemlist[
-@item{
-  @bm{morsecode}
-}
-@item{
-  @bm{zordoz}
-}
-]
-
-Overall, @|sShallow| Racket does not disappoint.
-
+@|sShallow| types lead to a huge improvement, from over 20x down to 8x or lower, in
+ @integer->word[(length '(forth fsmoo dungeon jpeg suffixtree take5 synth quadU quadT))]
+ benchmarks.
+In one way or another, these benchmarks suffer from high @|sdeep| overhead
+ due to eager and wrapped checks.
+The wrapper-free @|stransient| semantics removes the issue.
+@|sShallow| improves on a few other benchmarks, and does equally-well on
+ almost all the rest.
+The one exception is @bm{morsecode}, which fares better with @|sdeep| types.
+Three characteristics account for the discrepancy:
+ @bm{morsecode} boundaries create few wrappers;
+ the @|stransient| laziness does not end up saving many checks;
+ and the overhead of @|stransient| checks ends up slowing down large chunks of typed code.
+Overall, @|sShallow| Racket lives up to its promise of better mixed-typed performance.
 
 
 @subsection[#:tag "sec:transient:exact"]{Exact Runtime Plots}
@@ -1354,11 +1344,12 @@ In @|sDeep| Racket, mixing typed and untyped code can lead to significant overhe
 Points in the middle columns are for mixed configurations, and can have
  high cost; @bm{zombie} in particular slows down in the middle.
 Points on the right columns, however, do not suffer.
-After critical boundaries are typed, performance with @|sdeep| types is
- often excellent.
+After critical boundaries are typed, performance is often excellent.
 
 In @|sShallow| Racket, the trend is simple: adding types slows code down.
-There is a linear, upward trend in every benchmark except @bm{fsm}.
+There is a linear, upward trend in every benchmark.
+As the overhead plots anticipate, the linear cost is typically much lower
+ than the extremes of @|sdeep| types.
 
 
 @subsection[#:tag "sec:transient:blame-performance"]{Blame Performance}
@@ -1368,7 +1359,7 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
          (for/list ((r (in-list BT))
                     #:when (equal? "timeout" (blame-row-blame r)))
            (blame-row-name r)))
-        (blame-oom* '("???") #;
+        (blame-oom*
          (for/list ((r (in-list BT))
                     #:when (equal? "out of memory" (blame-row-blame r)))
            (blame-row-name r)))
@@ -1385,9 +1376,9 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
                     #:when (number? (blame-row-blame r)))
            (/ (blame-row-blame r)
               (blame-row-shallow r))))
-        (avgx-blame-over-shallow "???" #;
+        (avgx-blame-over-shallow
          (rnd (mean x-blame-over-shallow*)))
-        (worstx-blame-over-shallow "???" #;
+        (worstx-blame-over-shallow
          (rnd (apply max x-blame-over-shallow*))))
 @list[
 @figure*[
@@ -1404,8 +1395,6 @@ There is a linear, upward trend in every benchmark except @bm{fsm}.
   @render-blame-table[BT]
 ]
 @elem{
-@; TODO why expensive?
-@;  no gc, give example
 
 @Figure-ref{fig:transient:blame-performance} evaluates the overhead of
  @|sShallow| Racket with blame enabled.
@@ -1414,7 +1403,6 @@ The second column of this table measures the overhead of blame on
 For comparison: the third column lists the overhead of the same
  configuration without blame, and the fourth column lists the absolute
  worst-case of @|sdeep| types.
-
 This table reports only the fully-typed configuration for @|sshallow| because
  this configuration contains the greatest number blame-map updates.
 Configurations with fewer typed modules have syntactically fewer locations
@@ -1431,10 +1419,9 @@ Surprisingly, the fourth column shows that @|sshallow| blame costs
  more than the worst case of @|sDeep| types in @id[(length deep-beats-blame*)] benchmarks.
 The benchmarks in which @|sDeep| loses all send higher-order values across
  several boundaries; each crossing makes an expensive wrapper.
-@; TODO mention collapsible here?
 By contrast, @|sShallow| blame slows down every operation by a small factor
  and allocates a small amount of memory for every value.
-These small costs add up, even in our short-running benchmarks.
+These small costs add up, even in our relatively short-running benchmarks.
 
 Our blame results are far less optimistic than the early report in
  @citet{vss-popl-2017}, which found an average slowdown on 2.5x and
@@ -1442,8 +1429,8 @@ Our blame results are far less optimistic than the early report in
 For @|sShallow| Racket benchmarks that terminate, the average slowdown
  from blame is @id[avgx-blame-over-shallow]x
  and the worst-case is @id[worstx-blame-over-shallow]x.
-These different conclusions are due to two factors that let Reticulated
- insert few checks: the chosen benchmarks and gradual type inference.
+These different statistics are due to two factors that let Reticulated
+ insert fewer checks: the chosen benchmarks and gradual type inference.
 
 Regarding benchmarks, @citet{vss-popl-2017} use small programs from the
  @|PYBENCH| suite.
@@ -1452,15 +1439,17 @@ Regarding benchmarks, @citet{vss-popl-2017} use small programs from the
   @elem{@Integer->word[num-numeric] of the @integer->word[num-total] benchmarks
   focus on numeric computations; since the blame map does not track primitive
   values, adding blame adds little overhead.})
-Among the other benchmarks, the overhead of blame appears to increase with
+Four others have since been retired from the Python suite because they are
+ too small, unrealistic, and unstable (@shorturl["https://" "pyperformance.readthedocs.io/changelog.html"]).
+Among the remaining benchmarks, the overhead of blame appears to increase with
  the size of the program.
 Larger Reticulated benchmarks should run on par with @|sShallow| Racket.
 Indeed, I converted the @bm{sieve} benchmark to Reticulated and found that
  adding blame increases its running time from ~40 seconds to a time out after
  10 minutes.
 
-The type inference issue is subtle;
- Reticulated frequently infers the dynamic type for local variables.
+The type inference issue is subtle.
+Reticulated frequently infers the dynamic type for local variables.
 Doing so is type-sound and lets Reticulated skip many runtime checks
  and blame-map updates; however, the programmer gets less precise type
  and blame information.
@@ -1487,92 +1476,8 @@ Running this program leads to a Python exception about comparing strings
  and integers.
 For the benchmarks, the lack of checks leads to a faster running time,
  especially in programs that incrementally update local variables in a loop.
+If updates lead to the dynamic type, then run-time operations are free of
+ shape checks.
 }])
 
-
-@section[#:tag "sec:transient:future"]{Future Challenges}
-
-@futurework{
-  Adapt Typed Racket's occurrence typing to support a completion pass that
-   avoids dominated checks.
-  Evaluate the performance improvement.
-}
-
-@futurework{
-  Design a language of blame types to replace the identifier-based logic.
-}
-
-@futurework{
-  Allow multiple parents per link entry
-   and dynamically choose a parent for operations such as @codett{hash-ref}.
-  How do the changes affect blame errors and performance?
-}
-
-@futurework{
-  The Typed Racket optimizer does not take advantage of all shapes.
-  In this sense, the check for functions is an unnecessary cost---even
-   @codett{procedure?} would be a waste, because the TR optimizer does
-   not use it.
-  Improve the optimizer where possible and remove other shape checks.
-  How do the changes impact performance?
-  Try writing a few programs;
-   perhaps by converting Reticulated benchmarks to @|sShallow| Racket.
-  Do the removed shape checks make programs more difficult to debug?
-}
-
-
-@subsection{Trust Types}
-
-For now, @|sShallow| Racket includes a whitelist of trustworthy base-library
- functions.
-Functions like @codett{map} are trusted to return shape-correct results.
-
-Checking identifiers, however, is brittle.
-Furthermore, the current approach cannot trust deeper properties of a type.
-A call to @codett{filter}, for example, guarantees the top shape of the result
- (a list) and the top shape of every element in the list.
-There should be some way to encode this shape knowledge in a type.
-
-
-@subsection{Identify Trustworthy Typed Identifiers}
-
-@; aka why doesn't @|stransient| optimize more?
-
-Some user-defined functions do not need @|stransient| result checks.
-If a @|stransient| module defines a function @codett{f = (λ (x) ....)}
- then there is no need for the current module to check its results;
- static typing guarantees a shape-correct output.
-Other functions in the same module, though, cannot be trusted.
-If @codett{f = (car f*)} then we can only trust the output if functions
- in the list are good.
-
-
-@subsection{Improve or Drop @|sTransient| Blame Filtering}
-
-@|sShallow| Racket makes an effort to filter irrelevant boundaries
- as suggested by @citet{vss-popl-2017}.
-Some boundaries cannot be filtered, however, because @|sShallow| Racket
- cannot parse the complex type definitions (@section-ref{sec:transient:blame:types}).
-This challenge motivates two research efforts.
-
-One goal is to improve type parsing and filtering to cover all types.
-If possible, this seems like the way to go.
-But it will be important to measure whether the solution requires additional
- run-time overhead.
-
-A second goal is to evaluate the usefulness of filtering as-is.
-If filtering is not useful and seems unlikely to help, then removing it can
- save a tremendous amount of bookkeeping.
-Without the need to filter, the blame map does not need to store types or
- actions---only pointers and source locations.
-If filtering is useful, it may be helpful to allow types with parse errors
- because an action path explores only a fraction of a full type.
-The needed portion may not touch the difficult parts.
-
-
-@subsection{Design a new Blame Algorithm}
-
-The performance costs of the blame algorithm from @citet{vss-popl-2017} are high.
-Is there a different algorithm with lower cost that still provides useful
- information?
 

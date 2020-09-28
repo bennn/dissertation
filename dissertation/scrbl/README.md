@@ -24,6 +24,7 @@ TODO
 - [ ] conclusion ... other chapters?
 
 Style
+- [ ] fig 62+, bad titles for deep vs shallow exact plots
 - [ ] shallow/CACHE too big, why are files so huge?
       could zip them
 - [ ] hyperlinks broken because scribble labels
