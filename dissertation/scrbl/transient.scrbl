@@ -87,7 +87,7 @@ The performance of @|sShallow| Racket is typically an improvement over
  code, and surpasses untyped Racket in many cases.
 Whether @|sShallow| Racket can ever run faster than untyped code is an open
  question.
-For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
+@; For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
 
 
 @section[#:tag "sec:transient:theory"]{Theory}

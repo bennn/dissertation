@@ -1,14 +1,25 @@
 MAIN=bg
 
-all: pkg compile abstract.scrbl acknowledgments.scrbl bg.scrbl both.scrbl conclusion.scrbl design.scrbl future.scrbl introduction.scrbl performance.scrbl related.scrbl transient.scrbl why.scrbl scribble-load-replace.tex
-	PLTSTDERR="error info@bg-thesis" raco scribble --latex ++style texstyle.tex ++extra package.tex ++extra def.tex ++extra scribble-load-replace.tex ${MAIN}.scrbl
+bg.pdf: pkg compile bg.tex
+	pdflatex ${MAIN} && \
+	bibtex ${MAIN} && \
+	pdflatex ${MAIN} && \
+	pdflatex ${MAIN} && \
+	echo "done, fully" 
+
+fast: compile bg.tex
+	pdflatex ${MAIN}.tex && \
+	open ${MAIN}.pdf && \
+	echo "done"
+
+ben: pkg compile bg.scrbl
 	latexmk -silent --pdf ${MAIN}.tex ${MAIN}.bib
+
+bg.tex: abstract.scrbl acknowledgments.scrbl bg.scrbl both.scrbl conclusion.scrbl design.scrbl future.scrbl introduction.scrbl performance.scrbl related.scrbl transient.scrbl why.scrbl scribble-load-replace.tex
+	PLTSTDERR="error info@bg-thesis" raco scribble --latex ++style texstyle.tex ++extra package.tex ++extra def.tex ++extra scribble-load-replace.tex ${MAIN}.scrbl
 
 compile:
 	raco make -v ${MAIN}.scrbl
-
-tex: bg.tex
-	xelatex ${MAIN}.tex
 
 pkg:
 	raco pkg install --auto --skip-installed
