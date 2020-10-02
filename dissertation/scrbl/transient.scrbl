@@ -87,7 +87,7 @@ The performance of @|sShallow| Racket is typically an improvement over
  code, and surpasses untyped Racket in many cases.
 Whether @|sShallow| Racket can ever run faster than untyped code is an open
  question.
-@; For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
+For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
 
 
 @section[#:tag "sec:transient:theory"]{Theory}
@@ -273,7 +273,7 @@ In summary, the flexibility of subtyping limits the ability of @|stransient|
 Checks are based on local uses, while boundaries are claims with a broad scope.
 
 @futurework{
-  Find an effective way to offer subtyping and catch boundary errors.
+  Find an effective way to allow subtyping and catch boundary errors.
   One idea is to use static analysis to identify the different paths from
    boundaries to a use-site.
   A second is to record subtyping actions in the blame map, as a loss of precision.
@@ -328,6 +328,12 @@ The completion for @|sShallow| Racket produces the following term:
  can never fail.
 An improved completion would eliminate this check, other flow-dominated checks,
  and potentially many others.
+
+@futurework{
+  Adapt Typed Racket's occurrence typing to support a completion pass that
+   avoids dominated checks.
+  Evaluate the performance improvement.
+}
 
 
 @section[#:tag "sec:transient:blame"]{Work-in-progress: Blame}
@@ -490,6 +496,10 @@ Renaming @codett{map} leads to misleading blame errors.
 The same goes for applications of an expression instead of a literal identifier.
 Improving precision is an open challenge.
 
+@;@futurework{
+@;  Design a language of blame types to replace the identifier-based logic.
+@;}
+
 
 @subsection{Multi-Parent Paths}
 
@@ -516,6 +526,12 @@ A blame map clearly needs conditional and multi-parent paths to give precise
 But the cost of building and traversing the additional link entries may be
  high.
 Thus we leave such paths to future work.
+
+@;@futurework{
+@;  Allow multiple parents per link entry
+@;   and dynamically choose a parent for operations such as @codett{hash-ref}.
+@;  How do the changes affect blame errors and performance?
+@;}
 
 
 @subsection{Expressive Link-Entry Actions}
@@ -1097,6 +1113,7 @@ Finally, the @${\mathsf{unboxed{\mhyphen}let}} pass is only safe by virtue
 
 @subsection[#:tag "sec:transient:pr"]{Bonus Fixes and Enhancements}
 
+@; NOTE: text is too wide for a 2-column table, even if we remove "racket" from every line
 @figure*[
   "fig:transient:pulls"
   @elem{Pull requests inspired by work on @|sShallow| Racket.}
@@ -1480,4 +1497,76 @@ If updates lead to the dynamic type, then run-time operations are free of
  shape checks.
 }])
 
+
+@section[#:tag "sec:transient:future"]{Future Challenges}
+
+@subsection{Identify Trustworthy Typed Identifiers}
+
+@; aka why doesn't @|stransient| optimize more?
+
+Some user-defined functions do not need @|stransient| result checks.
+If a @|stransient| module defines a function @codett{f = (λ (x) ....)}
+ then there is no need for the current module to check its results
+ because static typing guarantees a shape-correct output.
+Other functions in the same module, though, cannot be trusted.
+If @codett{f = (car f*)} then we can only trust the output if functions
+ in the list are good.
+
+@; @subsection{Trust Types}
+@; 
+@; For now, @|sShallow| Racket includes a whitelist of trustworthy base-library
+@;  functions.
+@; Functions like @codett{map} are trusted to return shape-correct results.
+@; 
+@; Checking identifiers, however, is brittle.
+@; Furthermore, the current approach cannot trust deeper properties of a type.
+@; A call to @codett{filter}, for example, guarantees the top shape of the result
+@;  (a list) and the top shape of every element in the list.
+@; There should be some way to encode this shape knowledge in a type.
+
+
+@subsection{Improve or Drop @|sTransient| Blame Filtering}
+
+@|sShallow| Racket makes an effort to filter irrelevant boundaries
+ as suggested by @citet{vss-popl-2017}.
+Some boundaries cannot be filtered, however, because @|sShallow| Racket
+ cannot parse the complex type definitions (@section-ref{sec:transient:blame:types}).
+Short of designing a new blame algorithm, this challenge motivates two research efforts.
+
+One goal is to improve type parsing and filtering to cover all types.
+If possible, this seems like the way to go.
+But it will be important to measure whether the solution requires additional
+ run-time overhead.
+
+A second goal is to evaluate the usefulness of filtering as-is.
+If filtering is not useful and seems unlikely to help, then removing it can
+ save a tremendous amount of bookkeeping.
+Without the need to filter, the blame map does not need to store types or
+ actions---only pointers and source locations.
+If filtering is useful, it may be helpful to allow types with parse errors
+ because an action path explores only a fraction of a full type.
+@; The needed portion may not touch the difficult parts.
+
+
+@subsection{Evaluate Alternative Shape Designs}
+
+The shape checks in @|sShallow| Racket enforce full type constructors
+ (@sectionref{sec:transient:theory:types}).
+Other designs are possible, though, and may lead to a better tradeoff
+ between type guarantees and performance.
+
+One direction is to strenghten the run-time checks to go beyond the outermost type
+ constructor.
+Some designs may benefit from two or three levels of constructor checks.
+In the limit, a @|stransient| could enforce all first-order properties;
+ if a programmer can switch between enforcement levels, then this option may
+ be helpful for debugging.
+
+A second alternative is to weaken run-time checks for maximal performance.
+The current shapes check too much, in the sense that the Typed Racket optimizer
+ does not use them all.
+For example, the @|sShallow| check for function-arity does not help any optimizations.
+Nor would a simple @codett{procedure?} check.
+If performance is the only concern, then an implementation can let the dynamically-typed
+ runtime system handle function applications.
 
