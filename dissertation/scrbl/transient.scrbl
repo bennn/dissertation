@@ -524,7 +524,7 @@ Thus we leave such paths to future work.
   "fig:transient:blame:path"
   @elem{Sample blame actions in @|sShallow| Racket.}
   @exact{{
-  \renewcommand{\twoline}[2]{\parbox[t]{2.5in}{#1\newline#2}}
+  \renewcommand{\twoline}[2]{\parbox[t]{2.4in}{#1\newline#2}}
   \begin{tabular}{l@"@" {~~~~}l}
     Action Template & Interpretation
   \\\hline
@@ -540,7 +540,7 @@ Thus we leave such paths to future work.
   \\
     @codett{'list-rest} & Tail of a list
   \\
-    @codett{`(list-elem ,n)} &  \twoline{Element of a heterogeneous list,}{e.g. @codett{(List Boolean Number String)}}
+    @codett{`(list-elem ,n)} &  \twoline{Element of a heterogeneous list,}{e.g. @codett{(List Boolean Number String)}$\!\!\!\!$}
   \\[3.5ex]
     @codett{'hash-key} & Key of a hashtable
   \\
