@@ -12,7 +12,7 @@ fast: compile bg.tex
 	open ${MAIN}.pdf && \
 	echo "done"
 
-ben: pkg compile bg.scrbl
+ben: pkg compile bg.tex
 	latexmk -silent --pdf ${MAIN}.tex ${MAIN}.bib
 
 bg.tex: abstract.scrbl acknowledgments.scrbl bg.scrbl both.scrbl conclusion.scrbl design.scrbl future.scrbl introduction.scrbl performance.scrbl related.scrbl transient.scrbl why.scrbl scribble-load-replace.tex
