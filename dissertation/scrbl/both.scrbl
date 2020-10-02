@@ -16,20 +16,27 @@
 @;   Might be able to prove a ``tag error'' lemma, but the elimination forms
 @;    currently don't tell between static-typed and untyped
 
+This section validates my thesis: that @|sdeep| and @|sshallow| types
+ can be combined in a single language, and the combination is an improvement
+ over either one alone.
+First, I prove that @|sdeep| types via @|snatural| and @|sshallow| types
+ via @|stransient| can coexist in a formal model.
+The two semantics can interoperate without changing the formal properties
+ of either one (@sectionref{sec:both:model}).
+Second, I report challenges that arose combining @|sDeep| Racket and
+ @|sShallow| Racket (@sectionref{sec:both:implementation}).
+Overall, the combined implementation has clear benefits (@sectionref{sec:both:evaluation}).
+Programmers are better off with the choice between @|sdeep| guarantees
+ and @|stransient| performance.
+Combining the two semantics in one program can further improve performance.
+And, surprisingly, the addition of @|sshallow| types can express programs
+ that @|sDeep| Racket does not.
 
-First, simple model of the combination.
-Formal properties preserved.
-Failed attempts at reducing cross-checks between Guarded and Transient.
-
-New expressiveness, Transient TR allows boundaries that Guarded TR does not.
-
-Implementation challenges, require/untyped-contract and others.
- define-typed/untyped-id, S-require-T-id hygienic
-
-Evaluation, to be determined, 2-way vs 3-way lattice, programs where combination
- is better than Guarded-alone or Transient-alone.
-
-Threats, especially no blame in Transient.
+A downside of the combination is that @|snatural| and @|stransient| cannot
+ easily share the results of their type checks.
+The reason is simple: @|stransient| as-is lacks a way of telling what it learned.
+@Sectionref{sec:both:nonopt} explains the synergy challenge in terms of the
+ model and outlines implementation techniques that may work around the issue.
 
 
 @section[#:tag "sec:both:model"]{Model and Properties}
@@ -1384,6 +1391,8 @@ Even so, old code needs changes.
 
 
 @section[#:tag "sec:both:evaluation"]{Evaluation}
+@; @; Evaluation, to be determined, 2-way vs 3-way lattice, programs where combination
+@; @;  is better than Guarded-alone or Transient-alone.
 
 @subsection[#:tag "sec:both:expressiveness"]{Expressiveness}
 @; new mixed programs, relative to TR alone
@@ -1620,7 +1629,7 @@ Wider implication for Racket?
 
 
 
-@section{Failed Attempt to Optimize}
+@section[#:tag "sec:both:nonopt"]{Failed Attempt to Optimize}
 @; - talk about with-boundary model, explain HLU-interactions, why failed,
 @;   how to overcome maybe
 @; - 
