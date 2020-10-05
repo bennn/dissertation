@@ -1,4 +1,11 @@
 #lang greenman-thesis/include
+
+@; TODO
+@; - Might be able to prove a ``tag error'' lemma, but the elimination forms
+@;    currently don't tell between static-typed and untyped
+@; - colors for boundary spiderweb picture
+@; - ....
+
 @(require
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*
@@ -12,9 +19,6 @@
      mean))
 
 @title[#:tag "chap:both"]{@|sDeep| and @|sShallow|, Combined}
-@; TODO
-@;   Might be able to prove a ``tag error'' lemma, but the elimination forms
-@;    currently don't tell between static-typed and untyped
 
 This section validates my thesis: that @|sdeep| and @|sshallow| types
  can be combined in a single language, and the combination is an improvement
@@ -34,8 +38,8 @@ And, surprisingly, the addition of @|sshallow| types can express programs
 
 A downside of the combination is that @|snatural| and @|stransient| cannot
  easily share the results of their type checks.
-The reason is simple: @|stransient| as-is lacks a way of telling what it learned.
-@Sectionref{sec:both:nonopt} explains the synergy challenge in terms of the
+The reason is simple: @|stransient| as-is lacks a way of learning from past checks.
+@Sectionref{sec:both:model:nonopt} explains the synergy challenge in terms of the
  model and outlines implementation techniques that may work around the issue.
 
 
@@ -45,51 +49,34 @@ The reason is simple: @|stransient| as-is lacks a way of telling what it learned
 @;   - failed attempts at natural/transient cooperation to reduce checks,
 @;     possible futures (forgetful)
 
-This model compiles our three kinds of types down to a common, simple runtime.
-The compiler removes data about what languages are sitting around a boundary;
- this is similar to the information that the Racket runtime has about checks
- generated via Typed Racket.
+The model combines @|sdeep|-typed code, @|sshallow|-typed code, and
+ untyped code in one surface language.
+Each of these three typing disciplines is recognized by a surface-typing
+ judgment and comes with a complier.
+The three compilers translate well-typed code to a common evaluation
+ syntax that has one untyped semantics.
 
-Ingredients:
-
-@itemlist[
-@item{
-  1 surface language
-}
-@item{
-  1 evaluation language + semantics
-}
-@item{
-  3 linked surface type judgments
-}
-@item{
-  3 linked surface-to-evaluation compilers
-}
-@item{
-  3 linked evaluation type judgments
-}
-@item{
-  1 consistent ownering judgment
-}
-]
-
-The question is: can the language satisfy ``complete monitoring''
- if the compilers remove type and boundary info?
-
-In the end, we need no types and three kinds of cast expression in the
- evaluation language.
-Each kind of cast represents the ``most-concerned'' party:
- T and anyone gives T, U to S gives S, and S to U gives U.
-The three evaluation sub-languages can mix via the cast expressions and the
- result satisfies both type soundness (exact guarantee varies by surface sub-lang)
- and complete monitoring (for ``honest'' types only).
+Although the three varieties of surface code give rise to six kinds of
+ interactions, the model keeps these interactions under control with
+ only three kinds of run-time boundary (@figureref{fig:both:base-interaction}).
+A @emph[swrap] boundary inserts a higher-order check to support @|sdeep|
+ types.
+A @emph[sscan] boundary validates a top-level shape for @|sshallow| code.
+Lastly, a @emph[snoop] boundary does nothing.
+@Sectionref{sec:both:model:theorems} proves that these checks are strong enough to provide
+ @|sshallow| types that satisfy shape-soundness and @|sdeep| types that
+ satisfy complete monitoring.
+@; An interesting future challenge is whether checks can be systematically weakened;
+@;  @sectionref{sec:both:model:nonopt} briefly describes our failed attempts on this front.
 
 
-@; Similar to @chapter-ref{chap:design}, but simpler more realistic .. condensed?
-@; Worth repeating.
+@figure*[
+  "fig:both:base-interaction"
+  @elem{@|sDeep|, @|sShallow|, and untyped interactions.}
+  both:model-interaction]
 
 
-@subsection{Syntax}
+@subsection[#:tag "sec:both:model:syntax"]{Syntax}
 
 Surface expresssions $\ssurface$,
  types $\stype$,
@@ -147,7 +134,7 @@ Surface expresssions $\ssurface$,
 }|
 
 
-@subsection{Surface Typing}
+@subsection[#:tag "sec:both:model:types"]{Surface Typing}
 
 Module expressions separate different surface languages.
 
@@ -276,7 +263,7 @@ The typing rules for these decorated types are similar to the rules
 }|
 
 
-@subsection{Completion (aka Compilation)}
+@subsection[#:tag "sec:both:model:completion"]{Completion (aka Compilation)}
 
 Replace module boundaries with wraps, scans, and no-ops
 
@@ -443,7 +430,7 @@ Replace module boundaries with wraps, scans, and no-ops
 }|
 
 
-@subsection{Reduction Relation}
+@subsection[#:tag "sec:both:model:reduction"]{Reduction Relation}
 one simple reduction relation for everyone
 
 @exact|{
@@ -502,7 +489,7 @@ one simple reduction relation for everyone
 }|
 
 
-@subsection{Evaluation Typing}
+@subsection[#:tag "sec:both:model:eval-types"]{Evaluation Typing}
 
 three rules, one for each kind of surface expression
 
@@ -821,7 +808,7 @@ three rules, one for each kind of surface expression
 }|
 
 
-@subsection{Label Consistency}
+@subsection[#:tag "sec:both:model:ownership"]{Label Consistency}
 
 all T-owners distinct from S/U (the latter can mix)
 
@@ -938,7 +925,7 @@ all T-owners distinct from S/U (the latter can mix)
 }|
 
 
-@subsection{Theorems}
+@subsection[#:tag "sec:both:model:theorems"]{Theorems}
 
 First a notation
 
@@ -983,7 +970,7 @@ First a notation
 }|
 
 
-@subsection{Lemmas}
+@subsection[#:tag "sec:both:model:lemmas"]{Lemmas}
 
 @exact|{
 \begin{lemma}[$\stypemap$-compile]
@@ -1142,6 +1129,15 @@ First a notation
 \end{lemma}
 }|
 
+@subsection[#:tag "sec:both:model:nonopt"]{Failed Attempt to Optimize}
+@; - talk about with-boundary model, explain HLU-interactions, why failed,
+@;   how to overcome maybe
+@; - 
+@; - 
+@; - 
+@;
+
+
 
 
 @section[#:tag "sec:both:implementation"]{Implementation}
@@ -1169,12 +1165,6 @@ This section focuses on the challenging and/or unexpected aspects for
  three-way interaction.
 
 @subsection{Code Re-Use}
-
-@; TODO move figure up, to model?
-@figure*[
-  "fig:both:base-interactions"
-  @elem{@|sDeep|, @|sShallow|, and untyped interactions.}
-  both:model-interaction]
 
 
 Extending Typed Racket to safely share type environments between @|sdeep|
@@ -1627,14 +1617,5 @@ Wider implication for Racket?
 @subsection{Limitations and Threats}
 @; - threats: no blame in transient, 
 
-
-
-@section[#:tag "sec:both:nonopt"]{Failed Attempt to Optimize}
-@; - talk about with-boundary model, explain HLU-interactions, why failed,
-@;   how to overcome maybe
-@; - 
-@; - 
-@; - 
-@;
 
 

@@ -35,6 +35,7 @@ Style
   - sec 2 typed=black, untyped=white
   - sec 3 typed=grey, untyped=white ... moving beyond black/white but not sure yet
   - beyond : multi-color for typed components, depends on semantics
+  - apply to figures in BOTH chapter
 - [ ] print "x" after overheads
 - [ ] too many exercises, looks like everything has holes, save those for end
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?

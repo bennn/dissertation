@@ -29,7 +29,7 @@
   racket/string
   racket/format
   racket/math
-  (only-in racket/list take-right)
+  (only-in racket/list take-right first second third fourth)
 
   pict
   pict-abbrevs
@@ -56,9 +56,9 @@
 (define title-text-face "Liberation Serif")
 
 (define (te-mode-text str)
-  (define tt (text str (cons 'bold title-text-face) (+ 2 title-text-size)))
+  (define tt (text str (cons 'bold sc-text-style) (+ 2 title-text-size)))
   (add-rounded-border
-    #:x-margin 10 #:y-margin 10
+    #:frame-width 2 #:x-margin 10 #:y-margin 10
     tt))
 
 (define (title-text str)
@@ -122,6 +122,8 @@
                         #:line-width [pre-line-width #f]
                         #:color [color "black"]
                         #:label [label (blank)]
+                        #:x-adjust-label [x-label 0]
+                        #:y-adjust-label [y-label 0]
                         #:hide? [hide? #false])
   (define line-width (or pre-line-width 2))
   (define arrow-size (or pre-arrow-size 6))
@@ -135,6 +137,8 @@
     (code-arrow-tgt-find arrow)
     #:line-width line-width
     #:label label
+    #:x-adjust-label x-label
+    #:y-adjust-label y-label
     #:hide-arrowhead? hide?
     #:style (code-arrow-style arrow)
     #:start-angle (code-arrow-start-angle arrow)
@@ -562,30 +566,27 @@
   (ppict-do
     (blank 300 200)
     #:go (coord 0 10/100 'lt #:abs-x 10)
-    (tag-pict (te-mode-text "Deep") 'deep)
+    (add-hubs (te-mode-text "Deep") 'D)
     #:go (coord 1 10/100 'rt #:abs-x -10)
-    (tag-pict (te-mode-text "Untyped") 'untyped)
+    (add-hubs (te-mode-text "Shallow") 'S)
     #:go (coord 1/2 90/100 'cb)
-    (tag-pict (te-mode-text "Shallow") 'shallow)
+    (add-hubs (te-mode-text "Untyped") 'U)
     #:set
     (let* ((pp ppict-do-state)
            (lbl+arr*
              (list
-               (cons "noop" (code-arrow 'deep ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid)) ;; UGH
-               (cons "noop" (code-arrow 'untyped ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
-               (cons "noop" (code-arrow 'shallow cb-find 'shallow cb-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (list "wrap" -18 0 (code-arrow 'D-S rb-find 'U-W lt-find (* 75/100 turn) (* 95/100 turn)  40/100 40/100 'solid))
+               (list "wrap" -32 38 (code-arrow 'U-W lb-find 'D-S lb-find (* 54/100 turn) (* 20/100 turn)  60/100 60/100 'solid))
                ;;
-               (cons "wrap" (code-arrow 'deep ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
-               (cons "wrap" (code-arrow 'untyped ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
+               (list "wrap" 0 -24 (code-arrow 'D-E rt-find 'S-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
+               (list "wrap" 0  16 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
                ;;
-               (cons "wrap" (code-arrow 'deep ct-find 'shallow ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
-               (cons "wrap" (code-arrow 'shallow ct-find 'deep ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
-               ;;
-               (cons "noop" (code-arrow 'shallow ct-find 'untyped ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid))
-               (cons "scan" (code-arrow 'untyped ct-find 'shallow ct-find (* 0 turn) (* 10/100 turn)  1 1 'solid)))))
+               (list "noop" 13 0 (code-arrow 'S-S lb-find 'U-E rt-find (* 75/100 turn) (* 55/100 turn)  40/100 40/100 'solid))
+               (list "scan" 27 38 (code-arrow 'U-E rb-find 'S-S rb-find (* 96/100 turn) (* 30/100 turn)  60/100 60/100 'solid))
+               )))
       (for/fold ((pp pp))
                 ((l+a (in-list lbl+arr*)))
-        (add-code-arrow pp (cdr l+a) #:label (sc-text (car l+a)))))))
+        (add-code-arrow pp (fourth l+a) #:line-width 2 #:label (sc-text (first l+a)) #:x-adjust-label (second l+a) #:y-adjust-label (third l+a))))))
 
 (define both:impl-interaction
   (blank))

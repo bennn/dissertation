@@ -78,6 +78,9 @@
   snatural
   sshallow
   stransient
+  swrap
+  sscan
+  snoop
   scm
   sts
   ename cname fname aname nname tname
@@ -287,6 +290,9 @@
 (define snatural "natural")
 (define sshallow "shallow")
 (define stransient "transient")
+(define swrap "wrap")
+(define sscan "scan")
+(define snoop "noop")
 (define sts "type soundness")
 (define scm "complete monitoring")
 
