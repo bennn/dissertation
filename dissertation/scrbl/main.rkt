@@ -77,6 +77,7 @@
   sguarded
   snatural
   sshallow
+  suntyped
   stransient
   swrap
   sscan
@@ -289,6 +290,7 @@
 (define sguarded "guarded")
 (define snatural "natural")
 (define sshallow "shallow")
+(define suntyped "untyped")
 (define stransient "transient")
 (define swrap "wrap")
 (define sscan "scan")
