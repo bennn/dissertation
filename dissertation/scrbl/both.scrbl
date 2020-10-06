@@ -44,10 +44,6 @@ The reason is simple: @|stransient| as-is lacks a way of learning from past chec
 
 
 @section[#:tag "sec:both:model"]{Model and Properties}
-@; - simple model
-@;   - no worries, properties still hold
-@;   - failed attempts at natural/transient cooperation to reduce checks,
-@;     possible futures (forgetful)
 
 The model combines @|sdeep|-typed code, @|sshallow|-typed code, and
  untyped code in one surface language.
@@ -78,70 +74,93 @@ Lastly, a @emph[snoop] boundary does nothing.
 
 @subsection[#:tag "sec:both:model:syntax"]{Syntax}
 
-Surface expresssions $\ssurface$,
- types $\stype$,
- type-shapes $\sshape$,
- evaluation expressions $\sexpr$.
+@figure*[
+  "fig:both:surface"
+  @elem{Surface syntax}
 
-@exact|{
+  @exact|{
 \begin{langarray}
   \ssurface & \slangeq &
     \svar \mid \sint \mid \epair{\ssurface}{\ssurface}
     \mid \efun{\svar}{\ssurface}
     \mid \efun{\tann{\svar}{\stype}}{\ssurface}
     \mid \efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}
-    \mid \eunop{\ssurface} \mid \ebinop{\ssurface}{\ssurface} \mid \eapp{\ssurface}{\ssurface}
-    \mid \emod{\slang}{\ssurface}
+    \mid \eunop{\ssurface} \mid \ebinop{\ssurface}{\ssurface} \mid
+  \\ & &
+    \eappu{\ssurface}{\ssurface} \mid
+    \emod{\slang}{\ssurface}
+  \\
+  \slang & \slangeq &
+    \sD \mid \sS \mid \sU
   \\
   \stype & \slangeq &
     \tnat \mid \tint \mid \tpair{\stype}{\stype} \mid \tfun{\stype}{\stype}
   \\
   \sshape & \slangeq &
     \knat \mid \kint \mid \kpair \mid \kfun \mid \kany
-  \\
-  \stspec & \slangeq &
-    \stype \mid \tfloor{\stype} \mid \tdyn
-  \\
-  \slang & \slangeq &
-    \sT \mid \sS \mid \sU
-  \\
-  \sexpr & \slangeq &
-    \svar \mid \sint \mid \epair{\sexpr}{\sexpr}
-    \mid \efun{\svar}{\sexpr}
-    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
-    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
-    \mid \emon{\stype}{\svalue}
-    \mid \eunop{\sexpr} \mid \ebinop{\sexpr}{\sexpr} \mid \eapp{\sexpr}{\sexpr}
-    \mid \ewrap{\stype}{\sexpr}
-    \mid \escan{\sshape}{\sexpr}
-    \mid \enoop{\sexpr}
-  \\
-  \svalue & \slangeq &
-    \sint \mid \epair{\svalue}{\svalue}
-    \mid \efun{\svar}{\sexpr}
-    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
-    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
-    \mid \emon{\stype}{\svalue}
-  \\
-  \serror & \slangeq &
-    \stagerror \mid \sscanerror \mid \swraperror \mid \sdivzeroerror
-  \\
-  \sctx & \slangeq &
-    \sctxhole \mid \eunop{\sctx} \mid \ebinop{\sctx}{\sexpr} \mid \ebinop{\svalue}{\sctx}
-    \mid \eapp{\sctx}{\sexpr} \mid \eapp{\svalue}{\sctx} \mid \enoop{\sctx}
-    \mid \escan{\sshape}{\sctx} \mid \ewrap{\stype}{\sctx}
 \end{langarray}
-}|
+}|]
+
+The surface syntax begins with simple expressions and adds module boundaries
+ to enable a three-way interpretation.
+The simple expressions are function application (@${\eappu{\ssurface}{\ssurface}}),
+ primitive op. application (@${\eunop{\ssurface}}, @${\ebinop{\ssurface}{\ssurface}}),
+ variables (@${\svar}),
+ integers (@${\sint}),
+ pairs (@${\epair{\ssurface}{\ssurface}}),
+ and functions.
+Functions come in three flavors:
+ an untyped function has no type annotation (@${\efun{\svar}{\ssurface}}),
+ a @|sdeep|-typed function has a type annotation (@${\efun{\tann{\svar}{\stype}}{\ssurface}}),
+ and a @|sshallow|-typed function has an underline type annotation (@${\efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}}).
+The underline simplifies proofs, and serves as a hint to readers that
+ only the top-level shape of this type is guaranteed at run-time.
+Types (@${\stype}) express natural numbers (@${\tnat}),
+ integers (@${\tint}),
+ pairs (@${\tpair{\stype}{\stype}}),
+ and functions (@${\tfun{\stype}{\stype}}).
+Type-shapes (@${\sshape}) express the outermost constructor of a type.
+
+Module-boundary expressions declare the intent of the code within them.
+For example, the term @${\emod{\sD}{\ssurface_0}} asks for @|sdeep| types
+ in expression @${\ssurface_0} by default.
+If another boundary appears within @${\ssurface_0}, then its language flag
+ (@${\sD}, @${\sS}, or @${\sU}) sets a new default.
+
+Note that module boundaries are very similar to the boundary expressions
+ from @chapter-ref{chap:design}.
+Instead of adding a third boundary term to split the old @${\sstat} boundaries
+ into @|sdeep| and @|sshallow| versions, the present model uses one
+ parameterized term.
+Both the old and new formalism correspond to module boundaries in a realistic
+ language.
 
 
 @subsection[#:tag "sec:both:model:types"]{Surface Typing}
 
-Module expressions separate different surface languages.
+In principle, the surface language comes with three typing judgments
+ to recognize @|sdeep|, @|sshallow|, and untyped code.
+These judgments are mutually recursive at module-boundary terms.
+To keep things simple, however, @figure-ref{fig:both:surface-type}
+ presents one judgment that supports three possible conclusions.
+A conclusion (@${\stspec}) is one of:
+ the uni-type @${\tdyn} of untyped code,
+ a type @${\stype} for @|sdeep|-typed code,
+ or a decorated type @${\tfloor{\stype}} for @|sshallow| code.
+Note that a decorated type contains a full type;
+ for example, @${\tfloor{\tfun{\tint}{\tint}}} is valid and
+ @${\tfloor{\kfun}} is not.
+The notation is again a hint.
+A decorated type is equal to a normal type during static type checking,
+ but makes a weaker statement about program behavior.
 
-A $\tfloor{\stype_0}$ is a (decorated) full type, not a shape.
-The typing rules for these decorated types are similar to the rules
- for normal types, but these types give weaker guarantees; the notation
- is meant to illustrate the weaker-ness.
+The typing rules are straightforward.
+If anything, the only surprise is that one module may contain another with
+ the same language flag
+
+@figure*[
+  "fig:both:surface-type"
+  @elem{Surface typing judgment}
 
 @exact|{
 \begin{mathpar}
@@ -260,7 +279,47 @@ The typing rules for these decorated types are similar to the rules
     \stypeenv_0 \sST \emodule{\sslang}{\sexpr_0} : \tfloor{\stype_0}
   }
 \end{mathpar}
-}|
+}|]
+
+
+@subsection[#:tag "sec:both:model:eval-syntax"]{Evaluation Syntax}
+
+@figure*[
+  "fig:both:eval-syntax"
+  @elem{Evaluation Syntax}
+
+  @exact|{
+\begin{langarray}
+  \sexpr & \slangeq &
+    \svar \mid \sint \mid \epair{\sexpr}{\sexpr}
+    \mid \efun{\svar}{\sexpr}
+    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
+    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
+    \mid \emon{\stype}{\svalue}
+    \mid \eunop{\sexpr} \mid
+  \\ & &
+    \ebinop{\sexpr}{\sexpr} \mid \eappu{\sexpr}{\sexpr}
+    \mid \ewrap{\stype}{\sexpr}
+    \mid \escan{\sshape}{\sexpr}
+    \mid \enoop{\sexpr}
+  \\
+  \svalue & \slangeq &
+    \sint \mid \epair{\svalue}{\svalue}
+    \mid \efun{\svar}{\sexpr}
+    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
+    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
+    \mid \emon{\stype}{\svalue}
+  \\
+  \serror & \slangeq &
+    \stagerror \mid \sscanerror \mid \swraperror \mid \sdivzeroerror
+  \\
+  \sctx & \slangeq &
+    \sctxhole \mid \eunop{\sctx} \mid \ebinop{\sctx}{\sexpr} \mid \ebinop{\svalue}{\sctx}
+    \mid \eappu{\sctx}{\sexpr} \mid \eappu{\svalue}{\sctx} \mid
+  \\ & &
+    \enoop{\sctx} \mid \escan{\sshape}{\sctx} \mid \ewrap{\stype}{\sctx}
+\end{langarray}
+}|]
 
 
 @subsection[#:tag "sec:both:model:completion"]{Completion (aka Compilation)}
@@ -352,7 +411,7 @@ Replace module boundaries with wraps, scans, and no-ops
     \\
     \stypeenv_0 \sST \sexpr_1 : \tdyn \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tdyn \scompile \eapp{\sexpr_2}{\sexpr_3}
+    \stypeenv_0 \sST \eappu{\sexpr_0}{\sexpr_1} : \tdyn \scompile \eappu{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
@@ -360,7 +419,7 @@ Replace module boundaries with wraps, scans, and no-ops
     \\
     \stypeenv_0 \sST \sexpr_1 : \stype_1 \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \stype_0 \scompile \eapp{\sexpr_2}{\sexpr_3}
+    \stypeenv_0 \sST \eappu{\sexpr_0}{\sexpr_1} : \stype_0 \scompile \eappu{\sexpr_2}{\sexpr_3}
   }
 
   \inferrule*{
@@ -368,7 +427,7 @@ Replace module boundaries with wraps, scans, and no-ops
     \\
     \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
   }{
-    \stypeenv_0 \sST \eapp{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{(\eapp{\sexpr_2}{\sexpr_3})}
+    \stypeenv_0 \sST \eappu{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{(\eappu{\sexpr_2}{\sexpr_3})}
   }
 
   (unop, binop)
@@ -447,23 +506,23 @@ one simple reduction relation for everyone
   \ebinop{\svalue_0}{\svalue_1} & \snr
   & \sdelta(\sbinop, \svalue_0, \svalue_1)
   \\
-  \eapp{\svalue_0}{\svalue_1} & \snr &
+  \eappu{\svalue_0}{\svalue_1} & \snr &
   \stagerror
   \\
-  \eapp{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \snr
+  \eappu{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \snr
+  \eappu{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
+  \eappu{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \sscanerror
   \\
-  \eapp{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
+  \eappu{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
   \\
-  \eapp{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \snr
-  & \ewrap{\stype_1}{(\eapp{\svalue_0}{(\ewrap{\stype_0}{\svalue_1})})}
+  \eappu{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \snr
+  & \ewrap{\stype_1}{(\eappu{\svalue_0}{(\ewrap{\stype_0}{\svalue_1})})}
   \\
   \enoop{\svalue_0} & \snr
   & \svalue_0
@@ -551,7 +610,7 @@ three rules, one for each kind of surface expression
     \\
     \stypeenv_0 \sWTU \sexpr_1 : \sdyn
   }{
-    \stypeenv_0 \sWTU \eapp{\sexpr_0}{\sexpr_1} : \sdyn
+    \stypeenv_0 \sWTU \eappu{\sexpr_0}{\sexpr_1} : \sdyn
   }
 
   \inferrule*{
@@ -654,7 +713,7 @@ three rules, one for each kind of surface expression
     \\
     \stypeenv_0 \sWTS \sexpr_1 : \sshape_0
   }{
-    \stypeenv_0 \sWTS \eapp{\sexpr_0}{\sexpr_1} : \kany
+    \stypeenv_0 \sWTS \eappu{\sexpr_0}{\sexpr_1} : \kany
   }
 
   \inferrule*{
@@ -771,7 +830,7 @@ three rules, one for each kind of surface expression
     \\
     \stypeenv_0 \sWTT \sexpr_1 : \stype_0
   }{
-    \stypeenv_0 \sWTT \eapp{\sexpr_0}{\sexpr_1} : \stype_1
+    \stypeenv_0 \sWTT \eappu{\sexpr_0}{\sexpr_1} : \stype_1
   }
 
   \inferrule*{
@@ -870,7 +929,7 @@ all T-owners distinct from S/U (the latter can mix)
     \\
     \sowner_0; \sownerenv_0 \sWL \sexpr_1
   }{
-    \sowner_0; \sownerenv_0 \sWL \eapp{\sexpr_0}{\sexpr_1}
+    \sowner_0; \sownerenv_0 \sWL \eappu{\sexpr_0}{\sexpr_1}
   }
 
   \inferrule*{
@@ -927,7 +986,15 @@ all T-owners distinct from S/U (the latter can mix)
 
 @subsection[#:tag "sec:both:model:theorems"]{Theorems}
 
-First a notation
+First ...
+
+@${
+  \stspec  \slangeq 
+    \stype \mid \tfloor{\stype} \mid \tdyn
+}
+
+
+Second a notation
 
 @${\ssurface_0 \srr \sexpr_0
  \sdefeq
