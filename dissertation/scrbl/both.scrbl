@@ -641,7 +641,7 @@ Lastly, the @|suntyped| judgment (@${\sWTU}) guarantees no free variables.
 
 @figure*[
   "fig:both:shallow-type"
-  @elem{@|sShallow| typing judgment, subtyping, and type-to-shape map}
+  @elem{@|sShallow| typing judgment, subtyping, and shape map}
 
 @exact|{
 \begin{mathpar}
@@ -1119,62 +1119,144 @@ In fact, these boundaries are safe @|snoop|s because @|sshallow| pre-emptively
 
 
 @subsection[#:tag "sec:both:model:reduction"]{Reduction Relation}
-one simple reduction relation for everyone
+
+The semantics of the evaluation syntax is based on one notion of reduction.
+Aside from the domain checks for @|sshallow|-typed functions, reduction proceeds
+ in a standard, untyped fashion.
+Unary and binary operations proceed according to the @${\sdelta} metafunction (@figureref{fig:both:extra-rr}).
+Basic function application substitutes an argument value into a function body.
+Wrapped function application decomposes into two wrap boundaries: one
+ for the input and another for the result.
+Lastly, boundary terms optionally perform a run-time check.
+A @|snoop| boundary performs no check and lets any value cross.
+A @|sscan| boundary checks the top-level shape of a value against the expected
+ type.
+And a @|swrap| boundary checks top-level shapes and either installs a wrapper
+ around a higher-order value or recursively checks a data structure.
+
+@Figure-ref{fig:both:extra-rr} defines evaluation metafunctions.
+The @${\sdelta} function gives semantics to primitives.
+The @${\sshallow} function matches a type shape against the outer structure of a value.
+
+@figure*[
+  "fig:both:rr"
+  @elem{Semantics for the evaluation syntax}
 
 @exact|{
 \begin{rrarray}
   \eunop{\svalue_0} & \snr
   & \stagerror
-  \\
+  \\\sidecond{if $\sdelta(\sunop, \svalue_0)$ is undefined}
+  \\[1.0ex]
   \eunop{\svalue_0} & \snr
   & \sdelta(\sunop, \svalue_0)
-  \\
+  \\\sidecond{if $\sdelta(\sunop, \svalue_0)$ is defined}
+  \\[1.0ex]
   \ebinop{\svalue_0}{\svalue_1} & \snr
   & \stagerror
-  \\
+  \\\sidecond{if $\sdelta(\sbinop, \svalue_0, \svalue_1)$ is undefined}
+  \\[1.0ex]
   \ebinop{\svalue_0}{\svalue_1} & \snr
   & \sdelta(\sbinop, \svalue_0, \svalue_1)
-  \\
+  \\\sidecond{if $\sdelta(\sbinop, \svalue_0, \svalue_1)$ is defined}
+  \\[1.0ex]
   \eappu{\svalue_0}{\svalue_1} & \snr &
   \stagerror
-  \\
+  \\\sidecond{if $\svalue_0 \not\in \efun{\svar}{\sexpr} \cup \efun{\tann{\svar}{\stype}}{\sexpr} \cup \efun{\tann{\svar}{\sshape}}{\sexpr} \cup \emon{\stype}{\svalue}$}
+  \\[1.0ex]
   \eappu{(\efun{\svar_0}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \\
+  \\[1.0ex]
   \eappu{(\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \\
+  \\[1.0ex]
   \eappu{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \sscanerror
-  \\
+  \\\sidecond{if $\neg\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
   \eappu{(\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0})}{\svalue_0} & \snr
   & \esubst{\sexpr_0}{\svar_0}{\svalue_0}
-  \\
+  \\\sidecond{if $\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
   \eappu{(\emon{\tfun{\stype_0}{\stype_1}}{\svalue_0})}{\svalue_1} & \snr
   & \ewrap{\stype_1}{(\eappu{\svalue_0}{(\ewrap{\stype_0}{\svalue_1})})}
-  \\
+  \\[1.0ex]
   \enoop{\svalue_0} & \snr
   & \svalue_0
-  \\
+  \\[1.0ex]
   \escan{\sshape_0}{\svalue_0} & \snr
   & \sscanerror
-  \\
+  \\\sidecond{if $\neg\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
   \escan{\sshape_0}{\svalue_0} & \snr
   & \svalue_0
-  \\
+  \\\sidecond{if $\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
   \ewrap{\stype_0}{\svalue_0} & \snr
   & \swraperror
-  \\
+  \\\sidecond{if $\fshallow{\fshape{\sshape_0}}{\svalue_0}$}
+  \\[1.0ex]
   \ewrap{\tfun{\stype_0}{\stype_1}}{\svalue_0} & \snr
   & \emon{\tfun{\stype_0}{\stype_1}}{\svalue_0}
-  \\
+  \\\sidecond{if $\fshallow{\kfun}{\svalue_0}$}
+  \\[1.0ex]
   \ewrap{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
   & \epair{\ewrap{\stype_0}{\svalue_0}}{\ewrap{\stype_1}{\svalue_1}}
-  \\
-  \ewrap{\sshape_0}{\svalue_0} & \snr
-  & \svalue_0
+ %% TODO need this? ... if so needs typing rule too!
+ %% \ewrap{\sshape_0}{\svalue_0} & \snr
+ %% & \svalue_0
 \end{rrarray}
-}|
+
+\medskip
+\lbl{\fbox{\(\sexpr \srr \sexpr\)}\(~~\sdefeq \mbox{reflexive, transitive, compatible closure of $\snr$}\)}{
+}
+
+}|]
+
+@figure*[
+  "fig:both:extra-rr"
+  @elem{Semantic metafunctions}
+
+@exact|{
+\begin{minipage}[t]{0.5\columnwidth}
+\lbl{\fbox{$\sdelta : \ffun{\tpair{\sunop}{\svalue}}{\svalue}$}}{
+  \begin{langarray}
+    \sdelta(\sfst, \epair{\svalue_0}{\svalue_1}) & \feq & \svalue_0
+    \\
+    \sdelta(\ssnd, \epair{\svalue_0}{\svalue_1}) & \feq & \svalue_1
+  \end{langarray}
+}
+
+\end{minipage}\begin{minipage}[t]{0.5\columnwidth}
+\lbl{\fbox{$\sdelta : \ffun{\tpair{\sbinop}{\tpair{\svalue}{\svalue}}}{\svalue}$}}{
+  \begin{langarray}
+    \sdelta(\ssum, \sint_0, \sint_1) & \feq & \sint_0 + \sint_1
+    \\
+    \sdelta(\squotient, \sint_0, 0) & \feq & \divisionbyzeroerror
+    \\
+    \sdelta(\squotient, \sint_0, \sint_1) & \feq & \floorof{\sint_0 / \sint_1}
+  \end{langarray}
+}
+\end{minipage}
+
+\lbl{\fbox{$\sshallow : \ffun{\tpair{\sshape}{\svalue}}{\fbool}$}}{
+  \begin{langarray}
+   \fshallow{\kfun}{\svalue_0} & \feq & \ftrue
+   \\\sidecond{if $\svalue_0 \in \efun{\svar}{\sexpr} \cup \efun{\tann{\svar}{\stype}}{\sexpr} \cup \efun{\tann{\svar}{\sshape}}{\sexpr} \cup \emon{\stype}{\svalue}$}
+   \\[0.8ex]
+   \fshallow{\kpair}{\epair{\svalue_0}{\svalue_1}} & \feq & \ftrue
+   \\[0.8ex]
+   \fshallow{\kint}{\sint_0} & \feq & \ftrue
+   \\[0.8ex]
+   \fshallow{\knat}{\snat_0} & \feq & \ftrue
+   \\[0.8ex]
+   \fshallow{\kany}{\svalue_0} & \feq & \ftrue
+   \\[0.8ex]
+   \fshallow{\sshape_0}{\svalue_0} & \feq & \ffalse
+   \\\sidecond{otherwise}
+  \end{langarray}
+}
+}|]
 
 
 @subsection[#:tag "sec:both:model:ownership"]{Label Consistency}
