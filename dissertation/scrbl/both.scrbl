@@ -889,10 +889,11 @@ Lastly, the @|suntyped| judgment (@${\sWTU}) guarantees no free variables.
 
 A completion pass links the surface and evaluation syntaxes.
 The basic goal is to translate module boundaries to appropriate run-time
- checks; an ``appropriate'' result of a well-typed surface term is a
- well-typed evaluation term (@exact{\lemmaref{lemma:both:completion}}).
-The completion in @figureref{fig:both:completion} meets this goal via different
- strategies for each kind of code:
+ checks, but other terms may require checks as well.
+Formally, the goal is to map all well-typed surface expressions to well-typed
+ evaluation expressions (@exact{\lemmaref{lemma:both:completion}}).
+The completion rules shown in @figureref["fig:both:completion1" "fig:both:completion2"]
+ meet this goal via different strategies for each kind of code:
 @itemlist[
 @item{
  In @|sdeep|-typed code, completion inserts @|swrap| expressions at the
@@ -909,14 +910,41 @@ The completion in @figureref{fig:both:completion} meets this goal via different
   strategies call for a @|swrap| or @|sscan| check.
 }
 ]
-@|noindent|Refer to @figureref{fig:both:base-interaction}
- for a picture of how module boundaries translate to check expressions.
-In short: a module is a communication channel, meaning there is a possibility for
- mis-communication.
-When two typing disciplines meet, the one with the strongest guarantees
- at stake therefore decides which check to insert.
+@|noindent|@Figureref{fig:both:completion1} in particular shows how surface
+ functions translate to evaluation functions and how applications translate.
+For @|sdeep| and @|suntyped| code, the completion of an application is simply
+ the completion of its subexpressions.
+For @|sshallow| code, this elimination form requires a @|sscan| check to
+ validate the result.
+Other elimination forms have similar completions.
 
-@; TODO more to say? have awkward page breaks for now
+The completion of a @|sshallow| function is deceptively simple.
+In a realistic language, such functions would translate to an un-annotated
+ the first @|sscan|s the shape of its input and then proceeds with the function
+ body.
+The model obtains the protective @|sscan| without sequencing thanks to cooperation
+ from the upcoming semantics;
+ namely, the application of a @|sshallow|-typed function @|sscan|s the
+ argument before substituting into the function body (@sectionref{sec:both:model:reduction}).
+Would-be implementors must keep this notational trick in mind.
+
+@Figure-ref{fig:both:completion2} presents the completion rules for module
+ boundaries.
+Aside from the self-boundaries, the picture in @figure-ref{fig:both:base-interaction}
+ is an accurate summary of these rules.
+Each module is a channel of communication between a context and the module.
+The module declares its type discipline and the context's style is clear
+ from the conclusion of the surface typing judgment.
+To protect against mis-communications, the side with the stronger type requirements
+ determines the check that a module boundary completes to.
+@|sDeep| always directs, @|sshallow| wins over @|suntyped|, and the others---with
+ one exception---are clear @|snoop|s.
+The exception is for @|sshallow| values that exit to @|suntyped| code;
+ for integers there is nothing to protect, but functions would seem to need
+ some kind of wrapper to protect their body against untyped input.
+In fact, these boundaries are safe @|snoop|s because @|sshallow| pre-emptively
+ protects functions as noted above.
+
 
 @figure*[
   "fig:both:completion1"
@@ -992,6 +1020,8 @@ When two typing disciplines meet, the one with the strongest guarantees
 
   \inferrule*{
     \fcons{\tann{\svar_0}{\tfloor{\stype_0}}}{\stypeenv_0} \sST \sexpr_0 : \tfloor{\stype_1} \scompile \sexpr_1
+    \\
+    \fshape{\stype_0} = \sshape_0
   }{
     \stypeenv_0 \sST \efun{\tann{\svar_0}{\tfloor{\stype_0}}}{\sexpr_0} : \tfloor{\tfun{\stype_0}{\stype_1}} \scompile \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_1}
   }
@@ -1016,6 +1046,8 @@ When two typing disciplines meet, the one with the strongest guarantees
     \stypeenv_0 \sST \sexpr_0 : \tfloor{\tfun{\stype_1}{\stype_0}} \scompile \sexpr_2
     \\\\
     \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
+    \\
+    \fshape{\stype_1} = \sshape_0
   }{
     \stypeenv_0 \sST \eappu{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{(\eappu{\sexpr_2}{\sexpr_3})}
   }
