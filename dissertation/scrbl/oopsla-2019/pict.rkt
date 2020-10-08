@@ -21,6 +21,8 @@
   tr:compiler
 
   both:model-interaction
+  both:DS0
+  both:DS1
   both:impl-interaction
   both:model+impl
 )
@@ -564,25 +566,71 @@
 
 (define both:model-interaction
   (ppict-do
-    (blank 300 200)
+    (blank 300 180)
     #:go (coord 0 10/100 'lt #:abs-x 10)
     (add-hubs (te-mode-text "Deep") 'D)
     #:go (coord 1 10/100 'rt #:abs-x -10)
     (add-hubs (te-mode-text "Shallow") 'S)
-    #:go (coord 1/2 90/100 'cb)
+    #:go (coord 1/2 1 'cb)
     (add-hubs (te-mode-text "Untyped") 'U)
     #:set
     (let* ((pp ppict-do-state)
            (lbl+arr*
              (list
                (list "wrap" -18 0 (code-arrow 'D-S rb-find 'U-W lt-find (* 75/100 turn) (* 95/100 turn)  40/100 40/100 'solid))
-               (list "wrap" -32 38 (code-arrow 'U-W lb-find 'D-S lb-find (* 54/100 turn) (* 20/100 turn)  60/100 60/100 'solid))
+               (list "wrap" -15 52 (code-arrow 'U-W lb-find 'D-S lb-find (* 54/100 turn) (* 20/100 turn)  60/100 60/100 'solid))
                ;;
                (list "wrap" 0 -24 (code-arrow 'D-E rt-find 'S-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
                (list "wrap" 0  16 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
                ;;
                (list "noop" 13 0 (code-arrow 'S-S lb-find 'U-E rt-find (* 75/100 turn) (* 55/100 turn)  40/100 40/100 'solid))
-               (list "scan" 27 38 (code-arrow 'U-E rb-find 'S-S rb-find (* 96/100 turn) (* 30/100 turn)  60/100 60/100 'solid))
+               (list "scan" 10 52 (code-arrow 'U-E rb-find 'S-S rb-find (* 96/100 turn) (* 30/100 turn)  60/100 60/100 'solid))
+               )))
+      (for/fold ((pp pp))
+                ((l+a (in-list lbl+arr*)))
+        (add-code-arrow pp (fourth l+a) #:line-width 2 #:label (sc-text (first l+a)) #:x-adjust-label (second l+a) #:y-adjust-label (third l+a))))))
+
+(define both:DS0
+  ;; only D <-> S, weaken
+  (ppict-do
+    (blank 300 80)
+    #:go (coord 0 30/100 'lt #:abs-x 10)
+    (add-hubs (te-mode-text "Deep") 'D)
+    #:go (coord 1 30/100 'rt #:abs-x -10)
+    (add-hubs (te-mode-text "Shallow") 'S)
+    #:set
+    (let* ((pp ppict-do-state)
+           (lbl+arr*
+             (list
+               (list "wrap, if value escapes to U" -10 -24 (code-arrow 'D-E rt-find 'S-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
+               (list "wrap, if value from U" 10  36 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
+               )))
+      (for/fold ((pp pp))
+                ((l+a (in-list lbl+arr*)))
+        (add-code-arrow pp (fourth l+a) #:line-width 2 #:label (sc-text (first l+a)) #:x-adjust-label (second l+a) #:y-adjust-label (third l+a))))))
+
+(define both:DS1
+  (ppict-do
+    (blank 400 80)
+    #:go (coord 0 30/100 'lt #:abs-x 10)
+    (add-hubs (te-mode-text "Deep") 'D)
+    #:go (coord 45/100 30/100 'rt #:abs-x -10)
+    (add-hubs (te-mode-text "Shallow") 'S)
+    #:go (coord 1 30/100 'rt #:abs-x -10)
+    (add-hubs (te-mode-text "Untyped") 'U)
+    #:set
+    (let* ((pp ppict-do-state)
+           (pp (pin-arrows-line
+                 6 pp
+                 (find-tag pp 'D-E) rc-find (find-tag pp 'S-W) lc-find
+                 #:label (sc-text "noop") #:line-width 2 #:style 'solid #:color "black"
+                 #:x-adjust-label 0
+                 #:y-adjust-label -4
+                 #:start-angle 0 #:end-angle 0 #:start-pull 0 #:end-pull 0))
+           (lbl+arr*
+             (list
+               (list "wrap, if value from D" -10 -24 (code-arrow 'S-E rt-find 'U-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
+               (list "wrap, if value escapes to D" 24  36 (code-arrow 'U-W lb-find 'S-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
                )))
       (for/fold ((pp pp))
                 ((l+a (in-list lbl+arr*)))
@@ -673,7 +721,7 @@
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        both:model-interaction
+        both:DS1
         '()
     )))
 )

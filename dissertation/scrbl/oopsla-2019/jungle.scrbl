@@ -23,7 +23,7 @@
        Hack\({}^{\mtlangann}_{\dynlangann}\) \quad
        \\[0.4ex]
        Pyre\({}^{\mtlangann}_{\dynlangann}\) \quad
-       Pytype\({}^{\mtlangann}_{\dynlangann}\)
+       Pytype\({}^{\mtlangann}_{\dynlangann}\) \quad
        RDL\cite{rtsf-sac-2013}\({}^{\mtlangann}_{\dynlangann}\) \quad
        Strongtalk\cite{bg-oopsla-1993}\({}^{\mtlangann}\) \quad
        TypeScript\cite{bat-ecoop-2014}\({}^{\mtlangann}_{\dynlangann}\)

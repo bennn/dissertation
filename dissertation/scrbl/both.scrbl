@@ -14,6 +14,8 @@
      s:cache-dir)
    (only-in greenman-thesis/oopsla-2019/pict
      both:model-interaction
+     both:DS0
+     both:DS1
      typed-codeblock)
    (only-in math/statistics
      mean))
@@ -1544,8 +1546,8 @@ Complete monitoring is technically a statement about labeled expressions
 But because the propagating reduction is derived from the basic reduction
  relation is a straightforward manner, our theorem statement uses the
  basic symbol (@${\srr}).
-Likewise, both @${\sexpr_0} and @${\sexpr_1} refer to a well-labeled variant
- of the evaluation-language expression.
+Likewise, both @${\sexpr_0} and @${\sexpr_1} refer to a labeled variant
+ of an evaluation-language expression.
 If no such labeling exist for a term, then the theorem holds vacuously.
 
 @exact|{
@@ -1560,7 +1562,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
   By a preservation argument.
   The proofs for each basic reduction step are sketched below.
   These depend on two metafunctions: $\srev$ reverses a sequence of labels
-   and $\slast$ extracts the last element of such a sequence.
+   and $\slast$ extracts the last (outermost) element of such a sequence.
 
   \begin{description}
   \item[Case:]
@@ -1647,7 +1649,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
     \(\obars{\enoop{\obbars{\svalue_0}}{\sownerlist_0}}{\sowner_1} \snr \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
     QED, by the definition of $\scompile$, because a $\snoop{}$ boundary connects either:
-     two \sdeep{} components, two \sshallow{} components, two \suntyped{} components, or a \sshallow{} and \suntyped{} component.
+     two \sdeep{} components, two \sshallow{} components, two \suntyped{} components, or one \sshallow{} and one \suntyped{} component.
 
   \item[Case:]
     \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\sscanerror}{\sowner_1}\)
@@ -1657,7 +1659,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
   \item[Case:]
     \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \fconcat{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
-    QED, by the definition of $\scompile$, because a $\sscan{}$ boundary only linke an \suntyped{} component to a \sshallow{} component.
+    QED, by the definition of $\scompile$, because a $\sscan{}$ boundary only links an \suntyped{} component to a \sshallow{} component.
 
   \item[Case:]
     \(\obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\swraperror}{\sowner_1}\)
@@ -1789,7 +1791,8 @@ If no such labeling exist for a term, then the theorem holds vacuously.
   then\ $\sWTU \sexpr_0 : \tdyn$
 \end{lemma}
 \begin{proof}
-  By definition; the key rules are for shape-annotated functions.
+  By definition.
+  The key rules are for shape-annotated functions.
 \end{proof}
 }|
 
@@ -1855,14 +1858,78 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 
 @subsection[#:tag "sec:both:model:nonopt"]{Failed Attempt to Optimize}
 
-@; - talk about with-boundary model, explain HLU-interactions, why failed,
+@; talk about with-boundary model, explain HLU-interactions, why failed,
 @;   how to overcome maybe
-@; - 
-@; - 
-@; - 
-@;
+@; 1. no hope between D U gotta wrap
+@; 2. ditto for U S, best we can hope for
+@; 3. but D S have opportunity, apparently
+@; 4. if guaranteed only D S then same type checker = no checks at all
+@; 5. ok, well, could go for a more complex D S strategy,
+@;    D -> S = wrap if escapes to U
+@;    S -> D = wrap if came from U
+@;    but need heavy analysis
+@; 6. if S has info to make wrappers on behalf of D, then
+@;    D <-> S = noop
+@;    S -> U = wrap if came from D
+@;    U -> S = wrap if goes to D
+@;    again need analysis, also not easy for S to get wrapper info
+@; 7. all this suggests forgetful is a better S, for better sharing,
+@;    but miss all the benefits of no wrappers ... see below
 
+Although safe, the model's approach to @|sdeep| types is surprisingly
+ expensive.
+Even boundary to @|sdeep| code gets protected with a @|swrap| check (@figureref{fig:both:base-interaction}).
+For boundaries between @|sdeep| and @|suntyped| this is no surprise, because
+ the @|suntyped| is free to do just about anything.
+But for @|sshallow| code, one would hope to get away with a less expensive check.
+After all, closed programs that use only @|sdeep| and @|sshallow| code
+ need no checks whatsoever---because every line of code is validated by the
+ strong surface-language type checker.
 
+One possible way to optimize is to weaken the boundary between @|sdeep| and
+ @|sshallow|.
+@|sDeep| can avoid wrapping an export if the value never interacts with @|suntyped|
+ code going forward.
+Likewise, @|sdeep| can trust an import if the value was never handled or influenced
+ by @|suntyped| code.
+@Figure-ref{fig:both:opt0} sketches the boundaries that could change via
+ this strategy; the @|sdeep|--@|suntyped| and @|sshallow|--@|suntyped| boundaries
+ are unaffected.
+Note, however, that determining whether a value interacts with @|suntyped|
+ code requires a careful static analysis.
+Developing a correct analysis that runs quickly is a research challenge in
+ itself.
+
+@figure*[
+  "fig:both:opt0"
+  @elem{With an escape analysis, the @|sdeep|--@|sshallow| boundaries could be weakened.}
+  both:DS0]
+
+@figure*[
+  "fig:both:opt1"
+  @elem{With an escape analysis and the ability to create wrappers in @|sshallow| code, all runtime type checks could be pushed to the boundaries with @|suntyped| code.}
+  both:DS1]
+
+A second possibility is to make the @|sdeep|--@|sshallow| boundary
+ a @|snoop| by delaying wrappers until a @|sdeep| value reaches @|suntyped| code.
+Ideally, this strategy can work with an escape analysis to avoid wrapping
+ @|suntyped| values that never reach @|sdeep| code (@figureref{fig:both:opt1}).
+The challenge here is to design an escape analysis and to add wrapper-making
+ code to @|sshallow| without losing the expressiveness that @|stransient| gains
+ by avoiding wrappers altogether.
+For first-order interactions, things are not so bad.
+@|sShallow| can be careful about the identifiers that it sends to @|suntyped| code.
+Higher-order communication is the real source of difficulties; for example,
+ if @|sshallow| imports an @|suntyped| map function, then @|sshallow| must be
+ prepared to wrap every function that it sends to map just in case such a function
+ is @|sdeep|-typed.
+
+If a language can create wrapper in @|sshallow| code, however, then the
+ @exact{\fname} semantics (@chapter-ref{chap:design}) may be a better fit than @|sTransient|.
+@|sShallow| types via @exact{\fname} do not require shape checks throughout
+ typed code, and the 1-level wrappers can dynamically cooperate with @|sdeep|-wrapped
+ values; that is, the interactions do not require a static analysis
+ because the wrappers carry information.
 
 
 @section[#:tag "sec:both:implementation"]{Implementation}
@@ -1873,6 +1940,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @; X define-typed/untyped-id
 @; X reuse G macros in S code
 @; - manual type env needs manual trust
+
 
 To combine @|sdeep| and @|sshallow| in a single implementation,
  we add a new entry point via the language.
