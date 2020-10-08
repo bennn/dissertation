@@ -492,9 +492,9 @@ Reduction in typed code, whether @|sdeep| or @|sshallow|, should never raise a
   \sexpr & \slangeq &
     \svar \mid \svalue \mid \epair{\sexpr}{\sexpr}
     \mid \eunop{\sexpr} \mid
+    \ebinop{\sexpr}{\sexpr} \mid \eappu{\sexpr}{\sexpr} \mid \serror \mid
   \\ & &
-    \ebinop{\sexpr}{\sexpr} \mid \eappu{\sexpr}{\sexpr}
-    \mid \ewrap{\stype}{\sexpr}
+    \ewrap{\stype}{\sexpr}
     \mid \escan{\sshape}{\sexpr}
     \mid \enoop{\sexpr}
   \\
@@ -920,13 +920,16 @@ Other elimination forms have similar completions.
 
 The completion of a @|sshallow| function is deceptively simple.
 In a realistic language, such functions would translate to an un-annotated
- the first @|sscan|s the shape of its input and then proceeds with the function
- body.
-The model obtains the protective @|sscan| without sequencing thanks to cooperation
- from the upcoming semantics;
- namely, the application of a @|sshallow|-typed function @|sscan|s the
+ function that first @|sscan|s the shape of its input and then proceeds with the
+ body expression.
+This model, however, gets an implicit domain check thanks to cooperation
+ from the upcoming semantics.
+The application of a @|sshallow|-typed function always @|sscan|s the
  argument before substituting into the function body (@sectionref{sec:both:model:reduction}).
-Would-be implementors must keep this notational trick in mind.
+Arguably, this is a poor choice.
+It does simplify the model and proof details regarding substitution,
+ but the lack of an explicit domain check means that the model cannot test
+ whether some of these checks can be safely removed.
 
 @Figure-ref{fig:both:completion2} presents the completion rules for module
  boundaries.
@@ -1121,6 +1124,7 @@ In fact, these boundaries are safe @|snoop|s because @|sshallow| pre-emptively
 @subsection[#:tag "sec:both:model:reduction"]{Reduction Relation}
 
 The semantics of the evaluation syntax is based on one notion of reduction.
+@; ... like how MT reuses host reduction, but don't get too excited we still play tricks with transient
 Aside from the domain checks for @|sshallow|-typed functions, reduction proceeds
  in a standard, untyped fashion.
 Unary and binary operations proceed according to the @${\sdelta} metafunction (@figureref{fig:both:extra-rr}).
@@ -1202,9 +1206,10 @@ The @${\sshallow} function matches a type shape against the outer structure of a
   \\[1.0ex]
   \ewrap{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
   & \epair{\ewrap{\stype_0}{\svalue_0}}{\ewrap{\stype_1}{\svalue_1}}
- %% TODO need this? ... if so needs typing rule too!
- %% \ewrap{\sshape_0}{\svalue_0} & \snr
- %% & \svalue_0
+  \\
+  \ewrap{\stype_0}{\svalue_0} & \snr
+  & \svalue_0
+  \\\sidecond{if $\stype_0 \in \tint \cup \tnat$ and $\fshallow{\stype_0}{\svalue_0}$}
 \end{rrarray}
 
 \medskip
@@ -1259,9 +1264,102 @@ The @${\sshallow} function matches a type shape against the outer structure of a
 }|]
 
 
-@subsection[#:tag "sec:both:model:ownership"]{Label Consistency}
+@subsection[#:tag "sec:both:model:ownership"]{Single-Owner Consistency}
 
-all T-owners distinct from S/U (the latter can mix)
+@|sDeep| types are characterized by complete monitoring (@chapter-ref{chap:design}).
+To state a complete monitoring theorem, the model needs a labeled syntax,
+ a single-owner consistency judgment, and a reduction relation that propagates
+ labels.
+
+The labeled syntax permits an ownership label around any expression (@figure-ref{fig:both:ownership-syntax}).
+For example, the terms @${\obars{4}{\sowner_0}} and @${\obars{\eapp{\svar_0}{\svar_1}}{\sowner_1}}
+ illustrate one labeled value and one labeled expression.
+Most terms may have zero or more labels.
+Boundary terms are an exception;
+ a @${\swrap}, @${\sscan}, or @${\snoop} boundary must have at least one label
+ around its subexpression.
+The notation @${\obbars{\sexpr_0}{\sownerlist_0}} matches a sequence of labels
+ (@${\sownerlist_0}).
+
+An ownership label @${\sowner_0} carries two pieces of information.
+First is a typing discipline: @${\sdowner} for @|sdeep|,
+ @${\ssowner} for @|sshallow|, and @${\suowner} for @|suntyped|.
+Second is a natural number index to distinguish different labels.
+Initially, in a well-formed expression, these labels state the original owner
+ and typing of a subterm.
+As expressions reduce to values and flow across boundaries, labels accumulate
+ to show which components are partly responsible for these values.
+
+Ultimately, the goal of our complete monitoring proof effort is to show that
+ only @|sdeep|-typed code is responsible for @|sdeep|-typed expressions.
+Both @|sshallow| and @|suntyped| may recklessly share values.
+The single-owner consistency judgment in @figure-ref{fig:both:ownership-consistency}
+ formalizes the target invariant by stating when
+ an expression is consistent for label @${\sowner_0} and label environment
+ @${\sownerenv_0}.
+A variable must be bound to @${\sowner_0} in the label environment.
+Non-boundary terms must have consistent subterms.
+Boundary terms and guard wrappers are ownership switch points;
+ a boundary is consistent if its subterm is consistent with respect to the
+ label inside the boundary.
+Finally, the rules for explicitly-labeled expressions impose a discipline
+ on labels.
+A @|sdeep|-labeled expression may have other @|sdeep| labels, but nothing weaker.
+@|sShallow| and @|suntyped|-labeled expressions, by contrast, can mix together.
+
+Reduction of a labeled expression begins with the rules for the evaluation language
+ (@figure-ref{fig:both:rr}) and propagates labels according to the laws
+ stated in @sectionref{sec:design:laws}.
+In short, labels always accumulate unless a simple value meets a boundary with
+ a matching type shape.
+Even @|snoop| boundaries add a label; this is why ownership consistency allows
+ sequences of @|sdeep| labels.
+
+@figure*[
+  "fig:both:ownership-syntax"
+  @elem{Ownership syntax}
+
+@exact|{
+\begin{langarray}
+  \sexpr & \slangeq &
+    \svar \mid \svalue \mid \epair{\sexpr}{\sexpr}
+    \mid \eunop{\sexpr} \mid
+    \ebinop{\sexpr}{\sexpr} \mid \eappu{\sexpr}{\sexpr} \mid \serror \mid
+  \\ & &
+    \ewrap{\stype}{\obars{\sexpr}{\sowner}}
+    \mid \escan{\sshape}{\obars{\sexpr}{\sowner}}
+    \mid \enoop{\obars{\sexpr}{\sowner}}
+    \mid \obars{\sexpr}{\sowner}
+  \\
+  \svalue & \slangeq &
+    \sint \mid \epair{\svalue}{\svalue}
+    \mid \efun{\svar}{\sexpr}
+    \mid \efun{\tann{\svar}{\stype}}{\sexpr}
+    \mid \efun{\tann{\svar}{\sshape}}{\sexpr}
+    \mid \emon{\stype}{\obars{\svalue}{\sowner}}
+    \mid \obars{\svalue}{\sowner}
+  \\
+  \sctx & \slangeq &
+    \ldots \mid \obars{\sctx}{\sowner}
+  \\
+  \sowner & \slangeq &
+    \stowner_0 \mid \stowner_1 \mid \ldots \mid
+  %\\ & &
+    \ssowner_0 \mid \ssowner_1 \mid \ldots \mid
+  %\\ & &
+    \suowner_0 \mid \suowner_1 \mid \ldots
+  \\
+  \sownerlist & \slangeq &
+    \mbox{sequence of ownership labels ($\sowner$)}
+  \\
+  \sownerenv & \slangeq &
+    \cdot \mid \fcons{\tann{\svar}{\sowner}}{\sownerenv}
+\end{langarray}
+}|]
+
+@figure*[
+  "fig:both:ownership-consistency"
+  @elem{Single-owner consistency}
 
 @exact|{
 \begin{mathpar}
@@ -1325,71 +1423,94 @@ all T-owners distinct from S/U (the latter can mix)
   }
 
   \inferrule*{
-    \sowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \sowner_0; \sownerenv_0 \sWL \enoop{\obnd{\sowner_0}{}{\sowner_1}}{\sexpr_0}
+    \sowner_0; \sownerenv_0 \sWL \serror
   }
 
   \inferrule*{
     \sowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \sowner_0; \sownerenv_0 \sWL \escan{\obnd{\sowner_0}{\sshape_0}{\sowner_1}}{\sexpr_0}
+    \sowner_0; \sownerenv_0 \sWL \enoop{\obars{\sexpr_0}{\sowner_1}}
   }
 
   \inferrule*{
     \sowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \sowner_0; \sownerenv_0 \sWL \ewrap{\obnd{\sowner_0}{\stype_0}{\sowner_1}}{\sexpr_0}
+    \sowner_0; \sownerenv_0 \sWL \escan{\sshape_0}{\obars{\sexpr_0}{\sowner_1}}
+  }
+
+  \inferrule*{
+    \sowner_1; \sownerenv_0 \sWL \sexpr_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \ewrap{\stype_0}{\obars{\sexpr_0}{\sowner_1}}
+  }
+
+  \inferrule*{
+    \sowner_1; \sownerenv_0 \sWL \svalue_0
+  }{
+    \sowner_0; \sownerenv_0 \sWL \emon{\stype_0}{\obars{\svalue_0}{\sowner_1}}
   }
 
   \inferrule*{
     \stowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \stowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\stowner_1}
+    \stowner_0; \sownerenv_0 \sWL \obars{\sexpr_0}{\stowner_1}
   }
 
   \inferrule*{
     \ssowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \ssowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\ssowner_1}
+    \ssowner_0; \sownerenv_0 \sWL \obars{\sexpr_0}{\ssowner_1}
   }
 
   \inferrule*{
     \suowner_0; \sownerenv_0 \sWL \sexpr_0
   }{
-    \ssowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\suowner_0}
+    \ssowner_0; \sownerenv_0 \sWL \obars{\sexpr_0}{\suowner_0}
   }
 
   \inferrule*{
     \suowner_1; \sownerenv_0 \sWL \sexpr_0
   }{
-    \suowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\suowner_1}
+    \suowner_0; \sownerenv_0 \sWL \obars{\sexpr_0}{\suowner_1}
   }
 
   \inferrule*{
     \ssowner_0; \sownerenv_0 \sWL \sexpr_0
   }{
-    \suowner_0; \sownerenv_0 \sWL \ownedby{\sexpr_0}{\ssowner_0}
+    \suowner_0; \sownerenv_0 \sWL \obars{\sexpr_0}{\ssowner_0}
   }
 
 \end{mathpar}
-}|
+}|]
 
 
-@subsection[#:tag "sec:both:model:theorems"]{Theorems}
+@subsection[#:tag "sec:both:model:theorems"]{Properties}
 
+The primary meta-theoretic results are about type soundness and
+ complete monitoring.
+Type soundness predicts the possible outcomes of a well-typed expression.
+Naturally, these outcomes depend on the ``strength'' of the static types;
+ for example, @|suntyped| code has weaker guarantees than @|sshallow| code.
+Complete monitoring asks whether single-owner consistency is an invariant.
 
-
-Second a notation
-
-@${\ssurface_0 \srr \sexpr_0
- \sdefeq
- \vdash \ssurface_0 : \stspec
-  \mbox{ and } \vdash \ssurface_0 : \stspec \scompile \sexpr_1
-  \mbox{ and } \sexpr_1 \srr \sexpr_0}
+The statement of type soundness relies on one new notation and a family of
+ metafunctions.
+The notation @${\ssurface_0 \srr \sexpr_0} defines evalution for surface
+ expressions; the meaning is that @${\ssurface_0} is well-typed somehow
+ (@${\fexists{\stspec}{\vdash \ssurface_0 : \stspec}}),
+ compiles to an evaluation expression (@${\vdash \ssurface_0 : \stspec \scompile \sexpr_1}),
+ and then the compiled expression steps to the result (@${\sexpr_1 \srr \sexpr_0}).
+The metafunctions---@${\stypemapzero}, @${\stypemapshape}, and @${\stypemapone}---map
+ surface-language types to evaluation types.
+One function, @${\stypemapshape}, extends the similarly-name function from
+ @figureref{fig:both:shallow-type} to map the unitype @${\tdyn} to itself.
+The others are simple: @${\stypemapzero} maps all types to @${\tdyn}
+ and @${\stypemapone} is the identity.
+These tools enable a concise, parameterized statement of type soundness.
 
 @exact|{
-\begin{theorem}[TS$(\sX,\stypemap)$]
+\begin{definition}[TS$(\sX,\stypemap)$]
   Language\ $\sX$
   satisfies\ $\fTS{\stypemap}$
   if for all\ $\ssurface_0$
@@ -1400,7 +1521,7 @@ Second a notation
     \item $\ssurface_0 \srr \serror$
     \item $\ssurface_0 \srr$ diverges
   \end{itemize}
-\end{theorem}
+\end{definition}
 }|
 
 @exact|{
@@ -1411,145 +1532,295 @@ Second a notation
     \item $\sT$ satisfies\ $\fTS{\stypemapone}$
   \end{itemize}
 \end{theorem}
+\begin{proof}
+  \Lemmaref{lemma:both:completion} guarantees that the compiled form
+   of the surface expression is well-typed.
+  The rest follows from straightforward progress and preservation lemmas for the evaluation typing judgments.
+\end{proof}
 }|
+
+Complete monitoring is technically a statement about labeled expressions
+ and a label-propagating reduction relation.
+But because the propagating reduction is derived from the basic reduction
+ relation is a straightforward manner, our theorem statement uses the
+ basic symbol (@${\srr}).
+Likewise, both @${\sexpr_0} and @${\sexpr_1} refer to a well-labeled variant
+ of the evaluation-language expression.
+If no such labeling exist for a term, then the theorem holds vacuously.
 
 @exact|{
 \begin{theorem}[complete monitoring]
   If\ $~\vdash \ssurface_0 : \stspec$
-  and\ $\sowner_0 \Vdash \ssurface_0$
-  and\ $\ssurface_0 \srr \sexpr_0$
-  then\ $\sowner_0 \Vdash \sexpr_0$
+  and\ $\vdash \ssurface_0 : \stspec \scompile \sexpr_0$
+  and\ $\sowner_0; \cdot \Vdash \sexpr_0$
+  and\ $\sexpr_0 \srr \sexpr_1$
+  then\ $\sowner_0; \cdot \Vdash \sexpr_1$.
 \end{theorem}
+\begin{proof}
+  By a preservation argument.
+  The proofs for each basic reduction step are sketched below.
+  These depend on two metafunctions: $\srev$ reverses a sequence of labels
+   and $\slast$ extracts the last element of such a sequence.
+
+  \begin{description}
+  \item[Case:]
+    \(\obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\stagerror}{\sowner_1}\)
+  \item[]
+    QED by the definition, \(\sowner_1; \cdot \sWL \obars{\stagerror}{\sowner_1}\).
+
+  \item[Case:]
+    \(\obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obbars{\sdelta(\sunop, \svalue_0)}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \subitem
+    \begin{enumerate}
+    \item
+      $\sownerlist_0$ is either all \sdeep{} labels or a mix of \sshallow{} and \suntyped{}, by single-owner consistency of the redex.
+    \item
+      $\svalue_0$ is a pair, because $\sdelta$ is defined on it.
+    \item
+      both components of $\svalue_0$ are well-labeled, again by single-owner consistency on the redex.
+    \item
+      QED by the definition of $\sdelta$.
+    \end{enumerate}
+
+  \item[Case:]
+    \(\obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2} \snr \obars{\stagerror}{\sowner_2}\)
+  \item[]
+    QED by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2} \snr \obars{\sdelta(\sbinop, \svalue_0, \svalue_1)}{\sowner_2}\)
+  \item[]
+    QED by the definition of $\sWL$ and $\sdelta$; note that the binary operators are not elimination forms.
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\svalue_0}{\sownerlist_0}}{\svalue_1}}{\sowner_1} \snr \obars{\stagerror}{\sowner_1}\)
+  \item[]
+    QED by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\efun{\svar_0}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \subitem
+    \begin{enumerate}
+    \item\label{step:both:cm:1}
+      $\sownerlist_0$ is all \sdeep{} or a mix of \sshallow{} and \suntyped{}, by single-owner consistency of the redex.
+    \item\label{step:both:cm:2}
+      $\sowner_2; \cdot \sWL \svalue_0$, also by single-owner consistency of the redex.
+    \item
+      $\flast{\sownerlist_0}; \cdot \sWL \obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}$, by steps~\ref{step:both:cm:1} and~\ref{step:both:cm:2}.
+    \item
+      $\flast{\sownerlist_0}; \cdot \sWL \svar_0$ for each occurrence of $\svar_0$ in $\sexpr_0$, by single-owner consistency of the redex.
+    \item
+      QED by a substitution lemma.
+    \end{enumerate}
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \item[]
+    QED, similar to the previous case.
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obars{\sscanerror}{\sowner_1}\)
+  \item[]
+    QED, by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \item[]
+    QED, similar to the other substitution cases.
+
+  \item[Case:]
+    \(\obars{\eappu{\obbars{\emon{\tfun{\stype_0}{\stype_1}}{\obars{\svalue_0}{\sowner_0}}}{\sownerlist_1}}{\svalue_1}}{\sowner_2} \snr\)
+    \\\qquad\(\obbars{\ewrap{\stype_1}{\obars{\eappu{\svalue_0}{(\ewrap{\stype_0}{\obbars{\svalue_1}{\fconcat{\sowner_2}{\frev{\sownerlist_1}}}})}}{\sowner_0}}}{\fconcat{\sownerlist_1}{\sowner_2}}\)
+  \subitem
+    \begin{enumerate}
+    \item
+      $\sowner_0; \cdot \sWL \svalue_0$, by single-owner consistency of the redex.
+    \item
+      $\sowner_2; \cdot \sWL \svalue_1$, again by the redex.
+    \item
+      $\sownerlist_1$ is either all \sdeep{} or a mix of \sshallow{} and \suntyped{}, again by the redex.
+    \item
+      QED, by the definition of $\sWL$.
+    \end{enumerate}
+
+  \item[Case:]
+    \(\obars{\enoop{\obbars{\svalue_0}}{\sownerlist_0}}{\sowner_1} \snr \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \item[]
+    QED, by the definition of $\scompile$, because a $\snoop{}$ boundary connects either:
+     two \sdeep{} components, two \sshallow{} components, two \suntyped{} components, or a \sshallow{} and \suntyped{} component.
+
+  \item[Case:]
+    \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\sscanerror}{\sowner_1}\)
+  \item[]
+    QED, by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \fconcat{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+  \item[]
+    QED, by the definition of $\scompile$, because a $\sscan{}$ boundary only linke an \suntyped{} component to a \sshallow{} component.
+
+  \item[Case:]
+    \(\obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\swraperror}{\sowner_1}\)
+  \item[]
+    QED, by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\ewrap{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\emon{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}\)
+  \item[]
+    QED, by the definition of $\sWL$.
+
+  \item[Case:]
+    \(\obars{\ewrap{\tpair{\stype_0}{\stype_1}}{\obbars{\epair{\svalue_0}{\svalue_1}}{\sownerlist_0}}}{\sowner_1} \snr\)
+    \\\qquad\(\obars{\epair{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\ewrap{\stype_1}{\obbars{\svalue_1}{\sownerlist_0}}}}{\sowner_1}\)
+  \item[]
+    QED, by the definition of $\sWL$.
+    Note that the rule moves the elements of the pair in the redex into a new pair in the contractum.
+
+  \item[Case:]
+  \(\obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\svalue_0}{\sowner_1}\)
+  \\ where $\stype_0 \in \tint \cup \tnat$ and $\fshallow{\stype_0}{\svalue_0}$ 
+  \item[]
+    QED, by the definition of $\sWL$.
+
+  \end{description}
+\end{proof}
 }|
 
 
-@subsection[#:tag "sec:both:model:lemmas"]{Lemmas}
+@; @subsection[#:tag "sec:both:model:lemmas"]{Lemmas}
 
 @exact|{
-\begin{lemma}[$\stypemap$-compile]\label{lemma:both:completion}
-  If\ $~\vdash \ssurface_0 : \stspec$
+\begin{lemma}\label{lemma:both:completion}
+  If\ $\vdash \ssurface_0 : \stspec$
   then\ $\vdash \ssurface_0 : \stspec \scompile \sexpr_0$
   and\ $\sWTX \sexpr_0 : \ftypemap{\stspec}$
 \end{lemma}
 }|
 
-@exact|{
-\begin{lemma}[decomposition]
-  For all\ $\sexpr_0$
-  there exists unique\ $\sexpr_1, \sctx_0$
-  such that\ $\sexpr_0 \sexpreq \finhole{\sctx_0}[\sexpr_1]$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[type progress]
-  If\ $~\vdash \sexpr_0 : \stspec$
-  then either\ $\sexpr_0 \in \svalue \cup \serror$
-  or\ $\sexpr_0 \scc \sexpr_1$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[type preservation]
-  If\ $~\vdash \sexpr_0 : \stspec$
-  and\ $\sexpr_0 \scc \sexpr_1$
-  then\ $\vdash \sexpr_1 : \stspec$
-\end{lemma}
-}|
+@;@exact|{
+@;\begin{lemma}[decomposition]
+@;  For all\ $\sexpr_0$
+@;  there exists unique\ $\sexpr_1, \sctx_0$
+@;  such that\ $\sexpr_0 \sexpreq \finhole{\sctx_0}[\sexpr_1]$
+@;\end{lemma}
+@;}|
+@;
+@;@exact|{
+@;\begin{lemma}[type progress]
+@;  If\ $~\vdash \sexpr_0 : \stspec$
+@;  then either\ $\sexpr_0 \in \svalue \cup \serror$
+@;  or\ $\sexpr_0 \scc \sexpr_1$
+@;\end{lemma}
+@;}|
+@;
+@;@exact|{
+@;\begin{lemma}[type preservation]
+@;  If\ $~\vdash \sexpr_0 : \stspec$
+@;  and\ $\sexpr_0 \scc \sexpr_1$
+@;  then\ $\vdash \sexpr_1 : \stspec$
+@;\end{lemma}
+@;}|
 
 @exact|{
 \begin{lemma}[$\sdelta, \sDelta$ agreement]\leavevmode
   \begin{itemize}
     \item
-      If\ $~\sDelta(\sunop, \sdyn) = \sdyn$
-      and\ $\vdash \svalue_0 : \sdyn$
+      If\ $~\sDelta(\sunop, \tdyn) = \tdyn$
+      and\ $\vdash \svalue_0 : \tdyn$
+    \item[]
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
-      then\ $\vdash \sdelta(\sunop, \svalue_0) : \sdyn$
+      then\ $\vdash \sdelta(\sunop, \svalue_0) : \tdyn$
     \item
       If\ $~\sDelta(\sunop, \sshape_0) = \sshape_1$
       and\ $\vdash \svalue_0 : \sshape_0$
+    \item[]
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
       then\ $\vdash \sdelta(\sunop, \svalue_0) : \sshape_1$
     \item
-      If\ $~\sDelta(\sbinop, \sdyn, \sdyn) = \sdyn$
-      and\ $\vdash \svalue_0 : \sdyn$
-      and\ $\vdash \svalue_1 : \sdyn$
+      If\ $~\sDelta(\sbinop, \tdyn, \tdyn) = \tdyn$
+      and\ $\vdash \svalue_0 : \tdyn$
+      and\ $\vdash \svalue_1 : \tdyn$
+    \item[]
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
-      then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \sdyn$
+      then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \tdyn$
     \item
       If\ $~\sDelta(\sbinop, \sshape_0, \sshape_1) = \sshape_2$
       and\ $\vdash \svalue_0 : \sshape_0$
       and\ $\vdash \svalue_1 : \sshape_1$
+    \item[]
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
       then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \sshape_2$
   \end{itemize}
 \end{lemma}
 }|
 
+@;@exact|{
+@;\begin{lemma}[type substitution]\leavevmode
+@;  \begin{itemize}
+@;    \item
+@;      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
+@;      and\ $~\vdash \svalue_0 : \tdyn$
+@;      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+@;    \item
+@;      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
+@;      and\ $~\vdash \svalue_0 : \tdyn$
+@;      and\ $\fshapematch{\sshape_0}{\svalue_0}$
+@;      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+@;    \item
+@;      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
+@;      and\ $~\vdash \svalue_0 : \sshape_0$
+@;      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
+@;    \item
+@;      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
+@;      and\ $~\vdash \svalue_0 : \sshape_1$
+@;      and\ $\fshapematch{\sshape_0}{\svalue_0}$
+@;      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \kany$
+@;    \item
+@;      If\ $~\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
+@;      and\ $~\vdash \svalue_0 : \stype_0$
+@;      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
+@;  \end{itemize}
+@;\end{lemma}
+@;}|
+
 @exact|{
-\begin{lemma}[type substitution]\leavevmode
+\begin{lemma}
+  If\ $\sWTS \sexpr_0 : \sshape_0$
+  then\ $\sWTU \sexpr_0 : \tdyn$
+\end{lemma}
+\begin{proof}
+  By definition; the key rules are for shape-annotated functions.
+\end{proof}
+}|
+
+@;@exact|{
+@;\begin{lemma}[type in-hole]
+@;  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
+@;  then\ $\fexistsone{\stspec_1} \vdash \sexpr_0 : \stspec_1$
+@;\end{lemma}
+@;}|
+
+@;@exact|{
+@;\begin{lemma}[type replace]
+@;  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
+@;  and\ $~\vdash \sexpr_0 : \stspec_1$
+@;  and\ $~\vdash \sexpr_1 : \stspec_1$
+@;  then\ $~\vdash \finhole{\sctx_0}{\sexpr_1} : \stspec_0$
+@;\end{lemma}
+@;}|
+
+@exact|{
+\begin{lemma}[boundary-crossing]\leavevmode
   \begin{itemize}
     \item
-      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \tdyn$
-      and\ $~\vdash \svalue_0 : \tdyn$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
-    \item
-      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \tdyn$
-      and\ $~\vdash \svalue_0 : \tdyn$
-      and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \tdyn$
-    \item
-      If\ $~\vdash \efun{\svar_0}{\sexpr_0} : \kfun$
-      and\ $~\vdash \svalue_0 : \sshape_0$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \sdyn$
-    \item
-      If\ $~\vdash \efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0} : \kfun$
-      and\ $~\vdash \svalue_0 : \sshape_1$
-      and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \kany$
-    \item
-      If\ $~\vdash \efun{\tann{\svar_0}{\stype_0}}{\sexpr_0} : \tfun{\stype_0}{\stype_1}$
-      and\ $~\vdash \svalue_0 : \stype_0$
-      then\ $~\vdash \esubst{\sexpr_0}{\svar_0}{\svalue_0} : \stype_1$
-  \end{itemize}
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[S to U]
-  If\ $~\vdash \sexpr_0 : \sshape_0$
-  then\ $~\vdash \sexpr_0 : \sdyn$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[type in-hole]
-  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
-  then\ $\fexistsone{\stspec_1} \vdash \sexpr_0 : \stspec_1$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[type replace]
-  If\ $~\vdash \finhole{\sctx_0}{\sexpr_0} : \stspec_0$
-  and\ $~\vdash \sexpr_0 : \stspec_1$
-  and\ $~\vdash \sexpr_1 : \stspec_1$
-  then\ $~\vdash \finhole{\sctx_0}{\sexpr_1} : \stspec_0$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[boundary]\leavevmode
-  \begin{itemize}
-    \item
-      If\ $~\vdash \svalue_0 : \stspec$
+      If\ $\vdash \svalue_0 : \stspec$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
       then\ $\vdash \svalue_0 : \sshape_0$
     \item
-      If\ $~\vdash \svalue_0 : \sshape_0$
-      then\ $\vdash \svalue_0 : \sdyn$
+      If\ $\vdash \svalue_0 : \sshape_0$
+      then\ $\vdash \svalue_0 : \tdyn$
     \item
-      If\ $~\vdash \svalue_0 : \stype_0$
+      If\ $\vdash \svalue_0 : \stype_0$
       and\ $\ewrap{\stype_0}{\svalue_0} \snr \svalue_1$
       then\ $\vdash \svalue_1 : \ftypemapshape{\stype_0}$
       and\ $\vdash \svalue_1 : \tdyn$
@@ -1557,32 +1828,33 @@ Second a notation
 \end{lemma}
 }|
 
-@exact|{
-\begin{lemma}[owner preservation]
-  If\ $~\vdash \sexpr_0 : \stspec$
-  and\ $\sowner_0 \Vdash \sexpr_0$
-  and\ $\sexpr_0 \snr \sexpr_1$
-  then\ $\sowner_0 \Vdash \sexpr_1$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[label in-hole]
-  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
-  then\ $\fexistsone{\sowner_1} \sowner_1 \Vdash \sexpr_0$
-\end{lemma}
-}|
-
-@exact|{
-\begin{lemma}[label replace]
-  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
-  and\ $\sowner_1 \Vdash \sexpr_0$
-  and\ $\sowner_1 \Vdash \sexpr_1$
-  then\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_1}$
-\end{lemma}
-}|
+@;@exact|{
+@;\begin{lemma}[owner preservation]
+@;  If\ $~\vdash \sexpr_0 : \stspec$
+@;  and\ $\sowner_0 \Vdash \sexpr_0$
+@;  and\ $\sexpr_0 \snr \sexpr_1$
+@;  then\ $\sowner_0 \Vdash \sexpr_1$
+@;\end{lemma}
+@;}|
+@;
+@;@exact|{
+@;\begin{lemma}[label in-hole]
+@;  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
+@;  then\ $\fexistsone{\sowner_1} \sowner_1 \Vdash \sexpr_0$
+@;\end{lemma}
+@;}|
+@;
+@;@exact|{
+@;\begin{lemma}[label replace]
+@;  If\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_0}$
+@;  and\ $\sowner_1 \Vdash \sexpr_0$
+@;  and\ $\sowner_1 \Vdash \sexpr_1$
+@;  then\ $\sowner_0 \Vdash \finhole{\sctx_0}{\sexpr_1}$
+@;\end{lemma}
+@;}|
 
 @subsection[#:tag "sec:both:model:nonopt"]{Failed Attempt to Optimize}
+
 @; - talk about with-boundary model, explain HLU-interactions, why failed,
 @;   how to overcome maybe
 @; - 

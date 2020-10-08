@@ -214,6 +214,12 @@
 \newcommand{\slangeq}{=}
 \newcommand{\sexpreq}{=}
 \newcommand{\sdefeq}{\stackrel{\footnotesize def}{=}}
+\newcommand{\sdeep}{deep}
+\newcommand{\sshallow}{shallow}
+\newcommand{\suntyped}{untyped}
+\newcommand{\sDeep}{Deep}
+\newcommand{\sShallow}{Shallow}
+\newcommand{\sUntyped}{Untyped}
 
 \newcommand{\tinst}[2]{#1{\{#2\}}}
 
@@ -331,7 +337,6 @@
 \newcommand{\sflip}{\mffont{flip}}
 \newcommand{\sfresh}{\mffont{fresh}}
 \newcommand{\smerge}{\mffont{merge}}
-\newcommand{\sshallow}{\mffont{shape-match}}
 \newcommand{\sunion}{\cup}
 \newcommand{\sdepth}{\mffont{wraps}}
 \newcommand{\smondepth}{\mffont{guard-depth}}
@@ -365,6 +370,7 @@
 \newcommand{\suowner}{\sU}
 \newcommand{\ssowner}{\sS}
 \newcommand{\stowner}{\sT}
+\newcommand{\sdowner}{\stowner}
 \newcommand{\sowners}{\sowner^{*}}
 \newcommand{\sownerset}{\sowners}
 \newcommand{\sownerlist}{\thickbar{\sowner}}
@@ -403,8 +409,8 @@
 \newcommand{\sownerenv}{\mathpzc{L}}
 \newcommand{\stypemap}{\sfont{F}}
 \newcommand{\stypemapzero}{\propfont{0}}
-\newcommand{\stypemapshape}{\propfont{X}}
-\newcommand{\stypemapone}{\sshapecheck}
+\newcommand{\stypemapshape}{\propfont{shape}}
+\newcommand{\stypemapone}{\propfont{1}}
 \newcommand{\sctxhole}{\bullet}
 \newcommand{\sdynproj}{\mathbf{0}}
 \newcommand{\sidproj}{\mathbf{1}}
@@ -635,7 +641,7 @@
 \newcommand{\fintersect}[2]{#1 \sintersect #2}
 \newcommand{\flast}[1]{\slast\,(#1)}
 \newcommand{\fremove}[2]{#1 \sremove #2}
-\newcommand{\fshallow}[2]{\sshallow\,(#1,#2)}
+\newcommand{\fshallow}[2]{\sshapematch\,(#1,#2)}
 \newcommand{\frev}[1]{\srev\,(#1)} %{{#1}^{\kern-0.3em\srev}}
 \newcommand{\fnext}[1]{\snext\,(#1)}
 \newcommand{\fholeowner}[1]{\sholeowner\,(#1)}
