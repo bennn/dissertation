@@ -235,7 +235,7 @@
   (list "Benchmark"
         "worst before"
         "worst after"
-        "% better"))
+        "   improvement"))
 
 (define (render-mixed-worst-table row*)
   ;; TODO abstraction
@@ -265,10 +265,13 @@
   (define d-max (max-overhead pi-deep))
   (define worst-before (max s-max d-max))
   (define worst-after (min s-max d-max))
-  (define pct-improved (* 100 (/ worst-before worst-after)))
+  (define x-improved (/ worst-before worst-after))
   (list name
         (bm name)
-        (rnd worst-before)
-        (rnd worst-after)
-        (format "~a%" (exact-floor pct-improved))))
+        (string-append (rnd worst-before) "x")
+        (string-append (rnd worst-after) "x")
+        (let ((v (exact-floor x-improved)))
+          (if (= v 1)
+            "<2x"
+            (format "~ax" v)))))
 

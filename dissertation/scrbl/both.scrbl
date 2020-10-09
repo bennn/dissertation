@@ -2355,24 +2355,20 @@ Unfortunately, these input wrappers change the behavior of @tt{index-of};
 @; - ?? 2-way lattice? 3-way
 @; - ?? programs where mix is better than natural-only or transient-only
 
-Offering both @|sDeep| and @|sShallow| types removes the tradeoff evident
- in @chapter-ref{chap:transient}.
-Programmers can easily switch from one semantics to the other
- to pick the best performance.
-(Or the best guarantees, if needed.)
-For all benchmarks, the choice improves the worst-case overhead of
- gradual typing (@section-ref{sec:both:perf:worst}).
-By implication, Typed Racket can offer a new migration story.
-If the plan is to migrate from untyped to fully-typed one module at
- a time, adding @|sshallow| types greatly reduces the odds of hitting a slow
- configuration along a randomly-chosen path (@section-ref{sec:both:perf:path}).
-Mixing @|sdeep| and @|sshallow| types in one configuration opens new possibilities
- (@section-ref{sec:both:perf:both}).
-One especially promising direction is to use @|sshallow| types in
- library code (@section-ref{sec:both:perf:lib}).
+Now that programmers can choose between @|sdeep| and @|sshallow|,
+ the tradeoffs evident in @chapter-ref{chap:transient} disappear.
+For all our benchmarks, the choice improves the worst-case overhead of
+ type boundaries (@section-ref{sec:both:perf:worst}).
+By implication, Typed Racket can offer a new migration story:
+ use @|sshallow| types when converting an untyped application and switch to
+ @|sdeep| after the boundaries stabilize.
+Mixing @|sdeep| and @|sshallow| types in one program offers new ways of
+ improving performance (@section-ref{sec:both:perf:both}).
+@; One especially promising direction is to use @|sshallow| types in
+@;  library code (@section-ref{sec:both:perf:lib}).
 
 
-@subsubsection[#:tag "sec:both:perf:worst"]{Worst-Case, Table}
+@subsubsection[#:tag "sec:both:perf:worst"]{GTP Benchmarks, Worst-Case}
 
 @(let* ((WT (get-mixed-worst-table SHALLOW-CURRENT-BENCHMARK*))
        )
@@ -2380,33 +2376,42 @@ One especially promising direction is to use @|sshallow| types in
 @figure*[
   "fig:both:mixed-worst-table"
   @elem{
-   Worst-case overhead after choosing the best of @|sdeep| and @|sshallow|.
+   Worst-case overhead before (@|sdeep| types)
+    and after (either @|sdeep| or @|sshallow|)
+    the integration of @|sDeep| and @|sShallow| Racket.
   }
   @render-mixed-worst-table[WT]
 ]
 @elem{
-Allowing @|sdeep| and @|sshallow| types opens up the overhead plots
- in the previous chapter.
-With the ability to choose one world or the other, programmers can
- trace the best-case line on such a plot.
+Now that Racket programmers can easily switch between @|sdeep| and @|sshallow|
+ types, worst-case overheads improve by orders of magnitude.
+Before, the cost of @|sdeep| types overwhelmed many configurations.
+After, the costs can be avoided by changing the first line (the language)
+ of the typed modules.
 
-@Figure-ref{fig:both:mixed-worst-table} summarizes the consequences
- of the new freedom by listing the worst-case overhead in each benchmark,
- after picking the best of either @|sdeep| or @|sshallow|.
-Before, high-overheads were common.
-After, all these perils are avoidable by switching languages.
+@Figure-ref{fig:both:mixed-worst-table} quantifies the improvements in the
+ Typed Racket benchmarks.
+The first data column reports the old worst-case overheads.
+The second columns reports the new worst-case, now that programmers can
+ pick the best of @|sdeep| and @|sshallow| types.
+The final column is the quoient between the first two.
+In short, the ``after'' case is always better and can be an arbitrarily large
+ improvement.
 }])
 
 
-@subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
+@;@subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
 
-@subsubsection[#:tag "sec:both:perf:both"]{Better Together?}
 
-Are there any mixed lattice points, using guarded and transient, that do
- better than a "pure" configuration?
+@subsubsection[#:tag "sec:both:perf:both"]{Case Studies: @|sDeep| and @|sShallow|}
+@; Are there any mixed lattice points, using guarded and transient, that do
+@;  better than a "pure" configuration?
+@; For a negative answer, need a lattice on top of every lattice point.
+@; Can try small benchmarks --- ok, then extrapolate.
 
-For a negative answer, need a lattice on top of every lattice point.
-Can try small benchmarks --- ok, then extrapolate.
+Early experience with @|sShallow| Racket shows that the combination of
+ @|sdeep| and @|sshallow| types can be better that either alone.
+Here are three motivating case studies.
 
 
 @parag{synth}
@@ -2440,7 +2445,7 @@ Changing the library to use @|sshallow| types improves
  @~a[shallow-delta]x and makes the untyped client run faster a @|sdeep|-typed version.
 This fast configuration is about @~a[ds-fast]x slower that the fast
  @|sdeep|-@|sdeep| configuration, but the worst-case is @~a[ds-slow]x
- (@~a[ds-slow-sec] seconds) faster than before.
+ faster (@~a[ds-slow-sec] seconds) than before.
 Overall, the @|sshallow| library is a better tradeoff for @bm{synth}.
 })
 
@@ -2457,7 +2462,7 @@ Tests that formerly passed on the package server timed out after the change.
 
 I cloned MsgPack commit @github-commit["HiPhish" "MsgPack.rkt"]{64a60986b149703ff9436877da1dd3e86c6e4094}
  and found that running all unit tests took 320 seconds.
-Changing one file to use Shallow types brought the time down to 204 seconds ---
+Changing one file to @|sshallow| types brought the time down to 204 seconds ---
  a huge improvement for a one-line switch.
 Moving the rest of the library from @|sdeep| to @|sshallow| types adds only a slight
  improvement (down to 202 seconds), which suggests that a mix of @|sdeep| and
@@ -2494,22 +2499,18 @@ In principle, @|sdeep| code can avoid the slowdown with a custom parser
 Indeed, Phil Nguyen has written a @hyperlink["https://github.com/philnguyen/json-type-provider"]{library}
  for JSON that mitigates the overhead of @|sdeep| types.
 Such libraries are ideal, but until we have them for the next data exchange
- format (SQL, XML, YAML, ...) @|sshallow| types get the job for the parsers
+ format (SQL, XML, YAML, ...) @|sshallow| types get the job with the parsers
  that are available today.
  
 
-@subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
-
-For benchmarks that depend on a typed library,
- excluding gregor and quad for now,
- how are both lattices when library is transient?
-
-Wider implication for Racket?
-@; really need to check math library asap
-
-
-@subsection{Limitations and Threats}
-@; - threats: no blame in transient, 
+@;@subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
+@;
+@;For benchmarks that depend on a typed library,
+@; excluding gregor and quad for now,
+@; how are both lattices when library is transient?
+@;
+@;Wider implication for Racket?
+@;@; really need to check math library asap
 
 
 
