@@ -16,6 +16,9 @@
      both:model-interaction
      both:DS0
      both:DS1
+     both:any-wrap
+     both:no-wrap
+     both:index-of
      untyped-codeblock
      typed-codeblock)
    (only-in math/statistics
@@ -2096,7 +2099,7 @@ Third, @tt{parameterize} comes from untyped Racket.
 @;      "Correct form is (test-begin expr ...)"
 @;      stx)]))
 
-Currently, a @|sdeep| library can enable re-use by disabling the optimizer
+Currently, a @|sdeep| library can enable syntax re-use by disabling the optimizer
  and unsafely providing macros.
 This work-around requires a manual inspection, but is more appealing than
  forking the RackUnit library and asking programmers to choose the correct version.
@@ -2163,7 +2166,10 @@ The second problematic form is @tt{define-typed/untyped-identifier},
 The following example defines an example function @tt{f} from two other names:
 
 @exact{\smallskip}
-@typed-codeblock['("(define-typed/untyped-identifier f typed-f untyped-f)")]
+@typed-codeblock['(
+  "(define-typed/untyped-identifier f"
+  "  typed-f"
+  "  untyped-f)")]
 
 @|noindent|The meaning of the new @tt{f} depends on the context it appears.
 In typed code, @tt{f} expands to @tt{typed-f}.
@@ -2191,76 +2197,157 @@ In the future, this  @;@tt{define-typed/untyped-identifier}
 @; @; Evaluation, to be determined, 2-way vs 3-way lattice, programs where combination
 @; @;  is better than Guarded-alone or Transient-alone.
 
+The integration of @|sShallow| Racket and @|sDeep| Racket has implications for
+ expressiveness (@sectionref{sec:both:expressiveness}) and performance (@sectionref{sec:both:performance}).
+Switching between these two type-enforcement strategies can help programmers
+ express new designs and avoid huge performance costs.
+
+
 @subsection[#:tag "sec:both:expressiveness"]{Expressiveness}
-@; new mixed programs, relative to TR alone
+@; - TODO can we fix occurrence typing? Any -> box? -> set-box! ???
+@;    ditto for objects, avoid the cast, is it worth changing the typechecker?
 @; - (Syntaxof (-> Int Int)) ... new mixed programs that TR doesn't allow
 @; - higher-order / any errors, gone
 @; - indexof ... weird result, gone
 
-@|sShallow| enables new programs, it's more expressive.
+Conversations with Typed Racket users have shown that @|sdeep| types can
+ lead to unexpected outcomes.
+In some programs, type enforcement appears overly strict.
+In others, type enforcement is impossible because the implementation of
+ @|sDeep| Racket lacks wrappers for certain kinds of values.
+Worst of all, the wrappers that @|sDeep| inserts can change hehavior.
+@|sShallow| Racket avoids all of these issues because of its weak, wrapper-free
+ method of enforcing types.
 
-@|sDeep| types need to use wrappers to check and protect mutable values.
-Every kind of mutable value in Racket needs a custom kind of wrapper.
-But some wrappers do not exist yet, and so @|sDeep| Racket conservatively
-rejects some programs.
+@;@(let* ((qa-dir "../QA/transient-expressive")
+@;        (search-begin "2020-08-19")
+@;        (search-end "2019-12-13")
+@;        (num-tr-q 6)
+@;        (num-s-win 3)
+@;       )
+@;@elem{
+@;To assess whether @|sShallow| Racket could help express designs that
+@; programmers want to use, I searched the Racket mailing list for
+@; questions about Typed Racket from @|search-begin| back to @|search-end|.
+@;In total, @integer->word[num-tr-q] questions asked about Typed Racket errors.
+@;Changing to @|sShallow| Racket caused @integer->word[num-s-win] errors
+@; to disappear.
+@;Other problems were due to type checking, or a run-time issue that @|sShallow|
+@; Racket does not change.
+@;The conclusion is: yes, @|sshallow| types can make some programmer-created
+@; designs expressible.
+@;
+@;That said, there is a risk that further development could run into a delayed
+@; error, and perhaps one that the programmer cannot even articulate as a mailing
+@; list question.
+@;But for now I declare victory that @|sshallow| is more
+@; expressive.
+@;})
 
-For example, mutable pairs do not have a wrapper.
-The following good program gives a runtime error with Deep types:
+@subsubsection{Less-strict Any Type}
 
-@nested[#:style 'code-inset
-@verbatim|{
-  #lang racket
+@user-inspiration['(
+ "https://groups.google.com/g/racket-users/c/cCQ6dRNybDg/m/CKXgX1PyBgAJ"
+ "https://groups.google.com/g/racket-users/c/jtmVDFCGL28/m/jwl4hsjtBQAJ")]
 
-  (module t typed/racket
-    (: add-mpair (-> (MPairof Real Real) Real))
-    (define (add-mpair mp)
-      (+ (mcar mp) (mcdr mp)))
-    (provide add-mpair))
+The @|sdeep| type named @tt{Any} is a normal ``top'' type at compile-time,
+ but is surprisingly strict at run-time.
+For compile-time type checking, @tt{Any} is a supertype of every other
+ type and supports very few elimination forms.
+You can send any value to a function that expects an @tt{Any} input,
+ and the function needs to ask occurrence-typing questions about your value
+ before it can do anything to it.
+At run-time, the @tt{Any} type is enforced with a wrapper.
 
-  (require 't)
+@figure*[
+  "fig:both:any-wrap"
+  @elem{@|sDeep| seals mutable values of type @tt{Any} in a wrapper. @|sShallow| lets untyped code modify the box.}
 
-  (add-mpair (mcons 2 4))
-  ;; Type Checker: could not convert type to a contract;
-  ;; contract generation not supported for this type
-}|]
+  both:any-wrap]
 
-@|sShallow| Racket can run the program.
-For @|sShallow| type safety, the typed function checks @tt{mpair?} of its
- input and @tt{real?} after the getter functions.
+The wrapper is a surprise for developers who expect programs such
+ as @figure-ref{fig:both:any-wrap} to run without error.
+This program defines a mutable box in typed code,
+ assigns the @tt{Any} type to the box,
+ and sends it to untyped code that attempts to set the box.
+@|sDeep| Racket raises an exception when untyped code tries to modify the box.
+Unfortunately for the programmer, this error is essential for soundness.
+If untyped code put an integer in the box, then later typed uses of the
+original box @tt{b} would give a wrong result.
 
-Syntax objects also lack wrappers.
-Wrappers are needed for Deep types because a syntax object may contain a
- mutable value.
-Implementing these wrappers would require changes to basic parts of Racket,
+@|sShallow| Racket runs the program without error because of its delayed
+ checking strategy.
+If @|sshallow| code tries to read a symbol from the original
+ box @tt{b}, then that access will raise an error.
+Until then, the program runs.
+
+
+@subsubsection{No Missing Wrappers}
+
+Every kind of mutable value that can appear in @|sdeep| code needs a kind of
+ wrapper to protect it against untyped contexts.
+Wrappers do not exist for some values, causing @|sDeep| to reject code
+ that sends such a value across a boundary.
+
+@figure*[
+  "fig:both:no-wrap"
+  @elem{@|sDeep| lacks wrappers for mutable pairs and a few other datatypes. @|sShallow| does not need wrappers, and can express mixed-typed programs that share such values with untyped code.}
+  both:no-wrap]
+
+@Figure-ref{fig:both:no-wrap} demonstrates the issue with a mutable pair
+ (@tt{MPairof}) type.
+@|sDeep| raises a run-time error when untyped code tries to call the @tt{add-mpair}
+ function.
+@(let* ((missing-wrapper* '(
+          "(Async-Channel T)" "(Custodian-Box T)" "(C-Mark-Key T)" "(Evt T)"
+          "(Ephemeron T)" "(Future T)" "(MPair T T')" "(MList T)"
+          "(Prompt-Tag T T')" "(Syntax T)" "(Thread-Cell T)" "(Weak-Box T)"))
+        (num-missing (length missing-wrapper*)))
+  @elem{
+In total, there are @integer->word[num-missing] higher-order types that
+ suffer from this issue.
+Implementing wrappers for these types is a challenge.
+For example, syntax objects can contain mutable data and therefore need wrappers.
+But syntax wrappers would require changes to many parts of the Racket compiler,
  including the macro expander.
-@|sShallow| can allow the interaction, enabling types in new places.
-
-@; TODO data
-
-@(let* ((qa-dir "../QA/transient-expressive")
-        (search-begin "2020-08-19")
-        (search-end "2019-12-13")
-        (num-tr-q 6)
-        (num-s-win 3)
-       )
-@elem{
-To assess whether @|sShallow| Racket could help express designs that
- programmers want to use, I searched the Racket mailing list for
- questions about Typed Racket from @|search-begin| back to @|search-end|.
-In total, @integer->word[num-tr-q] questions asked about Typed Racket errors.
-Changing to @|sShallow| Racket caused @integer->word[num-s-win] errors
- to disappear.
-Other problems were due to type checking, or a run-time issue that @|sShallow|
- Racket does not change.
-The conclusion is: yes, @|sshallow| types can make some programmer-created
- designs expressible.
-
-That said, there is a risk that further development could run into a delayed
- error, and perhaps one that the programmer cannot even articulate as a mailing
- list question.
-But for now I declare victory that @|sshallow| is more
- expressive.
 })
+
+@|sShallow| Racket avoids the question of wrappers thanks to the @|sTransient|
+ semantics.
+Consequently, programmers gain the ability to send new types across boundaries
+ and explore new mixed-typed designs.
+
+
+@subsubsection{Uniform Behavior}
+
+@user-inspiration['(
+ "https://groups.google.com/g/racket-users/c/UD20HadJ9Ec/m/Lmuw0U8mBwAJ"
+ "https://groups.google.com/g/racket-users/c/ZbYRQCy93dY/m/kF_Ek0VvAQAJ")]
+
+Although the purpose of @|sDeep| Racket wrappers is to reject certain operations
+ without changing anything else about a program, wrappers can cause some
+ programs to run differently.
+One obvious case is code that explicitly looks for wrappers; the answers to
+ low-level observations such as @tt{has-contract?} may depend on the type
+ boundaries in a @|sdeep| program.
+@Figure-ref{fig:both:index-of} presents a second, more subtle case.
+This typed module imports an untyped function, @tt{index-of}, with a precise
+ polymorphic type.
+The wrapper that enforces this type
+ creates a new wrapper for every input to the function---to enforce parametric
+ polymorphism@~cite{gmfk-dls-2007}.
+Unfortunately, these input wrappers change the behavior of @tt{index-of};
+ it ends up searching the list for a wrapped version of the symbol @tt{'a} and returns
+ a ``not found'' result (@tt{#f}) instead of the correct position.
+
+@figure*[
+  "fig:both:index-of"
+  @elem{The @|sdeep| contract for an @tt{All} type can change the behavior of untyped code.}
+  both:index-of]
+
+@|sShallow| Racket avoids all such changes in behavior because the @|sTransient|
+ semantics does not use wrappers to enforce types.
+
 
 @subsection[#:tag "sec:both:performance"]{Performance}
 @; - worst-case table (can trace "min" line in "fig:transient:overhead"

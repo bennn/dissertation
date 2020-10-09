@@ -10,7 +10,6 @@
   jungle:example-pair*
   jungle:tr-api
   jungle:rp-api
-  jungle:landscape
   transient:divide
   transient:subtype
   transient:all-type
@@ -23,6 +22,9 @@
   both:model-interaction
   both:DS0
   both:DS1
+  both:any-wrap
+  both:no-wrap
+  both:index-of
   both:impl-interaction
   both:model+impl
 )
@@ -149,6 +151,33 @@
     #:end-pull (code-arrow-end-pull arrow)
     #:color color))
 
+(define (add-code-line  pp arrow
+                        #:arrow-size [pre-arrow-size #f]
+                        #:line-width [pre-line-width #f]
+                        #:color [color "black"]
+                        #:label [label (blank)]
+                        #:x-adjust-label [x-label 0]
+                        #:y-adjust-label [y-label 0])
+  (define line-width (or pre-line-width 2))
+  (pin-line
+    pp
+    (let ((src-tag (code-arrow-src-tag arrow)))
+      (if (symbol? src-tag) (find-tag pp src-tag) src-tag))
+    (code-arrow-src-find arrow)
+    (let ((tgt-tag (code-arrow-tgt-tag arrow)))
+      (if (symbol? tgt-tag) (find-tag pp tgt-tag) tgt-tag))
+    (code-arrow-tgt-find arrow)
+    #:line-width line-width
+    #:label label
+    #:x-adjust-label x-label
+    #:y-adjust-label y-label
+    #:style (code-arrow-style arrow)
+    #:start-angle (code-arrow-start-angle arrow)
+    #:end-angle (code-arrow-end-angle arrow)
+    #:start-pull (code-arrow-start-pull arrow)
+    #:end-pull (code-arrow-end-pull arrow)
+    #:color color))
+
 (define (add-code-arrow* pp . arrow*)
   (for/fold ((pp pp))
             ((arrow (in-list arrow*)))
@@ -170,7 +199,7 @@
       (tag-pict h-blank (tag-append tag 'W)) (tag-pict pp tag) (tag-pict h-blank (tag-append tag 'E)))
     (tag-pict v-blank (tag-append tag 'S))))
 
-(define (make-example-atom-pict t-str* u-str* ok? r-str*)
+(define (make-example-atom-pict t-str* u-str* ok? r-str* #:extra-x [extra-x #f])
   (define t-pict (typed-codeblock t-str*))
   (define u-pict (untyped-codeblock u-str*))
   (define r-pict (if r-str* (if ok? (success-text r-str*) (error-text r-str*)) (blank)))
@@ -196,7 +225,7 @@
         (code-arrow 'u-out-0 rb-find 'u-out-1 rt-find (* 1/4 turn) (* 1/4 turn) 0 0 'dot))
       (add-code-arrow tu-pict r-out-arrow)))
   (ppict-do
-    tu/arrow
+    (if extra-x (ht-append extra-x tu/arrow (blank)) tu/arrow)
     #:go (at-find-pict 'u-out-0 rc-find 'lc #:abs-x (* 2 shim-sep))
     r-pict))
 
@@ -647,81 +676,55 @@
       both:model-interaction
       both:impl-interaction)))
 
-(define jungle:landscape
-  ;; TODO
-  ;;;; \begin{tikzpicture}
-  ;;;;   \def\embeddingskip{2cm}
-  ;;;;   \renewcommand{\cite}[1]{}
-  ;;;;   \node (E)
-  ;;;;     [align=left]
-  ;;;;     {\textstrat{\ename{}}};
-  ;;;;   \node (EBOX)
-  ;;;;     [left=of E.south west,anchor=north west,xshift=2.5em,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-  ;;;;     {ActionScript\cite{rch-popl-2012}\({}^{\mtlangann}\) ~~~
-  ;;;;      Common Lisp\({}^{\mtlangann}\) ~~~
-  ;;;;      mypy\({}^{\mtlangann}_{\dynlangann}\) ~~~
-  ;;;;      Flow\cite{cvgrl-oopsla-2017}\({}^{\mtlangann}_{\dynlangann}\) ~~~
-  ;;;;      Hack\({}^{\mtlangann}_{\dynlangann}\) ~~~
-  ;;;;      Pyre\({}^{\mtlangann}_{\dynlangann}\) ~~~
-  ;;;;      Pytype\({}^{\mtlangann}_{\dynlangann}\) \\[0.4ex]
-  ;;;;      rtc\cite{rtsf-sac-2013}\({}^{\mtlangann}_{\dynlangann}\) \quad
-  ;;;;      Strongtalk\cite{bg-oopsla-1993}\({}^{\mtlangann}\) \quad
-  ;;;;      TypeScript\cite{bat-ecoop-2014}\({}^{\mtlangann}_{\dynlangann}\) \quad
-  ;;;;      Typed Clojure\cite{bdt-esop-2016}\({}^{\mtlangann}\) \quad
-  ;;;;      Typed Lua\cite{mmi-dls-2015}\({}^{\mtlangann}\)};
+(define both:any-wrap
+  (make-example-atom-pict
+    '("(define b : (Boxof Symbol)"
+      "  (box '$))"
+      ""
+      "(define any : Any b)")
+    '("(set-box! any 42)")
+    #false
+    "Deep: cannot set Any-wrapped box"
+    #:extra-x 215))
 
-  ;;;;   \node (NBOX)
-  ;;;;     [below=of EBOX.south west,anchor=north west,xshift=0.5em,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-  ;;;;     {Gradualtalk\cite{acftd-scp-2013}\({}^{\mtlangann}_{\dynlangann}\) ~~
-  ;;;;      Grift\({}_{\dynlangann}\) \\[0.4ex]
-  ;;;;      Pycket\cite{bbst-oopsla-2017}\({}^{\mtlangann}\) \quad
-  ;;;;      TPD\cite{wmwz-ecoop-2017}\({}^{\mtlangann}\) \\[0.4ex]
-  ;;;;      Typed Racket\cite{tf-popl-2008}\({}^{\mtlangann}\)};
+(define both:no-wrap
+  (make-example-atom-pict
+    '("(: add-mpair (-> (MPairof Real Real) Real))"
+      "(define (add-mpair mp)"
+      "  (+ (mcar mp) (mcdr mp)))")
+    '("(add-mpair (mcons 2 4))")
+    #false
+    "Deep: no contract for type"
+    #:extra-x 90))
 
-  ;;;;   \node (N)
-  ;;;;     [right=of NBOX.north west,anchor=south west,xshift=-2.5em]
-  ;;;;     {\textstrat{\nname}};
-
-  ;;;;   \node (TBOX)
-  ;;;;     [right=of NBOX.north east,xshift=-1em,anchor=north west,yshift=3mm,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-  ;;;;     {Grace\cite{rmhn-ecoop-2019} ~~
-  ;;;;      Pallene\cite{gi-sblp-2018}\({}^{\mtlangann}\) \\[0.4ex]
-  ;;;;      Reticulated\cite{vss-popl-2017}\({}^{\mtlangann}_{\dynlangann}\)};
-
-  ;;;;   \node (T)
-  ;;;;     [right=of TBOX.north west,anchor=south west,xshift=-2.5em]
-  ;;;;     {\textstrat{\tname}};
-
-  ;;;;   \node (CBOX)
-  ;;;;     [right=of TBOX.north east,xshift=-0.5em,yshift=-2ex,anchor=north west,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-  ;;;;     {\csharp{}  \quad
-  ;;;;      Dart 2 \\[0.4ex]
-  ;;;;      Nom\cite{mt-oopsla-2017}\({}_{\dynlangann}\) ~
-  ;;;;      SafeTS\cite{rsfbv-popl-2015} \\[0.4ex]
-  ;;;;      {TS\({}^*\)}\cite{sfrbcsb-popl-2014}};
-
-  ;;;;   \node (C)
-  ;;;;     [right=of CBOX.north west,anchor=south west,xshift=-2.5em]
-  ;;;;     {\textstrat{Concrete}};
-
-  ;;;;   \node (EC)
-  ;;;;     [draw=black!80!white,dashed,ellipse,left=of EBOX.south east,xshift=0.9em,yshift=-1mm,anchor=north,align=center]
-  ;;;;     {\(\!\!\!\)StrongScript\cite{rzv-ecoop-2015}\(\!\!\!\)\\[0.4ex]
-  ;;;;      Thorn\cite{wzlov-popl-2010}};
-
-  ;;;;   \node (ET)
-  ;;;;     [draw=black!80!white,dashed,ellipse,left=of TBOX.south west,xshift=7mm,yshift=-2mm,x radius=10em,anchor=north west,align=center]
-  ;;;;     {~Pyret~};
-
-  ;;;; \end{tikzpicture}
-  (blank))
+(define both:index-of
+  (let* ((pp
+          (typed-codeblock '(
+            "(require/typed racket/list"
+            "  [index-of"
+            "   (All (T)"
+            "    (-> (Listof T) T"
+            "        (U #f Natural)))])"
+            ""
+            "(index-of '(a b) 'a)")))
+         (pp (vl-append pp (tag-pict (blank shim-sep shim-sep) 't-shim)))
+         (pp (vl-append 14 pp (hb-append 32 (tag-pict (blank shim-sep shim-sep) 'u-shim) (tag-pict (blank shim-sep shim-sep) 'other-shim))))
+         (down-arr (code-arrow 't-shim rb-find 'u-shim rb-find (* 3/4 turn) (* 3/4 turn) 0 0 'dot))
+         (pp (add-code-line pp down-arr))
+         (right-arr (code-arrow 'u-shim rb-find 'other-shim rb-find 0 0 0 0 'dot))
+         (pp (add-code-arrow pp right-arr))
+         (r-pict (error-text "#f")))
+    (ppict-do
+      pp
+      #:go (at-find-pict 'other-shim rc-find 'lc #:abs-x (* 1 shim-sep))
+      r-pict)))
 
 (module+ raco-pict
   (provide raco-pict)
   (define raco-pict
     (add-rectangle-background #:color "white" #:x-margin 40 #:y-margin 40
       (apply vl-append 10
-        both:DS1
+        both:index-of
         '()
     )))
 )

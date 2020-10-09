@@ -30,6 +30,7 @@
 
   jointwork
   disclaimer
+  user-inspiration
   forigins
   fproperties
   summary
@@ -154,6 +155,13 @@
 
 (define (citet . txt*)
   (exact (list "\\citet{" txt* "}")))
+
+(define (user-inspiration url*)
+  (nested-inset
+    (list (emph "Inspired by:")
+          (apply itemlist
+                 (for/list ((url (in-list url*)))
+                   (item (format-url url)))))))
 
 (define (jointwork #:people* people* #:paper* [paper* '()] #:extra [e-elem #f])
   (nested-inset
