@@ -87,6 +87,7 @@
   ename cname fname aname nname tname
 
   sDeep
+  sUntyped
   sGuarded
   sNatural
   sShallow
@@ -315,6 +316,7 @@
 (define sTransient (string-titlecase stransient))
 (define sTS (string-1-titlecase sts))
 (define sCM (string-1-titlecase sts))
+(define sUntyped "Untyped")
 
 (define (axes q)
   (elem ($ q) "-axes"))

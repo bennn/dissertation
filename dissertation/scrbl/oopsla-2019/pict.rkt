@@ -603,7 +603,7 @@
            (lbl+arr*
              (list
                (list "wrap, if value escapes to U" -10 -24 (code-arrow 'D-E rt-find 'S-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
-               (list "wrap, if value from U" 10  36 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
+               (list "wrap, if value from U" 10  38 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
                )))
       (for/fold ((pp pp))
                 ((l+a (in-list lbl+arr*)))
@@ -630,7 +630,7 @@
            (lbl+arr*
              (list
                (list "wrap, if value from D" -10 -24 (code-arrow 'S-E rt-find 'U-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
-               (list "wrap, if value escapes to D" 24  36 (code-arrow 'U-W lb-find 'S-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
+               (list "wrap, if value escapes to D" 24  38 (code-arrow 'U-W lb-find 'S-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
                )))
       (for/fold ((pp pp))
                 ((l+a (in-list lbl+arr*)))

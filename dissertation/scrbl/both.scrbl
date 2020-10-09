@@ -16,6 +16,7 @@
      both:model-interaction
      both:DS0
      both:DS1
+     untyped-codeblock
      typed-codeblock)
    (only-in math/statistics
      mean))
@@ -1941,131 +1942,137 @@ If a language can create wrapper in @|sshallow| code, however, then the
 @; X reuse G macros in S code
 @; - manual type env needs manual trust
 
-
-To combine @|sdeep| and @|sshallow| in a single implementation,
- we add a new entry point via the language.
-Language @tt{typed/racket} enters the default, @|sdeep| types.
-New language @tt{typed/racket/shallow} gives @|sshallow| types.
-Both enter the same Typed Racket implementation, but set different values
- for a compile-time flag.
-
-The flag influences several aspects of the compiler:
- how to protect boundaries,
- the interpretation of types as contracts,
- whether to rewrite typed code with @|stransient| checks,
- and whether to disable certain optimizations.
-This section focuses on the challenging and/or unexpected aspects for
- three-way interaction.
-
-@subsection{Code Re-Use}
-
-
-Extending Typed Racket to safely share type environments between @|sdeep|
- and @|sshallow| code required significant changes.
-
-First, the context.
-Typed Racket supports separate compliation.
-Modules are type-checked individually.
-Once a module is checked, the compiler serializes its type environment so that
- future modules can re-use the results.
-When one @|sdeep| module imports from another, it eventually gets an identifier
- that it can look up in the deserialized type environment.
-For safe @|sdeep| and untyped interactions, however, Typed Racket provides
- identifies through one level of indirection.
-Instead of providing a function @tt{f} directly, Typed Racket provides a
- macro that expands either to @tt{f} or a contract-protected version.
-This macro chooses based on a compile-time flag; a @tt{typed/racket} module
- sets the flag while an untyped module leaves it unset.
-
-So, the story so far is that there are two versions of @|sdeep| identifiers.
-One has types and can only be used in @|sdeep| code.
-The other has no types, but is safe for untyped.
-
-When @|sShallow| Racket imports a @|sdeep| module, it needs both the type
- and the contract.
-Neither of the past identifiers will do because the typed one lacks
- protection and the protected one lacks a type.
-Achieving both required two changes:
+The implementation of @|sShallow| Racket begins with two new @tt{#lang}
+ languages to communicate the options available to programmers.
 @itemlist[
 @item{
-  First, each @|sdeep| identifier must be serialized with an extra bit to
-  say it is @|sdeep|-typed.
-  Expansion in a @|sshallow|-typed module then knows to expand to the
-   protected identifier.
+  Programs that start with @tt{#lang typed/racket} continue to use @|sdeep| types,
+   same as earlier versions of Typed Racket;
 }
 @item{
-  Second, complile-time type lookups go back one step to recover the type.
-  Fortunately, the contract library provides the needed metadata; each
-   contract-provided identifier has a complile-time link to its parent.
-  Type lookup checks for these links and uses them to find the parent's type.
+  @tt{#lang typed/racket/deep} is a new way to opt-in to @|sdeep| types;
 }
-]
+@item{
+  and @tt{#lang typed/racket/shallow} provides @|sshallow| types.
+}]
+@|noindent|All three languages begin by invoking the same type checker.
+At steps where @|sdeep| and @|sshallow| disagree,
+ the compiler queries the current language to proceed.
+For example, the type-directed optimizer checks that it has @|sdeep| types
+ before rewriting code based on the @|sdeep| soundness guarantee.
+@; Such queries are made possible by a module-level variable.
 
-In the other direction, @|sshallow| code can send plain identifiers to
- @|sshallow| and untyped code.
-But @|sdeep| cannot trust these plain identifiers to match their static type;
- @|sdeep| needs a contract.
-@|sShallow| Racket re-uses the @|sDeep| machinery for @|sshallow| exports.
-It provides two copies of every variable: a contract-protected one
- for @|sdeep| and a plain one for untyped and @|sshallow| clients.
-Type lookups in @|sdeep| code must similarly look past one level of contract
- to find the ``parent'' type of protected identifiers.
-
-That @|sshallow| uses contract tools is a little surprising.
-One would expect those to be confined to @|sdeep| code, which is after all
- the only place they are needed.
-But the use in @|sshallow| (on provide) is convenient, and is actually
- delayed until a @|sdeep| client uses an export.
+Many aspects of the modified compiler use a similar, one-or-the-other strategy
+ to handle @|sdeep| and @|sshallow| types.
+This section deals with the more challenging aspects.
+Sharing variables between @|sdeep| and @|sshallow| required changes to
+ type-lookup and wrapper generation (@sectionref{sec:both:impl:code}).
+Sharing syntax will require further changes; for now, typed syntax can only
+ be re-used through unsafe mechanisms (@sectionref{sec:both:impl:code}).
+Lastly, Typed Racket has accumulated a small API to give programmers control
+ over the @|sdeep| type enforcement strategy.
+This API needed generalizations to handle @|sshallow| types (@sectionref{sec:both:impl:tu}).
 
 
-@subsection{Syntax Re-Use (Unsolved)}
+@subsection[#:tag "sec:both:impl:code"]{@|sDeep| and @|sShallow| Interaction}
 
-Although @|sshallow| code can re-use @|sdeep| type definitions
- and can access @|sdeep| identifiers through contracts,
- @|sshallow| cannot re-use @|sdeep| macros.
-Re-use is desirable to avoid copying code, but macros open a soundness hole.
+Racket supports separate compilation.
+Each module in a program gets compiled individually so that other
+ programs can re-use the output.
+Typed Racket cooperates with the separate compilation protocol by serializing
+ the results of type checking.
+A well-typed module compiles to untyped code (with appropriate contracts)
+ and a local type environment.
+When one @|sdeep| module imports from another, it can find the type of the
+ imported identifier in the deserialized type environment.
 
-The RackUnit testing library shows the need to re-use macros.
-@|sDeep| Racket comes with a typed wrapper over this untyped testing library.
-The wrapper has 300 lines of type definitions and macro definitions
- that help Typed Racket understand uses of the untyped code.
-If @|sShallow| Racket were to copy these definitions, then both copies would
- need to be maintained.
+At first glance, it appears that @|sshallow| code can use the same protocol
+ to find the type of @|sdeep| imports.
+The protocol fails, however, because wrappers get in the way.
+When @|sdeep| wants to provide an identifier, it really provides a piece of
+ syntax called a rename transformer.
+These transformers expand to one of two identifiers depending on where they
+ appear: @|sdeep|-typed code gets the original identifier and can easily
+ look up the type, but @|suntyped| and @|sshallow| code gets a wrapped
+ version of the original.
+The wrapper causes a direct type lookup to fail.
 
-But macros are unsafe in general because they can smuggle a typed
- identifier across a boundary.
-Consider a simple macro that expands to a function application:
+For @|sdeep|-to-@|sshallow| exports, the solution is to modify
+ type lookup to pass through wrappers.
+Fortunately, the change was easy to make because the Racket contract library
+ provides enough metadata.
+At compile time (and only then), a wrapped identifier is associated with
+ a structure that links back to the original.
+The @|sshallow| type checker looks out for these wrappers and uncovers
+ the originals as needed.
 
-@code-nested{(define-syntax-rule (call-f x) (f x))}
+@|sShallow|-to-@|sdeep| exports use an opposite method.
+Like @|sdeep|, a @|sshallow| module provides only rename transformers.
+These expand to the original identifier in other @|sshallow| and @|suntyped|
+ code; the original is associated with serialized type information.
+For @|sdeep| clients, the transformers expand to a wrapped identifier.
+Consequently, the @|sdeep| type checker watches for ``untyped'' wrappers and
+ tests whether there is a serialized type underneath.
+Such types allow static type checks to succeed, and at run-time the wrapper
+ keeps @|sdeep| code safe.
 
-@|noindent|If this macro were used in @|sshallow| code, it would expand
- to an unprotected @tt{f} reference.
-Unless @tt{f} makes no asumptions about its input, the lack of contract
- protection can lead to unsoundness.
-And unsoundness can lead to a memory error (very bad) if the typed code
- runs through the optimizer.
-Lacking a static check to tell good macros from bad, the only safe option is
- is to reject all.
+A surprising consequence of the final protocol is that a @|sshallow| module must
+ be prepared to create wrappers for its exports.
+The wrapper-making code is generated during compilation, at the end of
+ type checking, but does not run until needed by a @|sdeep| client.
+In this way, only @|sdeep| code appears to suffer from the expressiveness
+ limits of wrappers.
 
-A static check is hard to design.
-Below is one safe macro, @tt{test-case}, from the RackUnit type definitions.
+
+@subsection[#:tag "sec:both:impl:syntax"]{Syntax Re-Use}
+
+@|sShallow| code cannot yet use @|sdeep| macros.
+Re-use is desirable to avoid copying code, but requires a static analysis
+ to avoid opening a soundness hole.
+This section explains the problem and suggests requirements for a solution.
+
+A simple, unsafe macro applies a typed function @tt{f} to an input:
+
+@typed-codeblock['("(define-syntax-rule (call-f x) (f x))")]
+
+@|noindent|If this macro could appear in @|sshallow| code, then any
+ @|sshallow| value @tt{x} could sneak into the @|sdeep| function.
+Unless @tt{f} makes no assumptions about its input, such values can break
+ the @|sdeep| soundness guarantee and lead to dangerous results in optimized
+ code.
+
+One fix idea is to put a contract around every @|sdeep| identifier that
+ appears in a macro.
+Doing so would require one analysis to find out which contracts are needed,
+ a second analysis to install the contracts (ideally without repeats),
+ and a way to avoid the contracts if the macro goes only to @|sdeep| clients.
+These are major changes.
+
+A more realistic option is to statically check whether a macro is safe to
+ export.
+The @tt{call-f} macro above is unsafe.
+Safe macros appear, for example, in the typed compatibility layer for the
+ RackUnit testing library.
+RackUnit is an untyped library that exports some functions and some macros.
+The typed layer provides types for the functions and type-annotated copies
+ of the macros (about 300 lines in total).
+These macros are safe because they do not expose any @|sdeep|-typed identifiers.
+For example, the following macro combines a sequence of expressions into
+ a named RackUnit test case:
 
 @typed-codeblock['(
   "(define-syntax (test-case stx)"
-  "  (syntax-case stx ()"
+  "  (syntax-parse stx"
   "    [(_ name expr ...)"
   "     (quasisyntax/loc stx"
-  "       (parameterize"
-  "           ([current-test-name"
-  "             (ensure-string name (quote-syntax #,(datum->syntax #f 'loc #'name)))])"
+  "       (parameterize ([test-name (ensure-str name)])"
   "         (test-begin expr ...)))]))"
 )]
 
 @|noindent|This macro is safe for @|sshallow| code, but for complicated reasons.
-First, @tt{ensure-string} is a typed function that accepts any input.
-Second, @tt{test-begin} is a macro (from the same file) that does not
- expose any unsafe typed code.
-Other identifiers come from untyped Racket.
+First, @tt{ensure-str} is a typed function that accepts any input.
+Second, @tt{test-begin} is a macro from the same file that is also safe.
+Third, @tt{parameterize} comes from untyped Racket.
 
 @; ;; rackunit/rackunit-typed/rackunit/main.rkt
 @;(define-syntax (test-begin stx)
@@ -2089,88 +2096,95 @@ Other identifiers come from untyped Racket.
 @;      "Correct form is (test-begin expr ...)"
 @;      stx)]))
 
-To enable re-use for libraries such as RackUnit, the @|sdeep| wrapper can
- disable optimization and unsafely export macros that pass a manual inspection
-This is a kludge, but the manual inspection is easier than forking.
-And without optimization, accidental future unsoundness can only lead to a
- Racket-level error.
+Currently, a @|sdeep| library can enable re-use by disabling the optimizer
+ and unsafely providing macros.
+This work-around requires a manual inspection, but is more appealing than
+ forking the RackUnit library and asking programmers to choose the correct version.
 
 
-@subsection{Typed/Untyped Utilities}
+@subsection[#:tag "sec:both:impl:tu"]{@|sDeep|--@|sUntyped| Utilities}
 @; --- struggles = edit old code , 2 of these => new type errors
 
-Typed Racket exposes a limited API to manually tweak typed/untyped interactions.
-Deals with challenges that arose as users built libraries for mixed-typed users.
-Two forms in this API can lead to unexpected results in the new
- @|sdeep| + @|sshallow| world.
-
+Typed Racket has a small API to let programmers control boundaries
+ between @|sdeep| and @|suntyped| code.
+The API arose over time, as language users discovered challenges.
+Two forms in this API can currently lead to surprising results now that
+ @|sdeep| and @|sshallow| code can interact.
 
 @; --- require/untyped-contract
 
 First is @tt{require/untyped-contract}.
-This form is for untyped code to import a typed identifier whose type
- does not have a @|sdeep| contract.
-Users can give a supertype that has a contract, and use the typed identifier
- in a more restricted way than typed code does.
+This form lets untyped code import a typed identifier whose precise type
+ cannot be expressed with a @|sdeep| contract.
+Users supply a supertype of the precise type and @|sDeep| Racket uses this
+ weaker type to generate a contract.
 
 For example, the @bm{jpeg} benchmark depends on a library for multi-dimensional
  arrays (@render-lib[(make-lib "math/array" "https://docs.racket-lang.org/math/array.html")]).
 This library accepts two kinds of data for array indices:
  either a vector of natural numbers or a vector of integers.
 Helper functions assert that values with the integer type do not actually
- contain negative numbers:
+ contain negative numbers using a run-time checking function:
 
-@code-nested{(: check-array-shape (-> (U (Vectorof Natural) (Vectorof Integer)) (Vectorof Natural)))}
+@exact{\smallskip}
+@typed-codeblock['(
+  "(: check-array-shape"
+  "   (-> (U (Vectorof Natural) (Vectorof Integer))"
+  "       (Vectorof Natural)))")]
 
-Such types cannot be turned into useful contracts because Racket does not have
- true union contracts.
-The work around is to give a supertype:
+@|noindent|@|sDeep| contracts cannot express the type for the checking
+ function because they lack support for true unions.
+The work around is to impose a supertype on untyped clients:
 
-@code-nested{(require/untyped-contract [check-array-shape (-> (Vectorof Integer) (Vectorof Natural))])}
+@exact{\smallskip}
+@untyped-codeblock['(
+  "(require/untyped-contract"
+  "  [check-array-shape"
+  "   (-> (Vectorof Integer) (Vectorof Natural))])")]
 
 This form comes with a surprising design choice.
-If an untyped-contract identifier goes back into typed code, it has its original
- type, not the supertype.
-The form only talks about contracts, it does not narrow type checking.
-This is a safe thing to do because @|sdeep|-typed code does not use
- the contract; it can tag along until it hits another boundary.
-
-For @|sshallow| types, the contract is needed.
-It must be applied immediately when the value reaches @|sshallow| code,
- and this means the original type is misleading because some would-be-type-correct
- behaviors are certainly ruled out by the contract.
-So the supertype must be used.
-This means, new typechecking errors can occur when changing from @|sdeep|
- to @|sshallow|.
-
+If an untyped-contract identifier flows back into typed code,
+ the type checker uses the original type rather than the supertype.
+For @|sdeep| code, the choice is convenient because more programs can type-check
+ using the supertype.
+For @|sshallow|, though, the convenience disappears.
+A @|sshallow| client must receive the wrapped version of the identifier,
+ which means @|sshallow| must behave in accordance with the supertype.
+Because of this fact, the @|sshallow| type checker uses the supertype as
+ well.
+Consequently, some well-typed @|sdeep| programs raise type errors upon switching
+ to @|sshallow| types.
 
 @; --- define-typed/untyped-identifier
 @; TODO more extreme version of untyped-contract
 
-Second is @tt{define-typed/untyped-identifier}.
-As the name suggests, this form creates a new identifier from two old ones.
-The following example defines @tt{f} from two other names:
+The second problematic form is @tt{define-typed/untyped-identifier},
+ which creates a new identifier from two old ones.
+The following example defines an example function @tt{f} from two other names:
 
-@code-nested{(define-typed/untyped-identifier f typed-f untyped-f)}
+@exact{\smallskip}
+@typed-codeblock['("(define-typed/untyped-identifier f typed-f untyped-f)")]
 
-The meaning of the new @tt{f} depends on the context it appears.
+@|noindent|The meaning of the new @tt{f} depends on the context it appears.
 In typed code, @tt{f} expands to @tt{typed-f}.
 In untyped code, an @tt{f} is a synonym for @tt{untyped-f}.
 
 The @tt{typed-f} is intended for @|sdeep|-typed code.
 It cannot be safely used in a @|sshallow| module because it may
  assume certain interactions.
-Consequently, @|sshallow| code must use the untyped id.
+Consequently, @|sshallow| code gets the untyped id.
 This means, unfortunately, that changing a @|sdeep| module to @|sshallow|
- can raise a type checking error.
-In particular, occurrences of @tt{f} that expand to @tt{untyped-f} are
- untyped identifiers.
+ can raise a type checking error because occurrences of @tt{f} that expand to
+ @tt{untyped-f} are plain, untyped identifiers.
 There is no way to uncover the type that a @tt{typed-f} would have, and
- it is unclear whether such a type is always desirable.
+ anyway there is no guarantee that @tt{typed-f} and @tt{untyped-f} have
+ similar behavior.
 
-The way forward is to add a third argument to the form so that users can
- specify behavior for all three contexts.
-Even so, old code needs changes.
+For now, such type errors call for programmer-supplied annotations in
+ the @|sshallow| client code.
+In the future, this  @;@tt{define-typed/untyped-identifier}
+ form would benefit
+ from a third argument that specifies behavior in @|sshallow| contexts.
 
 
 @section[#:tag "sec:both:evaluation"]{Evaluation}
