@@ -24,9 +24,9 @@ Once the community knows more about what makes blame valuable,
 On the @|sdeep| side, the @|snatural| semantics is designed with blame in
  mind.
 If blame is not needed, then a semantics could enforce the same type guarantees
- using fewer wrappers; even Racket's collapsible contracts create more wrappers
- than one would expect because they provide accurate blame@~cite{g-popl-2015,fgsfs-oopsla-2018}.
-Again, this research vector calls for an evaluation of blame
+ using fewer wrappers; even Racket's collapsible contracts fail to remove
+ many wrappers because they insist on correct blame@~cite{g-popl-2015,fgsfs-oopsla-2018}.
+Again, this research calls for an evaluation of blame
  and entails a design and implementation challenge.
 
 

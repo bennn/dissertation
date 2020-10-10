@@ -1,6 +1,6 @@
 #lang greenman-thesis/include
 
-@title[#:tag "chap:related"]{Related}
+@title[#:tag "chap:related"]{Related Work}
 
 All the related work for previous chapters.
 Evaluation method.

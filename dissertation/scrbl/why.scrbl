@@ -203,7 +203,7 @@ The result is a mixed-typed language because entire blocks of code may have
  the dynamic type throughout.
 Gradual typing emphasizes the mixed-typed idea in quasi-static typing,
  contributes major technical improvements and design discipline@~cite{st-sfp-2006,svcb-snapl-2015},
- and has inspired a large body of static-to-dynamic research (@section-ref{sec:related:gradual}).
+ and has inspired a large body of static-to-dynamic research (@format-url{https://github.com/samth/gradual-typing-bib}).
 
 Implicit coercions to type dynamic, however, weaken type-proofs in a
  gradual or quasi-static language.

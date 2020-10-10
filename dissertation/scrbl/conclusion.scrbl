@@ -22,7 +22,7 @@ The benefits improve all three main dimensions of a mixed-typed programming:
 \item \emph{People}:
   \sShallow{} types can express new combinations of typed and untyped code
    because they enforce weaker guarantees.
-  Programmers can choose between this flexibility and the predictability
+  Programmers can choose between this flexibility and the stability
    of \sdeep{} types as they see fit, for each part of a codebase.
 \end{itemize}}}
 @|noindent|Integrating @|sdeep| and @|sshallow| within one codebase---as

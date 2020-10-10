@@ -93,9 +93,7 @@ The design-space analysis motivates a compromise between two semantics,
  both @|snatural| and @|stransient| behavior.
 Along the way, each chapter acknowledges collaborators and closely-related
  work.
-@; TODO 2020-10-09 : OK to remove end-related, but explain why (theory & practice have different relatives ... blah)
-A broad family tree comes at the end (@chapter-ref{chap:related}),
- along with a view toward future work (@chapter-ref{chap:future})
+The dissertation ends with a view toward future work (@chapter-ref{chap:future})
  and reflections on the wider research context (@chapter-ref{chap:conclusion}).
 
 
@@ -147,7 +145,7 @@ There is no hope in trying to be authoritative because the research community
 @subsection{Names in Prior Work}
 
 @citet{tgpk-dls-2018} introduce the names @emph[sdeep] and @emph[sshallow], but use
- them to refer to the @|snatural| and @|stransient| implementations.
+ them for the @|snatural| and @|stransient| implementations.
 @citet{gf-icfp-2018} use @emph{higher-order} for the @|sdeep| idea and
  @emph{first-order} for the @|sshallow| idea.
 

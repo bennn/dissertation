@@ -29,7 +29,7 @@
 @include-section{design.scrbl}
 @include-section{transient.scrbl}
 @include-section{both.scrbl}
-@include-section{related.scrbl}
+@;@include-section{related.scrbl}
 @include-section{future.scrbl}
 @include-section{conclusion.scrbl}
 
