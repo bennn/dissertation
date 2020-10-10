@@ -12,12 +12,12 @@ A language that can mix typed and untyped code must balance three conflicting
  dimensions:
 @exact{{\renewcommand{\labelitemi}{{\large\decothreeright}} %{\raisebox{0.4ex}{\tiny\(\bullet\)}}
 \begin{itemize}
-\item \emph{Proofs}\/:
+\item \emph{Proofs}:
   Static types should be accurate predictions about the way a program
    behaves at run-time.
   If a type makes a claim, then other code---typed or untyped---may
    depend on it.
-\item\emph{Performance}\/:
+\item\emph{Performance}:
   Adding types to part of a codebase should not cripple its running time.
   On the contrary, a smart compiler should use type-proofs to generate
    efficient code.
@@ -60,7 +60,8 @@ Hence the second half of this dissertation, which supports my thesis statement.
 @section{Thesis Statement}
 
 @|sDeep| and @|sshallow| types can coexist in a way that preserves their formal
-properties; programmers can combine these types to strengthen @|sshallow|-type
+properties
+Programmers can combine these types to strengthen @|sshallow|-type
 guarantees, avoid unimportant @|sdeep|-type runtime errors, and lower the
 running time of typed/untyped interactions.
 
@@ -92,6 +93,7 @@ The design-space analysis motivates a compromise between two semantics,
  both @|snatural| and @|stransient| behavior.
 Along the way, each chapter acknowledges collaborators and closely-related
  work.
+@; TODO 2020-10-09 : OK to remove end-related, but explain why (theory & practice have different relatives ... blah)
 A broad family tree comes at the end (@chapter-ref{chap:related}),
  along with a view toward future work (@chapter-ref{chap:future})
  and reflections on the wider research context (@chapter-ref{chap:conclusion}).
@@ -144,7 +146,7 @@ There is no hope in trying to be authoritative because the research community
 
 @subsection{Names in Prior Work}
 
-@citet{tgpk-dls-2018} introduce the names @|sdeep| and @|sshallow|, but use
+@citet{tgpk-dls-2018} introduce the names @emph[sdeep] and @emph[sshallow], but use
  them to refer to the @|snatural| and @|stransient| implementations.
 @citet{gf-icfp-2018} use @emph{higher-order} for the @|sdeep| idea and
  @emph{first-order} for the @|sshallow| idea.
@@ -156,7 +158,7 @@ There is no hope in trying to be authoritative because the research community
  the semantics and its characteristic wrapper values.
 Foundational papers simply call it gradual typing@~cite{st-sfp-2006,tf-dls-2006,htf-hosc-2010}.
 
-The name @|snatural| comes from @citet{mf-toplas-2009}, who use it
+The name @emph[snatural] comes from @citet{mf-toplas-2009}, who use it
  to describe a proxy method for transporting untyped functions into a
  typed context.
 Earliers works on higher-order contracts@~citep{ff-icfp-2002},

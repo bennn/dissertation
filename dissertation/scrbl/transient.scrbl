@@ -50,7 +50,7 @@ The high costs of @|sdeep| types @;(@chapter-ref{chap:performance})
  motivate a compromise.
 In a language that supports both, programmers can mix @|sdeep| and
  @|sshallow| types to find an optimal tradeoff.
-This chapter presents the first half of a compromise; namely, a @|sshallow| semantics for Typed Racket.
+This chapter presents the first half of the compromise; namely, a @|sshallow| semantics for Typed Racket.
 By default, Typed Racket provides @|sdeep| types via the @|snatural| semantics.
 My work brings the @|stransient| semantics to the Typed Racket surface syntax.
 

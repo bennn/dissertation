@@ -45,6 +45,8 @@ Earlier versions of @|sShallow| Racket ran much slower due to redundant checks
  and the overhead of contract library combinators; perhaps further analysis
  and ahead-of-time optimization can close the gap between fully-typed @|sshallow|
  and @|sdeep|.
+Starting points for such an analysis include occurrence typing@~cite{tf-icfp-2010},
+ modular set-based analysis@~cite{mff-popl-2006}, and Henglein's tagging optimization@~cite{h-lfp-1992}.
 
 
 @section{Stronger @|sShallow| Types}
