@@ -30,35 +30,24 @@ update 2020-10-13
 
 Hello committee members,
 
-Today I shipped a first-draft dissertation to Matthias. After he reads it and
-I incorporate his suggestions, I will send a second draft out to you. Then, once
-you've had a chance to read, I will schedule one-on-one meetings and bring in
-your feedback. I am planning to defend in mid-December.
+Today I shipped a first-draft dissertation to Matthias. We expect to have a
+copy to you by November 1. My goal is to defend during the first half of
+December.
 
-Here is a rough timeline of the next steps:
-
-- Oct 13th -- Oct 27th : Matthias reads the 1st draft
-- Oct 27th -- Nov  5th : Ben makes 2nd draft
-- Nov  6th -- Nov 20th : committee reads 2nd draft
-- Nov 20th -- Dec  5th : 1-on-1 meetings, Ben + committee member
-- mid-December : defense
-
-Let me know ASAP if you are planning to be offline for an extended period
-(say, 3 days or more) during the holidays.
-
+Please let me know if you have any large/complex time constraints in Nov. / Dec.
 
 The dissertation currently has eight chapters and 198 pages. Here is a brief summary:
 
 Title = Deep and Shallow Types
 
-1. Introduction, thesis statement
-2. Background on gradual typing & my approach in particular
-3. How to evaluate the performance of gradual types
-4. How to evaluate the semantics of gradual types
-5. Shallow types for Racket: design, implementation, and challenges
-6. Deep and Shallow together: model, implementation, and analysis
-7. Future work
-8. Conclusions
+  1. Introduction, thesis statement
+  2. Background on gradual typing & my approach in particular
+  3. How to evaluate the performance of gradual types
+  4. How to evaluate the semantics of gradual types
+  5. Shallow types for Racket: design, implementation, and challenges
+  6. Deep and Shallow together: model, implementation, and analysis
+  7. Future work
+  8. Conclusions
 
 Chapters 3, 4, 5, and 6 are the technical ones. Chapter 3 combines my past works
 on measuring performance --- both for Typed Racket and Reticulated. Chapter 4
@@ -66,6 +55,9 @@ is based on a journal article that we* submitted this year to the JFP special
 issue on gradual typing. Chapters 5 and 6 are all new material.
 
 * we = Ben, Matthias, and Christos Dimoulas
+
+Thanks,
+Ben
 
 
 update 2020-07-21
