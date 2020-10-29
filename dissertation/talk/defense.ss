@@ -20,6 +20,7 @@
   racket/list
   racket/string
   racket/format
+  racket/runtime-path
   slideshow/code
   plot/no-gui (except-in plot/utils min* max*))
 
@@ -93,32 +94,86 @@
 (define title-3k1 (hex-triplet->color% #xF1E7DE))
 (define author-3k1 (hex-triplet->color% #xE5E6E6))
 
-(define untyped-color yellow1-3k1)
-(define deep-color green2-3k1)
-(define shallow-color green0-3k1)
+(define untyped-pen-color yellow1-3k1)
+(define deep-pen-color green2-3k1)
+(define shallow-pen-color green0-3k1)
+(define neutral-pen-color grey-3k1)
+
+(define untyped-brush-color yellow1-3k1)
+(define deep-brush-color green2-3k1)
+(define shallow-brush-color green0-3k1)
+(define neutral-brush-color fog-3k1)
+
 (define background-color green3-3k1)
 (define spotlight-color teal-3k1)
 (define title-text-color title-3k1)
 (define body-text-color author-3k1)
+(define subtitle-text-color orange1-3k1)
+(define code-text-color body-text-color)
 
 ;; -----------------------------------------------------------------------------
 ;; --- text
 
+(define (small-caps-style font)
+  (cons 'no-combine (cons 'caps font)))
+
+(define title-text-font (small-caps-style "TeX Gyre Pagella"))
+(define title-text-size 70)
+
+(define body-text-font "Lucida Grande")
+(define body-text-size 38)
+
+(define subtitle-text-font (small-caps-style body-text-font))
+
+(define code-text-font "Inconsolata")
+(define code-text-size 38)
+
+(define (txt str*
+             #:font [font body-text-font]
+             #:style [style #f]
+             #:size [size body-text-size]
+             #:color [color body-text-color])
+  (colorize
+    (text (if (string? str*) str* (apply string-append str*))
+          (if style (cons style font) font)
+          size)
+    color))
+
+(define (ht . str*)
+  (ht* str*))
+
+(define (ht* str*)
+  (txt str* #:font title-text-font #:size title-text-size #:color title-text-color))
+
+(define (rt . str*)
+  (rt* str*))
+
+(define (rt* str*)
+  (txt str* #:font body-text-font #:size body-text-size #:color body-text-color))
+
+(define (tt . str*)
+  (tt* str*))
+
+(define (tt* str*)
+  (txt str* #:font code-text-font #:size code-text-size #:color code-text-color))
+
 ;; -----------------------------------------------------------------------------
 ;; --- ???
 
-;(define (frame-bitmap ps)
-;  (add-rounded-border
-;    #:x-margin #:y-margin
-;    #:frame-width 4 #:frame-color 
-;
-;(define (bgbg pp)
-;  (make-codeblock
-;      #:bg-color deco-bg-color
-;      #:x-margin tiny-x-sep #:y-margin tiny-y-sep
-;      (list pp)))
-;
+(define-runtime-path src "src")
 
+(define (src-path . elem*)
+  (src-path* elem*))
+
+(define (src-path* elem*)
+  (apply build-path src elem*))
+
+(define (frame-bitmap ps #:w% [w% 9/10])
+  (add-rounded-border
+    #:radius 2 #:x-margin (w%->pixels 3/100) #:y-margin (h%->pixels 3/100)
+    #:frame-width 2 #:frame-color neutral-pen-color
+    #:background-color neutral-brush-color
+    (bitmap (src-path ps))))
 
 ;; -----------------------------------------------------------------------------
 
@@ -139,19 +194,35 @@
     #:go center-coord
     (cc-superimpose vl hl)))
 
+(define (test-screenshot-slide)
+  (pslide
+    #:go center-coord
+    (frame-bitmap "racket-users-ho-any.png" #:w% 5/10)))
 
 (define (test-code-slide)
   (void))
 
 ;; =============================================================================
 
-(define (do-show)
+(define (sec:title)
+  (define (st str #:size-- [size-- 0] #:color [color body-text-color])
+    (txt str #:font subtitle-text-font #:size (- body-text-size size--) #:color color))
+  (pslide
+    #:go (coord 1/2 4/10 'ct #:sep pico-y-sep)
+    @ht{Deep and Shallow Types}
+    (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color)
+    (blank 0 small-y-sep)
+    @st{Ben Greenman    2020-12-19})
+  (void))
+
+(module+ main
   (set-page-numbers-visible! #false)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha spotlight-color 0.6))
   ;; --
   (parameterize ((current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color background-color)))
-    (test-margin-slide)
-    ;(sec:title)
+    ;(test-margin-slide)
+    ;(test-screenshot-slide)
+    (sec:title)
     ;(sec:big-picture)
     ;(sec:shallow-fast)
     ;(sec:shallow-expressive)
@@ -162,17 +233,21 @@
     (void))
   (void))
 
-
-(module+ main
-  (do-show))
-
 ;; =============================================================================
 
 (module+ raco-pict (provide raco-pict) (define client-w 984) (define client-h 728) (define raco-pict
+
+  #;(add-rounded-border #:background-color background-color #:x-margin 20 #:y-margin 20
+    (colorize (make-font-table-pict "Translated from the Chinese")
+              title-text-color))
+
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go (coord text-left text-top 'lt)
-    (blank)
+    ;#:go (coord text-left text-top 'lt)
+    ;(ht "Three Kingdoms")
+    ;(rt "Deep and Shallow types can coexist in a way that ...")
+    ;(tt "#lang racket/base (define (f x) (add1 x))")
+
 
 
   )))
