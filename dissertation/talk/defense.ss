@@ -61,7 +61,7 @@
 (define med-y-sep (h%->pixels 10/100))
 (define big-y-sep (h%->pixels 15/100))
 
-(define code-line-sep (h%->pixels 2/100))
+(define code-line-sep (h%->pixels 12/1000))
 (define text-line-sep (h%->pixels 3/100))
 
 (define codeblock-x-sep (w%->pixels 4/100))
@@ -99,17 +99,19 @@
 (define shallow-pen-color green0-3k1)
 (define neutral-pen-color grey-3k1)
 
-(define untyped-brush-color yellow1-3k1)
-(define deep-brush-color green2-3k1)
-(define shallow-brush-color green0-3k1)
+(define code-brush-alpha 0.6)
+
+(define untyped-brush-color (color%-update-alpha yellow1-3k1 code-brush-alpha))
+(define deep-brush-color (color%-update-alpha green2-3k1 code-brush-alpha))
+(define shallow-brush-color (color%-update-alpha green0-3k1 code-brush-alpha))
 (define neutral-brush-color fog-3k1)
 
-(define background-color green3-3k1)
+(define background-color black-3k1)
 (define spotlight-color teal-3k1)
 (define title-text-color title-3k1)
 (define body-text-color author-3k1)
 (define subtitle-text-color orange1-3k1)
-(define code-text-color body-text-color)
+(define code-text-color black)
 
 ;; -----------------------------------------------------------------------------
 ;; --- text
@@ -126,7 +128,7 @@
 (define subtitle-text-font (small-caps-style body-text-font))
 
 (define code-text-font "Inconsolata")
-(define code-text-size 38)
+(define code-text-size 26)
 
 (define (txt str*
              #:font [font body-text-font]
@@ -156,6 +158,62 @@
 
 (define (tt* str*)
   (txt str* #:font code-text-font #:size code-text-size #:color code-text-color))
+
+(define (code-line-append . pp*)
+  (code-line-append* pp*))
+
+(define (code-line-append* pp*)
+  (apply vl-append code-line-sep pp*))
+
+(define (add-background #:radius r pp)
+  (add-rectangle-background
+    #:radius r
+    #:color white
+    pp))
+
+(define (X-codeblock pp* #:title [title #f] #:label [label #f] #:frame-color [frame-color #f] #:background-color [background-color #f])
+  (define label-margin (if title (* 50/100 (pict-height title)) 0))
+  (define (add-label-margin pp [extra 0]) (vl-append (+ extra label-margin) (blank) pp))
+  (define radius 1)
+  (define fw 5)
+  (let* ((block-pict
+          (add-background
+            #:radius radius
+            (add-rounded-border
+              #:frame-color frame-color
+              #:frame-width fw
+              #:background-color background-color
+              #:x-margin tiny-x-sep
+              #:y-margin small-y-sep
+              #:radius radius
+              (add-label-margin (code-line-append* pp*)))))
+         (title-pict (and title (rt title))))
+    (if label
+      (let ((block-pict (add-label-margin block-pict 2)))
+        (ppict-do (if title-pict (lt-superimpose block-pict (ht-append 4 (blank) title-pict)) block-pict)
+          #:go (coord 1/2 0 'ct) label))
+      (if title-pict (vl-append 0 title-pict block-pict) block-pict))))
+
+(define (conslang x y)
+  (if x (list* (tt x) (blank) y) y))
+
+(define (untyped-codeblock #:title [title #f] #:lang [lang "#lang racket"] . str*)
+  (untyped-codeblock* #:title title (conslang lang (map tt str*))))
+
+(define (untyped-codeblock* pp* #:title [title #f])
+  (X-codeblock pp* #:title title #:frame-color untyped-pen-color #:background-color untyped-brush-color))
+
+(define (shallow-codeblock #:title [title #f] #:lang [lang "#lang shallow"] . str*)
+  (shallow-codeblock* #:title title (conslang lang (map tt str*))))
+
+(define (shallow-codeblock* pp* #:title [title #f])
+  (X-codeblock pp* #:title title #:frame-color shallow-pen-color #:background-color shallow-brush-color))
+
+(define (deep-codeblock #:title [title #f] #:lang [lang "#lang deep"] . str*)
+  (deep-codeblock* #:title title (conslang lang (map tt str*))))
+
+(define (deep-codeblock* pp* #:title [title #f])
+  (X-codeblock pp* #:title title #:frame-color deep-pen-color #:background-color deep-brush-color))
 
 ;; -----------------------------------------------------------------------------
 ;; --- ???
@@ -199,7 +257,34 @@
     #:go center-coord
     (frame-bitmap "racket-users-ho-any.png" #:w% 5/10)))
 
+(define (test-text-slide)
+  (pslide
+    #:go (coord text-left text-top 'lt)
+    (ht "Three Kingdoms")
+    (rt "Deep and Shallow types can coexist in a way that ...")
+    (tt "#lang racket/base (define (f x) (add1 x))"))
+  (void))
+
 (define (test-code-slide)
+  (pslide
+    #:go (coord text-left text-top 'lt)
+    (ht-append
+      tiny-x-sep
+      (untyped-codeblock
+        ""
+        "(define (add1 n)"
+        "  (+ n 1))"
+        "")
+      (shallow-codeblock
+        "(: add1 (-> Real Real))"
+        "(define (add1 n)"
+        "  (+ n 1))"
+        "")
+      (deep-codeblock
+        "(: add1 (-> Real Real))"
+        "(define (add1 n)"
+        "  (+ n 1))"
+        "")))
   (void))
 
 ;; =============================================================================
@@ -208,6 +293,7 @@
   (define (st str #:size-- [size-- 0] #:color [color body-text-color])
     (txt str #:font subtitle-text-font #:size (- body-text-size size--) #:color color))
   (pslide
+    ;; TODO sunset, forest background
     #:go (coord 1/2 4/10 'ct #:sep pico-y-sep)
     @ht{Deep and Shallow Types}
     (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color)
@@ -243,11 +329,24 @@
 
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    ;#:go (coord text-left text-top 'lt)
-    ;(ht "Three Kingdoms")
-    ;(rt "Deep and Shallow types can coexist in a way that ...")
-    ;(tt "#lang racket/base (define (f x) (add1 x))")
-
+    #:go (coord text-left text-top 'lt)
+    (ht-append
+      tiny-x-sep
+      (untyped-codeblock
+        ""
+        "(define (add1 n)"
+        "  (+ n 1))"
+        "")
+      (shallow-codeblock
+        "(: add1 (-> Real Real))"
+        "(define (add1 n)"
+        "  (+ n 1))"
+        "")
+      (deep-codeblock
+        "(: add1 (-> Real Real))"
+        "(define (add1 n)"
+        "  (+ n 1))"
+        ""))
 
 
   )))
