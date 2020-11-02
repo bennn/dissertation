@@ -236,11 +236,11 @@
   (define tu-pict
     (let* ((t/u
             (vl-append
-              t-pict
+              u-pict
               (tag-pict (blank shim-sep shim-sep) 't-shim)
               (blank 0 output-y)
               (tag-pict (blank shim-sep shim-sep) 'u-shim)
-              u-pict
+              t-pict
               (hb-append (blank shim-sep output-y)
                          (tag-pict (blank output-x 0) 'u-out-0)))))
       (add-code-arrow
