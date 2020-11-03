@@ -6,8 +6,8 @@
 ;; TODO
 ;; - [X] get colors ... three kingdoms?
 ;; - [X] pick fonts
-;; - [ ] outline, on paper
-;; - [ ] jfp example, slides ... take from diss pict
+;; - [X] jfp example, slides ... take from diss pict
+;; - [X] outline, on paper
 ;; - [ ]
 ;; - [ ]
 
