@@ -11,10 +11,10 @@ The benefits improve all three main dimensions of a mixed-typed programming:
 \item \emph{Proofs}\/:
   Switching from \sshallow{} to \sdeep{} types strengthens the formal guarantees
    for a block of code.
-  In Typed Racket, changing one line of code improves types from local spot-checks
-   to claims that hold throughout the program.
+  In Typed Racket, a one-line change thus improves types from local spot-checks
+   to claims that hold throughout the program, including in untyped modules.
 \item\emph{Performance}\/:
-  Switching between \sdeep{} to \sshallow{} can improve performance.
+  Flipping between \sdeep{} and \sshallow{} can improve performance.
   In fully-typed programs, \sdeep{} types have zero cost---and often run faster
    due to type-directed optimizations.
   In mixed-typed programs, \sshallow{} avoids the tremendous overheads
@@ -27,36 +27,42 @@ The benefits improve all three main dimensions of a mixed-typed programming:
 \end{itemize}}}
 @|noindent|Integrating @|sdeep| and @|sshallow| within one codebase---as
  opposed to picking one or the other---improves several concrete examples (@sectionref{sec:both:perf:both}).
+These examples all use @|sshallow| types for code that is tightly coupled to
+ an untyped boundary and @|sdeep| types everywhere else.
+More experience is likely to reveal other patterns and best practices.
 For now, I recommend @|sshallow| types when initially converting an untyped
  program.
-Once the types are in place and the boundaries are clear, then consider
- moving from @|sshallow| to @|sdeep|.
-@; Further experience may suggest other best practices.
+Once the types are in place and the boundaries are clear,
+ then moving from @|sshallow| to @|sdeep| may assist with debugging tasks
+ and may improve performance.
 
-Beyond the central contribution, this dissertation introduces methods to
- systematically measure any mixed-typed language.
-The performance methods in @chapter-ref{chap:performance} offer a comprehensive
+The foundations of this work are the methods that I developed to systematically
+ measure mixed-typed languages.
+@itemlist[#:style 'ordered
+@item{
+The performance evaluation methods from (@chapter-ref{chap:performance}) offer a comprehensive
  and scalable picture of run-time costs.
-Any multi-language system with performance implications can apply the methods
- to learn about its exponentially-large space of configurations.
-The design methods in @chapter-ref{chap:design} rigorously assess the strengths
+An exhaustive method summarizes the complete dataset when feasible, and an
+ approximate method gives an empirically-justified weakening otherwise.
+}
+@item{
+The design evaluation methods (@chapter-ref{chap:design}) rigorously assess the strengths
  and weaknesses of static types.
-Our application of these methods leads to an unexcelled characterization
- of different designs from the literature.
-@; Thanks to the syntactic nature of the proof techniques, I can recommend
-@;  the theorems to other designers.
+Our application of these methods leads to the most precise
+ characterization of designs in the literature.
+}]
 
-Overall, we have learned a lot about what it means to offer a practical
- mixed-typed language.
+Overall, my dissertation has revealed a lot about what it means to offer a
+ practical mixed-typed language.
 The step from @emph{untyped or typed} to @emph{mixed-typed} has presented a
  serious challenge to the conventional wisdom about static types.
-Techniques that led to strong guarantees and fast performance in a fully-typed
- setting now give weaker guarantees and poor running times.
+Standard techniques that realize strong guarantees and fast performance in a fully-typed
+ setting yield weaker guarantees and slower running times in mixed programs.
 Methods and measurements have improved our understanding of the design space
- and articulated the benefits of combining strong (@|sdeep|) and weak (@|sshallow|)
+ and articulated the benefits of combining @|sdeep| and @|sshallow|
  types in a mixed-typed language.
 Yet much remains to be done, especially to see how programmers comprehend
- and use the new freedom.
+ the new types and leverage the new choices.
 
 
 @; -----------------------------------------------------------------------------
