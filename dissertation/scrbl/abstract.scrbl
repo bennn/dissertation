@@ -19,7 +19,7 @@ Together, the methods characterize the strengths and weaknesses of language desi
 
 The comparison does not reveal a clear winner, and therefore motivates
  a synthesis of two ideas from the literature: @|sdeep| and @|sshallow|.
-@|sDeep| types offer strong guarantees, but impose a high cost on communications
+@|sDeep| types offer strong guarantees but impose a high cost on communications
  that span type boundaries.
 @|sShallow| types come with weak guarantees but can be implemented with
  relatively low and predictable costs.

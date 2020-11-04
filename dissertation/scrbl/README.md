@@ -45,6 +45,13 @@ Style
 - [X] start every chapter with acks, papers, people
 - [ ] MF has boxes around hyperlinks why
 
+MF edits, leftover
+- [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger
+- [ ] (pX)
+- [ ] (pX)
+- [ ] (pX)
+- [ ] (pX)
+
 #### dependencies
 
 racket 7.7 +
