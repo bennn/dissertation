@@ -19,9 +19,11 @@ TODO
   - [X] blame table
   - [X] future work
 - [X] full intro (1)
-- [ ] "both" chapter
-- [ ] related
-- [ ] conclusion ... other chapters?
+- [X] "both" chapter
+- [X] related
+- [X] conclusion ... other chapters?
+- [ ] HEY write the contributions, separate from thesis
+      the CONTRIBUTIONS will survive need to applaud them
 
 Style
 - [ ] fig 62+, bad titles for deep vs shallow exact plots
@@ -41,6 +43,7 @@ Style
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [X] careful about common lisp characterization ... free to ignore, opt non-mand
 - [X] start every chapter with acks, papers, people
+- [ ] MF has boxes around hyperlinks why
 
 #### dependencies
 
