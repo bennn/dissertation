@@ -1,12 +1,9 @@
 #lang greenman-thesis/include
 
+@; TODO
+@; - [ ] cut out "articulate"
+
 @title{What It's All About}
-@; from abstract, have feelings about:
-@; - type system
-@; - mixed-typed language
-@; - 3way tradeoff
-@; - order to design space
-@; - two ideas: deep and shallow types
 
 A language that can mix typed and untyped code must balance three conflicting
  dimensions:

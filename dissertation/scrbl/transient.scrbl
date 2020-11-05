@@ -412,7 +412,7 @@ There are two kinds of entry in such a collection:
 If a @|stransient| run-time check fails, the blame map can supply a set
  of boundaries by following
  parent pointers up from the failed value.
-Each parent pointer is partially responsible for the mis-matched value.
+Each parent pointer is partially responsible for the mismatched value.
 Each boundary at the root of the parent paths contains possibly-unchecked
  type assumptions.
 The programmer can begin debugging by reviewing these type assumptions.

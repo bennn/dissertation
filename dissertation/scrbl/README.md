@@ -22,8 +22,10 @@ TODO
 - [X] "both" chapter
 - [X] related
 - [X] conclusion ... other chapters?
-- [ ] HEY write the contributions, separate from thesis
+- [X] HEY write the contributions, separate from thesis
       the CONTRIBUTIONS will survive need to applaud them
+- [ ] "methods" -> "method" goddammit I am the first with these great METHOD canonical,
+      you can improve but you will be second
 
 Style
 - [ ] fig 62+, bad titles for deep vs shallow exact plots
@@ -44,6 +46,8 @@ Style
 - [X] careful about common lisp characterization ... free to ignore, opt non-mand
 - [X] start every chapter with acks, papers, people
 - [ ] MF has boxes around hyperlinks why
+- [ ] soft typing, remove bullet points
+- [ ] 2.2.2 still awkward
 
 MF edits, leftover
 - [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger

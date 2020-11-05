@@ -7,30 +7,15 @@
 
 @; -----------------------------------------------------------------------------
 
-@; --- MF
-@; So I have read it a couple of times.
-@; 
-@; — I think all the thoughts are there that you need for the rest of the
-@; dissertation and perhaps a few more.
-@; — They are presented with occasional lapses in category. (This is a
-@; so-called categorical mistake.)
-@; — Your style is quite uneven in many different ways (for example,
-@; inspect
-@; “I” vs “we” or look for “inanimate things that do”).
-@; — The biggest technical problem is your discussion of FFIs. I think it
-@; doesn’t come across what you want.
-
 @title[#:tag "chap:why"]{Migratory Typing}
-@; whence MT
 
 Migratory typing is a novel approach to an old desire:
  mixing typed and untyped code.
-A typed programming language comes with a strict meta-language (of types)
- that articulates how a program computes.
-For better or worse, code that does not fit the meta-language may not run.
-An untyped language is willing to see what happens in many more programs,
- so long as the computations stick to legal values.
-@; TODO cite Hoare hints, "cherished"?
+A typed programming language comes with a strict sub-language (of types)
+ that articulates what a program computes.
+For better or worse, code that does not fit the sub-language may not run.
+An untyped language runs any program in which the primitive computations
+ stick to legal values.
 The mixed-typed idea is to somehow combine some good aspects of both.
 A programmer should have some untyped flexibility and some typed guarantees.
 
@@ -40,7 +25,7 @@ More freedom to run programs means less knowledge about what a new
 Run-time checks slow down a computation, thus a mixed-typed language needs to
  balance three desires: expressiveness, guarantees, and performance.
 
-Before a language can address the central 3-way tradeoff, its designers
+Before a language design can address the central 3-way tradeoff, its creators
  must decide what kinds of mixing to allow and what goals to strive for.
 Migratory typing is one such theory.
 The goal is to add static typing onto an independent untyped
@@ -67,10 +52,10 @@ The observations, in particular, motivate design choices that characterize
 @section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
 @; TODO what did Henglein do and how does it fit???
 
-In the days before migratory typing, language designs explored several ways
+In the days before migratory typing, language designers explored several ways
  to mix typed and untyped code.
-Some mixtures began with an untyped language and considered
- whether to demand user-supplied type annotations.
+Some mixtures began with an untyped language and allowed
+ user-supplied type annotations.
 Others began with a typed language and added untyped flexibility.
 Either way, each design had to decide on run-time guarantees for its
  generalized types.
@@ -82,8 +67,8 @@ Either way, each design had to decide on run-time guarantees for its
 Early Lisps, including MACLISP@~cite{m-maclisp-1974} and Common Lisp@~cite{s-lisp-1990},
  have compilers that accept type hints.
 In MACLISP, for example, a programmer can hint that a function expects two
- floating-point numbers to encourage the compiler to specialize the function
- body (@figure-ref{fig:maclisp-hint}).
+ floating-point numbers and returns one to encourage the compiler to specialize
+ the function body (@figure-ref{fig:maclisp-hint}).
 
 Any speedup due to type hints, however, comes at a risk.
 There is no static type system to prove that hints are sensible claims.
@@ -92,7 +77,7 @@ Similarly, there is no dynamic guarantee that compiled code receives valid
  inputs.
 If the function @tt{F} in @figure-ref{fig:maclisp-hint} is invoked on two
  strings, it may compute an invalid result.
-In other words, type hints come with all the perils of casts in a C-like language.
+In other words, type hints come with all the perils of types in a C-like language.
 
 @figure*[
   "fig:maclisp-hint"
@@ -128,10 +113,10 @@ The inference problem now asks for types that over-approximate the
  behaviors in a set of values.
 
 There are two known methods to solve type inequalities.
-Soft inference adds slack variables to types and turns the
- inequalities into equalities@~cite{f-thesis-1992}.
+Soft inference adds slack variables to types, turns the
+ inequalities into equalities, and then uses Hindley-Milner style inference@~cite{f-thesis-1992}.
 Set-based inference solves the inequalities by computing a transitive
- closure over the entire program@~cite{am-popl-1991,awl-popl-1994,f-thesis-1997,ff-pldi-1997,ffkwf-pldi-1996}.
+ closure through constructors over the entire program@~cite{am-popl-1991,awl-popl-1994,f-thesis-1997,ff-pldi-1997,ffkwf-pldi-1996}.
 Both solutions, unfortunately, reveal major challenges for inference:
 @exact{
 \begin{itemize}
@@ -161,7 +146,7 @@ The approach is related to type hints in that programmers must add
  annotations to untyped code.
 Optional types are supported, however, by a full-fledged type checker
  and a no-op compiler.
-The type checker is the static analysis; it uses types to find logical errors.
+The type checker is the static analysis; it uses types to find basic logical errors.
 Compilation erases types to arrive at an untyped program that can safely
  interoperate with the rest of the program.
 
@@ -171,9 +156,6 @@ Despite their widespread adoption (@section-ref{sec:design:landscape}),
 A programmer cannot use optional types to predict the inputs that a function
  will receive, and likewise a compiler cannot use optional types to justify
  transformations.
-Unless researchers can design a practical and non-optional mixed-typed language,
- then work on sound types is limited to closed-world programs that do not
- interoperate with untyped code.
 
 @emph{History Note:}
 To be fair, optional typing is one valid way to use Lisp type hints.
@@ -240,9 +222,8 @@ Small teams continue to employ untyped languages; indeed, most repositories on
 Once an untyped codebase is off the ground and the lack of reliable type
  information becomes a maintenance bottleneck, programmers have two options.
 The extreme option is to change languages.
-Twitter, for example, was able to port their Ruby codebase over to Scala@~cite{twitter-scala}.
-Good on them.
-For teams that lack the time and expertise to make a switch, the alternative
+Twitter, for example, was able to port its Ruby codebase over to Scala@~cite{twitter-scala}.
+For teams that lack the time and expertise to make such a switch, the alternative
  is to re-create any necessary benefits of types.
 An exemplar of the second option is Sweden's pension system, which
  depends on a contract-laden Perl program@~cite{sweden-pluto}.
@@ -282,16 +263,11 @@ Type annotations are an important channel of communication.
 For human readers, they describe the high-level design of code.
 Even the original author of a function can benefit from reading the types
  after some time away from the codebase.
-For a compiler, annotations are expectations.
-In a full-featured type system with subtyping and other points of ambiguity,
- user-supplied annotations drive choices.
-Additionally, type errors that can point to part of an annotation have a direct
- link to the programmer who needs to deal with the errors.
-
-@; These benefits offset the costs of writing and maintaining types.
-@; Languages that can help write types are better off, of course,
-@;  but types belong in source code.
-@; At least for top-level and recursive definitions.
+For a compiler, annotations are hints about what the programmer expects.
+In languages that lack principal types, user-supplied annotations can resolve
+ ambiguity.
+Additionally, any type error messages that can point to part of an annotation
+ have a direct link to the programmer who needs to deal with the errors.
 
 
 @subsection[#:tag "why:mt-o3"]{MT-o3: sound types catch bugs}
@@ -300,7 +276,7 @@ Additionally, type errors that can point to part of an annotation have a direct
 @; - unless academics try, nobody will
 
 All static types can find typo-level mistakes, but only sound types
- guarantee behavior.
+ guarantee type-specified behavior.
 In a mixed-typed setting, a guarantee can make a world of difference.
 Picture a large untyped codebase made up of several interacting components,
  and suppose that one component behaves strangely.
@@ -308,13 +284,14 @@ Adding unsound types to that one component can reveal a syntactic mistake, but n
 Sound types, on the other hand, will halt the program as soon as an incorrect
  value appears in typed code.
 If the language can additionally report the source of the untyped value
- and the rationale for the mis-matched type expectation, then the programmer
+ and the rationale for the mismatched type expectation, then the programmer
  has two clues about where to begin debugging.
 
+@; TODO really the type system monitors ... not that type is dependable
 Going beyond soundness, a mixed-typed language that satisfies complete
- monitoring guarantees the deep run-time behavior of every type.
+ monitoring guarantees the run-time behavior of every type.
 If a value flows across a type-annotated source position, then future users
- of the value can assume the type---no matter whether these uses are
+ of the value can depend on the type---no matter whether these uses are in
  statically-typed or untyped code (@chapter-ref{chap:design}).
 In other words, silent disagreements between a type and value cannot arise.
 Every mismatch stops the program before computations can become further derailed.
@@ -339,8 +316,8 @@ As always, research is when it can fail.
 
 Migratory typing begins with an independent untyped language and adds
  a companion type system.
-The new types must express common designs from the untyped world;
- in other words, a type system that demands re-organized untyped code
+The new types and type system must express common idioms from the untyped world;
+ in other words, a type system that demands a re-organizion of untyped code
  is not acceptable.
 
 
@@ -373,11 +350,12 @@ To this end, a mixed-typed language should try to present relevant source
 
 @subsection[#:tag "why:mt-r4"]{MT-r4: clear boundaries}
 
-Typed and untyped code must be linked at static API boundaries.
+Typed and untyped code must be linked at static and clearly visible API boundaries.
 In order for a typed module to interact with an untyped value, the module
  must declare a type specification for the value.
-An untyped module does not need to give specifications, because any
+An untyped module does not need to give specifications because any
  typed value that it imports comes with a static specification for correct use.
+@; TODO also we don't want to touch
 
 By contrast, this dissertation is not directly concerned with true gradual
  languages that include a dynamic type@~cite{svcb-snapl-2015}.
@@ -407,11 +385,11 @@ These names express the same idea as my boundary requirement,
 Macro allows interaction between typed and untyped chunks of code@~cite{tf-dls-2006}
  whereas micro allows ``fine-grained'' mixing via a dynamic type@~cite{st-sfp-2006}.
 
-Looking back, I believe there were two dimensions at play.
+Looking back, I think there were two dimensions at play.
 First is whether to include a dynamic type.
 Second is how to mix: whether to migrate from an untyped host language
  or to add flexibility to a static type system@~cite{g-snapl-2019}.
 Micro/macro is a useful mnemonic for the first dimension,
- but it is more direct to talk about dyn/non-dyn and migratory/non-migratory
+ but it is more direct to talk about dynamic/non-dynamic and migratory/non-migratory
  as two choices in the design of a new mixed-typed language.
 
