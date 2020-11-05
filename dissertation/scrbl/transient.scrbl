@@ -1,4 +1,8 @@
 #lang greenman-thesis/include
+
+@; TODO
+@; - [ ] describe for-loop opt, other things to reduce cost ... contracts too
+
 @(require
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*

@@ -100,24 +100,24 @@ The dissertation ends with a view toward future work (@chapter-ref{chap:future})
 Overall, I present four major contributions:
 @itemlist[#:style 'ordered
 @item{
-  performance analysis methods that systematically explore the interactions
-   enabled by a mixed-typed language;
+  the first performance-analysis method to systematically explore the
+   interactions enabled by a mixed-typed language;
 }
 @item{
-  design-space analysis methods that articulate meaningful distinctions
-   among languages that prior analyses lumped together;
+  the first design-analysis method to articulate the meaning of types for
+   both typed and untyped parts of a codebase;
 }
 @item{
-  an adaptation of @|stransient| to new types and larger programs, despite
-   scalability challenges; and
+  a scaled-up @|stransient| that handles a rich language of types and
+   employs ahead-of-time optimizations; and
 }
 @item{
-  evidence that interoperability between @|sdeep| and @|sshallow| types
-   is both possible and useful.
+  the first language that lets programmers migrate untyped code to two
+   type-sound disciplines: @|sdeep| and @|sshallow| types.
 }]
 
-@|noindent|The first two contributions helped to develop my thesis statement.
-The latter arose from my work on the thesis.
+@; @|noindent|The first two contributions helped to develop my thesis statement.
+@; The latter arose from my work on the thesis.
 
 
 @section{Specification, Implementation, and Naming}
