@@ -977,13 +977,14 @@ The trouble is that type instantiation can change the shape of such types,
 Occurrence types at a boundary are a second problem.
 A program cannot assign an occurrence type to an untyped value,
  as in @figure-ref{fig:transient:occurrence-type}.
-This program uses @codett{require/typed} to import an untyped function with a nonsensical
+This code uses @codett{require/typed} to import an untyped function with a
+ nonsensical occurrence type; it passes the type checker, but the compiler
+ raises an error during contract generation because it cannot enforce the
  occurrence type.
-The typechecker trusts that all @codett{require/typed} annotations are valid
- claims, and so the rest of the program type checks.
-The typechecker assumes that a run-time check will catch any faulty claims.
-In this program, however, the occurrence type adds a side effect claim
- that is not caught by any check.
+Proper enforcement requires rewriting both branches of the conditional
+ to include casts based on the occurrence type.
+In this case, a check must ensure that @codett{x} is a string.
+
 
 
 @subsection[#:tag "sec:transient:optimize"]{Optimizer}
@@ -991,54 +992,59 @@ In this program, however, the occurrence type adds a side effect claim
 @figure*[
   "fig:transient:optimize"
   @elem{TR optimizations and whether @|sShallow| can re-use them.}
-  @exact{{
+  @exact|{{
   \deftablemacros{}
-  \begin{tabular}[t]{cc}
-  \begin{tabular}{lr}
+  \begin{tabular}{l@{~}c@{~~~}l}
     Topic & Shape-Safe?
   \\\hline
     \(\mathsf{apply}\)          & \tblY
+    & Deforest map-reduce exprs.
   \\
     \(\mathsf{box}\)            & \tblY
+    & Speed up box access.
   \\
     \(\mathsf{dead{\mhyphen}code}\)      & \tblN
+    & Remove if and case-lambda branches.
   \\
     \(\mathsf{extflonum}\)      & \tblY
+    & Rewrite math for extended floats.
   \\
     \(\mathsf{fixnum}\)         & \tblY
+    & Rewrite math for fixnums.
   \\
     \(\mathsf{float{\mhyphen}complex}\)  & \tblY
+    & Unbox \& rewrite complex float ops.
   \\
     \(\mathsf{float}\)          & \tblY
+    & Rewrite math for normal floats.
   \\
     \(\mathsf{list}\)           & \tblY
-  \end{tabular}
-  &
-  \begin{tabular}{lr}
-    Topic & Shape-Safe?
-  \\\hline
+    & Speed up list access and length.
+  \\
     \(\mathsf{number}\)         & \tblY
+    & Rewrite basic numeric operations.
   \\
     \(\mathsf{pair}\)           & \tblN
+    & Speed up (nested) pair access.
   \\
     \(\mathsf{sequence}\)       & \tblY
+    & Insert type hints for the runtime.
   \\
     \(\mathsf{string}\)         & \tblY
+    & Speed up string operations.
   \\
     \(\mathsf{struct}\)         & \tblY
-  \\
-    \(\mathsf{unboxed{\mhyphen}let}\)    & \tblY
+    & Speed up struct access.
   \\
     \(\mathsf{vector}\)         & \tblY
-  \\
+    & Speed up vector access.
   \\
   \end{tabular}
-  \end{tabular}
-}} ]
+}}| ]
 
 Typed Racket uses static types to compile efficient code@~cite{sta-nt-base-types,stff-padl-2012,stf-oopsla-2012}.
 To give a basic example, a dynamically-typed sum @codett{(+ n0 n1)} can be
- complied to add its inputs without first confirming that they are numbers.
+ rewritten to add its inputs without first confirming that they are numbers.
 In principle, such optimizations may rely on full types.
 These ``@|sdeep|'' optimizations are not safe for @|sShallow| Racket because it only
  guarantees the top type constructor.
@@ -1056,11 +1062,13 @@ Other passes are re-used in @|sShallow| Racket.
 The benefit of these optimizations is sometimes enough to outweigh the cost
  of @|stransient| checks (@section-ref{sec:transient:performance}).
 Certain re-used passes, though, force design decisions.
-The @${\mathsf{apply}} pass requires all @|sshallow|-typed functions to
+The @${\mathsf{apply}} pass directly applies a typed function to the elements
+ of a list.
+This transformation is shape sound because all @|sshallow|-typed functions
  check their inputs, whether or not they escape to untyped code.
 The @${\mathsf{list}} and @${\mathsf{sequence}} passes depend on the @${O(n)}
  shape check for list types.
-Finally, the @${\mathsf{unboxed{\mhyphen}let}} pass is only safe by virtue
+Finally, the unboxing in the @${\mathsf{float{\mhyphen}complex}} pass is only safe by virtue
  of a conservative escape analysis.
 
 
@@ -1271,10 +1279,10 @@ As before, these plots show the proportion of @ddeliverable{D} configurations
 @|sShallow| types lead to a huge improvement, from over 20x down to 8x or lower, in
  @integer->word[(length '(forth fsmoo dungeon jpeg suffixtree take5 synth quadU quadT))]
  benchmarks.
-In one way or another, these benchmarks suffer from high @|sdeep| overhead
+With @|sdeep| types, these benchmarks suffer high overhead
  due to eager and wrapped checks.
 The wrapper-free @|stransient| semantics removes the issue.
-@|sShallow| improves on a few other benchmarks, and does equally-well on
+@|sShallow| improves on a few other benchmarks and it does equally-well on
  almost all the rest.
 The one exception is @bm{morsecode}, which fares better with @|sdeep| types.
 Three characteristics account for the discrepancy:
@@ -1300,7 +1308,7 @@ Overall, @|sShallow| Racket lives up to its promise of better mixed-typed perfor
 ]
 
 @Figures-ref["fig:transient:exact" (exact-ceiling (/ (length SHALLOW-CURRENT-BENCHMARK*) overhead-plots-per-page))]
- offers a different perspective on @|sdeep| and @|sshallow| types.
+ offer a different perspective on @|sdeep| and @|sshallow| types.
 These exact runtime plots show how performance changes as the number of type
  annotations in a benchmark increases.
 The leftmost column of each plot has one dot for each fully-untyped running
@@ -1368,7 +1376,7 @@ As the overhead plots anticipate, the linear cost is typically much lower
  @|sShallow| Racket with blame enabled.
 The second column of this table measures the overhead of blame on
  the fully-typed configuration.
-For comparison: the third column lists the overhead of the same
+For comparison, the third column lists the overhead of the same
  configuration without blame, and the fourth column lists the absolute
  worst-case of @|sdeep| types.
 This table reports only the fully-typed configuration for @|sshallow| because
@@ -1385,11 +1393,11 @@ The rest run far slower than @|sshallow| without blame.
 
 Surprisingly, the fourth column shows that @|sshallow| blame costs
  more than the worst case of @|sDeep| types in @id[(length deep-beats-blame*)] benchmarks.
-The benchmarks in which @|sDeep| loses all send higher-order values across
- several boundaries; each crossing makes an expensive wrapper.
-By contrast, @|sShallow| blame slows down every operation by a small factor
+@|sShallow| blame slows down every operation by a small factor
  and allocates a small amount of memory for every value.
 These small costs add up, even in our relatively short-running benchmarks.
+@|sDeep| is slowest only in benchmarks that frequently send higher-order
+ values across boundaries; collapsible contracts may resolve these issues@~cite{fgsfs-oopsla-2018}.
 
 Our blame results are far less optimistic than the early report in
  @citet{vss-popl-2017}, which found an average slowdown on 2.5x and
@@ -1412,9 +1420,9 @@ Four others have since been retired from the Python suite because they are
 Among the remaining benchmarks, the overhead of blame appears to increase with
  the size of the program.
 Larger Reticulated benchmarks should run on par with @|sShallow| Racket.
-Indeed, I converted the @bm{sieve} benchmark to Reticulated and found that
- adding blame increases its running time from ~40 seconds to a time out after
- 10 minutes.
+For example, a Reticulated variant of the @bm{sieve} benchmark
+ runs in about 40 seconds without blame and times out after 10 minutes with
+ blame enabled.
 
 The type inference issue is subtle.
 Reticulated frequently infers the dynamic type for local variables.
