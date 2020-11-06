@@ -550,7 +550,7 @@
     (define tiny-x-sep 20)
     (define pico-y-sep 8)
     (define tiny-y-sep 10)
-    (define med-x-sep 32)
+    (define med-x-sep 24)
     (define (make-pipeline . pp*)
       (make-pipeline* pp*))
     (define (make-pipeline* pp*)
@@ -571,8 +571,8 @@
     (make-pipeline
       (make-natural-step '("Expand"))
       (make-natural-step '("Typecheck" "Kernel"))
-      (make-natural-step '("Generate" "Contract"))
-      (make-natural-step '("Type-Directed" "Optimizer")))))
+      (make-natural-step '("Generate" "Contracts"))
+      (make-natural-step '("Type-Based" "Optimizer")))))
 
 (define transient:defense
   (typed-codeblock '(
