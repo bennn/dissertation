@@ -2106,7 +2106,7 @@ This work-around requires a manual inspection, but is more appealing than
 
 
 @subsection[#:tag "sec:both:impl:tu"]{@|sDeep|--@|sUntyped| Utilities}
-@; --- struggles = edit old code , 2 of these => new type errors
+@; struggles = edit old code , 2 of these => new type errors
 
 Typed Racket has a small API to let programmers control boundaries
  between @|sdeep| and @|suntyped| code.
@@ -2114,7 +2114,7 @@ The API arose over time, as language users discovered challenges.
 Two forms in this API can currently lead to surprising results now that
  @|sdeep| and @|sshallow| code can interact.
 
-@; --- require/untyped-contract
+@; require/untyped-contract
 
 First is @tt{require/untyped-contract}.
 This form lets untyped code import a typed identifier whose precise type
@@ -2158,7 +2158,7 @@ Because of this fact, the @|sshallow| type checker uses the supertype as
 Consequently, some well-typed @|sdeep| programs raise type errors upon switching
  to @|sshallow| types.
 
-@; --- define-typed/untyped-identifier
+@; define-typed/untyped-identifier
 @; TODO more extreme version of untyped-contract
 
 The second problematic form is @tt{define-typed/untyped-identifier},
@@ -2407,7 +2407,7 @@ In short, the ``after'' case is always better and can be an arbitrarily large
 @; Are there any mixed lattice points, using guarded and transient, that do
 @;  better than a "pure" configuration?
 @; For a negative answer, need a lattice on top of every lattice point.
-@; Can try small benchmarks --- ok, then extrapolate.
+@; Can try small benchmarks.... ok, then extrapolate.
 
 Early experience with @|sShallow| Racket shows that the combination of
  @|sdeep| and @|sshallow| types can be better that either alone.
@@ -2462,8 +2462,8 @@ Tests that formerly passed on the package server timed out after the change.
 
 I cloned MsgPack commit @github-commit["HiPhish" "MsgPack.rkt"]{64a60986b149703ff9436877da1dd3e86c6e4094}
  and found that running all unit tests took 320 seconds.
-Changing one file to @|sshallow| types brought the time down to 204 seconds ---
- a huge improvement for a one-line switch.
+Changing one file to @|sshallow| types brought the time down to 204 seconds---a
+ huge improvement for a one-line switch.
 Moving the rest of the library from @|sdeep| to @|sshallow| types adds only a slight
  improvement (down to 202 seconds), which suggests that a mix of @|sdeep| and
  @|sshallow| is best.

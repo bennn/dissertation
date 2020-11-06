@@ -105,8 +105,8 @@ StrongScript and Thorn offer a choice of concrete and erased types@~citep{wzlov-
 Pyret uses @|nname|-style checks to validate fixed-size data and @|tname|-style checks
  for recursive types (e.g. lists) and higher-order types
  (personal communication with Benjamin Lerner and Shriram Krishnamurthi).
-The literature presents additional languages, as formal semantics, that defy a broad categorization.
-@citet{cl-icfp-2017} drop certain higher-order wrappers.
+The literature presents additional languages, as formal semantics without implementations, that defy a broad categorization.
+@citet{cl-icfp-2017} drop certain wrappers.
 @citet{svctg-esop-2015} give a monotonic semantics for references.
 
 Our goal is a systematic comparison of type guarantees across the wide design space.
@@ -114,7 +114,7 @@ Such a comparison is possible because, despite the variety, the different guaran
  arise from choices about how to enforce types at the boundaries between
  type-checked code and arbitrary dynamically-typed code.
 To illustrate, the following three subsections discuss type boundary examples in the
- context of:
+ context of for languages:
   Flow@~citep{cvgrl-oopsla-2017},
   Reticulated@~citep{vss-popl-2017},
   Typed Racket@~citep{tfffgksst-snapl-2017},
@@ -136,8 +136,8 @@ The first example illustrates one such interaction:
   "eq:example-atom"
   jungle:example-atom]
 
-@|noindent|The typed function on the left expects an integer.
-The untyped context on the right imports this function @${f} and applies @${f} to
+@|noindent|The typed function on top expects an integer.
+The untyped context on the bottom imports this function @${f} and applies @${f} to
  itself; thus the typed function receives a function rather than an integer.
 The question is whether the program halts
  or invokes the typed function @${f} on a nonsensical input.
@@ -166,7 +166,7 @@ Flow does not detect the run-time type mismatch because it follows the
  @emph{erasure}, or optional typing, approach to type enforcement.
 @|ename| is hands-off;
  types have no effect on the behavior of a program.
-These static-only types help find logical mistakes and enable IDE tools,
+These static-only types help find logical mistakes and enable type-directed IDE tools,
  but disappear during compilation.
 Consequently, the author of a typed Erasure function cannot assume that it
  receives only well-typed input.
@@ -178,17 +178,16 @@ The checks for other types reveal differences among these non-trivial type enfor
 
 @section[#:tag "sec:design:anti-concrete"]{Validating an Untyped Data Structure}
 
-The second example is about pair types. Specifically, it questions what
- happens when typed code declares a pair type and receives an untyped pair
- at runtime:
+The second example is about pairs. It asks what
+ happens when typed code declares a pair type and receives an untyped pair:
 
 @equation[
   "eq:example-pair"
   jungle:example-pair]
 
-@|noindent|The typed function on the left expects a pair of integers and uses the
+@|noindent|The typed function on top expects a pair of integers and uses the
  first element of the input pair as a number.
-The untyped code on the right applies this function to a pair that contains a
+The untyped code on the bottom applies this function to a pair that contains a
  string and an integer.
 
 @Figureref{fig:example-pair} translates this idea into
@@ -254,18 +253,18 @@ Both programs also signal run-time errors, but for different reasons and
 @Figureref{fig:tr-example} consists of an untyped library,
  an @emph{incorrect} layer of type annotations,
  and an untyped client of the types.
-The module on the top left, @codett{net/url},
+The module on top, @codett{net/url},
  is a snippet from an untyped library that has been part of Racket for two decades
  (@shorturl["https://" "github.com/racket/net"]).
-The typed module on the right defines types for part of the untyped library.
-Lastly, the module at the bottom left imports the typed library and calls
+The typed module on the middle-right defines types for part of the untyped library.
+Lastly, the module at the bottom of the figure imports the typed library and calls
  the library function @codett{call/input-url}.
 
 Operationally, the library function flows from @codett{net/url}
  to the typed module and then to the client.
 When the client calls this function, it sends
  client data to the untyped library code via the typed module.
-The client application clearly relies on the type specification from @codett{typed/net/url} because:
+The client application clearly relies on the type specification from @codett{typed/net/url} because
  the first argument is a URL structure,
  the second is a function that accepts a string,
  and the third is a function that maps an input port to an HTML representation.
@@ -294,12 +293,12 @@ A quick look confirms that the contract---that is, the type
 
 @Figure-ref{fig:retic-example} presents an arrangement of three Transient
  Reticulated modules, similar to the code in @figureref{fig:tr-example}.
-The module on the top left exports a function that retrieves data from a URL
+The module on the top exports a function that retrieves data from a URL
 (adapted from the @tt{requests} library, @shorturl["https://" "github.com/psf/requests"]).
 This function accepts several optional and keyword arguments.
 The typed adaptor module on the right formulates types for one valid use of the
  function; a client may supply a URL as a string and a timeout as a pair of floats.
-These types are correct, but the client module on the bottom left sends
+These types are correct, but the client module on the bottom sends
  a tuple that contains an integer and a string.
 
 Reticulated's runtime checks ensure that the typed function receives a

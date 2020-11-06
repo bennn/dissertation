@@ -1,10 +1,6 @@
 #lang greenman-thesis/include
 @(require greenman-thesis/oopsla-2019/main)
 
-@; TODO be careful about Natural vs Deep,
-@;  Natural = semantics,
-@;  Deep = idea = synonym for Nat in other parts of the paper (want Deep, get via Natural)
-
 @title[#:tag '("sec:design:introduction" "chap:design")]{Design Analysis Method}
 @jointwork[
   #:people* '(
@@ -14,10 +10,9 @@
   #:paper* '("gf-icfp-2018" "gfd-oopsla-2019" "gdf-jfp-2020")
 ]
 
-Over the years, several approaches to mixing typed and untyped code have
- emerged.
-Typed Racket and Reticulated are but two implementations in a wide design space.
-To a first approximation, the underlying designs fall into four broad strategies:
+Over the years, researchers have developed several languages that mix typed and untyped code.
+Typed Racket and Reticulated are but two implementations in a wide space.
+To a first approximation, the designs fall into four broad strategies:
 
 @itemlist[
   @item{
@@ -60,7 +55,7 @@ The gradual guarantee@~citep{svcb-snapl-2015}, for example, is trivially
 Simply put, the field lacks an apples-to-apples way of comparing different
  type-enforcement strategies and considering their implications for programmers.
 
-This paper introduces a framework for systematically comparing the behavioral
+This chapter introduces a framework for systematically comparing the behavioral
  guarantees offered by different mixed-typed semantics.
 Because each semantics is essentially a method of enforcing static types,
  the comparison begins with a common mixed-typed syntax.
@@ -71,7 +66,7 @@ With this semantic framework, one can directly observe the possible behaviors
 
 The chosen models illustrate @emph{natural} (@${\nscr}), @emph{transient} (@${\tscr}),
  @emph{optional} (also known as @emph{erasure}, @${\escr}),
- and three theoretical strategies (@${\cscr}, @${\fscr}, @${\ascr}).
+ and three other strategies (@${\cscr}, @${\fscr}, @${\ascr}) that demenstrate how to fill design gaps.
 The comparison excludes two classes of prior work:
  @emph{concrete}, because of the constraints it places on untyped code (@sectionref{sec:design:anti-concrete}),
  and mixed-typed languages that must analyze untyped code to interoperate with it.
@@ -80,12 +75,12 @@ Our focus is on strategies that can deal with untyped code
 
 @exact|{
 \begin{table}[t]
-  \caption{Informal sketch of design-space analysis; full results in \tableref{tbl:technical} (page \pageref{tbl:technical}).}
+  \caption{Informal sketch of the design-space analysis.}
   \label{tbl:contributions}
 
   {\deftablemacros{}
    \hfill\(\begin{array}{l@{\qquad}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c@{\hsep}c}
-     & \nscr\LE & \cscr\LE & \fscr\LE & \tscr\EQ & \ascr\LE & \escr
+     & \nscr\hphantom{\LE} & \cscr\hphantom{\LE} & \fscr\hphantom{\LE} & \tscr\hphantom{\EQ} & \ascr\hphantom{\LE} & \escr
      \\[1.0ex] \textrm{type soundness}
         &     \tblY &     \tblY &     \tblY &     \tblY &     \tblY &     \tblN
      \\ \textrm{complete monitoring}
@@ -94,6 +89,8 @@ Our focus is on strategies that can deal with untyped code
         &     \tblY &     \tblY &     \tblY &     \tblN &     \tblY &     \tblY
      \\ \textrm{blame completeness}
         &     \tblY &     \tblY &     \tblN &     \tblN &     \tblY &     \tblN
+     \\ \textrm{error preorder}
+     & \nscr\LE & \cscr\LE & \fscr\LE & \tscr\EQ & \ascr\LE & \escr
    \end{array}\)\hfill}
 \end{table}
 }|
@@ -106,7 +103,7 @@ As to be expected, @|nname| (@${\nscr}) accepts the fewest programs without rais
  of programs;
  the symbols @${\sbehaviorle} and @${\sbehavioreq} indicate these
  behavioral differences.
-Lower rows introduce additional properties that drive our comparison.
+Lower rows introduce additional properties that underlie our comparison.
 Type soundness guarantees the validity of types in typed code.
 Complete monitoring guarantees that the type system moderates all boundaries between
  typed and untyped code---even boundaries that arise at run-time.
@@ -126,7 +123,7 @@ In sum, the five properties enable a uniform analysis of existing strategies
 
 @section{Chapter Outline}
 
-Sections @exact{\ref{sec:design:jungle}} through @exact{\ref{sec:design:strategies}} explain the
+Sections @exact{\ref{sec:design:jungle}} through @exact{\ref{sec:design:basic}} explain the
  @emph{what}, @emph{why}, and @emph{how} of our design-space analysis.
 There is a huge body of work on mixed-typed language that desperately
  needs organizing principles (@sectionref{sec:design:jungle}).
@@ -135,13 +132,13 @@ Past attempts to organize fall short; by contrast,
  basis for comparison (@sectionref{sec:design:properties}).
 These properties guide an apples-to-apples method that begins
  with a common surface language and studies different semantics (@sectionref{sec:design:basic}).
-In particular, this paper analyzes six semantics based on six ideas for
- enforcing static types (@sectionref{sec:design:strategies}).
+In particular, this chapter analyzes six semantics based on six ideas for
+ enforcing static types.
 
 @Sectionref{sec:design:technical} presents the six semantics and the key results.
-Expert readers may wish to begin there and refer back to @sectionref{sec:design:strategies}
+Expert readers may wish to begin there and refer back to @sectionref{sec:design:basic}
  as needed.
-The supplementary material contains a complete formal account of our results.
+An appendix contains a complete formal account of our results.
 
 
 
@@ -150,7 +147,6 @@ The supplementary material contains a complete formal account of our results.
 @include-section{oopsla-2019/jungle.scrbl}
 @include-section{oopsla-2019/properties.scrbl}
 @include-section{oopsla-2019/basic.scrbl}
-@include-section{oopsla-2019/strategies.scrbl}
 @include-section{oopsla-2019/technical.scrbl}
 @include-section{oopsla-2019/conclusion.scrbl}
 

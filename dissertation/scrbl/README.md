@@ -28,6 +28,8 @@ TODO
       you can improve but you will be second
 
 Style
+- [ ] goddammit typed-color too dark in oopsla-2019/pict
+- [ ] chapter or section for references?
 - [ ] fig 62+, bad titles for deep vs shallow exact plots
 - [ ] shallow/CACHE too big, why are files so huge?
       could zip them
@@ -48,12 +50,27 @@ Style
 - [ ] MF has boxes around hyperlinks why
 - [ ] soft typing, remove bullet points
 - [ ] 2.2.2 still awkward
+- [ ] 2.2.3 very awkward ... when do I have time to fix?!
 
 MF edits, leftover
 - [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger
-- [ ] (pX)
-- [ ] (pX)
-- [ ] (pX)
+- [ ] (p13) 3 novel configurations in between
+- [ ] (p14) 3 experience with TR section
+- [ ] (p45) 3 cache?
+- [ ] (p53) 4 think about solid vs dashed arrows
+- [ ] (p54) 4 specify error, in fig?
+- [ ] (p63) 4 how to add dynamic type, orthogonal
+- [ ] (p64) 4 fix codeblock colors, use "a --" style with label on left at least
+- [ ] bring Deep and Shallow into chap 4
+- [ ] (p111) 4 conclusion, wrappers vs lambda
+- [ ] (p117) 5 move note to end? perf
+- [ ] (p119) 5 insert theorem completion correctness ... and a few others
+- [ ] (p120) 5 better road map .... move integrate blame/Perf explanation
+- [ ] (p124) 5 how many actions?
+- [ ] (p125) 5 correctness, careful
+- [ ] (p125) 5 Along the way
+- [ ] (p129) 5 function clones ... N entry points
+- [ ] (p130X) 5 "protecting functions ..." gone, is it graceful?
 - [ ] (pX)
 
 #### dependencies

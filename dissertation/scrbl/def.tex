@@ -265,7 +265,6 @@
 
 \newcommand{\fakebf}[1]{\ooalign{{$#1$}\cr\hidewidth\makebox[4pt][l]{$#1$}\cr}}
 \newcommand{\lowersym}[1]{\raisebox{-0.7ex}{$#1$}}
-\newcommand{\mktagproj}[1]{\lowersym{\llcorner}\!\!#1\!\!\lowersym{\lrcorner}}
 
 % s = symbol
 \newcommand{\stheorem}{\textsc{Theorem}}
@@ -419,7 +418,7 @@
 \newcommand{\sWT}{\vdash}
 \newcommand{\sWTO}{\mathrel{\thickjbar{\sWT}}}
 \newcommand{\sWTfull}{\sWT_{\sidproj}}
-\newcommand{\sWTtag}{\sWT_{\sWT_{\stagproj}}}
+\newcommand{\sWTtag}{\sWT_{\stagproj}}
 \newcommand{\sWTnone}{\sWT_{\sdynproj}}
 \newcommand{\sWS}{\sWT}
 \newcommand{\sWD}{\sWT}
@@ -721,7 +720,7 @@
 \newcommand{\fproperties}[1]{#1{} and its Properties}
 \newcommand{\fdynproj}[1]{\sdynproj(#1)}
 \newcommand{\fidproj}[1]{\sidproj(#1)}
-\newcommand{\ftagproj}[1]{\mktagproj{#1}}
+\newcommand{\ftagproj}[1]{\stagproj(#1)}
 \newcommand{\fXproj}[1]{\sXproj(#1)}
 
 \newcommand{\rrarrow}{\rightarrow}

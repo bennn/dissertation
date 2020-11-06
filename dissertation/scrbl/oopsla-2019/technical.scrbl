@@ -79,7 +79,7 @@ This means that the map in @figureref{fig:technical-outline} is only half
  of the formal development; each syntax and semantics has a parallel, lifted version.
 @Sectionref{sec:design:surface-language} presents the lifted surface syntax, but other
  sections give only the most important details regarding ownership.
-Full definitions appear in the supplement.
+Full definitions appear in the appendix.
 
 
 @section[#:tag "sec:design:surface-language"]{Surface Syntax, Types, and Ownership}
@@ -230,9 +230,9 @@ Fine-grained mixtures of @${\stype} and @${\tdyn}, such as @${\tpair{\tint}{\tdy
 A statically-typed expression @${\sexpr_0} is one where the judgment
  @${\stypeenv_0 \sWT \sexpr_0 : \stype_0} holds for some type environment
  and type.
-This judgment depends on a standard notion of subtyping (@${\subteq}) based
- on the relation @${\tnat \subteq \tint} that is covariant for pairs and
- function codomains and contravariant for function domains.
+This judgment depends on a standard notion of subtyping (@${\subteq}) that is
+ based on the relation @${\tnat \subteq \tint}, is covariant for pairs and
+ function codomains, and is contravariant for function domains.
 The metafunction @${\sDelta} determines the output type of a primitive operation.
 For example the sum of two natural numbers is a natural (@${\sDelta(\ssum, \tnat, \tnat) = \tnat})
  but the sum of two integers returns an integer.
@@ -245,10 +245,10 @@ These annotations serve two purposes:
  to determine the behavior of the @|tname| and @|aname| semantics,
  and to tell apart statically-typed and dynamically-typed redexes.
 An implementation could easily infer valid annotations.
-The model keeps them explicit to more easily formulate examples where subtyping
- affects behavior; for instance, the terms @${\eunopt{\tnat}{\sexpr_0}} and
- @${\eunopt{\tint}{\sexpr_0}} may give different results for the same input
- expression.
+The model keeps them explicit to easily formulate examples where subtyping
+ affects behavior; for instance, the source-language terms
+ @${\eunopt{\tnat}{\sexpr_0}} and
+ @${\eunopt{\tint}{\sexpr_0}} may lead to different run-time checks.
 
 
 @figure*[
@@ -372,7 +372,7 @@ The model keeps them explicit to more easily formulate examples where subtyping
 These labels record the component from which an expression originates.
 The extended syntax brings one addition,
  labeled expressions @${\obars{\sexpr}{\sowner}},
- and a requirement that that boundary expressions label their inner component.
+ and a requirement that boundary expressions label their inner component.
 The single-owner consistency judgment (@${\sownerenv; \sowner \sWLsingle \sexpr}) ensures
  that every subterm of an expression has a unique owner.
 This judgment is parameterized by a mapping from variables to labels
@@ -565,27 +565,36 @@ And an @emph{erased} syntax supports the compilation of typed and
 These include errors @${\eerr}, shapes (or, constructors) @${\stag},
  evaluation contexts, and evaluation metafunctions.
 
-A program evaluation may signal four kinds of errors.
-First, a dynamic tag error (@${\tagerrorD{}}) occurs when
+A program evaluation may signal four kinds of errors:
+@itemlist[#:style 'ordered
+@item{
+A dynamic tag error (@${\tagerrorD{}}) occurs when
  an untyped redex applies an elimination form to a mis-shaped input.
 For example, the first projection of an integer signals a tag error.
-Second, an invariant error (@${\tagerrorS{}}) occurs when the shape of a typed
+}
+@item{
+An invariant error (@${\tagerrorS{}}) occurs when the shape of a typed
  redex contradicts static typing; a ``tag error'' in typed code is one
  way to reach an invariant error.
 One goal of type soundness is to eliminate such contradictions.
-Third, a division-by-zero error (@${\divisionbyzeroerror}) may be raised by an
+}
+@item{
+A division-by-zero error (@${\divisionbyzeroerror}) may be raised by an
  application of the @${\squotient} primitive;
  a full language will contain many similar primitive errors.
-Lastly, a boundary error (@${\boundaryerror{\sbset}{\svalue}})
+}
+@item{
+A boundary error (@${\boundaryerror{\sbset}{\svalue}})
  reports a mismatch between two components.
 One component, the sender, provided the enclosed value.
-A second client component rejected the value.
+A second component rejected the value.
 The accompanying set of witness boundaries suggests potential sources for the fault;
  intuitively, this set should include the client--sender boundary.
 The error @${\boundaryerror{\eset{\obnd{\sowner_0}{\stype_0}{\sowner_1}}}{\svalue_0}},
  for example,
  says that a mismatch between value @${\svalue_0} and type @${\stype_0} prevented
  the value sent by the @${\sowner_1} component from entering the @${\sowner_0} component.
+}]
 
 The four shapes, @${\stag}, correspond both to type constructors and to value
  constructors.
@@ -620,9 +629,9 @@ These provide a standard, partial specification of the primitive operations.
  and ownership labels.
 For boundaries, @${\srev} flips every client and sender name in
  a set of specifications.
-Both @|tname| and @|aname| use this function when a value flows
- along a back-channel; if a function crosses one set @${\sbset_0} of boundaries,
- then an input to this function crosses the reversed boundaries @${\frev{\sbset_0}}
+Both @|tname| and @|aname| reverse boundaries at function calls.
+If a function $f$ crosses one set @${\sbset_0} of boundaries,
+ then an input to $f$ crosses the reversed boundaries @${\frev{\sbset_0}}
  before entering the function.
 The @${\sbsetsenders} metafunction extracts the sender names from the
  right-hand side of every boundary specification in a set.
@@ -948,7 +957,7 @@ The flat typing judgments check the top-level shape (@${\stag}) of an expression
 These judgments rely on a store typing (@${\vstoretype})
  to describe heap-allocated values.
 These types must be consistent with the actual values on the heap, a standard
- technical device that is spelled out in the supplement.
+ technical device that is spelled out in the appendix.
 Untyped functions may appear in a typed context and vice-versa---because
  there are no wrappers to enforce a separation.
 Shape-check expressions are valid in typed and untyped contexts.
@@ -1023,6 +1032,7 @@ Note that an invariant error captures the classic idea of going wrong@~citep{m-j
 
 @exact|{
 \begin{definition}[$\sXproj{}$-type soundness]\label{def:ts}
+  Let\/ $\sXproj$ map surface types to evaluation types.
   A semantics\/ $\xsym$
   satisfies\/ $\propts{\sXproj}$
   if for all\/ $\fwellformed{\sexpr_0}{\stoptional}$
@@ -1041,7 +1051,7 @@ Note that an invariant error captures the classic idea of going wrong@~citep{m-j
 @|noindent|Three surface-to-evaluation maps (@${\sXproj}) suffice for the evaluation languages:
  an identity map @${\sidproj},
  a type-shape map @${\stagproj} that extends the type-to-shape metafunction from @figureref{fig:evaluation-common},
- and a constant dynamic map @${\sdynproj}:
+ and a constant map @${\sdynproj}:
 
 @exact|{
 \smallskip
@@ -1064,7 +1074,7 @@ Note that an invariant error captures the classic idea of going wrong@~citep{m-j
  monitors all interactions between client and server components.
 The definition of ``all interactions'' comes from the
  path-based ownership propagation laws (@sectionref{sec:design:laws});
- the labels on a value list all partially-responsible components.
+ the labels on a value enumerate all partially-responsible components.
 Relative to this specification, a reduction that preserves
  single-owner consistency (@figureref{fig:surface-ownership})
  ensures that a value cannot enter a new component without a full type check.
@@ -1084,7 +1094,7 @@ Relative to this specification, a reduction that preserves
  relative to a specification of the components that handled a value during an
   evaluation.
 A blame-sound semantics guarantees a subset of the true senders,
- though it may miss some or all.
+ though it may miss some or even all.
 A blame-complete semantics guarantees all the true senders,
  though it may include irrelevant information.
 A sound and complete semantics reports exactly the components that sent
@@ -1229,9 +1239,9 @@ If @${\xsym} and @${\ysym} represent two strategies for type enforcement,
   \end{minipage}
 }|]
 
-Four of the semantics ahead build on the higher-order evaluation syntax.
+Four of the semantics build on the higher-order evaluation syntax.
 In redexes that do not mix typed and untyped values, these semantics
- share the common behavior in @figureref{fig:common-reduction}.
+ share the common behavior specified in @figureref{fig:common-reduction}.
 The rules for typed code (@${\snredsta}) handle basic elimination forms
  and raise an invariant error (@${\tagerrorS}) for invalid input.
 Type soundness ensures that such errors do not occur.
@@ -1361,8 +1371,8 @@ Thus, the possible wrapped values are drawn from the following two sets:
 \smallskip
 }|
 
-The reduction rules focus on the @|nname| strategy for enforcing
- static types.
+The presented reduction rules are those relevant to the @|nname| strategy for
+ enforcing static types.
 When a dynamically-typed value reaches a typed context (@${\sdyn}),
  @|nname| checks the shape of the value against the type.
 If the type and value match, @|nname| wraps functions
@@ -1381,8 +1391,7 @@ The application of a wrapped function creates boundaries to validate
 
 Unsurprisingly, this checking protocol ensures the validity of types in typed
  code and the well-formedness of expressions in untyped code.
-The @|nname| approach additionally keeps boundary types honest throughout the
- execution.
+The @|nname| approach furthemore enforces boundary types throughout the execution.
 
 @exact|{
 \begin{theorem}
@@ -1412,8 +1421,8 @@ The @|nname| approach additionally keeps boundary types honest throughout the
 \begin{proofsketch}
   By showing that a lifted variant of the $\rredN$ relation preserves
    single-owner consistency ($\sWLsingle$).
-  Full lifted rules for \nname{} appear in the supplementary
-   material, but one can derive the rules by applying the guidelines from \sectionref{sec:design:laws}.
+  Full lifted rules for \nname{} appear in an appendix,
+   but one can derive the rules by applying the guidelines from \sectionref{sec:design:laws}.
   For example, consider the $\nredND$ rule that wraps a function.
   The lifted version accepts a term with arbitrary ownership labels
    and propagates these labels to the result:
@@ -1649,7 +1658,7 @@ Nevertheless, @|cname| and @|nname| can behave differently.
   \nname{} takes extra steps when a pair reaches a boundary because it
    immediately checks the contents; \cname{} creates a guard wrapper.
   \cname{} takes additional steps when eliminating a wrapped pair.
-  The supplement defines the simulation relation.
+  The appendix defines the simulation relation.
 
   The pair wrappers in \cname{} imply $\csym{} \not\sbehaviorle \nsym{}$.
   Consider a typed expression that imports an untyped pair
@@ -1781,7 +1790,7 @@ The @|fname| semantics (@figureref{fig:forgetful-reduction})
  but strictly limits the number of wrappers on any one value.
 An untyped value acquires at most one wrapper.
 A typed value acquires at most two wrappers: one to protect itself from
- inputs, and a second to reflect the expectations of its current client.
+ inputs, and a second to reflect the expectations of its current client:
 
 @exact|{
 \smallskip
@@ -1813,8 +1822,8 @@ Re-entering typed code makes a new wrapper,
 Removing outer wrappers does not affect the type soundness of untyped code;
  all well-formed values match @${\tdyn}, with or without wrappers.
 Type soundness for typed code is guaranteed by the temporary outer wrappers.
-Complete monitoring is lost, however, because removing a wrapper does
- not remove any labels.
+Complete monitoring is lost, however, because the removal of a wrapper
+ creates a joint-ownership situation.
 Similarly, @|fname| lies above @|cname| and @|nname| in the error preorder.
 
 When a type mismatch occurs, @|fname| blames one boundary.
@@ -1860,7 +1869,7 @@ So, @|fname| fails to satisfy blame completeness.
     \\[0.5ex]\sidestep{\emon{\obnd{\sowner_4}{(\tpair{\stype_1}{\stype_2})}{\sowner_3}}{(\emon{\obnd{\sowner_1}{\tpair{\tint}{\tint}}{\sowner_2}}{\svalue_0})}}
   \end{displayrrarray}
 
-  \noindent{}The wrapper preserves soundness for now and goes away if the value exits typed code.
+  \noindent{}The new wrapper preserves soundness.
 \end{proofsketch}
 }|
 
@@ -1881,7 +1890,7 @@ So, @|fname| fails to satisfy blame completeness.
   \noindent{}Suppose $\sowner_0 \neq \sowner_1$.
   If the redex satisfies single-owner consistency, then $\sownerlist_2$ contains
    $\sowner_1$ and $\sowner_3 = \sowner_0$.
-  Thus the rule creates a value with two distinct labels.
+  Thus the rule creates a contractum with two distinct labels.
 \end{proof}
 }|
 
@@ -1891,7 +1900,7 @@ So, @|fname| fails to satisfy blame completeness.
 \end{theorem}
 \begin{proof}
   By a preservation lemma for a weakened version of the $\sWLsingle$ judgment,
-   which is defined in the supplement.
+   which is defined in the appendix.
   The judgment asks whether the owners on a value contain at least the name
    of the current component.
   \fname{} easily satisfies this invariant because the ownership
@@ -1936,9 +1945,6 @@ So, @|fname| fails to satisfy blame completeness.
   By a stuttering simulation.
   \cname{} can take extra steps at an elimination form to unwrap an arbitrary
    number of wrappers; \fname{} has at most two to unwrap.
-  The \fname{} semantics shown above never steps ahead of \cname{},
-   but the supplement presents a variant with \aname{}-style trace
-   wrappers that does step ahead.
 
   In the other direction, $\fsym{} \not\sbehaviorle \csym{}$ because \fname{} drops checks.
   Let:
@@ -2097,10 +2103,10 @@ If successful, the blame map records the check.
 Otherwise, @|tname| reports the boundaries associated with the function@~citep{vss-popl-2017}.
 Note that untyped functions may appear in typed contexts, and vice-versa.
 
-Observe that applications of untyped functions in untyped code do not update the
+Applications of untyped functions in untyped code do not update the
  blame map.
-This enables an implementation that inserts all checks by rewriting typed
- code at compile-time, leaving untyped code as-is.
+This allows an implementation to insert all checks by rewriting typed
+ code at compile-time, leaving untyped code as is.
 Protected typed code can then interact with any untyped libraries.
 
 Not shown in @figureref{fig:transient-reduction} are rules for elimination
@@ -2134,7 +2140,8 @@ Blame completeness fails because @|tname| does not update the blame map when an
   \tname{} satisfies $\propts{\stagproj}$.
 \end{theorem}
 \begin{proofsketch}
-  By progress and preservation lemmas for the flat typing judgment ($\sWTtag$).
+  Recall that $\stagproj$ maps types to type shapes and the unitype to itself.
+  The proof depends on progress and preservation lemmas for the flat typing judgment ($\sWTtag$).
   Although \tname{} lets any well-shaped value cross a boundary, the check
    expressions that appear after elimination forms preserve soundness.
   Suppose that an untyped function crosses a boundary and eventually computes
@@ -2179,7 +2186,7 @@ Blame completeness fails because @|tname| does not update the blame map when an
   Let component $\sowner_0$ define a function $f_0$ and export it to
    components $\sowner_1$ and $\sowner_2$.
   If component $\sowner_2$ triggers a type mismatch, as sketched below,
-   then \tname{} blames both component $\sowner_2$ and the unimportant $\sowner_1$:
+   then \tname{} blames both component $\sowner_2$ and the irrelevant $\sowner_1$:
 
   \begin{center}
     \begin{tikzpicture}[
@@ -2216,7 +2223,7 @@ Blame completeness fails because @|tname| does not update the blame map when an
       \!\!\!\!\!\!\!\!\!  ~\conf{\estab{\obnd{\sowner_0}{\tint}{\sowner_2}}{\obars{\eapp{\tint}{(\edynb{\obnd{\sowner_2}{\theexampletype}{\sowner_0}}{\obars{f_0}{\sowner_0}})}{\theexampleint}}{\sowner_2}})^{\raisedsowner}}{\emptyset}{\emptyset} \!\!\!\!
     \end{displayrrarray}}
 
-  \noindent{}Reduction ends in a boundary error that blames all three components.
+  \noindent{}Reduction ends in a boundary error that blames three components.
 \end{proof}
 }|
 
@@ -2267,7 +2274,7 @@ Additionally, its heap-based approach to blame fails @${\propbspath{}} because t
 If several clients use the same library function and one client encounters
  a type mismatch, everyone gets blamed.
 
-We have struggled to find a positive characterization of @|tname|.
+We have struggled to find a positive characterization of @|tname|'s blame behavior.
 Complete monitoring and blame completeness appear unattainable, even in a
  weakened form, because @|tname| has no control over untyped code.
 Blame soundness, however, is possible under a relaxed specification of ownership
@@ -2293,7 +2300,7 @@ Blame soundness, however, is possible under a relaxed specification of ownership
 
 @|noindent|Intuitively, the new specification pushes all ownership labels onto the heap.
 Rather than push to the value heap (@${\vstore}) directly, though, the
- extended model of @|tname| in the supplement introduces a parallel store
+ extended model of @|tname| in the appendix introduces a parallel store
  (@${\lstore}) analogous to the blame heap.
 
 Merging ownership labels on the heap is a non-compositional behavior.
@@ -2301,7 +2308,7 @@ A programmer cannot reason about a local expression without thinking about
  how the rest of the codebase may introduce new owners.
 Because of this whole-program action, it is unclear whether the weakened
  notions of blame that follow are useful guarantees to strive for.
-Nevertheless, they help characterize @|tname|:
+Nevertheless, they help characterize @|tname|.
 
 @exact|{
 \begin{definition}[heap-based blame soundness and blame completeness]\label{def:blame-heap}
@@ -2349,7 +2356,7 @@ Nevertheless, they help characterize @|tname|:
 \end{theorem}
 \begin{proofsketch}
   By a preservation lemma for the $\sWLheap$ judgment sketched in @figureref{fig:heap-blame}
-   and fully-defined in the supplement.
+   and fully-defined in the appendix.
   The judgment ensures that the blame map records a subset of the true owners on each heap-allocated value.
   One subtle case of the proof concerns function application, because the unlabeled
    rule appears to blame a typed function (at address $\eloc_0$) for an unrelated incompatible value:
@@ -2663,7 +2670,8 @@ This information leads to sound and complete blame messages.
   \end{displayrrarray}
 
   \noindent{}The new boundary enforces the context's assumption ($\stype_0$)
-   instead, but this supertype is all that type soundness requires.
+   instead, but we know that $\stype_0$ is a supertype of $\stype_1$ by the
+   higher-order typing judgment.
 \end{proofsketch}
 }|
 

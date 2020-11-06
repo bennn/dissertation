@@ -5,9 +5,9 @@
 
 This section introduces the basic ideas of the evaluation framework;
  detailed formal definitions are deferred to @sectionref{sec:design:technical}.
-To formulate different type-enforcement stategies on an equal footing,
+To formulate different type-enforcement strategies on an equal footing,
  the framework begins with one mixed-typed surface language (@sectionref{sec:design:basic:surface})
- and models stategies as distinct semantics (@sectionref{sec:design:semantic-framework}).
+ and models strategies as distinct semantics (@sectionref{sec:design:semantic-framework}).
 The properties listed above support an analysis.
 Type soundness (@sectionref{sec:design:basic:ts}) and complete monitoring (@sectionref{sec:design:cm})
  characterize the type mismatches that a semantics detects.
@@ -181,7 +181,7 @@ The specification includes the names of the client and sender components,
  the boundary.
 Names, such as @${\sowner_0}, come from some countable set @${\sowner}.
 The boundary types guide the static type checker, but are mere suggestions
- unless a semantics decides to enforce them.
+ unless a semantics decides to enforce them:
 
 @exact|{
 \smallskip
@@ -252,19 +252,14 @@ Since component names appear in the surface syntax, they can help explain
 Suppose a program halts due to a mismatch between a type and a value.
 If one component is responsible for the value and the language can find both the
  client with the type expectation and source of the incompatible value, then a
- programmer knows exactly where to start debugging---either the expectation
- or the value-source must change.
-
-
+ programmer knows exactly where to start debugging.
 
 
 @section[#:tag "sec:design:semantic-framework"]{Semantic Framework}
 
 The surface language enables the construction of mixed-typed expressions.
-The next step is to assign behaviors to these programs via formal semantics.
-Semantics that correspond to different type-enforcement strategies
-must have equivalent behavior on boundary-free expressions.
-Starting from this constraint, the central design problem is how to enforce boundary types.
+The next step is to assign behaviors to these programs via formal semantics
+ that differ only in the way they enforce boundary types.
 
 The first ingredient of a semantics is the set of result values @${\svalue} that
  expressions may reduce to.
@@ -297,7 +292,7 @@ Guards are similar to boundary expressions; they separate a context
  component from a value component.
 Trace wrappers simply annotate values.
 
-Note: a language with the dynamic type will need a third
+Note that a language with the dynamic type will need a third
   wrapper for basic values that have been assigned type dynamic.
 We conjecture that this wrapper is the only change needed to transfer our
  positive results.
@@ -350,9 +345,7 @@ The @|tname| semantics (@sectionref{sec:design:tech:transient}) takes a @emph{fi
  approach to boundaries.
 Instead of using wrappers, it checks shapes at a boundary and guards
  elimination forms with shape-check expressions.
-For example, the following simplified reduction demonstrates a successful check.
-The triangle is filled gray (@${\nredXsym}) because @|tname| is defined
- via one notion of reduction that handles both typed and untyped code:
+For example, the following simplified reduction demonstrates a successful check:
 
 @exact|{
 \begin{displayrrarray}
@@ -362,9 +355,12 @@ The triangle is filled gray (@${\nredXsym}) because @|tname| is defined
 \end{displayrrarray}
 }|
 
+@|noindent|The triangle is filled gray (@${\nredXsym}) because @|tname| is defined
+ via one notion of reduction that handles both typed and untyped code.
+
 These two points, values and checking rules, are the distinctive aspects of
  a semantics.
-Other ingredients can be shared, such as the:
+Other ingredients can be shared:
  errors, evaluation contexts, and interpretation of primitive operations.
 Indeed, @sectionref{sec:design:tech:eval} defines three baseline evaluation
  languages---higher-order, first-order, and erasure---that abstract over the
@@ -380,8 +376,8 @@ Since there are two kinds of surface expression, soundness has two parts:
 
 For typed code, the question is whether code can trust the
  types of its subexpressions.
-If an expression with static type @${\stype_0} reduces to a value, what
- (if anything) does type @${\stype_0} predict about that value?
+If an expression with static type @${\stype_0} reduces to a value,
+ the question is what (if anything) the type @${\stype_0} predicts about that value.
 There are a range of possible answers.
 At one end, the result value may match the full type @${\stype_0} according
  to an evaluation-language typing judgment.
@@ -437,8 +433,8 @@ The judgment @${\sWTX} matches a value with a description.
 
 Complete monitoring tests whether a mixed-typed semantics has control over
  every interaction between typed and untyped code.
-If the property holds, then a programmer can rely on the language to insert
- check at the proper points, for example, between the library and client
+If the property holds, then a programmer can rely on the language to run
+ checks at the proper points, for example, between the library and client
  demonstrated in @figureref{fig:tr-example}.
 Concretely, if a value passes through the type @${(\tfun{\tint}{\tint})}
  then complete monitoring guarantees that the language has control over
@@ -447,7 +443,7 @@ Concretely, if a value passes through the type @${(\tfun{\tint}{\tint})}
 
 Because all such interactions originate at the boundaries
  between typed and untyped code,
- a first-draft way to formalize complete monitoring is to ask whether each
+ a simplistic way to formalize complete monitoring is to ask whether each
  boundary comes with a full run-time check when possible and an error otherwise.
 A language that meets this strict requirement certainly has full control.
 However, other good designs fail.
@@ -509,7 +505,7 @@ The key single-ownership rules deal with labeled expressions and boundary terms:
 @|noindent|Values such as @${\obbars{42}{\fconcat{\sowner_0}{\sowner_1}}}
  represent a communication that slipped past the run-time checking protocol,
  and therefore fail to satisfy single ownership.
-@bold{Sneak preview} one way that a semantics can transfer a higher-order value
+@bold{Sneak Preview:} One way that a semantics can transfer a higher-order value
 without creating a joint-ownership is by providing controlled access through
 a wrapper.
 The client owns the wrapper, and the sender retains ownership of the enclosed value.
@@ -543,7 +539,7 @@ The models in @sectionref{sec:design:technical} present six reduction relations
  for a mixed-typed language.
 Each relation needs a lifted version to support an attempt at a complete
  monitoring proof.
-These lifted reduction relations are deferred to supplementary material,
+These lifted reduction relations are deferred to an appendix,
  but come about semi-automatically through the
  following informal guidelines, or ``natural laws,'' for labeling.
 
@@ -571,7 +567,7 @@ When reading an example, accept the transitions
       %%  a complete monitor ... nor any semantics that lets base values cross.
       %% 'must' is less confusing and avoids this interpretation
     \subitem\hfill $\newcommand{\thevalue}{0}
-              \obars{\estab{\obnd{\sowner_0}{\tnat}{\sowner_1}}{\obars{\thevalue}{\fconcat{\sowner_2}{\sowner_1}}}}{\sowner_0}
+              \obars{\estab{\obnd{\sowner_0}{\tnat}{\sowner_1}}{\obbars{\thevalue}{\fconcat{\sowner_2}{\sowner_1}}}}{\sowner_0}
               \samplerrarrow \obars{\thevalue}{\sowner_0}$
     \subitem\hfill
       \emph{The value\/ $0$ fully matches the type\/ $\tnat$.}
@@ -597,7 +593,7 @@ When reading an example, accept the transitions
       \emph{The value\/ $2$ flows out of the pair\/ $\epair{1}{2}$.}
 
     \item \label{law:neg}
-      Every value that flows into a value $\svalue_0$ acquires the label
+      Every value that flows into a function $\svalue_0$ acquires the label
       of the context and the reversed labels of $\svalue_0$.
     \subitem\hfill
       $\newcommand{\thevalue}{\epair{8}{6}}
@@ -634,6 +630,9 @@ When reading an example, accept the transitions
 
   \end{enumerate}}
 }|
+
+@|noindent|Note: @exact{\lawref{law:neg}} talks about functions, but generalizes to
+ reference cells and other values that accept input.
 
 To show how these laws generate a lifted reduction relation,
  the following rules lift the examples from @sectionref{sec:design:semantic-framework}.
@@ -679,10 +678,10 @@ The fourth rule (d') applies @exact{\lawref{law:pos}} for an output.
 }|
 
 Although the design of a lifted reduction relation is a challenge
- for every language at hand,
+ for every language,
  the laws in this section bring across the intuition behind prior
  formalizations of complete monitoring@~citep{dfff-popl-2011,dtf-esop-2012,tsdtf-oopsla-2012,mdffc-oopsla-2016}
- and may help guide future work.
+ and should help guide future work.
 
 
 @section[#:tag "sec:design:ownership"]{Blame Soundness, Blame Completeness}
@@ -778,6 +777,8 @@ One semantics lies below another in this preorder,
 Put another way,
  @${\xsym{} \sbehaviorle \ysym{}}
  if and only if the latter reduces at least as many expressions to a result value.
+Note that semantics do not need to raise the same error when they both agree
+ that a program is faulty.
 When two semantics agree about which expressions raise run-time errors,
  the notation @${\xsym{} \sbehavioreq \ysym{}} shows that they lie below one
  another.

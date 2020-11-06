@@ -1,9 +1,5 @@
 #lang greenman-thesis/include
 
-@; TODO acknowledge origin of retic benchmarks
-@;
-@; TODO reticulated here is without blame
-
 @(require
    (prefix-in tr: greenman-thesis/jfp-2019/main)
    (prefix-in rp: greenman-thesis/pepm-2018/main)
@@ -21,14 +17,14 @@
 @title[#:tag "chap:performance"]{Performance Analysis Method}
 @jointwork[
   #:people* '(
-    "Asumu Takikawa"
-    "Max S. New"
-    "Daniel Feltey"
-    "Jan Vitek"
-    "Robert Bruce Findler"
-    "Sam Tobin-Hochstadt"
-    "Zeina Migeed"
     "Matthias Felleisen"
+    "Daniel Feltey"
+    "Robert Bruce Findler"
+    "Zeina Migeed"
+    "Max S. New"
+    "Asumu Takikawa"
+    "Sam Tobin-Hochstadt"
+    "Jan Vitek"
   )
   #:paper* '("gtnffvf-jfp-2019" "gm-pepm-2018" "tfgnvf-popl-2016")
   #:extra @elem{ The Typed Racket benchmarks presented in this chapter
@@ -38,7 +34,7 @@
 
 
 @; sound GT has cost
-Sound types come with performance overhead in a mixed-typed language
+@|noindent|Sound types come with performance overhead in a mixed-typed language
  because soundness is a claim about behavior and the only way to control
  the behavior of untyped code is via run-time checks.
 These checks impose a cost in proportion to
@@ -65,7 +61,7 @@ But in their defense, the development of a performance method is a challenge
 This chapter presents systematic and scalable methods to assess the performance
  of a mixed-typed language.
 The methods summarize performance for the exponentially-many ways that a programmer
- can mix typed and untyped code by focusing on a binary ``goodness'' measure.
+ can mix typed and untyped code by focusing on a binary quality measure.
 Informally, a mixture is good if runs within a user-supplied overhead limit.
 Random sampling can approximate the proportion of good mixtures for programs
  in which exhaustive evaluation is not practical.
@@ -80,7 +76,7 @@ The goal of performance evaluation is to predict the experiences of future
 Intuition suggests that the users of a mixed-typed language will begin
  with an untyped codebase and add types step-by-step.
 Experience with Typed Racket supports the intuition.
-Programmers write types incrementally and test all sorts of combinations.
+Programmers add types in an incremental fashion and experiment with all sorts of combinations.
 When typed libraries enter the picture, untyped programmers unknowingly
  create mixed-typed applications.
 In a typical evolution, programmers compare the performance of the modified
@@ -106,7 +102,7 @@ Benchmark programs that stem from realistic code and exercise a variety
 @(let ((num-example-configs 5)) (list @elem{
 A mixed-typed language promises to support exponentially-many combinations of
  typed and untyped code.
-In Typed Racket, for example, a programmer can add types to any module.
+In Typed Racket, for example, a programmer can add types to any module of a program.
 Thus a program with @id[num-example-configs] modules leads to
  @${2^@id[num-example-configs]} possible combinations (@figure-ref{fig:example-lattice-0}).
 Languages that can mix at a finer granularity support @${2^k} configurations,
@@ -184,9 +180,7 @@ Technically, there are two kinds of modules in such a collection:
  the @emph{migratable} modules that the program's author has direct
  control over, and the @emph{contextual} modules that come from an
  external library.
-Typed Racket lets a programmer add types to any module.
-In practice, this usually means that any migratable module can
- gain type annotations.
+A programmer can add types to any migratable module.
 Thus a program with @${N} migratable modules opens a space of @${2^N}
  mixed-typed configurations, and each configuration depends on
  the same contextual modules.
@@ -197,7 +191,7 @@ The main functionality is split across @integer->word[num-modules] modules;
  mixed-typed configurations.
 @Figure-ref{fig:example-lattice} shows all these configurations in a lattice,
  with the untyped configuration on the bottom and the fully-typed configuration
- on type.
+ on top.
 Nodes in the middle mix typed and untyped code; each row groups all
  configurations with the same number of typed modules.
 Lines between nodes represent the addition (or removal) of types from one
@@ -215,12 +209,6 @@ Six other configurations run within a 2x overhead, but the rest suffer
 Types in @bm{fsm} can come at a huge cost.
 }
 
-@exercise[2]{
-  Are there any paths from bottom to top in the @bm{fsm} lattice that stay
-   under 2x at every point?
-  Can the configurations with exactly 1 typed module predict whether such
-   paths exist?
-}
 @figure*["fig:example-lattice" @elem{
 Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
   (parameterize ([*LATTICE-CONFIG-X-MARGIN* 10]
@@ -240,8 +228,7 @@ Performance overhead in @bm{fsm}, on Racket v@|lattice-version|.}
 Drawing such conclusions is not easy, however, even for this small program.
 Manually analyzing a lattice for programs with eight or more modules is clearly infeasible.
 @Figure-ref{fig:overhead-plot-example} presents a graphical alternative,
- an @emph{overhead plot},
- that anonymizes configurations and presents only their overhead relative
+ an @emph{overhead plot}, that reports configurations' overhead relative
  to the untyped baseline.
 Overhead plots are cumulative distribution functions.
 As the function proceeds left-to-right for numbers @${D} along the @|x-axis|,
@@ -275,7 +262,7 @@ Lastly, the slope of a curve corresponds to the likelihood that
 A flat curve (zero slope) suggests that the performance of a group of
  configurations is dominated by a common set of type annotations.
 Such observations are no help to programmers facing performance issues,
- but may help language designers fix inefficiencies.
+ but may help language implementors fix inefficiencies.
 
 Overhead plots scale to arbitrarily large datasets by compressing
  exponentially-many points into a proportion.
@@ -321,7 +308,7 @@ The prose uses Reticulated Python as a running example.
 
 In Reticulated, every parameter to a function, every function return position,
  and every class field can be typed or untyped.
-This is a much finer @emph{granularity} than Typed Racket, in which entire
+This is a much finer @emph{granularity} than Typed Racket's, in which entire
  modules must be typed as a unit.
 The added flexibility means that an experimenter must choose whether to explore:
  coarse, module-grained mixes;
@@ -345,17 +332,17 @@ A potential complication is that programs may depend on external libraries
  or other modules that lie outside the realistic scope of the evaluation.
 
 @definition["migratable, contextual"]{
-  The @emph{migratable modules} in a program define its configurations.
-  The @emph{contextual modules} in a program are common across all configurations.
+  The @emph{migratable} code in a program defines its configurations.
+  The @emph{contextual} code in a program is common across all configurations.
 }
 
-The granularity and migratable modules define the
+The granularity and the migratable code define the
  @emph{configurations} of a fully-typed program.
 
 @definition["configurations"]{
   Let @${C \tcstep C'}
    if and only if program @${C'} can be obtained from program
-   @${C} by annotating one syntactic unit in a migratable module.
+   @${C} by annotating one migratable syntactic unit.
   Let @${\tcmulti} be the reflexive, transitive closure of the @${\tcstep}
    relation.
   The @emph{configurations} of a fully-typed program @${C_\tau} are all
@@ -406,6 +393,8 @@ In this spirit, @citet{tfgnvf-popl-2016} ask programmers to consider the
 
 @subsection[#:tag "sec:perf:limits"]{Known Limitations}
 
+@; TODO overhead plot anonymize
+
 Evaluation begins with a fixed set of types, but there are usually many
  ways to type a piece of code.
 Consider the application of an identity function to a number:
@@ -431,13 +420,7 @@ In Reticulated, the type @tt{Function([Str], Int)} has three
 The method only looks at one fully-typed variant, but the others may
  have notable performance implications.
 
-@futurework{
- Adapt the notion of granularity to imprecise types such as @tt{List(Dyn)}
-  and @tt{Function([Dyn], Str)}.
- Compare your new dynamic-type granularity to prior studies that randomly
-  select imprecise types@~cite{kas-pldi-2019,vsc-dls-2019}.
-}
-
+@; TODO 3rd issue = anonymous configs
 Overhead plots (@figure-ref{fig:overhead-plot-example}) rest on two assumptions.
 @; - assn: log scale
 First is that configurations with less than 2x overhead
@@ -453,7 +436,7 @@ Pathologies like the 1000x slowdowns in @figure-ref{fig:example-lattice}
  dropped to 30x, the configurations would still be useless to developers.
 
 The main limitation of exhaustive evaluation, however, is its exhaustiveness.
-With 20 type-able units, an experiment requires over 1 million measurements.
+With 20 migratable units, an experiment requires over 1 million measurements.
 At a module-level granularity, this limit is somewhat reasonable because each
  module can be arbitrarily large.
 But at function-level granularity and finer, the practical limit quickly rules
@@ -482,8 +465,8 @@ If the true proportion of @ddeliverable{D} configurations in a program
  happens to be 10%, then a random configuration has a 1 in 10
  chance of being @ddeliverable{D}.
 
-A statistical justification depends on the law of large numbers the
- central limit theorem.
+A statistical justification depends on the law of large numbers
+ and the central limit theorem.
 Let @${d} be a predicate that checks whether a configuration
  is @ddeliverable{D}.
 Since @${d} is either true or false for every configuration,
@@ -585,7 +568,7 @@ Several implement games, and re-play a game round.
 Others adapt library code with an example use.
 All of the forthcoming Typed Racket benchmarks follow this approach (@section-ref{sec:tr:benchmarks}).
 Many of the Reticulated benchmarks, however, come from prior work and
- adapt smaller benchmark scripts instead (@section-ref{sec:rp:benchmarks}).
+ adapt small benchmark scripts instead (@section-ref{sec:rp:benchmarks}).
 
 
 @subsection[#:tag "sec:conversion"]{From Programs to Benchmarks}
@@ -593,7 +576,7 @@ Many of the Reticulated benchmarks, however, come from prior work and
 To convert a program into a benchmark, we:
 @itemlist[#:style 'ordered
 @item{
-  partition the program into migratable and contextual modules;
+  partition the program into migratable and contextual code;
 }
 @item{
   build a migratable driver module that runs the program and collects timing information;
@@ -602,15 +585,10 @@ To convert a program into a benchmark, we:
   remove any non-determinism or I/O actions;
 }
 @item{
-  find typed variants of the migratable modules.
+  find types for the migratable code.
 }]
 
-The final step, finding types, can be difficult.
-If the migratable modules already come with types, the work is straightforward:
- remove the type annotations and replace casts with equivalent untyped
- assertions.
-When adding types by hand, complications arise.
-
+The final step, finding types for untyped code, can be difficult.
 First, the type checker may require casts or refactorings to deal with
  untyped code.
 For example, untyped Racket code may assume that the
@@ -644,7 +622,7 @@ Typed Racket benchmarks with this issue include additional contextual
 This section presents an exhaustive evaluation of Typed Racket v7.7
  on a set of @integer->word[tr:num-benchmarks] benchmark programs;
  namely, the GTP suite v@|tr:gtp-version| (@|gtp-url|).
-The main purpose of this evaluation is to evalution confirms that the
+The main purpose of this evaluation is to confirm that the
  exhaustive method provides a useful summary of a mixed-typed language.
 A secondary result is that it reveals performance challenges
  that Typed Racket must overcome.
@@ -698,7 +676,6 @@ Each summary comes with four fields:
   #:purpose "Generate prime numbers"]{
     Demonstrates a scenario where client code is tightly coupled to higher-order library code.
     The library implements a stream data structure; the client builds a stream of prime numbers.
-    Introducing a type boundary between these modules leads to significant overhead.
 }
 @bm-desc[
   @bm{forth}
@@ -708,7 +685,6 @@ Each summary comes with four fields:
   #:url "http://docs.racket-lang.org/forth/index.html"]{
   Interprets Forth programs.
   The interpreter represents calculator commands as a list of first-class objects.
-  These objects accumulate proxies as they cross type boundaries.
 }
 @bm-desc[
   (list @bm{fsm} @bm{fsmoo})
@@ -726,9 +702,7 @@ Each summary comes with four fields:
   #:purpose "Interactive map"
   #:depends (list (make-lib "graph" "http://github.com/stchang/graph"))]{
   Builds a map of Boston's subway system and answers reachability queries.
-  The map interacts with Racket's untyped @library{graph} library;
-   when the map is typed, the boundary to @library{graph} is a
-   bottleneck.
+  The map interacts with Racket's untyped @library{graph} library.
 }
 @bm-desc[
   @bm{morsecode}
@@ -736,8 +710,7 @@ Each summary comes with four fields:
   #:origin "Library"
   #:purpose "Morse code trainer"
   #:url "https://github.com/jbclements/morse-code-trainer/tree/master/morse-code-trainer"]{
-  Computes Levenshtein distances and morse code translations for a fixed sequence of pairs of words.
-  Every function that crosses a type boundary in @bm{morsecode} operates on strings and integers, thus run-time checks are fairly cheap.
+  Computes Levenshtein distances@~cite{l-spd-1966} and morse code translations for a fixed sequence of pairs of words.
 }
 @bm-desc[
   @bm{zombie}
@@ -762,8 +735,6 @@ Each summary comes with four fields:
   #:origin "Application"
   #:purpose "Maze generator"]{
   Builds a grid of wall and floor objects by choosing first-class classes from a list of ``template'' pieces.
-  This list accumulates proxies when it crosses a type boundary.
-
   Originally, the program imported the Racket @library{math} library
    for array operations.
   The benchmark uses Racket's vectors instead of the @library{math} library's arrays
@@ -781,7 +752,6 @@ Each summary comes with four fields:
   #:depends (list (make-lib "math/array" "https://docs.racket-lang.org/math/array.html")
                   (make-lib "rnrs/bytevectors-6" "https://docs.racket-lang.org/r6rs/R6RS_Libraries.html#(mod-path._rnrs%2Fbytevectors-6)"))]{
   Parses a bytestream of JPEG data to an internal representation, then serializes the result.
-  Adding types can lead to expensive data structure checks.
 }
 @bm-desc[
   @bm{zordoz}
@@ -791,8 +761,7 @@ Each summary comes with four fields:
   #:url "http://github.com/bennn/zordoz"
   #:depends (list (make-lib "compiler-lib" "http://docs.racket-lang.org/raco/decompile.html#%28mod-path._compiler%2Fdecompile%29"))]{
   Traverses Racket bytecode (@tt{.zo} files).
-  The @library{compiler-lib} library defines the bytecode data structures.
-  Typed code interacting with the library suffers overhead.
+  The untyped @library{compiler-lib} library defines the bytecode data structures.
 }
 @bm-desc[
   @bm{lnm}
@@ -803,7 +772,7 @@ Each summary comes with four fields:
               (make-lib "plot" "https://docs.racket-lang.org/plot/")
               (make-lib "math/statistics" "https://docs.racket-lang.org/math/stats.html"))]{
   Renders overhead plots.
-  Two modules are tightly-coupled to Typed Racket libraries; typing both modules improves performance.
+  Two modules are tightly-coupled to Typed Racket libraries.
 }
 @bm-desc[
   @bm{suffixtree}
@@ -811,9 +780,8 @@ Each summary comes with four fields:
   #:origin "Library"
   #:purpose "String tools"
   #:url "https://github.com/dyoo/suffixtree"]{
-  Implements Ukkonen's suffix tree algorithm and computes
-  longest common subsequences between strings.
-  The largest performance overheads are due to a boundary between struct definitions and functions on the structures.
+  Implements Ukkonen's suffix tree algorithm@~cite{u-a-1995}
+   and computes longest common subsequences between strings.
 }
 @bm-desc[
   @bm{kcfa}
@@ -823,7 +791,6 @@ Each summary comes with four fields:
   #:url "http://matt.might.net/articles/implementation-of-kcfa-and-0cfa/"]{
   Performs 1-CFA on a lambda calculus term that computes @$|{~2*(1+3) = 2*1 + 2*3}| via Church numerals.
   The (mutable) binding environment flows throughout functions in the benchmark.
-  When this environment crosses a type boundary, it acquires a new proxy.
 }
 @bm-desc[
   @bm{snake}
@@ -832,7 +799,6 @@ Each summary comes with four fields:
   #:purpose "Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
   Implements the Snake game; the benchmark replays a fixed sequence of moves.
-  Modules in this benchmark frequently exchange first-order values, such as lists and integers.
 }
 @bm-desc[
   @bm{take5}
@@ -840,7 +806,6 @@ Each summary comes with four fields:
   #:origin "Educational"
   #:purpose "Game"]{
   Manages a card game between AI players.
-  These players communicate infrequently, so migratory typing adds relatively little overhead.
 }
 @bm-desc[
   @bm{acquire}
@@ -849,7 +814,7 @@ Each summary comes with four fields:
   #:purpose "Game"
   #:url "https://github.com/mfelleisen/Acquire"]{
   Simulates a board game via message-passing objects.
-  These objects encapsulate the core data structures; few higher-order values cross type boundaries.
+  These objects encapsulate the core data structures and seldom cross module boundaries.
 }
 @bm-desc[
   @bm{tetris}
@@ -858,7 +823,6 @@ Each summary comes with four fields:
   #:purpose "Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
   Replays a pre-recorded game of Tetris.
-  Frequent type boundary crossings, rather than proxies or expensive runtime checks, are the source of performance overhead.
 }
 @bm-desc[
   @bm{synth}
@@ -868,7 +832,6 @@ Each summary comes with four fields:
   #:url "http://github.com/stamourv/synth"]{
   Converts a description of notes and drum beats to @tt{WAV} format.
   Modules in the benchmark come from two sources, a music library and an array library.
-  The worst overhead occurs when arrays frequently cross type boundaries.
 }
 @bm-desc[
   @bm{gregor}
@@ -879,7 +842,6 @@ Each summary comes with four fields:
   #:depends
     (list (make-lib "cldr" "https://docs.racket-lang.org/cldr-core/index.html")
           (make-lib "tzinfo" "https://docs.racket-lang.org/tzinfo/index.html"))]{
-
   Provides tools for manipulating calendar dates.
   The benchmark builds tens of date values and runs unit tests on these values.
 }
@@ -951,8 +913,7 @@ Overall, many benchmarks run significantly faster with types
  (@id[num-faster-typed] of @id[num-total]).
 These programs have few boundaries to untyped contextual modules
  and benefit from type-directed compilation.
-The highest ratios stay within a 2x overhead.
-Compared to later results, this is a modest cost.
+The highest ratios stay within a modest 2x overhead.
 }])
 
 @; -----------------------------------------------------------------------------
@@ -1013,9 +974,9 @@ Even at a generous 10x factor, no more than half the configurations in
 The curves' endpoints describe the extremes of migratory typing.
 The left endpoint gives the percentage of configurations that run at least
  as quickly as the untyped configuration.
-With few exceptions, notably @bm{lnm}, such configurations are a low proportion of the total.
-The right endpoint shows how many configurations suffer over 20x performance overhead.
-@string-titlecase[num-max-deliverable-str] benchmarks have at least one off the chart.
+With few exceptions, notably @bm{lnm}, these configurations are a low proportion of the total.
+The right endpoint shows how many configurations suffer at least 20x overhead.
+@string-titlecase[num-max-deliverable-str] benchmarks have at least one such configuration.
 
 In summary, the application of the evaluation method projects a negative
  image of Typed Racket's sound migratory typing.
@@ -1047,8 +1008,8 @@ The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
 
 Reticulated Python is the original home of the @|stransient| semantics for
  mixed-typed programs@~cite{v-thesis-2019}.
-@|sTransient| is a type-sound semantics (@chapter-ref{chap:design}),
- but does not rely on higher-order wrappers or full run-time checks.
+@|sTransient| is a type-sound semantics (@chapter-ref{chap:design})
+ that does not rely on higher-order wrappers or full run-time checks.
 Instead, @|stransient| uses light ``shape checks'' throughout typed code.
 One would expect fast performance from @|stransient| on mixed-typed code.
 The first-ever evaluation, however, only reports data for untyped and fully-typed
@@ -1071,7 +1032,7 @@ One syntactic unit in the experiment is either one function,
 @Figure-ref{fig:rp:example-class} demonstrates this granularity with
  a simple Reticulated module.
 The class @tt{Cash} has two fields and one method that requires three arguments;
- the module also include a function that creates a @tt{Cash} with exactly
+ the module also include a function that instantiates a @tt{Cash} object with exactly
  5 dollars.
 Reticulated permits the removal of every type in the figure, giving
  @${128} possible configurations.
@@ -1455,7 +1416,7 @@ From left to right, these are:
 
 For example, the row for @bm{futen} reports a @|rp:u/p-ratio| of @${@|futen-u/p|}.
 This means that the average time to run the untyped configuration of the
- @bm{futen} benchmark using Reticulated was that much slower than the
+ @bm{futen} benchmark using Reticulated is that much slower than the
  average time of running the same code using Python.
 The @|rp:t/u-ratio| for @bm{futen} states that the fully-typed configuration
  is @${@|futen-t/u|} times slower than the untyped configuration.
@@ -1548,7 +1509,9 @@ This is to be expected, given the @|rp:u/p-ratio|s in @figure-ref{fig:rp:ratio} 
 In these benchmarks, the fully-typed configuration is one of the slowest configurations.
 The notable exception is @bm{spectralnorm}, in which the fully-typed configuration
  runs faster than @${@id[S-SLOWER]\%} of all configurations.
-Unfortunately, this speedup is due to a soundness bug; Reticulated
+Unfortunately, this speedup comes from a soundness bug that we discovered
+ thanks to this performance evaluation.
+Reticulated
  at commit @|rp:retic-commit| does not type-check the contents of tuples
  (@github-issue["mvitousek" "reticulated" 36]).
 })
@@ -1610,8 +1573,8 @@ Three have been noted above:
                         @(if long-style? " functions and methods" "")}))]
        ) @elem{
   A third issue is that the experiment uses rather small benchmarks.
-  An ad-hoc sample of the @|rank-info| shows that widely-used
-   Python packages have far more functions and methods.
+  The @|rank-info| shows that widely-used
+   Python packages have far more functions and methods (accessed 2018).
   @|lib-info|.
 })
 
@@ -1660,9 +1623,10 @@ Unfortunately, this method hides outliers in the data
 @Figure-ref{fig:example-exact-plot} addresses both concerns.
 Instead of summarizing one configuration with its average runtime,
  the plot contains one point for every running time in the dataset.
-These points are sorted left-to-right in one of the @integer->word[num-units]
- columns of the figure; if a plot like this does not consist of distinct,
- horizontal lines, the underlying dataset may have irregular running times.
+These points are spread left-to-right in one of the @integer->word[(+ 1 num-units)]
+ columns of the figure.
+If a plot like this does not consist of distinct, horizontal lines, the
+ underlying dataset may have irregular running times.
 Each column contains all configurations that have the same number of types.
 In terms of the configuration lattice (@figure-ref{fig:example-lattice-0}),
  the left-most column contains the bottom level and each successive column
@@ -1699,11 +1663,10 @@ Each point in the scatterplot shows how collapsible affects one configuration.
 Points above the diagonal line are improved;
  points below the line get worse with collapsible contracts.
 More precisely, a point @${(X, Y)} shows the overhead in both systems.
-The first coordinate, @${X}, is the overhead with collapsible
+The first coordinate, @${X}, is the overhead with collapsible.
 The @${Y} coordinate is the baseline overhead, without collapsible.
-If collapsible always led to a lower overhead, then @${X < Y} in each
- point and all points would lie above the @${X=Y} line.
-As you can see, however, some points improve and others do not.
+If collapsible always led to a lower overhead, then all
+ point would lie above the @${X=Y} line (because @${X < Y}).
 }])
 
 
@@ -1729,10 +1692,9 @@ The plots in @section-ref{sec:tr:evaluation} paint a bleak picture of
  Typed Racket.
 Many benchmarks have many configurations that run far slower than the
  untyped code.
-But, one wonders, maybe these pitfalls can be avoided with a little extra
- effort by the programmer.
-If the programmer is willing to convert one or two modules, can performance
- improve?
+A natural question, though, is whether these results are brittle.
+If a programmer can escape the slow configurations by converting one or
+ two more modules, then the bleak conclusion may be unwarranted.
 
 @Figure-ref{fig:example-path} presents two plots for the @bm[bm-name] benchmark
  that compare the original data against the best-possible performance after

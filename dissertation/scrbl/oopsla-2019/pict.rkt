@@ -496,11 +496,12 @@
 
 (define transient:subtype
   (make-example-atom-pict
-    '("(define ((lazy-fact (lazy-n : (-> Natural))))"
-      "  (let fact ((n : ??? (lazy-n)))"
-      "    (if (zero? n)"
-      "      1"
-      "      (* n (fact (- n 1))))))")
+    '("(define (lazy-fact (lazy-n : (-> Natural)))"
+      "  (lambda ()"
+      "    (let fact ((n : ??? (lazy-n)))"
+      "      (if (zero? n)"
+      "        1"
+      "        (* n (fact (- n 1)))))))")
     '("((lazy-fact (λ() -4)))")
     #true
     #false))
@@ -558,18 +559,20 @@
         (let* ((sep (blank med-x-sep 0))
                (pp+ (hc-append 4 acc sep pp)))
           (pin-arrow-line 6 pp+ sep lc-find sep rc-find #:line-width 2 #:color "black"))))
-    (define (make-x-step #:border-color bc str)
+    (define (make-x-step #:border-color bc str*)
       (add-rounded-border
         #:radius 8 #:frame-color bc #:frame-width 4 #:background-color "white"
         #:x-margin tiny-x-sep #:y-margin tiny-y-sep
-        (text str "Inconsolata" 14)))
+        (apply
+          vc-append 4
+          (map (lambda (str) (text str "Inconsolata" 14)) str*))))
     (define (make-natural-step str)
       (make-x-step #:border-color "light gray" str))
     (make-pipeline
-      (make-natural-step "Expand")
-      (make-natural-step "Typecheck")
-      (make-natural-step "Contract")
-      (make-natural-step "Optimize"))))
+      (make-natural-step '("Expand"))
+      (make-natural-step '("Typecheck" "Kernel"))
+      (make-natural-step '("Generate" "Contract"))
+      (make-natural-step '("Type-Directed" "Optimizer")))))
 
 (define transient:defense
   (typed-codeblock '(

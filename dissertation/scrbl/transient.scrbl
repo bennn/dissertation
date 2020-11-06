@@ -54,15 +54,15 @@ The high costs of @|sdeep| types @;(@chapter-ref{chap:performance})
  motivate a compromise.
 In a language that supports both, programmers can mix @|sdeep| and
  @|sshallow| types to find an optimal tradeoff.
-This chapter presents the first half of the compromise; namely, a @|sshallow| semantics for Typed Racket.
+This chapter presents the first half of the compromise, namely, a @|sshallow| semantics for Typed Racket.
 By default, Typed Racket provides @|sdeep| types via the @|snatural| semantics.
 My work brings the @|stransient| semantics to the Typed Racket surface syntax.
 
 Henceforth, @|sDeep| Racket refers to the original, @|snatural| implementation
- and @|sShallow| Racket refers to my @|stransient| implementation.
+ of Typed Racket and @|sShallow| Racket refers to its @|stransient| implementation.
 Typed Racket refers to the common parts: the surface language and the type system.
 
-@|sTransient| is a promising companion to @|snatural| because it pursues an
+@|sTransient| is a promising companion to @|sNatural| because it pursues an
  opposite kind of implementation.
 Whereas @|snatural| eagerly enforces full types with guard wrappers, @|stransient|
  lazily checks only top-level shapes.
@@ -71,16 +71,15 @@ The lazy strategy means that @|stransient| does not need wrappers, which removes
 @|sTransient| can also run without blame, removing another form of run-time cost.
 By contrast, simply removing blame from @|snatural| changes little because
  blame information tags along with the guard wrappers.
-To fully benefit, @|snatural| needs a new strategy for allocating wrappers in
+To fully benefit from removing blame, @|sNatural| needs a new strategy for allocating wrappers in
  the first place.
 
 Adapting the theory of @|stransient|@~cite{vss-popl-2017} to Typed Racket required
  several generalizations and insights (@sectionref{sec:transient:theory}).
 In the course of this work, I also adapted the @|stransient| heap-based blame
  algorithm and identified several challenges (@sectionref{sec:transient:blame});
- first and foremost, the basic algorithm is prohibitively slow.
-The final implementation takes care to reuse large parts of Typed Racket,
- including the static type checker and most of the type-driven optimizer
+ first and foremost, the basic blame algorithm is prohibitively slow.
+The final implementation takes care to reuse large parts of Typed Racket
  (@sectionref{sec:transient:implementation}).
 
 The performance of @|sShallow| Racket is typically an improvement over
@@ -100,9 +99,9 @@ For now, @sectionref{sec:transient:future} lists several avenues worth exploring
 This semantics communicates the key ideas behind @|stransient| and
  the behavior of Reticulated Python, but four characteristics make it
  unsuitable for a @|stransient| implementation in Racket.
-It deals with a simpler language of static types,
- it includes a dynamic type,
- it does not include a subtyping relation,
+It deals with a simpler language of static types;
+ it includes a dynamic type;
+ it does not include a subtyping relation;
  and its type checker is intertwined with the @emph{completion} pass
  that rewrites typed code.
 This section outlines the design of a suitable model and its properties.
@@ -134,8 +133,9 @@ The type-shape for an object with @${N} fields/methods checks for the presence
  of each member.
 Thus, the cost is linear in the size of an object type.
 
-@|sShallow| Racket includes additional non-constant shapes to support
+@|sShallow| Racket includes additional linear-time shapes to support
  Typed Racket's expressive types with meaningful run-time checks.
+Some are linear in the size of a type; others are linear in the size of incoming values.
 In general, the goal is to enforce full constructors.
 The type-shape for a function checks arity; for example,
  the types @${(\tfun{\tint}{\tnat})} and @${(\tfun{\tint\,\tint}{\tnat})}
@@ -151,11 +151,6 @@ For example, @${\tagof{\stype_0 \cup \stype_1} = \tagof{\stype_0} \cup \tagof{\s
 Type variables have trivial shapes in other contexts, @${\tagof{\alpha_0} = \top}.
 @Section-ref{sec:transient:types} goes into more detail about the implementation.
 
-@futurework{
-  Is there a different way to enforce universal types that offers stronger
-   reasoning principles, in the spirit of parametricity?
-}
-
 
 @subsection[#:tag "sec:transient:theory:dyn"]{Removing Type Dynamic}
 
@@ -170,9 +165,9 @@ Using this macro approach, only a handful of typing rules need to deal
 
 The differences between the dynamic (micro) and non-dynamic (macro) typing rules have implications
  for @|stransient| run-time checks.
-In the original semantics, the evaluation of any expression could bring
+In the original model, the evaluation of any expression could bring
  a dynamically-typed value into a typed context.
-In a non-dyn semantics, only boundaries and elimination forms can introduce
+In a non-dyn model, only boundaries and elimination forms can introduce
  an untyped value.
 @Figure-ref{fig:transient:app-compare} illustrates the difference by contrasting
  the @|stransient| checks needed for a function application.
@@ -218,7 +213,7 @@ On the bottom, only one check is needed because the function and argument
   }|
 ]
 
-Note: adding blame to a non-dynamic language adds the need for an additional blame-map operation
+Note: Adding blame to a non-dynamic language adds the need for an additional blame-map operation
  in @figure-ref{fig:transient:app-compare}, but no additional checks.
 The blame map potentially needs an update because the argument flows
  in to the function.
@@ -238,11 +233,11 @@ A type system for untyped code must either include a subtyping
 Rewriting takes time and invites mistakes, therefore the
  migratory typing perspective demands a subtyping judgment.
 
-The dynamic type is not a replacement for subtyping because it cannot articulate designs.
+The dynamic type is not a replacement for subtyping because it cannot describe designs.
 For example, the untyped @codett{divide} function in @figure-ref{fig:transient:divide}
  either divides two numbers or returns the symbol @tt{'undef} if the divisor
  is zero.
-Typed Racket lets a programmer express this ad-hoc union of two base types.
+Typed Racket lets a programmer express this union of two base types.
 By contrast, the dynamic type can only summarize the result in an over-approximate
  way that provides no information to callers.
 
@@ -251,9 +246,9 @@ By contrast, the dynamic type can only summarize the result in an over-approxima
   @elem{Untyped division function with two kinds of output.}
   transient:divide]
 
-Adapting @|stransient| to include subtyping was therefore an essential task
+Adapting @|stransient| to include subtyping is therefore an essential task
  for @|sShallow| Racket.
-The addition was straightforward, but revealed a surprising distinction
+The addition is straightforward, but reveals a surprising distinction
  between declaration-site types and use-site types; @|stransient| with
  subtyping may miss certain type mistakes.
 @Figure-ref{fig:transient:subtype} illustrates the pitfall of @|stransient|
@@ -263,7 +258,7 @@ This typed function asks for a thunk that computes a non-negative number
 Because of the type declaration on @codett{lazy-n}, it looks like @|stransient|
  should check that the call @codett{(lazy-n)} returns a non-negative number.
 The actual behavior, however, depends on the type of the call expression.
-If the language replaces the placeholder @codett{???} with the valid type
+If the implementation replaces the placeholder @codett{???} with the valid type
  @codett{Integer}, then @|stransient| checks for an integer and the untyped
  code at the bottom of the figure enters an infinite loop.
 
@@ -275,14 +270,6 @@ If the language replaces the placeholder @codett{???} with the valid type
 In summary, the flexibility of subtyping limits the ability of @|stransient|
  checks to find mismatches due to type boundaries.
 Checks are based on local uses, while boundaries are claims with a broad scope.
-
-@futurework{
-  Find an effective way to allow subtyping and catch boundary errors.
-  One idea is to use static analysis to identify the different paths from
-   boundaries to a use-site.
-  A second is to record subtyping actions in the blame map, as a loss of precision.
-  The extra metadata, however, will not prevent @codett{lazy-fact} from diverging.
-}
 
 
 @subsection[#:tag "sec:transient:theory:completion"]{From Elaboration to Completion}
@@ -319,7 +306,7 @@ Second, the clear requirement makes it easier to adapt the idea of @|stransient|
 If the language has its own surface-level typing and type-to-shape metafunction
  (@${\tagof{\cdot}}), then completion correctness theorem guides the next steps.
 
-Third, the specification encourages research on better completions and target-level
+Third, the separation encourages research on better completions and target-level
  typings.
 The challenge is to use as few checks as possible to build the target term.
 For example, suppose the variable @codett{xy} points to a pair of numbers
@@ -333,23 +320,16 @@ The completion for @|sShallow| Racket produces the following term:
 An improved completion would eliminate this check, other flow-dominated checks,
  and potentially many others.
 
-@futurework{
-  Adapt Typed Racket's occurrence typing to support a completion pass that
-   avoids dominated checks.
-  Evaluate the performance improvement.
-}
-
 
 @section[#:tag "sec:transient:blame"]{Work-in-progress: Blame}
 
 Blame is an important part of a migratory typing system because it strengthens
  the key weakness of migratory types.
-Static types guarantee that certain errors cannot occur.
+Static types guarantee that certain errors cannot occur at run-time.
 Migratory types are weak because they cannot offer the same promise.
 Errors can occur just about anywhere in typed code.
 With blame, however, type-mismatch errors come with an action plan for debugging.
-A programmer can follow the blame information to decide what code to edit
- toward a working program.
+A programmer can follow the blame information to attempt a fix.
 
 The usefulness of such an action plan depends on the blame strategy.
 The current-best algorithm for @|stransient|, from @citet{vss-popl-2017},
@@ -359,17 +339,12 @@ The set is unsound and incomplete in the technical sense of
  no information.
 
 Early experience with blame in @|sShallow| Racket, however, has identified
- significant challenges.
+ two significant challenges.
 First, scaling the original blame algorithm to Typed Racket raises
  questions about its accuracy.
 Second, @|stransient| blame has a tremendous performance cost.
 This section explains the challenges; performance concerns are deferred
  to @section-ref{sec:transient:blame-performance}.
-
-To be clear, @|sShallow| Racket does not include blame because the
- performance cost is unacceptable.
-Except where otherwise noted, @|sshallow| data is this paper is for
- @|stransient| without blame.
 
 
 @subsection{Basics of @|sTransient| Blame}
@@ -380,9 +355,9 @@ Except where otherwise noted, @|sshallow| data is this paper is for
 The @|stransient| blame algorithm uses a global @emph{blame map} to connect
  run-time values to source-code boundaries.
 This blame map uses heap addresses as keys.
-Every non-primitive value in a program has a heap address, and potentially
+Every non-primitive value in a program has a heap address and potentially
  a blame map entry.
-The values in a blame map are collections of entry items.
+The values in a blame map are collections of entries.
 There are two kinds of entry in such a collection:
 @itemlist[#:style 'ordered
 @item{
@@ -401,10 +376,10 @@ There are two kinds of entry in such a collection:
   A @emph{link entry} combines a parent pointer and an action.
   The parent refers to another blame map key.
   The action describes the relation between the current value and its parent.
-  Suppose the function @codett{f} from above gets applied to the
-   untyped value @codett{'NaN}.
+  Suppose the function @codett{f} from above gets applied to an
+   untyped value @codett{v}.
   As the value enters the function, the blame map gains a link entry
-   for @codett{'NaN} that points to @codett{f} with the action @codett{'dom},
+   for @codett{v} that points to @codett{f} with the action @codett{'dom},
    to remember that the current value is an input to the parent.
 }
 ]
@@ -413,7 +388,7 @@ If a @|stransient| run-time check fails, the blame map can supply a set
  of boundaries by following
  parent pointers up from the failed value.
 Each parent pointer is partially responsible for the mismatched value.
-Each boundary at the root of the parent paths contains possibly-unchecked
+Each boundary at the root of all parent paths contains possibly-unchecked
  type assumptions.
 The programmer can begin debugging by reviewing these type assumptions.
 
@@ -422,8 +397,8 @@ They filter the set of typed boundaries using the failed value and the
  action path that led to the boundary.
 The action path gives a list of selectors to apply to the boundary type,
  ending with a smaller type.
-Checking this type against the bad value helps rule out unimportant boundaries.
-If the bad value is an integer and one of the boundary types expects an integer,
+Checking this type against the bad value helps rule out irrelevant boundaries.
+For example, if the bad value is an integer and one of the boundary types expects an integer,
  then that boundary is not worth reporting.
 
 In summary, the success of the blame map rests on three principles:
@@ -433,16 +408,15 @@ In summary, the success of the blame map rests on three principles:
    map for each value that crosses the boundary at runtime;
 }
 @item{
-  every elimination form adds a link entry with a correct parent and action;
+  every elimination form adds a link entry with a correct parent and action; and
 }
 @item{
-  and there is a run-time way to test whether a value matches part of
+  there is a run-time way to test whether a value matches part of
    a boundary type.
 }
 ]
 These principles are relatively easy to satisfy in a model language,
- but raise surprising implications and challenges for a full language.
-The next sections go into detail.
+ but pose surprising challenges for a full language.
 
 
 @subsection{Trusted Libraries Obstruct Blame}
@@ -460,12 +434,12 @@ Both @|sDeep| Racket and @|sShallow| Racket can re-use this function by
  and @|sShallow|---without blame---can trust that @codett{map} always returns a list.
 
 For @|sShallow| with blame, however, trusted re-use leads to imprecise blame.
-@Figure-ref{fig:transient:blame:map} illustrates with a tiny example.
+@Figure-ref{fig:transient:blame:map} illustrates this phenomenon with a tiny example.
 The typed function at the top of this figure expects a list of numbers,
  applies a trivial @codett{map} to the list,
  and later finds a bad element in the mapped list.
 @|sTransient| blame should point back to the boundary between the typed
- function and the untyped list, but cannot do so if @codett{map} does
+ function and the untyped list but cannot if @codett{map} does
  not update the blame map.
 The solution is to register @codett{map} in the blame map with a boundary entry
  and add link entries before and after every call.
@@ -500,10 +474,6 @@ Renaming @codett{map} leads to misleading blame errors.
 The same goes for applications of an expression instead of a literal identifier.
 Improving precision is an open challenge.
 
-@;@futurework{
-@;  Design a language of blame types to replace the identifier-based logic.
-@;}
-
 
 @subsection{Multi-Parent Paths}
 
@@ -531,12 +501,6 @@ But the cost of building and traversing the additional link entries may be
  high.
 Thus we leave such paths to future work.
 
-@;@futurework{
-@;  Allow multiple parents per link entry
-@;   and dynamically choose a parent for operations such as @codett{hash-ref}.
-@;  How do the changes affect blame errors and performance?
-@;}
-
 
 @subsection{Expressive Link-Entry Actions}
 
@@ -548,29 +512,29 @@ Thus we leave such paths to future work.
   \begin{tabular}{l@"@" {~~~~}l}
     Action Template & Interpretation
   \\\hline
-    @codett{`(dom ,n)} & @codett{n}-th argument to a function
+    @codett{(dom n)} & @codett{n}-th argument to a function
   \\
-    @codett{`(cod ,n)} & @codett{n}-th result from a function
+    @codett{(cod n)} & @codett{n}-th result from a function
   \\
-    @codett{`(case-dom (,k ,n))} & \twoline{@codett{n}-th argument (of @codett{k} total) to an}{overloaded function}
+    @codett{(case-dom (k n))} & \twoline{@codett{n}-th argument (of @codett{k} total) to an}{overloaded function}
   \\[3.5ex]
-    @codett{`(object-method (,m ,n))} & \twoline{@codett{n}-th argument to method @codett{m} of an}{object}
+    @codett{(object-method (m n))} & \twoline{@codett{n}-th argument to method @codett{m} of an}{object}
   \\[3.5ex]
-    @codett{'list-elem} & Element of a homogeneous list
+    @codett{list-elem} & Element of a homogeneous list
   \\
-    @codett{'list-rest} & Tail of a list
+    @codett{list-rest} & Tail of a list
   \\
-    @codett{`(list-elem ,n)} &  \twoline{Element of a heterogeneous list,}{e.g. @codett{(List Boolean Number String)}$\!\!\!\!$}
+    @codett{(list-elem n)} &  \twoline{Element of a heterogeneous list,}{e.g. @codett{(List Boolean Number String)}$\!\!\!\!$}
   \\[3.5ex]
-    @codett{'hash-key} & Key of a hashtable
+    @codett{hash-key} & Key of a hashtable
   \\
-    @codett{'hash-value} & Value of a hashtable
+    @codett{hash-value} & Value of a hashtable
   \\
-    @codett{`(struct-field ,n)} & @codett{n}-th field of a structure
+    @codett{(struct-field n)} & @codett{n}-th field of a structure
   \\
-    @codett{`(object-field ,f)} & Field @codett{f} of an object type
+    @codett{(object-field f)} & Field @codett{f} of an object type
   \\
-    @codett{'noop} & No action; direct link to parent
+    @codett{noop} & No action; direct link to parent
   \end{tabular}}}
 ]
 
@@ -588,8 +552,11 @@ These help traverse simple function types (@${\tfun{\stype}{\stype}})
  focuses on the element type @${\tint}.
 The implementation of Reticulated adds one action, @codett{Attr},
  and generalizes @codett{Arg} with an index.
-Starting from the Reticulated type @codett{Function([int, str], float)},
- the action @codett{[Arg, 1]} focuses on the type @codett{str} of the
+Starting from the following Reticulated type:
+
+@code-nested{Function([int, str], float)}
+
+@|noindent|the action @codett{[Arg, 1]} focuses on the type @codett{str} of the
  second positional argument.
 Similarly, the action @codett{[Attr, "foo"]} focuses on the member @codett{"foo"}
  of an object type.
@@ -606,7 +573,7 @@ If a nested list value crosses the boundaries @codett{List(List(int))}
  and @codett{List(Dict(str, str))}, and then an elimination returns
  a string where an @codett{int} was expected, a plain @codett{Deref}
  incorrectly filters out the @codett{Dict} type.
-The user needs to see both types because neither matches the actual nested list value.
+The developer needs to see both types because neither matches the actual nested list value.
 @; TODO can we make a retic example that blames both? So far I'm getting trivial blame  (in retic repo, blame_conflate.py)
 
 @|sShallow| Racket thus comes with an extensive action language to
@@ -628,18 +595,18 @@ Finally, the @codett{noop} action adds a direct link
 
 @subsection[#:tag "sec:transient:blame:types"]{Types at Runtime}
 
-@|sTransient| needs types at runtime, or a close substitute, to filter
+@|sTransient| blame needs types at runtime, or a close substitute, to filter
  irrelevant boundaries.
 These runtime types must have selectors for
  each possible action and an interpretation function that checks the
  shape of a value against the shape of a type.
 
 @|sShallow| Racket's runtime types are a revived version of its static types.
-During compilation, static types get seriazed into a chain of type constructor
+During compilation, static types get serialized into a chain of type constructor
  calls.
 After a runtime error occurs, @|sShallow| Racket re-evaluates the constructor
  definitions and uses these constructors to revive types.
-This revival approach re-uses at least 4,000 lines of code to good effect:
+This revival approach re-uses at least 4,000 lines of Typed Racket to good effect:
  roughly 3,000 lines of constructor and selector definitions,
  @; roughly: 300 type->transient-sc, 60 sc def, 270 sc inst, 450 sc opt
  and 1,000 lines that turn a type into a @|stransient| check.
@@ -663,7 +630,6 @@ A related question, though, is whether @|stransient| is better off with
 
 
 @section[#:tag "sec:transient:implementation"]{Implementation}
-@; TODO worth showing the #%module-begin weaving?
 
 @figure*[
   "fig:transient:tr-overview"
@@ -675,22 +641,22 @@ A related question, though, is whether @|stransient| is better off with
 The goal is not to create a fork, but rather to adapt the existing compiler
  and provide a uniform experience to programmers.
 
-@Figure-ref{fig:transient:tr-overview} presents a high-level glimpse of the
- Typed Racket compiler.
+@Figure-ref{fig:transient:tr-overview} presents a high-level organization diagram of the
+ Typed Racket compiler@~cite{tscff-pldi-2011}.
 Source code goes through a macro-expansion step at the start.
-The type checker operates on expanded code; it validates the program at
+The type checker operates on expanded code; it validates the program and
  attaches type annotations as metadata for later passes.
 Third, the compiler turns boundary types into higher-order contracts.
 The last major step is the type-driven optimizer, which uses type annotations
  to remove unnecessary runtime checks.
 
 @|sShallow| Racket can re-use the expander and type checker as-is.
-The contract and optimize steps require changes.
+The ``contract'' and ``optimize'' steps require changes.
 Contract generation must create @|stransient| checks rather than
  @|sdeep| higher-order contracts (@section-ref{sec:transient:types}).
 Additionally, the contract pass must rewrite all typed code with @|stransient|
  checks (@section-ref{sec:transient:defense}).
-The optimize pass must be restricted because it cannot rely on full types (@section-ref{sec:transient:optimize}).
+The ``optimize'' pass must be restricted because it cannot rely on full types (@section-ref{sec:transient:optimize}).
 
 Along the way, the implementation effort brought a few surprises.
 Challenges with universal types and occurrence types cause the current
@@ -735,8 +701,8 @@ Actual shapes in the implementation do not use contract combinators such
   ]
 
   The type represents lists of real numbers.
-  The shape accepts any proper list;
-   an improper list like @codett{(cons 1 (cons 2 3))} is not allowed.
+  The shape accepts any proper list, but not improper lists such as
+   @codett{(cons 1 (cons 2 3))}.
   The run-time cost depends on the size of input values in the worst case,
    but pairs are immutable and the predicate @codett{list?} caches
    its results.
@@ -830,11 +796,11 @@ Actual shapes in the implementation do not use contract combinators such
     #:cost "O(1)"]
 
   Represents a mathematical integer.
-  The shape checks for exactness; an inexact integer such as @codett{4.0} is
+  The shape checks for exactness; an inexact integer such as @codett{4.1} is
    not allowed.
 
   Other numeric types require larger checks for additional properties,
-   for example @codett{Negative-Integer} adds looks for an exact integer that
+   for example @codett{Negative-Integer} looks for an exact integer that
    is less than zero.
 
   To the type system, numeric types are wide unions.
@@ -880,7 +846,7 @@ Actual shapes in the implementation do not use contract combinators such
 
   Represents a function that accepts any number of positional arguments.
   The shape looks for functions that can accept zero arguments,
-   but does not check whether they accept more.
+   but it does not check whether they accept more.
 }
 @item{
   @example-type-shape[
@@ -950,7 +916,7 @@ Checks guard the positions where an untyped value might appear
   around elimination forms;
 }
 @item{
-  and at the first line of every function.
+  and at the entry of every function.
 }
 ]
 
@@ -961,7 +927,7 @@ If typed code expects a number and imports a value from untyped code,
 Elimination forms need protection for the same reason, but are an
  over-approximation.
 @Figure-ref{fig:transient:defense} provides a concrete example with a
- for loop that adds a list of numbers.
+ for loop that sums up a list of numbers.
 Every step of the loop first checks the current list element.
 If the list came from untyped code, then the checks are clearly needed.
 The list might come from typed code, though, in which case the checks
@@ -974,23 +940,6 @@ These checks might be unnecessary if the function never escapes to untyped code,
  but escapes are hard to detect because
  a typed function can escape as an argument to a combinator
  @codett{(map sum-list nss)} or via a macro-introduced reference.
-
-Protecting functions turned out to be the most difficult part of the
- rewriting --- worse than rewriting classes and other macro-expanded code.
-The tricky detail is that the external type of a function can differ
- from the types available inside the function body.
-@Figure-ref{fig:transient:opt} presents an example from the @bm{synth}
- benchmark.
-This @codett{array-append} function accepts an optional argument @codett{k},
- but the public type requires callers to send only one input.
-Consequently, Typed Racket internally gives @codett{k} the bottom type
- at the top of the expanded function.
-The bottom type is widened via occurrence typing before any user code
- appears.
-@|sShallow| Racket cooperates with this widening protocol to insert
- correct checks.
-In an early version, though, every call to @codett{array-append}
- raised an error.
 
 
 @subsubsection[#:tag "sec:transient:surprise"]{Current Limitations}
@@ -1227,15 +1176,13 @@ Their saving grace is that the type optimizer does not transform methods;
 
 
 @section[#:tag "sec:transient:performance"]{Performance}
-@; [X] get NSA data
-@; [X] overhead plots ... incrementally
-@; [X] exact plots, for trends
-@; [X] table, typed/untyped (see perf sections)
-@; [X] DEBUG why is fsm7.7 faster untyped than fsm-S ???
-@;     maybe BC vs CS, fsm-7.7 might be BC (yes fixed)
-@; [X] DEBUG why is synth (recent data, 07-31?) so bad?
-@; [X] DEBUG why is fsmoo transient-typed faster than untyped? (class code not protected)
-@; [X] blame perf table (use NSA)
+
+@; TODO integrate
+@; To be clear, @|sShallow| Racket does not include blame because the
+@;  performance cost is unacceptable.
+@; Except where otherwise noted, @|sshallow| data is this paper is for
+@;  @|stransient| without blame.
+
 
 
 @|sShallow| Racket sacrifices static guarantees for a wrapper-free implementation.
@@ -1501,76 +1448,4 @@ If updates lead to the dynamic type, then run-time operations are free of
  shape checks.
 }])
 
-
-@section[#:tag "sec:transient:future"]{Future Challenges}
-
-@subsection{Identify Trustworthy Typed Identifiers}
-
-@; aka why doesn't @|stransient| optimize more?
-
-Some user-defined functions do not need @|stransient| result checks.
-If a @|stransient| module defines a function @codett{f = (λ (x) ....)}
- then there is no need for the current module to check its results
- because static typing guarantees a shape-correct output.
-Other functions in the same module, though, cannot be trusted.
-If @codett{f = (car f*)} then we can only trust the output if functions
- in the list are good.
-
-@; @subsection{Trust Types}
-@; 
-@; For now, @|sShallow| Racket includes a whitelist of trustworthy base-library
-@;  functions.
-@; Functions like @codett{map} are trusted to return shape-correct results.
-@; 
-@; Checking identifiers, however, is brittle.
-@; Furthermore, the current approach cannot trust deeper properties of a type.
-@; A call to @codett{filter}, for example, guarantees the top shape of the result
-@;  (a list) and the top shape of every element in the list.
-@; There should be some way to encode this shape knowledge in a type.
-
-
-@subsection{Improve or Drop @|sTransient| Blame Filtering}
-
-@|sShallow| Racket makes an effort to filter irrelevant boundaries
- as suggested by @citet{vss-popl-2017}.
-Some boundaries cannot be filtered, however, because @|sShallow| Racket
- cannot parse the complex type definitions (@section-ref{sec:transient:blame:types}).
-Short of designing a new blame algorithm, this challenge motivates two research efforts.
-
-One goal is to improve type parsing and filtering to cover all types.
-If possible, this seems like the way to go.
-But it will be important to measure whether the solution requires additional
- run-time overhead.
-
-A second goal is to evaluate the usefulness of filtering as-is.
-If filtering is not useful and seems unlikely to help, then removing it can
- save a tremendous amount of bookkeeping.
-Without the need to filter, the blame map does not need to store types or
- actions---only pointers and source locations.
-If filtering is useful, it may be helpful to allow types with parse errors
- because an action path explores only a fraction of a full type.
-@; The needed portion may not touch the difficult parts.
-
-
-@subsection{Evaluate Alternative Shape Designs}
-
-The shape checks in @|sShallow| Racket enforce full type constructors
- (@sectionref{sec:transient:theory:types}).
-Other designs are possible, though, and may lead to a better tradeoff
- between type guarantees and performance.
-
-One direction is to strenghten the run-time checks to go beyond the outermost type
- constructor.
-Some designs may benefit from two or three levels of constructor checks.
-In the limit, a @|stransient| could enforce all first-order properties;
- if a programmer can switch between enforcement levels, then this option may
- be helpful for debugging.
-
-A second alternative is to weaken run-time checks for maximal performance.
-The current shapes check too much, in the sense that the Typed Racket optimizer
- does not use them all.
-For example, the @|sShallow| check for function-arity does not help any optimizations.
-Nor would a simple @codett{procedure?} check.
-If performance is the only concern, then an implementation can let the dynamically-typed
- runtime system handle function applications.
 

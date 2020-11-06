@@ -4,7 +4,7 @@
 @title[#:tag "sec:design:properties"]{Towards a Formal Comparison}
 
 The design of a type-enforcement strategy is a multi-faceted problem.
-A strategy determines:
+A strategy determines many aspects of behavior:
  whether mismatches between type specifications and value flows are discovered;
  whether the typed portion of the code is really statically typed, in a conventional sense;
  what typed APIs mean for untyped client code;
@@ -15,28 +15,21 @@ designer.
 
 The examples in @sectionref{sec:design:jungle} show that
  various languages choose different points in this multi-faceted design space.
-But, while they can motivate a systematic analysis, examples
- cannot serve as the basis of such an endeavor: the selection of example programs
- and their translation across languages will always be somewhat @emph{ad-hoc}.
+But, examples can only motivate a systematic analysis; they
+ cannot serve as the basis of such an endeavor.
+The selection of example programs and their translation across languages
+ require too much insight.
 Worse, the examples tell us little about the broader implications of each
  choice; at best they can demonstrate issues.
 
 A systematic analysis needs a suite of formal properties that capture the
 consequences of design choices for the working developer and language designer.
-Such properties must:
-@itemlist[
-  @item{
+Such properties must
     apply to a wide (if not the full) spectrum of design options,
-  }
-  @item{
     articulate benefits of type specifications to typed and untyped code alike, and
-  }
-  @item{
     come with proof techniques that scale to complex language features.
-  }
-]
 
-@|noindent|The literature on gradual typing contains few adequate properties.
+@|noindent|The literature on gradual typing suggests few adequate properties.
 Our analysis therefore brings new properties to the toolbox.
 
 
@@ -51,19 +44,19 @@ The use of type soundness in the gradual typing literature, however, does not
  promote a level comparison.
 Consider the four example languages from the previous section.
 @citet{cvgrl-oopsla-2017} present a model of Flow and prove a conventional
- type soundness theorem, though, a close look reveals that it assumes all code
- is statically-typed.
+ type soundness theorem under the assumption that all code is statically-typed.
 @citet{vss-popl-2017} prove a type soundness theorem for Reticulated Python;
  a reader will eventually notice that the theorem talks about the @emph{shape}
  of values not their types. 
-@citet{mt-oopsla-2017} prove a full type soundness theorem for Nom.
+@citet{mt-oopsla-2017} prove a full type soundness theorem for Nom,
+ which implements the concrete approach.
 @citet{tf-dls-2006} prove a full type soundness theorem for a prototypical
  Typed Racket that includes a weak blame property.
 To summarize, the four advertised type soundness theorems differ in several
 regards:  one focuses on the typed half of the language;
  a second proves a claim about a loose relationship between values and types; 
- a third is a truly conventional type soundness theorem, covering the full language;
- and the last one finally incorporates a claim about the quality of error messages.
+ a third is a truly conventional type soundness theorem;
+ and the last one incorporates a claim about the quality of error messages.
 
 @citet{svcb-snapl-2015} propose the @emph{gradual guarantee} as a test to
  identify languages that enable smooth transitions between typed and
@@ -100,7 +93,6 @@ Furthermore, the type-centric nature of the equivalences offers no direct
  information to the untyped side.
 Authors of untyped code can at best deduce that the behavior of their programs
  cannot be affected by certain changes in typed libraries.
-%% And programmers get no information about why a cast error occurs.
 As a final remark, techniques for proving equivalence preservation are an
  active area of research but results so far indicate that they require a lot of
  ingenuity to adapt from one linguistic setting to another.
@@ -109,7 +101,7 @@ Another well-studied property is the @emph{blame theorem}@~citep{tf-dls-2006, wf
 svctg-esop-2015, w-snapl-2015, vss-popl-2017}.
 Despite the authoritative name, this property is not the final word on blame.
 It states that a run-time mismatch may occur only when an untyped value enters
-a typed, or more-precise, context; a typed value cannot trigger an error by
+a typed, or more-precisely typed, context; a typed value cannot trigger an error by
 crossing to less-typed code.  The property is a useful design principle, but
 does not distinguish the various semantics in the literature.
 To its credit, the blame theorem does justify the slogan ``well typed programs can't be blamed''
@@ -127,8 +119,8 @@ The primary formal property has to be type soundness, because it tells a
 programmer that evaluation is well-defined in each component of a mixed-typed programs.
 
 The second property, @emph{complete monitoring}, asks whether types
-are enforced on all explicit and implicit channels of
-communication between typed and untyped code. That is, every interaction
+guard all statically-declared and dynamically-created channels of
+communication between typed and untyped code. That is, whether every interaction
 between typed and untyped code is mediated by run-time checks.
 
 When a run-time check discovers a mismatch between a type specification and
