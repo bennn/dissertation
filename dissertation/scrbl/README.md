@@ -70,7 +70,16 @@ MF edits, leftover
 - [ ] (p125) 5 correctness, careful
 - [ ] (p125) 5 Along the way
 - [ ] (p129) 5 function clones ... N entry points
-- [ ] (p130X) 5 "protecting functions ..." gone, is it graceful?
+- [ ] (p130) 5 "protecting functions ..." gone, is it graceful?
+- [ ] Q (p132) 5 remove bonus fixes?
+- [ ] Q (p148) 6 "not readable" ?
+- [ ] (p150) 6 redex model
+- [ ] (p156) 6 matrix, not rules
+- [ ] (p157) 6 labeled semantics ... but comes about in CM proof
+- [ ] (p161) 6 labeled red, what symbol?
+- [ ] (p163) 6 lemmas, explain where needed
+- [ ] (p167) 6 why can shallow be aware of deep? articulate benefits
+- [ ] (pX)
 - [ ] (pX)
 
 #### dependencies

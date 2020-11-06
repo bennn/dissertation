@@ -26,46 +26,46 @@
 
 @title[#:tag "chap:both"]{@|sDeep| and @|sShallow|, Combined}
 
-This section validates my thesis: that @|sdeep| and @|sshallow| types
- can be combined in a single language, and the combination is an improvement
+This chapter validates the central point of my thesis: that @|sdeep| and @|sshallow| types
+ can be combined in a companion language for Racket, and the combination is an improvement
  over either one alone.
 First, I prove that @|sdeep| types via @|snatural| and @|sshallow| types
  via @|stransient| can coexist in a formal model.
 The two semantics can interoperate without changing the formal properties
  of either one (@sectionref{sec:both:model}).
 Second, I report challenges that arose combining @|sDeep| Racket and
- @|sShallow| Racket (@sectionref{sec:both:implementation}).
+ @|sShallow| Racket in a single implementation (@sectionref{sec:both:implementation}).
 Overall, the combined implementation has clear benefits (@sectionref{sec:both:evaluation}).
-Programmers are better off with the choice between @|sdeep| guarantees
+Programmers are better off with a choice of @|sdeep| guarantees
  and @|stransient| performance.
 Combining the two semantics in one program can further improve performance.
 And, surprisingly, the addition of @|sshallow| types can express programs
- that @|sDeep| Racket does not.
+ that @|sDeep| Racket currently cannot.
 
 A downside of the combination is that @|snatural| and @|stransient| cannot
  easily share the results of their type checks.
 The reason is simple: @|stransient| as-is lacks a way of learning from past checks.
 @Sectionref{sec:both:model:nonopt} explains the synergy challenge in terms of the
- model and outlines implementation techniques that may work around the issue.
+ model and outlines implementation techniques that may get around the issue.
 
 
 @section[#:tag "sec:both:model"]{Model and Properties}
 
 The model combines @|sdeep|-typed code, @|sshallow|-typed code, and
  untyped code in one surface language.
-Each of these three typing disciplines is recognized by a surface-typing
+Each of these three disciplines is recognized by a surface-typing
  judgment and comes with a complier.
 The three compilers translate well-typed code to a common evaluation
  syntax that has one untyped semantics.
 
 Although the three varieties of surface code give rise to six kinds of
  interactions, the model keeps these interactions under control with
- only three kinds of run-time boundary (@figureref{fig:both:base-interaction}).
+ only three kinds of run-time boundaries (@figureref{fig:both:base-interaction}).
 A @emph[swrap] boundary inserts a higher-order check to support @|sdeep|
  types.
 A @emph[sscan] boundary validates a top-level shape for @|sshallow| code.
 Lastly, a @emph[snoop] boundary does nothing.
-@Sectionref{sec:both:model:theorems} proves that these checks are strong enough to provide
+@Sectionref{sec:both:model:theorems} proves that these checks are strong enough to realize
  @|sshallow| types that satisfy shape-soundness and @|sdeep| types that
  satisfy complete monitoring.
 @; An interesting future challenge is whether checks can be systematically weakened;
@@ -120,9 +120,10 @@ The simple expressions are function application (@${\eappu{\ssurface}{\ssurface}
 Functions come in three flavors:
  an untyped function has no type annotation (@${\efun{\svar}{\ssurface}}),
  a @|sdeep|-typed function has a type annotation (@${\efun{\tann{\svar}{\stype}}{\ssurface}}),
- and a @|sshallow|-typed function has an underline type annotation (@${\efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}}).
-The underline simplifies proofs, and serves as a hint to readers that
+ and a @|sshallow|-typed function has an underlined type annotation (@${\efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}}).
+The underline mark simplifies proofs, and serves as a hint to readers that
  only the top-level shape of this type is guaranteed at run-time.
+It is @emph{not} a meta-function.
 Types (@${\stype}) express natural numbers (@${\tnat}),
  integers (@${\tint}),
  pairs (@${\tpair{\stype}{\stype}}),
@@ -149,14 +150,12 @@ In principle, the surface language comes with three typing judgments
  to recognize @|sdeep|, @|sshallow|, and untyped code.
 These judgments are mutually recursive at module-boundary terms.
 To keep things simple, however, @figure-ref{fig:both:surface-type}
- presents one judgment that supports three possible conclusions.
+ presents one judgment (@${\stypeenv \sST \sexpr : \stspec})
+ that supports three possible conclusions.
 A conclusion (@${\stspec}) is one of:
  the uni-type @${\tdyn} of untyped code,
  a type @${\stype} for @|sdeep|-typed code,
  or a decorated type @${\tfloor{\stype}} for @|sshallow| code.
-Note that a decorated type contains a full type;
- for example, @${\tfloor{\tfun{\tint}{\tint}}} is valid and
- @${\tfloor{\kfun}} is not.
 The notation is again a hint.
 A decorated type is equal to a normal type during static type checking,
  but makes a weaker statement about program behavior.
@@ -463,7 +462,7 @@ If anything, the only surprise is that one module may contain another with
 The evaluation syntax removes the declarative parts of the surface syntax
  and adds tools for enforcing types.
 First to go are the module boundary expressions, which express a desire
- for @|sdeep| or @|sshallow| or no types.
+ for a style of type enforcement.
 Instead, the evaluation syntax has three kinds of run-time check expression:
  a @|swrap| boundary fully enforces a type, perhaps with a guard wrapper (@${\emon{\stype}{\svalue}});
  a @|sscan| boundary checks a type-shape (@${\sshape}),
@@ -485,7 +484,7 @@ A @${\swraperror} arises when a @|swrap| boundary receives invalid input,
 The final error, @${\stagerror}, is the result of a malformed term that cannot
  reduce further.
 Such errors can easily occur in untyped code without any boundaries;
- for instance, the application of a number (@${\eappu{2}{4}}) is malformed.
+ for instance, the application of a number (@${\eappu{2~}{4}}) signals a tag error.
 Reduction in typed code, whether @|sdeep| or @|sshallow|, should never raise a
  tag error.
 
@@ -917,7 +916,7 @@ The completion rules shown in @figureref["fig:both:completion1" "fig:both:comple
 }
 ]
 @|noindent|@Figureref{fig:both:completion1} in particular shows how surface
- functions translate to evaluation functions and how applications translate.
+ functions translate to evaluation syntax functions and how applications translate.
 For @|sdeep| and @|suntyped| code, the completion of an application is simply
  the completion of its subexpressions.
 For @|sshallow| code, this elimination form requires a @|sscan| check to
@@ -932,16 +931,15 @@ This model, however, gets an implicit domain check thanks to cooperation
  from the upcoming semantics.
 The application of a @|sshallow|-typed function always @|sscan|s the
  argument before substituting into the function body (@sectionref{sec:both:model:reduction}).
-Arguably, this is a poor choice.
-It does simplify the model and proof details regarding substitution,
- but the lack of an explicit domain check means that the model cannot test
- whether some of these checks can be safely removed.
+This design simplifies the model and proof details regarding substitution,
+ but the lack of an explicit domain check means that the model cannot
+ support a pass that eliminates redundant checks.
 
 @Figure-ref{fig:both:completion2} presents the completion rules for module
  boundaries.
 Aside from the self-boundaries, the picture in @figure-ref{fig:both:base-interaction}
  is an accurate summary of these rules.
-Each module is a channel of communication between a context and the module.
+Each module represents a channel of communication between a context and the inside of the module.
 The module declares its type discipline and the context's style is clear
  from the conclusion of the surface typing judgment.
 To protect against mis-communications, the side with the stronger type requirements
@@ -1129,7 +1127,7 @@ In fact, these boundaries are safe @|snoop|s because @|sshallow| pre-emptively
 
 @subsection[#:tag "sec:both:model:reduction"]{Reduction Relation}
 
-The semantics of the evaluation syntax is based on one notion of reduction.
+The semantics of the evaluation syntax is based on one notion of reduction (@figure-ref{fig:both:rr}).
 @; ... like how MT reuses host reduction, but don't get too excited we still play tricks with transient
 Aside from the domain checks for @|sshallow|-typed functions, reduction proceeds
  in a standard, untyped fashion.
@@ -1284,7 +1282,7 @@ Most terms may have zero or more labels.
 Boundary terms are an exception;
  a @${\swrap}, @${\sscan}, or @${\snoop} boundary must have at least one label
  around its subexpression.
-The notation @${\obbars{\sexpr_0}{\sownerlist_0}} matches a sequence of labels
+The notation @${\obbars{\sexpr_0}{\sownerlist_0}} matches an expressiow with a sequence of labels
  (@${\sownerlist_0}).
 
 An ownership label @${\sowner_0} carries two pieces of information.
@@ -1502,7 +1500,7 @@ Complete monitoring asks whether single-owner consistency is an invariant.
 
 The statement of type soundness relies on one new notation and a family of
  metafunctions.
-The notation @${\ssurface_0 \srr \sexpr_0} defines evalution for surface
+The notation @${\ssurface_0 \srr \sexpr_0} defines evaluation for surface
  expressions; the meaning is that @${\ssurface_0} is well-typed somehow
  (@${\fexists{\stspec}{\vdash \ssurface_0 : \stspec}}),
  compiles to an evaluation expression (@${\vdash \ssurface_0 : \stspec \scompile \sexpr_1}),
@@ -1516,7 +1514,7 @@ The others are simple: @${\stypemapzero} maps all types to @${\tdyn}
 These tools enable a concise, parameterized statement of type soundness.
 
 @exact|{
-\begin{definition}[TS$(\sX,\stypemap)$]
+\begin{definition}[TS$(\stypemap)$]
   Language\ $\sX$
   satisfies\ $\fTS{\stypemap}$
   if for all\ $\ssurface_0$
@@ -1547,8 +1545,8 @@ These tools enable a concise, parameterized statement of type soundness.
 
 Complete monitoring is technically a statement about labeled expressions
  and a label-propagating reduction relation.
-But because the propagating reduction is derived from the basic reduction
- relation is a straightforward manner, our theorem statement uses the
+But, because the propagating reduction is derived from the basic reduction
+ relation in a straightforward manner, our theorem statement uses the
  basic symbol (@${\srr}).
 Likewise, both @${\sexpr_0} and @${\sexpr_1} refer to a labeled variant
  of an evaluation-language expression.
@@ -1572,7 +1570,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
   \item[Case:]
     \(\obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\stagerror}{\sowner_1}\)
   \item[]
-    QED by the definition, \(\sowner_1; \cdot \sWL \obars{\stagerror}{\sowner_1}\).
+    by the definition, \(\sowner_1; \cdot \sWL \obars{\stagerror}{\sowner_1}\).
 
   \item[Case:]
     \(\obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obbars{\sdelta(\sunop, \svalue_0)}{\fconcat{\sownerlist_0}{\sowner_1}}\)
@@ -1581,27 +1579,29 @@ If no such labeling exist for a term, then the theorem holds vacuously.
     \item
       $\sownerlist_0$ is either all \sdeep{} labels or a mix of \sshallow{} and \suntyped{}, by single-owner consistency of the redex.
     \item
+      similarly, $\sowner_1$ must match $\sownerlist_0$
+    \item
       $\svalue_0$ is a pair, because $\sdelta$ is defined on it.
     \item
       both components of $\svalue_0$ are well-labeled, again by single-owner consistency on the redex.
     \item
-      QED by the definition of $\sdelta$.
+      by the definition of $\sdelta$.
     \end{enumerate}
 
   \item[Case:]
     \(\obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2} \snr \obars{\stagerror}{\sowner_2}\)
   \item[]
-    QED by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2} \snr \obars{\sdelta(\sbinop, \svalue_0, \svalue_1)}{\sowner_2}\)
   \item[]
-    QED by the definition of $\sWL$ and $\sdelta$; note that the binary operators are not elimination forms.
+    by the definition of $\sWL$ and $\sdelta$; note that the binary operators are not elimination forms.
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\svalue_0}{\sownerlist_0}}{\svalue_1}}{\sowner_1} \snr \obars{\stagerror}{\sowner_1}\)
   \item[]
-    QED by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\efun{\svar_0}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
@@ -1616,23 +1616,23 @@ If no such labeling exist for a term, then the theorem holds vacuously.
     \item
       $\flast{\sownerlist_0}; \cdot \sWL \svar_0$ for each occurrence of $\svar_0$ in $\sexpr_0$, by single-owner consistency of the redex.
     \item
-      QED by a substitution lemma.
+      by a substitution lemma.
     \end{enumerate}
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
-    QED, similar to the previous case.
+    similar to the previous case.
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obars{\sscanerror}{\sowner_1}\)
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1} \snr \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
-    QED, similar to the other substitution cases.
+    similar to the other substitution cases.
 
   \item[Case:]
     \(\obars{\eappu{\obbars{\emon{\tfun{\stype_0}{\stype_1}}{\obars{\svalue_0}{\sowner_0}}}{\sownerlist_1}}{\svalue_1}}{\sowner_2} \snr\)
@@ -1646,47 +1646,47 @@ If no such labeling exist for a term, then the theorem holds vacuously.
     \item
       $\sownerlist_1$ is either all \sdeep{} or a mix of \sshallow{} and \suntyped{}, again by the redex.
     \item
-      QED, by the definition of $\sWL$.
+      by the definition of $\sWL$.
     \end{enumerate}
 
   \item[Case:]
     \(\obars{\enoop{\obbars{\svalue_0}}{\sownerlist_0}}{\sowner_1} \snr \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
-    QED, by the definition of $\scompile$, because a $\snoop{}$ boundary connects either:
+    by the definition of $\scompile$, because a $\snoop{}$ boundary connects either:
      two \sdeep{} components, two \sshallow{} components, two \suntyped{} components, or one \sshallow{} and one \suntyped{} component.
 
   \item[Case:]
     \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\sscanerror}{\sowner_1}\)
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \fconcat{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
-    QED, by the definition of $\scompile$, because a $\sscan{}$ boundary only links an \suntyped{} component to a \sshallow{} component.
+    by the definition of $\scompile$, because a $\sscan{}$ boundary only links an \suntyped{} component to a \sshallow{} component.
 
   \item[Case:]
     \(\obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\swraperror}{\sowner_1}\)
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\ewrap{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\emon{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}\)
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \item[Case:]
     \(\obars{\ewrap{\tpair{\stype_0}{\stype_1}}{\obbars{\epair{\svalue_0}{\svalue_1}}{\sownerlist_0}}}{\sowner_1} \snr\)
     \\\qquad\(\obars{\epair{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\ewrap{\stype_1}{\obbars{\svalue_1}{\sownerlist_0}}}}{\sowner_1}\)
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
     Note that the rule moves the elements of the pair in the redex into a new pair in the contractum.
 
   \item[Case:]
   \(\obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obars{\svalue_0}{\sowner_1}\)
   \\ where $\stype_0 \in \tint \cup \tnat$ and $\fshallow{\stype_0}{\svalue_0}$ 
   \item[]
-    QED, by the definition of $\sWL$.
+    by the definition of $\sWL$.
 
   \end{description}
 \end{proof}
@@ -1860,7 +1860,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;\end{lemma}
 @;}|
 
-@subsection[#:tag "sec:both:model:nonopt"]{Failed Attempt to Optimize}
+@subsection[#:tag "sec:both:model:nonopt"]{Potential Attempt to Optimize}
 
 @; talk about with-boundary model, explain HLU-interactions, why failed,
 @;   how to overcome maybe
@@ -1882,7 +1882,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 
 Although safe, the model's approach to @|sdeep| types is surprisingly
  expensive.
-Even boundary to @|sdeep| code gets protected with a @|swrap| check (@figureref{fig:both:base-interaction}).
+Every boundary to @|sdeep| code gets protected with a @|swrap| check (@figureref{fig:both:base-interaction}).
 For boundaries between @|sdeep| and @|suntyped| this is no surprise, because
  the @|suntyped| is free to do just about anything.
 But for @|sshallow| code, one would hope to get away with a less expensive check.
@@ -1900,7 +1900,7 @@ Likewise, @|sdeep| can trust an import if the value was never handled or influen
  this strategy; the @|sdeep|--@|suntyped| and @|sshallow|--@|suntyped| boundaries
  are unaffected.
 Note, however, that determining whether a value interacts with @|suntyped|
- code requires a careful static analysis.
+ code requires a careful analysis.
 Developing a correct analysis that runs quickly is a research challenge in
  itself.
 
@@ -1921,14 +1921,15 @@ Ideally, this strategy can work with an escape analysis to avoid wrapping
 The challenge here is to design an escape analysis and to add wrapper-making
  code to @|sshallow| without losing the expressiveness that @|stransient| gains
  by avoiding wrappers altogether.
-For first-order interactions, things are not so bad.
-@|sShallow| can be careful about the identifiers that it sends to @|suntyped| code.
-Higher-order communication is the real source of difficulties; for example,
+For first-order interactions,
+ @|sShallow| can be careful about the identifiers that it sends to @|suntyped| code.
+Higher-order communication is the real source of difficulties.
+For example,
  if @|sshallow| imports an @|suntyped| map function, then @|sshallow| must be
  prepared to wrap every function that it sends to map just in case such a function
  is @|sdeep|-typed.
 
-If a language can create wrapper in @|sshallow| code, however, then the
+If a language can create wrappers in @|sshallow| code, however, then the
  @exact{\fname} semantics (@chapter-ref{chap:design}) may be a better fit than @|sTransient|.
 @|sShallow| types via @exact{\fname} do not require shape checks throughout
  typed code, and the 1-level wrappers can dynamically cooperate with @|sdeep|-wrapped
@@ -1949,7 +1950,7 @@ The implementation of @|sShallow| Racket begins with two new @tt{#lang}
  languages to communicate the options available to programmers.
 @itemlist[
 @item{
-  Programs that start with @tt{#lang typed/racket} continue to use @|sdeep| types,
+  Modules that start with @tt{#lang typed/racket} continue to use @|sdeep| types,
    same as earlier versions of Typed Racket;
 }
 @item{
@@ -1958,21 +1959,21 @@ The implementation of @|sShallow| Racket begins with two new @tt{#lang}
 @item{
   and @tt{#lang typed/racket/shallow} provides @|sshallow| types.
 }]
-@|noindent|All three languages begin by invoking the same type checker.
+@|noindent|All three languages invoke the same type checker.
 At steps where @|sdeep| and @|sshallow| disagree,
  the compiler queries the current language to proceed.
 For example, the type-directed optimizer checks that it has @|sdeep| types
  before rewriting code based on the @|sdeep| soundness guarantee.
 @; Such queries are made possible by a module-level variable.
 
-Many aspects of the modified compiler use a similar, one-or-the-other strategy
+Many parts of the modified compiler use a similar, one-or-the-other strategy
  to handle @|sdeep| and @|sshallow| types.
 This section deals with the more challenging aspects.
 Sharing variables between @|sdeep| and @|sshallow| required changes to
  type-lookup and wrapper generation (@sectionref{sec:both:impl:code}).
-Sharing syntax will require further changes; for now, typed syntax can only
+Sharing macros requires further changes; for now, @|sdeep|-typed syntax can only
  be re-used through unsafe mechanisms (@sectionref{sec:both:impl:code}).
-Lastly, Typed Racket has accumulated a small API to give programmers control
+Lastly, Typed Racket has a small API that gives programmers control
  over the @|sdeep| type enforcement strategy.
 This API needed generalizations to handle @|sshallow| types (@sectionref{sec:both:impl:tu}).
 
@@ -1980,14 +1981,14 @@ This API needed generalizations to handle @|sshallow| types (@sectionref{sec:bot
 @subsection[#:tag "sec:both:impl:code"]{@|sDeep| and @|sShallow| Interaction}
 
 Racket supports separate compilation.
-Each module in a program gets compiled individually so that other
- programs can re-use the output.
+Each module in a program gets compiled to a core language individually, and
+ other modules can re-use the output.
 Typed Racket cooperates with the separate compilation protocol by serializing
  the results of type checking.
 A well-typed module compiles to untyped code (with appropriate contracts)
  and a local type environment.
 When one @|sdeep| module imports from another, it can find the type of the
- imported identifier in the deserialized type environment.
+ imported identifier in the type environment.
 
 At first glance, it appears that @|sshallow| code can use the same protocol
  to find the type of @|sdeep| imports.
@@ -1996,8 +1997,8 @@ When @|sdeep| wants to provide an identifier, it really provides a piece of
  syntax called a rename transformer.
 These transformers expand to one of two identifiers depending on where they
  appear: @|sdeep|-typed code gets the original identifier and can easily
- look up the type, but @|suntyped| and @|sshallow| code gets a wrapped
- version of the original.
+ look up its type, but @|suntyped| and @|sshallow| code gets a wrapped
+ version.
 The wrapper causes a direct type lookup to fail.
 
 For @|sdeep|-to-@|sshallow| exports, the solution is to modify
@@ -2009,32 +2010,34 @@ At compile time (and only then), a wrapped identifier is associated with
 The @|sshallow| type checker looks out for these wrappers and uncovers
  the originals as needed.
 
-@|sShallow|-to-@|sdeep| exports use an opposite method.
+@|sShallow|-to-@|sdeep| exports use a dual method.
 Like @|sdeep|, a @|sshallow| module provides only rename transformers.
 These expand to the original identifier in other @|sshallow| and @|suntyped|
- code; the original is associated with serialized type information.
+ code; the original is associated with type information.
 For @|sdeep| clients, the transformers expand to a wrapped identifier.
 Consequently, the @|sdeep| type checker watches for ``untyped'' wrappers and
- tests whether there is a serialized type underneath.
+ tests whether there is an available type.
 Such types allow static type checks to succeed, and at run-time the wrapper
  keeps @|sdeep| code safe.
 
 A surprising consequence of the final protocol is that a @|sshallow| module must
  be prepared to create wrappers for its exports.
 The wrapper-making code is generated during compilation, at the end of
- type checking, but does not run until needed by a @|sdeep| client.
+ type checking, but it does not run until needed by a @|sdeep| client.
 In this way, only @|sdeep| code appears to suffer from the expressiveness
  limits of wrappers.
 
 
 @subsection[#:tag "sec:both:impl:syntax"]{Syntax Re-Use}
 
-@|sShallow| code cannot yet use @|sdeep| macros.
-Re-use is desirable to avoid copying code, but requires a static analysis
- to avoid opening a soundness hole.
+@|sShallow| code cannot use @|sdeep| macros.
+Re-use is desirable to avoid copying code, but it requires a static analysis
+ to enforce soundness.
 This section explains the problem and suggests requirements for a solution.
 
-A simple, unsafe macro applies a typed function @tt{f} to an input:
+To appreciate the problem, consider the following simple macro.
+This macro applies a a typed function @tt{f} to an input, and is consequently
+ unsafe:
 
 @typed-codeblock['("(define-syntax-rule (call-f x) (f x))")]
 
@@ -2044,16 +2047,15 @@ Unless @tt{f} makes no assumptions about its input, such values can break
  the @|sdeep| soundness guarantee and lead to dangerous results in optimized
  code.
 
-One fix idea is to put a contract around every @|sdeep| identifier that
+One possible fix is to put a contract around every @|sdeep| identifier that
  appears in a macro.
-Doing so would require one analysis to find out which contracts are needed,
- a second analysis to install the contracts (ideally without repeats),
- and a way to avoid the contracts if the macro goes only to @|sdeep| clients.
+Doing so would require an analysis to find out which contracts are needed,
+ and a second analysis to install the contracts (ideally without repeats).
+It should also be possible to avoid the contracts if the macro goes only to @|sdeep| clients.
 These are major changes.
 
-A more realistic option is to statically check whether a macro is safe to
+Another possibility is to statically check whether a macro is safe to
  export.
-The @tt{call-f} macro above is unsafe.
 Safe macros appear, for example, in the typed compatibility layer for the
  RackUnit testing library.
 RackUnit is an untyped library that exports some functions and some macros.
@@ -2099,9 +2101,9 @@ Third, @tt{parameterize} comes from untyped Racket.
 @;      "Correct form is (test-begin expr ...)"
 @;      stx)]))
 
-Currently, a @|sdeep| library can enable syntax re-use by disabling the optimizer
+Currently, the author of a @|sdeep| library can enable syntax re-use by disabling the optimizer
  and unsafely providing macros.
-This work-around requires a manual inspection, but is more appealing than
+This work-around requires a manual inspection, but it is more appealing than
  forking the RackUnit library and asking programmers to choose the correct version.
 
 
@@ -2110,13 +2112,13 @@ This work-around requires a manual inspection, but is more appealing than
 
 Typed Racket has a small API to let programmers control boundaries
  between @|sdeep| and @|suntyped| code.
-The API arose over time, as language users discovered challenges.
-Two forms in this API can currently lead to surprising results now that
- @|sdeep| and @|sshallow| code can interact.
+The API arose over time, as programmers discovered challenges.
+Two forms in this API can lead to surprising results due to the existence of
+ @|sshallow| code.
 
 @; require/untyped-contract
 
-First is @tt{require/untyped-contract}.
+The first problem concerns @tt{require/untyped-contract}.
 This form lets untyped code import a typed identifier whose precise type
  cannot be expressed with a @|sdeep| contract.
 Users supply a supertype of the precise type and @|sDeep| Racket uses this
@@ -2152,9 +2154,8 @@ For @|sdeep| code, the choice is convenient because more programs can type-check
  using the supertype.
 For @|sshallow|, though, the convenience disappears.
 A @|sshallow| client must receive the wrapped version of the identifier,
- which means @|sshallow| must behave in accordance with the supertype.
-Because of this fact, the @|sshallow| type checker uses the supertype as
- well.
+ which means @|sshallow| code must behave in accordance with the supertype;
+ hence, the @|sshallow| type checker uses the supertype as well.
 Consequently, some well-typed @|sdeep| programs raise type errors upon switching
  to @|sshallow| types.
 
@@ -2163,7 +2164,7 @@ Consequently, some well-typed @|sdeep| programs raise type errors upon switching
 
 The second problematic form is @tt{define-typed/untyped-identifier},
  which creates a new identifier from two old ones.
-The following example defines an example function @tt{f} from two other names:
+The following example defines @tt{f} from two other names:
 
 @exact{\smallskip}
 @typed-codeblock['(
@@ -2171,20 +2172,20 @@ The following example defines an example function @tt{f} from two other names:
   "  typed-f"
   "  untyped-f)")]
 
-@|noindent|The meaning of the new @tt{f} depends on the context it appears.
+@|noindent|The meaning of the new @tt{f} depends on the context in which it appears.
 In typed code, @tt{f} expands to @tt{typed-f}.
 In untyped code, an @tt{f} is a synonym for @tt{untyped-f}.
 
 The @tt{typed-f} is intended for @|sdeep|-typed code.
 It cannot be safely used in a @|sshallow| module because it may
- assume certain interactions.
+ assume type invariants.
 Consequently, @|sshallow| code gets the untyped id.
 This means, unfortunately, that changing a @|sdeep| module to @|sshallow|
  can raise a type checking error because occurrences of @tt{f} that expand to
  @tt{untyped-f} are plain, untyped identifiers.
 There is no way to uncover the type that a @tt{typed-f} would have, and
  anyway there is no guarantee that @tt{typed-f} and @tt{untyped-f} have
- similar behavior.
+ the same behavior.
 
 For now, such type errors call for programmer-supplied annotations in
  the @|sshallow| client code.
@@ -2251,13 +2252,12 @@ Worst of all, the wrappers that @|sDeep| inserts can change hehavior.
  "https://groups.google.com/g/racket-users/c/jtmVDFCGL28/m/jwl4hsjtBQAJ")]
 
 The @|sdeep| type named @tt{Any} is a normal ``top'' type at compile-time,
- but is surprisingly strict at run-time.
+ but it is surprisingly strict at run-time.
 For compile-time type checking, @tt{Any} is a supertype of every other
- type and supports very few elimination forms.
-You can send any value to a function that expects an @tt{Any} input,
- and the function needs to ask occurrence-typing questions about your value
+ type.
+A function that expects an @tt{Any} input must ask occurrence-typing questions
  before it can do anything to it.
-At run-time, the @tt{Any} type is enforced with a wrapper.
+At run-time, the @tt{Any} type is enforced with an opaque wrapper.
 
 @figure*[
   "fig:both:any-wrap"
@@ -2269,16 +2269,17 @@ The wrapper is a surprise for developers who expect programs such
  as @figure-ref{fig:both:any-wrap} to run without error.
 This program defines a mutable box in typed code,
  assigns the @tt{Any} type to the box,
- and sends it to untyped code that attempts to set the box.
+ and sends it to untyped code.
+The untyped module attempts to set the box.
 @|sDeep| Racket raises an exception when untyped code tries to modify the box.
 Unfortunately for the programmer, this error is essential for soundness.
 If untyped code put an integer in the box, then later typed uses of the
-original box @tt{b} would give a wrong result.
+ box would give a result that is inconsistent with its type.
 
 @|sShallow| Racket runs the program without error because of its delayed
  checking strategy.
-If @|sshallow| code tries to read a symbol from the original
- box @tt{b}, then that access will raise an error.
+If @|sshallow|-typed code tries to read a symbol from the
+ box, then that access will raise an error.
 Until then, the program runs.
 
 
@@ -2304,7 +2305,7 @@ Wrappers do not exist for some values, causing @|sDeep| to reject code
           "(Prompt-Tag T T')" "(Syntax T)" "(Thread-Cell T)" "(Weak-Box T)"))
         (num-missing (length missing-wrapper*)))
   @elem{
-In total, there are @integer->word[num-missing] higher-order types that
+In total, there are @integer->word[num-missing] types that
  suffer from this issue.
 Implementing wrappers for these types is a challenge.
 For example, syntax objects can contain mutable data and therefore need wrappers.
@@ -2355,13 +2356,15 @@ Unfortunately, these input wrappers change the behavior of @tt{index-of};
 @; - ?? 2-way lattice? 3-way
 @; - ?? programs where mix is better than natural-only or transient-only
 
-Now that programmers can choose between @|sdeep| and @|sshallow|,
- the tradeoffs evident in @chapter-ref{chap:transient} disappear.
+With the @|sShallow| Racket implementation, the tradeoffs of @chapter-ref{chap:transient} disappear.
 For all our benchmarks, the choice improves the worst-case overhead of
  type boundaries (@section-ref{sec:both:perf:worst}).
 By implication, Typed Racket can offer a new migration story:
+
+@nested-inset[@emph{
  use @|sshallow| types when converting an untyped application and switch to
- @|sdeep| after the boundaries stabilize.
+ @|sdeep| types after the boundaries stabilize.}]
+
 Mixing @|sdeep| and @|sshallow| types in one program offers new ways of
  improving performance (@section-ref{sec:both:perf:both}).
 @; One especially promising direction is to use @|sshallow| types in
@@ -2386,7 +2389,7 @@ Mixing @|sdeep| and @|sshallow| types in one program offers new ways of
 Now that Racket programmers can easily switch between @|sdeep| and @|sshallow|
  types, worst-case overheads improve by orders of magnitude.
 Before, the cost of @|sdeep| types overwhelmed many configurations.
-After, the costs can be avoided by changing the first line (the language)
+After, the costs can be avoided by changing the first line (the language specification)
  of the typed modules.
 
 @Figure-ref{fig:both:mixed-worst-table} quantifies the improvements in the
@@ -2442,8 +2445,8 @@ When the library code uses @|sdeep| types, the original client runs with
 
 Changing the library to use @|sshallow| types improves
  the gap between an untyped and @|sdeep|-typed client to
- @~a[shallow-delta]x and makes the untyped client run faster a @|sdeep|-typed version.
-This fast configuration is about @~a[ds-fast]x slower that the fast
+ @~a[shallow-delta]x.
+This fast untyped configuration is about @~a[ds-fast]x slower than the fast
  @|sdeep|-@|sdeep| configuration, but the worst-case is @~a[ds-slow]x
  faster (@~a[ds-slow-sec] seconds) than before.
 Overall, the @|sshallow| library is a better tradeoff for @bm{synth}.
@@ -2502,6 +2505,15 @@ Such libraries are ideal, but until we have them for the next data exchange
  format (SQL, XML, YAML, ...) @|sshallow| types get the job with the parsers
  that are available today.
  
+@subsubsection[#:tag "sec:both:perf:release"]{Release Information}
+
+@|sShallow| Typed Racket is publicly available in a pull request to Typed Racket:
+@github-pull["racket" "typed-racket" "948"].
+I expect to merge the pull request early in 2021.
+After the release, I look forward to collecting more anecdotal experiences
+ with the system.
+
+
 
 @;@subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
 @;

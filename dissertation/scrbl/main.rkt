@@ -37,6 +37,7 @@
   bm
   codett
   code-nested
+  nested-inset
   id
   library
   Section-ref
