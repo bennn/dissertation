@@ -8,9 +8,8 @@ These design efforts explore a range of goals;
  others strengthen untyped code with a tailor-made type system.
 On the other hand, experience with type-sound designs has revealed major challenges.
 We do not know how to measure the performance costs of sound interaction.
-Nor do we have criteria for ``true'' mixed-typed soundness; indeed,
- a normal type soundness theorem says nothing about whether untyped code
- can trust the types.
+Nor do we have criteria that distinguish ``truly sound'' mixed-typed languages
+ from others that ignore type obligations in untyped code.
 
 In this dissertation, I introduce methods for assessing
  mixed-typed languages and bring order to the design space.
