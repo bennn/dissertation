@@ -299,7 +299,7 @@ The blue curve for v@|lattice-version| is higher, showing a relative improvement
 ])
 
 
-@subsection{By Definition}
+@subsection[#:tag "chap:performance:definition"]{By Definition}
 
 The exhaustive evaluation method applies to other mixed-typed languages
  as well as Typed Racket.

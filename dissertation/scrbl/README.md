@@ -76,10 +76,10 @@ MF edits, leftover
 - [ ] (p150) 6 redex model
 - [ ] (p156) 6 matrix, not rules
 - [ ] (p157) 6 labeled semantics ... but comes about in CM proof
+       YES really need the labeled semantics
 - [ ] (p161) 6 labeled red, what symbol?
 - [ ] (p163) 6 lemmas, explain where needed
 - [ ] (p167) 6 why can shallow be aware of deep? articulate benefits
-- [ ] (pX)
 - [ ] (pX)
 
 #### dependencies
