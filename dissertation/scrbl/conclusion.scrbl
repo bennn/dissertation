@@ -17,7 +17,7 @@ The benefits improve all three main dimensions of a mixed-typed programming:
   Flipping between \sdeep{} and \sshallow{} can improve performance.
   In fully-typed programs, \sdeep{} types have zero cost---and often run faster
    due to type-directed optimizations.
-  In mixed-typed programs, \sshallow{} avoids the tremendous overheads
+  In mixed programs, \sshallow{} avoids the tremendous overheads
    of \sdeep{} type boundaries.
 \item \emph{People}:
   \sShallow{} types can express new combinations of typed and untyped code
@@ -52,15 +52,18 @@ Our application of these methods leads to the most precise
  characterization of designs in the literature.
 }]
 
-Overall, my dissertation has revealed a lot about what it means to offer a
- practical mixed-typed language.
-The step from @emph{untyped or typed} to @emph{mixed-typed} has presented a
+Overall, my dissertation brings us closer to useful mixed-typed languages.
+The step from @emph{untyped-or-typed} to @emph{mixed-typed} has presented a
  serious challenge to the conventional wisdom about static types.
 Standard techniques that realize strong guarantees and fast performance in a fully-typed
  setting yield weaker guarantees and slower running times in mixed programs.
+In the words of one Racket programmer, mixed languages ``seemed to combine the
+ best of both worlds .... but in practice seems to combine mainly the
+ downsides'' because of friction between static and dynamic typing.
 Methods and measurements have improved our understanding of the design space
  and articulated the benefits of combining @|sdeep| and @|sshallow|
- types in a mixed-typed language.
+ types.
+With both styles available, programmers can avoid severe roadblocks.
 Yet much remains to be done, especially to see how programmers comprehend
  the new types and leverage the new choices.
 
