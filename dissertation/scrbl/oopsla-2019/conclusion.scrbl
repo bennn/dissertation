@@ -34,7 +34,7 @@ More precisely, this chapter analyzes six distinct semantics via four properties
     Type soundness is a relatively weak property for mixed-typed programs;
      it determines whether typed code can trust its own types.
     Except for the @|ename| semantics, which does nothing to enforce types,
-     type soundness does not clearly distinguish the various strategies (@exact{\remarkref{TS-not-enough}}).
+     type soundness does not clearly distinguish the various strategies.
 
   }@item{
     Complete monitoring is a stronger property, adapted from the literature on
@@ -94,7 +94,7 @@ Perhaps a future design can strengthen the wrapper-free guarantees.
    \medskip
    \hfill
      \begin{tabular}{c@{~~}l}
-     $\dagger$ & {indirectly satisfies $\propts{\sidproj}$ by simulation to $\ascr{}$ (\theoremref{thm:TAsim})}
+     $\dagger$ & {note that $\tscr{}$ is bisimilar to $\ascr{}$ (\theoremref{thm:TAsim})}
      \\
      $\ddagger$ & {satisfiable by adding $\ascr{}$-style trace wrappers, see appendix}\!\!\!\!
      \end{tabular}

@@ -2743,6 +2743,8 @@ This information leads to sound and complete blame messages.
    into one wrapper.
   \tname{} takes extra steps to place pre-values on the heap and to conservatively
    check the result of elimination forms.
+  In fact, @|aname| and @|tname| behave exactly the same aside from bookkeeping
+   to create wrappers and track blame.
 \end{proofsketch}
 }|
 
@@ -2765,30 +2767,6 @@ This information leads to sound and complete blame messages.
 
   \noindent{}Since ${{-4}}$ is an integer, \aname{} reduces to a value.
   \fname{} detects an error.
-\end{proofsketch}
-}|
-
-At first glance, @exact{\theoremref{thm:TAsim}} seems to contradict the type
- soundness results.
-Soundness for @|aname| guarantees full types whereas @|tname| predicts only type shapes
- (@${\propts{\sidproj}} vs. @${\propts{\stagproj}}).
-One would thus expect the shape-sound @|tname| to allow more behaviors, but the
- error equivalence theorem says that @|tname| and @|aname| reject exactly
- the same programs.
-
-The confusion arises because type soundness says little about behaviors.
-In fact, @|aname| and @|tname| behave exactly the same aside from bookkeeping
- to create wrappers and track blame.
-Consequently, we must admit that @|tname| is no less sound than @|aname|
- via an indirect argument.
-
-@exact|{
-\begin{remark}\label{TS-not-enough}
-  \tname{} satisfies the spirit of\/ $\propts{\sidproj}$.
-\end{remark}
-\begin{proofsketch}
-  \aname{} satisfies $\propts{\sidproj}$ (\theoremref{thm:A-TS}) and is
-   bisimilar to \tname{}, modulo wrappers and blame.
 \end{proofsketch}
 }|
 
