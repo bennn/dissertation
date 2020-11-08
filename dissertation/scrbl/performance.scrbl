@@ -567,8 +567,8 @@ My best-effort approach is to seek out programs that serve a realistic
 Several implement games, and re-play a game round.
 Others adapt library code with an example use.
 All of the forthcoming Typed Racket benchmarks follow this approach (@section-ref{sec:tr:benchmarks}).
-Many of the Reticulated benchmarks, however, come from prior work and
- adapt small benchmark scripts instead (@section-ref{sec:rp:benchmarks}).
+Many of the Reticulated benchmarks (@section-ref{sec:rp:benchmarks}), however, come from prior work and
+ are smaller scripts in the spirit of the Gabriel benchmarks@~cite{g-1985}.
 
 
 @subsection[#:tag "sec:conversion"]{From Programs to Benchmarks}
