@@ -2,6 +2,7 @@
 @(require greenman-thesis/oopsla-2019/main)
 
 @title[#:tag "sec:design:basic"]{Evaluation Framework}
+@latex-label{sec:design:basic}
 
 This section introduces the basic ideas of the evaluation framework;
  detailed formal definitions are deferred to @sectionref{sec:design:technical}.

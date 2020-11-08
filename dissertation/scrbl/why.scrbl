@@ -393,3 +393,25 @@ Micro/macro is a useful mnemonic for the first dimension,
  but it is more direct to talk about dynamic/non-dynamic and migratory/non-migratory
  as two choices in the design of a new mixed-typed language.
 
+
+@section[#:tag "sec:why:history"]{Recent History}
+
+@citet{t-thesis-2010} developed migratory typing alongside Typed Racket.
+The basic ideas arose from work on soft typing@~cite{f-thesis-1992,w-thesis-1994},
+ higher-order contracts@~cite{f-thesis-2002},
+ and modular set-based analysis@~cite{m-thesis-2006}.
+Subsequent work adapted migratory typing to
+ multi-paradigm language features:
+ compositional flow-based reasoning@~cite{tf-icfp-2010},
+ delimited continuations@~cite{tst-esop-2013},
+ variable-arity polymorphism@~cite{stf-esop-2009},
+ type-driven optimization@~cite{s-thesis-2015},
+ first-class classes@~cite{t-thesis-2016},
+ units (first-class modules)@~cite{f-thesis-2015},
+ and refinement types@~cite{k-thesis-2019}.
+Refer to @citet{tfffgksst-snapl-2017} for a ten-year retrospective.
+My dissertation adds one step to this lineage.
+I began by studying the most pressing challenge, performance costs, and
+ arrived at the combination of @|sdeep| and @|sshallow| types.
+
+
