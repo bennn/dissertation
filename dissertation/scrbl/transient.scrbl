@@ -292,6 +292,8 @@ The goal is to insert enough checks to create a target-language term with
 }
 }|
 
+@|noindent|@exact{\Lemmaref{lemma:both:completion}} adapts the theorem sketch to a model.
+
 The first benefit of this theorem is that it rules out nonsensical completions.
 By contrast, a type elaboration that converts all surface terms to the
  integer @${42} satisfies every theorem used to validate the original

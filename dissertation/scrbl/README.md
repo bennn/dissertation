@@ -24,8 +24,12 @@ TODO
 - [X] conclusion ... other chapters?
 - [X] HEY write the contributions, separate from thesis
       the CONTRIBUTIONS will survive need to applaud them
-- [ ] "methods" -> "method" goddammit I am the first with these great METHOD canonical,
-      you can improve but you will be second
+- [X] "methods" -> "method" goddammit I am the first with these great METHOD canonical,
+      you can improve but you will be second (abstract intro conclusion)
+- [ ] diss to committee
+
+HEY
+- [ ] perf from NSA
 
 Style
 - [ ] goddammit typed-color too dark in oopsla-2019/pict
@@ -34,7 +38,6 @@ Style
 - [ ] shallow/CACHE too big, why are files so huge?
       could zip them
 - [ ] hyperlinks broken because scribble labels
-- [ ] ABC00 cite style, like theory papers
 - [ ] paragraph style looks bad with subsections
 - [ ] why not scribble/text ???
 - [ ] color-code ideas:
@@ -43,44 +46,42 @@ Style
   - beyond : multi-color for typed components, depends on semantics
   - apply to figures in BOTH chapter
 - [ ] print "x" after overheads
-- [ ] too many exercises, looks like everything has holes, save those for end
+- [X] too many exercises, looks like everything has holes, save those for end
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [X] careful about common lisp characterization ... free to ignore, opt non-mand
 - [X] start every chapter with acks, papers, people
 - [ ] MF has boxes around hyperlinks why
 - [ ] soft typing, remove bullet points
-- [ ] 2.2.2 still awkward
+- [X] 2.2.2 still awkward
 - [ ] 2.2.3 very awkward ... when do I have time to fix?!
 
 MF edits, leftover
 - [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger
 - [ ] (p13) 3 novel configurations in between
 - [ ] (p14) 3 experience with TR section
-- [ ] (p45) 3 cache?
+- [X] (p45) 3 cache?
 - [ ] (p53) 4 think about solid vs dashed arrows
 - [ ] (p54) 4 specify error, in fig?
-- [ ] (p63) 4 how to add dynamic type, orthogonal
+- [X] (p63) 4 how to add dynamic type, orthogonal
 - [ ] (p64) 4 fix codeblock colors, use "a --" style with label on left at least
 - [ ] bring Deep and Shallow into chap 4
 - [ ] (p111) 4 conclusion, wrappers vs lambda
 - [ ] (p117) 5 move note to end? perf
 - [ ] (p119) 5 insert theorem completion correctness ... and a few others
-- [ ] (p120) 5 better road map .... move integrate blame/Perf explanation
-- [ ] (p124) 5 how many actions?
+- [X] (p120) 5 better road map .... move integrate blame/Perf explanation
+- [X] (p124) 5 how many actions?
 - [ ] (p125) 5 correctness, careful
-- [ ] (p125) 5 Along the way
+- [X] (p125) 5 Along the way
 - [ ] (p129) 5 function clones ... N entry points
 - [ ] (p130) 5 "protecting functions ..." gone, is it graceful?
-- [ ] Q (p132) 5 remove bonus fixes?
+- [X] Q (p132) 5 remove bonus fixes?
 - [ ] Q (p148) 6 "not readable" ?
-- [ ] (p150) 6 redex model
+- [X] (p150) 6 redex model
 - [ ] (p156) 6 matrix, not rules
-- [ ] (p157) 6 labeled semantics ... but comes about in CM proof
-       YES really need the labeled semantics
-- [ ] (p161) 6 labeled red, what symbol?
-- [ ] (p163) 6 lemmas, explain where needed
+- [X] (p157) 6 labeled semantics ... but comes about in CM proof YES really need the labeled semantics
+- [X] (p161) 6 labeled red, what symbol?
+- [X] (p163) 6 lemmas, explain where needed
 - [ ] (p167) 6 why can shallow be aware of deep? articulate benefits
-- [ ] (pX)
 
 #### dependencies
 

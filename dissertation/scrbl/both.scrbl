@@ -1629,6 +1629,8 @@ These tools enable a concise, parameterized statement of type soundness.
   \Lemmaref{lemma:both:completion} guarantees that the compiled form
    of the surface expression is well-typed.
   The rest follows from straightforward progress and preservation lemmas for the evaluation typing judgments.
+  \Lemmaref{lemma:both:delta} is essential to preservation for primitive operations.
+  Lemmas~\ref{lemma:both:su} and~\ref{lemma:both:boundary} are key aspects of preservation for boundary terms.
 \end{proof}
 }|
 
@@ -1781,7 +1783,6 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 \end{proof}
 }|
 
-
 @; @subsection[#:tag "sec:both:model:lemmas"]{Lemmas}
 
 @exact|{
@@ -1817,7 +1818,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;}|
 
 @exact|{
-\begin{lemma}[$\sdelta, \sDelta$ agreement]\leavevmode
+\begin{lemma}[$\sdelta, \sDelta$ agreement]\label{lemma:both:delta}\leavevmode
   \begin{itemize}
     \item
       If\ $~\sDelta(\sunop, \tdyn) = \tdyn$
@@ -1879,7 +1880,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;}|
 
 @exact|{
-\begin{lemma}
+\begin{lemma}\label{lemma:both:su}
   If\ $\sWTS \sexpr_0 : \sshape_0$
   then\ $\sWTU \sexpr_0 : \tdyn$
 \end{lemma}
@@ -1906,7 +1907,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;}|
 
 @exact|{
-\begin{lemma}[boundary-crossing]\leavevmode
+\begin{lemma}[boundary-crossing]\label{lemma:both:boundary}\leavevmode
   \begin{itemize}
     \item
       If\ $\vdash \svalue_0 : \stspec$
