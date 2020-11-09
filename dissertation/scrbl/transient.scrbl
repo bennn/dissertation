@@ -461,7 +461,7 @@ Additionally, the input function should point to this input list in case
 
 Blame in @|sShallow| Racket depends on literal syntax to decide when complex
  reasoning is needed.
-The original paper used the same method; primitive operations have tailored
+The original algorithm uses the same method; primitive operations have tailored
  bookkeeping and other function applications create link entries in a standard
  way@~cite{vss-popl-2017}.
 

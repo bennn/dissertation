@@ -217,7 +217,7 @@ CALLED OFF
 @;@subsection{@forigins{@|fname|}}
 @;
 @;@citet{g-popl-2015} introduces forgetful manifest contracts and proves
-@; type soundness; the extended version of the paper contains a detailed
+@; type soundness; the extended version contains a detailed
 @; discussion, including the observation that forgetful types cannot support
 @; abstraction and information hiding (@shorturl["https://" "arxiv.org/abs/1410.2813"]).
 @;@citet{cl-icfp-2017} present a forgetful and type sound semantics for a
