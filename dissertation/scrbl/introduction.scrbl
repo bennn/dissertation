@@ -75,7 +75,7 @@ My goal is to combine typed and untyped code in a @emph{migratory typing}
  system, in which types accommodate the grown idioms of an
  untyped host language (@chapter-ref{chap:why}).
 Languages that fail the expressiveness criteria, however, can still benefit
- from the results in later chapters.
+ from the results.
 @Chapter-ref{chap:performance} presents methods for evaluating performance
  and validates the methods through an empirical study of two migratory
  typing systems: Typed Racket and Reticulated Python.

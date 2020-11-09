@@ -437,7 +437,7 @@ For @|sShallow| with blame, however, trusted re-use leads to imprecise blame.
 @Figure-ref{fig:transient:blame:map} illustrates this phenomenon with a tiny example.
 The typed function at the top of this figure expects a list of numbers,
  applies a trivial @codett{map} to the list,
- and later finds a bad element in the mapped list.
+ and lastly finds a bad element in the mapped list.
 @|sTransient| blame should point back to the boundary between the typed
  function and the untyped list but cannot if @codett{map} does
  not update the blame map.

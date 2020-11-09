@@ -2555,7 +2555,7 @@ There are two crucial differences:
   }@item{
     At elimination forms, @|aname| checks only the context's type annotation.
     Suppose an untyped function enters typed code at one type and is
-     later used at a supertype:
+     used at a supertype:
      @exact{\\\hfill{}\qquad @${\eapp{\tint}{(\emon{\obnd{\sowner_0}{(\tfun{\tnat}{\tnat})}{\sowner_1}}{\efun{\svar_0}{{-7}}})}{2}} \hfill{}\\}
     @|aname| runs this application without error but @|fname| raises a boundary error.
   }]

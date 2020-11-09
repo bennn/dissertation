@@ -2194,7 +2194,7 @@ This program defines a mutable box in typed code,
 The untyped module attempts to set the box.
 @|sDeep| Racket raises an exception when untyped code tries to modify the box.
 Unfortunately for the programmer, this error is essential for soundness.
-If untyped code put an integer in the box, then later typed uses of the
+If untyped code put an integer in the box, then typed uses of the
  box would give a result that is inconsistent with its type.
 
 @|sShallow| Racket runs the program without error because of its delayed
