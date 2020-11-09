@@ -37,9 +37,8 @@ Note that @${\tdyn} is not the flexible dynamic type that is compatible with
 Consequently, there is no need for a type precision judgment in the surface language
  because all mixed-typed interactions occur through boundary expressions.
 How to add a dynamic type is a separate dimension that is orthogonal to the
- question of how to enforce types;
- whether or not a language has a dynamic type, our results
- apply to its type-enforcement strategy.
+ question of how to enforce types; with or without such a type,
+ our results apply to the language's type-enforcement strategy.
 Whether the dynamic type is useful is a question for another time@~citep{g-snapl-2019}.
 
 The core statically-typed (@${\svaluestat}) and dynamically-typed (@${\svaluedyn})

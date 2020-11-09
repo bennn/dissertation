@@ -1,8 +1,5 @@
 #lang greenman-thesis/include
 
-@; TODO
-@; - [ ] describe for-loop opt, other things to reduce cost ... contracts too
-
 @(require
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*
@@ -574,8 +571,8 @@ The developer needs to see both types because neither matches the actual nested 
 
 @|sShallow| Racket thus comes with an extensive action language to
  prevent imprecision.
-@Figure-ref{fig:transient:blame:path} lists a few actions, along with
- a brief interpretation.
+@Figure-ref{fig:transient:blame:path} presents a representative sample of actions
+ and a brief description of each.
 Function actions must handle multiple arguments, multiple results,
  methods, and overloadings.
 Data structures have tailored actions.
@@ -586,7 +583,7 @@ Lists, for example, require three kinds of actions:
  in each position.
 Finally, the @codett{noop} action adds a direct link
  to track a copy from one data structure to another (@codett{vector-copy!})
- or a wrapper (@codett{chaperone-procedure}).
+ or a wrapper.
 
 
 @subsection[#:tag "sec:transient:blame:types"]{Types at Runtime}
@@ -653,7 +650,7 @@ Additionally, the contract pass must rewrite all typed code with @|stransient|
  checks (@section-ref{sec:transient:defense}).
 The ``optimize'' pass must be restricted because it cannot rely on full types (@section-ref{sec:transient:optimize}).
 
-Along the way, the implementation effort brought a few surprises.
+The implementation effort brought a few surprises.
 Challenges with universal types and occurrence types cause the current
  @|sShallow| Racket to reject some well-typed code (@section-ref{sec:transient:surprise}).
 @|sDeep| Racket rejects the same programs.

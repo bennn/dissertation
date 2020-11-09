@@ -290,10 +290,8 @@ For human readers, they describe the high-level design of code.
 Even the original author of a function can benefit from reading the types
  after some time away from the codebase.
 For a compiler, annotations are hints about what the programmer expects.
-In languages that lack principal types, user-supplied annotations can resolve
- ambiguity.
-Additionally, any type error messages that can point to part of an annotation
- have a direct link to the programmer who needs to deal with the errors.
+Any type error messages that can point to part of an annotation
+ have a syntactic link to the programmer who needs to deal with the errors.
 
 
 @subsection[#:tag "why:mt-o3"]{MT-o3: sound types catch bugs}
