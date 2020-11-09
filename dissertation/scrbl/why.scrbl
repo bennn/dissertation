@@ -368,9 +368,9 @@ Both @|sdeep| and @|sshallow| types are acceptable, but nothing less.
 @subsubsection{Blame}
 
 Sound types catch bugs, but make no claims about actionable error outputs.
-Blame is an additional property geared toward useful errors
+Blame is an additional property geared to useful errors
  that tell a programmer where to begin debugging.
-To this end, a mixed-typed language should try to present relevant source
+To this end, a mixed-typed language should try to present meaningful source
  locations along with every run-time type mismatch error.
 
 

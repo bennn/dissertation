@@ -91,7 +91,7 @@ The design-space analysis motivates a compromise between two semantics:
 @Chapter-ref{chap:both} formally proves that @|sdeep| and @|sshallow|
  types can interoperate and reports the performance of a Typed Racket variant
  that supports both @|snatural| and @|stransient| behavior.
-The dissertation ends with a view toward future work (@chapter-ref{chap:future})
+The dissertation ends with a view to future work (@chapter-ref{chap:future})
  and reflections on the wider research context (@chapter-ref{chap:conclusion}).
 
 Overall, I present four major contributions:
