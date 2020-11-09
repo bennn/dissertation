@@ -55,5 +55,6 @@ Alan Kay
 
 Per Martin-Loef
 
+..... Stracheys first law
 
 
