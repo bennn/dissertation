@@ -46,9 +46,9 @@ An exhaustive method summarizes the complete dataset when feasible, and an
  approximate method gives an empirically-justified weakening otherwise.
 }
 @item{
-The design evaluation methods (@chapter-ref{chap:design}) rigorously assess the strengths
+The design evaluation method (@chapter-ref{chap:design}) rigorously assess the strengths
  and weaknesses of static types.
-Our application of these methods leads to the most precise
+Our application of this method leads to the most precise
  characterization of designs in the literature.
 }]
 

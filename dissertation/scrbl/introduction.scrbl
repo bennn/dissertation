@@ -47,7 +47,7 @@ Lacking an apples-to-apples comparison, it is impossible to decide whether
  a language has solved the performance question.
 
 The first half of this dissertation untangles the design space.
-I present methods to measure performance, methods to measure type guarantees,
+I present a method to measure performance, a method to measure type guarantees,
  and basic requirements concerning the expressiveness of such type systems.
 I apply these methods and conclude that there are two promising designs:
  @|sdeep| types via the @|snatural| semantics and @|sshallow| types via
@@ -76,8 +76,8 @@ My goal is to combine typed and untyped code in a @emph{migratory typing}
  untyped host language (@chapter-ref{chap:why}).
 Languages that fail the expressiveness criteria, however, can still benefit
  from the results.
-@Chapter-ref{chap:performance} presents methods for evaluating performance
- and validates the methods through an empirical study of two migratory
+@Chapter-ref{chap:performance} presents the first systematic method for evaluating performance
+ and validates this method through an empirical study of two migratory
  typing systems: Typed Racket and Reticulated Python.
 Both languages guarantee type soundness, but come with very different
  performance characteristics; more surpringly, they compute incompatible results for

@@ -1193,7 +1193,7 @@ The loss of wrappers implies a loss of full type soundness, complete monitoring,
  and correct blame.
 As compensation, @|sshallow| needs to demonstrate improved performance.
 
-This section applies the methods from @chapter-ref{chap:performance} to evaluate
+This section applies the method from @chapter-ref{chap:performance} to evaluate
  @|sShallow| Racket on the @|GTP| benchmarks.
 The granularity of the experiment is module-level, same as our @|sDeep| Racket
  experiment from @section-ref{sec:tr:evaluation}.

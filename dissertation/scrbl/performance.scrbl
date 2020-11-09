@@ -58,9 +58,9 @@ Others show only the performance of fully-typed code relative to fully-untyped
 But in their defense, the development of a performance method is a challenge
  in itself.
 
-This chapter presents systematic and scalable methods to assess the performance
+This chapter presents a systematic and scalable method to assess the performance
  of a mixed-typed language.
-The methods summarize performance for the exponentially-many ways that a programmer
+The method summarizes performance for the exponentially-many ways that a programmer
  can mix typed and untyped code by focusing on a binary quality measure.
 Informally, a mixture is good if runs within a user-supplied overhead limit.
 Random sampling can approximate the proportion of good mixtures for programs
@@ -1589,7 +1589,7 @@ Three have been noted above:
 @; -----------------------------------------------------------------------------
 @section{Additional Visualizations}
 
-The methods presented in this chapter are our most effective answer
+The method presented in this chapter targets our most effective answer
  to the question of how to evaluate the performance of a mixed-typed language.
 In particular, the notion of @ddeliverable{} configurations is a
  clear and scalable way to summarize performance.
