@@ -25,7 +25,22 @@ Acknowledgments:
 
 - - -
 
-update 2020-10-13
+update 5 2020-11-09
+---
+
+Hello committee members,
+
+Attached is a draft of my dissertation. Please take a look.
+
+Towards the end of this month, I will reach out the schedule one-on-one
+meetings and collect your feedback.
+
+Ben
+
+
+
+
+update 4 2020-10-13
 ---
 
 Hello committee members,
