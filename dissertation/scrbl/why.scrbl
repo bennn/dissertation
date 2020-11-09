@@ -137,6 +137,32 @@ Both solutions, unfortunately, reveal major challenges for inference:
 Their observations anticipate the migratory typing approach to mixed-typed code.
 
 
+@subsection{Inference via Dynamic Typing}
+
+Henglein's dynamic typing uses standard types and general-purpose coercions to
+ compile untyped code to an efficient representation@~cite{h-scp-1994}.
+The method starts with a conventional typed language and adds three
+ related ingredients:
+ a universal sum type, called the dynamic type;
+ coercions that inject any precisely-typed value up to the dynamic type; and
+ (partial) coercions that project a dynamically-typed value down to a non-dynamic type.
+This augmented core is the basis of a mixed-typed language.
+Typed code maps directly to the core with no additional coercions.
+Untyped code may require coercions, but a smart compiler can minimize
+ their use.
+@citet{h-lfp-1992} compiles Scheme to a monomorphic type system and is able
+ to resolve at least 50% of the coercions in six benchmarks.
+@citet{hr-fpca-1995} extend the method to polymophic types and
+ implement IEEE Scheme using Standard ML.
+
+Conventional types, however, are not always sufficient to capture untyped
+ designs.
+For example, @citet{hr-fpca-1995} note that Scheme conditionals
+ end up with extra coercions into the dynamic type.
+The designs can be expressed, but a tailored type system is needed to
+ maximize run-time efficiency.
+
+
 @subsection{Optional Typing}
 @; lesson = annotations work ... possible but lacks ideal
 
@@ -158,7 +184,7 @@ A programmer cannot use optional types to predict the inputs that a function
  transformations.
 
 @emph{History Note:}
-To be fair, optional typing is one valid way to use Lisp type hints.
+Optional typing is one valid way to use Lisp type hints.
 A Lisp compiler need not optimize based on type hints, and it may even ignore
  types completely@~cite{m-maclisp-1974,s-lisp-1990}.
 @citet{bg-oopsla-1993} deserve credit not for inventing the optional style,
