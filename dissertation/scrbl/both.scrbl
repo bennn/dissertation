@@ -1208,7 +1208,7 @@ The @${\sshallow} function matches a type shape against the outer structure of a
   \\[1.0ex]
   \ewrap{\tpair{\stype_0}{\stype_1}}{\epair{\svalue_0}{\svalue_1}} & \snr
   & \epair{\ewrap{\stype_0}{\svalue_0}}{\ewrap{\stype_1}{\svalue_1}}
-  \\
+  \\[1.0ex]
   \ewrap{\stype_0}{\svalue_0} & \snr
   & \svalue_0
   \\\sidecond{if $\stype_0 \in \tint \cup \tnat$ and $\fshallow{\stype_0}{\svalue_0}$}
@@ -1219,6 +1219,96 @@ The @${\sshallow} function matches a type shape against the outer structure of a
 }
 
 }|]
+
+@figure*[
+  "fig:both:rrlbl"
+  @elem{Labeled semantics for the evaluation language, derived from @figure-ref{fig:both:rr} and the guidelines in @section-ref{sec:design:laws}.}
+
+@exact|{
+\begin{rrarray}
+  \obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obars{\stagerror}{\sowner_1}
+  \\\sidecond{if $\svalue_0 \not\in \obars{\svalue}{\sowner}$ and $\sdelta(\sunop, \svalue_0)$ is undefined}
+  \\[1.0ex]
+  \obars{\eunop{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obbars{\sdelta(\sunop, \svalue_0)}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\\sidecond{if $\sdelta(\sunop, \svalue_0)$ is defined}
+  \\[1.0ex]
+  \obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2}
+  & \snr
+  & \obars{\stagerror}{\sowner_2}
+  \\\sidecond{if $\svalue_i \not\in \obars{\svalue}{\sowner}$ and $\sdelta(\sbinop, \svalue_0, \svalue_1)$ is undefined}
+  \\[1.0ex]
+  \obars{\ebinop{\obbars{\svalue_0}{\sownerlist_0}}{\obbars{\svalue_1}{\sownerlist_1}}}{\sowner_2}
+  & \snr
+  & \obars{\sdelta(\sbinop, \svalue_0, \svalue_1)}{\sowner_2}
+  \\\sidecond{if $\sdelta(\sbinop, \svalue_0, \svalue_1)$ is defined}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\svalue_0}{\sownerlist_0}}{\svalue_1}}{\sowner_1}
+  & \snr
+  & \obars{\stagerror}{\sowner_1}
+  \\\sidecond{if $\svalue_0 \not\in \obars{\svalue}{\sowner} \cup \efun{\svar}{\sexpr} \cup \efun{\tann{\svar}{\stype}}{\sexpr} \cup \efun{\tann{\svar}{\sshape}}{\sexpr} \cup \emon{\stype}{\svalue}$}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\efun{\svar_0}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1}
+  & \snr
+  & \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\efun{\tann{\svar_0}{\stype_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1}
+  & \snr
+  & \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1}
+  & \snr
+  & \obars{\sscanerror}{\sowner_1}
+  \\\sidecond{if $\neg\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\efun{\tann{\svar_0}{\sshape_0}}{\sexpr_0}}{\sownerlist_0}}{\svalue_0}}{\sowner_1}
+  & \snr
+  & \obbars{\esubst{\sexpr_0}{\svar_0}{\obbars{\svalue_0}{\fconcat{\sowner_1}{\frev{\sownerlist_0}}}}}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\\sidecond{if $\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\eappu{\obbars{\emon{\tfun{\stype_0}{\stype_1}}{\obars{\svalue_0}{\sowner_0}}}{\sownerlist_1}}{\svalue_1}}{\sowner_2}
+  & \snr
+  \\\sidecond{\qquad\(\obbars{\ewrap{\stype_1}{\obars{\eappu{\svalue_0}{(\ewrap{\stype_0}{\obbars{\svalue_1}{\fconcat{\sowner_2}{\frev{\sownerlist_1}}}})}}{\sowner_0}}}{\fconcat{\sownerlist_1}{\sowner_2}}\)}
+  \\[1.0ex]
+  \obars{\enoop{\obbars{\svalue_0}}{\sownerlist_0}}{\sowner_1}
+  & \snr
+  & \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\[1.0ex]
+  \obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obars{\sscanerror}{\sowner_1}
+  \\\sidecond{if $\neg\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}
+  \\\sidecond{if $\fshallow{\sshape_0}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obars{\swraperror}{\sowner_1}
+  \\\sidecond{if $\fshallow{\fshape{\sshape_0}}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\ewrap{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obars{\emon{\tfun{\stype_0}{\stype_1}}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  \\\sidecond{if $\fshallow{\kfun}{\svalue_0}$}
+  \\[1.0ex]
+  \obars{\ewrap{\tpair{\stype_0}{\stype_1}}{\obbars{\epair{\svalue_0}{\svalue_1}}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  \\\sidecond{\qquad\(\obars{\epair{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\ewrap{\stype_1}{\obbars{\svalue_1}{\sownerlist_0}}}}{\sowner_1}\)}
+  \\[1.0ex]
+  \obars{\ewrap{\stype_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1}
+  & \snr
+  & \obars{\svalue_0}{\sowner_1}
+  \\\sidecond{if $\stype_0 \in \tint \cup \tnat$ and $\fshallow{\stype_0}{\svalue_0}$}
+\end{rrarray}
+
+}|]
+
 
 @figure*[
   "fig:both:extra-rr"
@@ -1312,6 +1402,7 @@ A @|sdeep|-labeled expression may have other @|sdeep| labels, but nothing weaker
 Reduction of a labeled expression begins with the rules for the evaluation language
  (@figure-ref{fig:both:rr}) and propagates labels according to the laws
  stated in @sectionref{sec:design:laws}.
+@Figure-ref{fig:both:rrlbl} presents the rules in full.
 In short, labels always accumulate unless a simple value meets a boundary with
  a matching type shape.
 Even @|snoop| boundaries add a label; this is why ownership consistency allows
@@ -1659,7 +1750,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
     by the definition of $\sWL$.
 
   \item[Case:]
-    \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \fconcat{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
+    \(\obars{\escan{\sshape_0}{\obbars{\svalue_0}{\sownerlist_0}}}{\sowner_1} \snr \obbars{\svalue_0}{\fconcat{\sownerlist_0}{\sowner_1}}\)
   \item[]
     by the definition of $\scompile$, because a $\sscan{}$ boundary only links an \suntyped{} component to a \sshallow{} component.
 
