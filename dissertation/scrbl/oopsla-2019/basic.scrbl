@@ -362,7 +362,7 @@ These two points, values and checking rules, are the distinctive aspects of
  a semantics.
 Other ingredients can be shared:
  errors, evaluation contexts, and interpretation of primitive operations.
-Indeed, @sectionref{sec:design:tech:eval} defines three baseline evaluation
+Indeed, @sectionref{sec:design:tech:eval} defines three evaluation
  languages---higher-order, first-order, and erasure---that abstract over the
  common ingredients.
 

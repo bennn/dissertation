@@ -1561,7 +1561,7 @@ Three have been noted above:
         [lib-data* '((simplejson 50 "https://github.com/simplejson/simplejson")
                      (requests 200 "https://github.com/kennethreitz/requests")
                      (Jinja2 600 "https://github.com/pallets/jinja/tree/master/jinja2"))]
-        [rank-info @elem{PyPI Ranking (@format-url{http://pypi-ranking.info/alltime})}]
+        [rank-info @elem{PyPI Ranking (@format-url{http://pypi-ranking.info/alltime}, accessed 2018)}]
         [lib-info (authors*
                     (for/list ([ld (in-list lib-data*)]
                                [long-style? (in-sequences '(#t)
@@ -1574,7 +1574,7 @@ Three have been noted above:
        ) @elem{
   A third issue is that the experiment uses rather small benchmarks.
   The @|rank-info| shows that widely-used
-   Python packages have far more functions and methods (accessed 2018).
+   Python packages have far more functions and methods.
   @|lib-info|.
 })
 

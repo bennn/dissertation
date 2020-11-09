@@ -1062,7 +1062,7 @@ This transformation is shape sound because all @|sshallow|-typed functions
  check their inputs, whether or not they escape to untyped code.
 The @${\mathsf{list}} and @${\mathsf{sequence}} passes depend on the @${O(n)}
  shape check for list types.
-Finally, the unboxing in the @${\mathsf{float{\mhyphen}complex}} pass is only safe by virtue
+The unboxing in the @${\mathsf{float{\mhyphen}complex}} pass is only safe by virtue
  of a conservative escape analysis.
 
 

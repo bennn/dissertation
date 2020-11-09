@@ -588,7 +588,7 @@ A boundary error (@${\boundaryerror{\sbset}{\svalue}})
  reports a mismatch between two components.
 One component, the sender, provided the enclosed value.
 A second component rejected the value.
-The accompanying set of witness boundaries suggests potential sources for the fault;
+The set of witness boundaries suggests potential sources for the fault;
  intuitively, this set should include the client--sender boundary.
 The error @${\boundaryerror{\eset{\obnd{\sowner_0}{\stype_0}{\sowner_1}}}{\svalue_0}},
  for example,
@@ -958,7 +958,7 @@ These judgments rely on a store typing (@${\vstoretype})
  to describe heap-allocated values.
 These types must be consistent with the actual values on the heap, a standard
  technical device that is spelled out in the appendix.
-Untyped functions may appear in a typed context and vice-versa---because
+Untyped functions may appear in a typed context and vice-versa;
  there are no wrappers to enforce a separation.
 Shape-check expressions are valid in typed and untyped contexts.
 

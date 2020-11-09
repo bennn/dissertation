@@ -200,7 +200,7 @@ If performance is the only concern, then an implementation can let the dynamical
    can be diagnosed by studying each typed unit individually.
 }
 @item{
- The performance evaluation method begins by adding/removing types at a
+ The performance evaluation method begins by toggling types at a
   certain granularity.
  The definition of granularity in @chapter-ref{chap:performance:definition} does not
   allow for imprecise types such as @tt{List(Dyn)} and @tt{Function([Dyn], Str)}.
