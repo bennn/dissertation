@@ -109,7 +109,7 @@ Thus ML inference asks for a solution to a system of equalities between
 Inference for an untyped language must relax the equality assumption
  to deal with the less-structured design of untyped programs.
 Here, the natural types describe sets of values with compatible behavior.
-The inference problem now asks for types that over-approximate the
+The inference problem asks for types that over-approximate the
  behaviors in a set of values.
 
 There are two known methods to solve type inequalities.

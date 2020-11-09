@@ -1892,7 +1892,7 @@ Many parts of the modified compiler use a similar, one-or-the-other strategy
 This section deals with the more challenging aspects.
 Sharing variables between @|sdeep| and @|sshallow| required changes to
  type-lookup and wrapper generation (@sectionref{sec:both:impl:code}).
-Sharing macros requires further changes; for now, @|sdeep|-typed syntax can only
+Sharing macros requires further changes; currently, @|sdeep|-typed syntax can only
  be re-used through unsafe mechanisms (@sectionref{sec:both:impl:code}).
 Lastly, Typed Racket has a small API that gives programmers control
  over the @|sdeep| type enforcement strategy.

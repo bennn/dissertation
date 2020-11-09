@@ -90,7 +90,6 @@ The performance of @|sShallow| Racket is typically an improvement over
  code, and surpasses untyped Racket in many cases.
 Whether @|sShallow| Racket can ever run faster than untyped code is an open
  question.
-For now, @sectionref{sec:transient:future} lists several avenues worth exploring.
 
 
 @section[#:tag "sec:transient:theory"]{Theory}
@@ -348,9 +347,6 @@ This section explains the challenges; performance concerns are deferred
 
 
 @subsection{Basics of @|sTransient| Blame}
-@; TODO better examples (ramble ok for now)
-@;  work through without filter,
-@;  then revisit to explain filter
 
 The @|stransient| blame algorithm uses a global @emph{blame map} to connect
  run-time values to source-code boundaries.
@@ -623,8 +619,7 @@ At compile-time, it suffices to generate a correct identifier.
 At run-time, @|stransient| needs to evaluate a correct identifier in
  the right run-time context to find the predicate.
 
-A different approach may be able to solve the generative-types problem,
- but for now it remains an open question.
+A different approach may be able to solve the generative-types problem.
 A related question, though, is whether @|stransient| is better off with
  a different method of filtering.
 

@@ -942,7 +942,7 @@ If not, then the location @${\eloc} may be the source of the fault.
 Locations are names for the pairs and functions in a program.
 These names map to pre-values in a heap (@${\vstore})
  and, more importantly, to sets of boundaries in a blame map (@${\bstore}).
-Pairs and functions are now second-class pre-values (@${\sprevalue}) that
+Pairs and functions are second-class pre-values (@${\sprevalue}) that
  must be allocated before they may be used.
 
 Three meta-functions define heap operations:
