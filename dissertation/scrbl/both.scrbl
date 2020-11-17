@@ -9,8 +9,12 @@
 @(require
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*
+     get-mixed-path-table
+     render-mixed-path-table
      get-mixed-worst-table
      render-mixed-worst-table
+     find-lowest-3dpath-D
+     get-3d-table
      s:cache-dir)
    (only-in greenman-thesis/oopsla-2019/pict
      both:model-interaction
@@ -2371,7 +2375,7 @@ Unfortunately, these input wrappers change the behavior of @tt{index-of};
 
 With the @|sShallow| Racket implementation, the tradeoffs of @chapter-ref{chap:transient} disappear.
 For all our benchmarks, the choice improves the worst-case overhead of
- type boundaries (@section-ref{sec:both:perf:worst}).
+ type boundaries.
 By implication, Typed Racket can offer a new migration story:
 
 @nested-inset[@emph{
@@ -2379,9 +2383,7 @@ By implication, Typed Racket can offer a new migration story:
  @|sdeep| types after the boundaries stabilize.}]
 
 Mixing @|sdeep| and @|sshallow| types in one program offers new ways of
- improving performance (@section-ref{sec:both:perf:both}).
-@; One especially promising direction is to use @|sshallow| types in
-@;  library code (@section-ref{sec:both:perf:lib}).
+ improving performance.
 
 
 @subsubsection[#:tag "sec:both:perf:worst"]{GTP Benchmarks, Worst-Case}
@@ -2416,7 +2418,54 @@ In short, the ``after'' case is always better and can be an arbitrarily large
 }])
 
 
-@;@subsubsection[#:tag "sec:both:perf:path"]{Paths, Migration Story}
+@subsubsection[#:tag "sec:both:perf:path"]{Migration Paths}
+
+@(let* ([bm* '(sieve forth fsm fsmoo mbta morsecode
+               zombie dungeon jpeg zordoz lnm suffixtree
+               kcfa snake take5)]
+        [D 3]
+        [PT (get-mixed-path-table D bm*)]
+        [deep-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (caddr path-info))) (car path-info))]
+        [shallow-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr path-info))) (car path-info))]
+        [mix-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr (cdr path-info)))) (car path-info))]
+        [_md (unless (= 1 (length mix-dead*)) (printf "HELP expected one mix-dead row got ~s~n" mix-dead*))]
+        [mix-path-bm 'fsm]
+        [mix-best-D (find-lowest-3dpath-D mix-path-bm)]
+        )
+@list[
+@figure*[
+  "fig:both:mixed-path"
+  @elem{Percent of @ddeliverable[D] paths in three lattices:
+   the @|sdeep|-typed lattice, the @|sshallow|-typed lattice,
+   and a hybrid that chooses the best of @|sdeep| or @|sshallow| types at each point.}
+  @render-mixed-path-table[PT]
+]
+@elem{
+@|sShallow| types make step-by-step migration more practical in Typed Racket.
+Originally, with @|sdeep| types, a programmer who adds types one module at
+ a time is likely to hit a performance wall; that is, a few configurations
+ along the migration path are likely to suffer a large overhead.
+Adding more @|sdeep| types is a sure way to reduce the overhead,
+ especially if the programmer adds the best-possible types (@figure-ref{fig:example-path}),
+ but these multi-step pitfalls contradict the promise of migratory typing.
+High overhead makes it hard to tell whether the new types are compatible with
+ the rest of the codebase.
+
+By choosing @|sdeep| or @|sshallow| types at each point along a path, the
+ worst-case overhead along migration paths goes down.
+@Figure-ref{fig:both:mixed-path} quantifies the improvement by showing the
+ percent of all paths that are @ddeliverable[D] at each step.
+With @|sdeep| types alone, all paths in @integer->word[(length deep-dead*)]
+ benchmarks hit a point that exceeds the @~a[D]x limit.
+With @|sshallow| types alone, all paths in @integer->word[(length shallow-dead*)] benchmarks
+ exceed the limit as well.
+With the mix, however, only @integer->word[(length mix-dead*)] benchmark (@bm[(car mix-dead*)])
+ has zero @ddeliverable[D] paths.
+Fine-grained combinations of @|sdeep| and @|sshallow| types can further improve
+ the number of viable migration paths.
+In @bm[mix-path-bm], for example, every path is @ddeliverable[mix-best-D] if the programmer
+ picks the fastest-running mix of @|sdeep| and @|sshallow| types for each configuration.
+}])
 
 
 @subsubsection[#:tag "sec:both:perf:both"]{Case Studies: @|sDeep| and @|sShallow|}
@@ -2517,7 +2566,28 @@ Indeed, Phil Nguyen has written a @hyperlink["https://github.com/philnguyen/json
 Such libraries are ideal, but until we have them for the next data exchange
  format (SQL, XML, YAML, ...) @|sshallow| types get the job with the parsers
  that are available today.
- 
+
+
+@parag{GTP Benchmarks}
+
+@(let* ((DDD (get-3d-table '(fsm morsecode jpeg kcfa zombie zordoz))))
+  ;; TODO note future challenges 
+@list[
+@(apply itemlist
+   (for/list ((d-row (in-list DDD)))
+     (item (format "~a% of ~a configurations" (cadr d-row) (car d-row)))))
+
+])
+
+
+@; Last case study, three way lattice, how many points best with mix?
+@; Prohibitive experiment, now 3n for normal points a whole lattice to explore at
+@;  each, but also the both files can be toggled making an extra 2m for the m both
+@;  files.
+@; Those are the adaptors, extreme example is kcfa adds 4 for adaptor.
+@; future work
+
+
 @subsubsection[#:tag "sec:both:perf:release"]{Release Information}
 
 @|sShallow| Typed Racket is publicly available in a pull request to Typed Racket:
@@ -2527,15 +2597,6 @@ After the release, I look forward to collecting more anecdotal experiences
  with the system.
 
 
-
-@;@subsubsection[#:tag "sec:both:perf:lib"]{Changing Library}
-@;
-@;For benchmarks that depend on a typed library,
-@; excluding gregor and quad for now,
-@; how are both lattices when library is transient?
-@;
-@;Wider implication for Racket?
-@;@; really need to check math library asap
 
 
 

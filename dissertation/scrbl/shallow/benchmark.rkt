@@ -10,12 +10,18 @@
   ratios-row-deep
   ratios-row-shallow
 
+  find-lowest-3dpath-D
+  get-3d-table
+
   get-blame-table
   render-blame-table
   blame-row-name
   blame-row-blame
   blame-row-deep
   blame-row-shallow
+
+  get-mixed-path-table
+  render-mixed-path-table
 
   get-mixed-worst-table
   render-mixed-worst-table
@@ -33,7 +39,9 @@
   (only-in math/statistics
     mean)
   (only-in racket/math
+    exact-round
     exact-floor)
+  (only-in math/number-theory factorial)
   (only-in racket/path
     file-name-from-path
     find-relative-path)
@@ -44,6 +52,8 @@
   (only-in racket/file
     file->lines
     file->value)
+  (only-in racket/sequence
+    sequence-map)
   racket/match
   racket/serialize
   racket/runtime-path
@@ -72,6 +82,7 @@
 (define data-dir (build-path HERE "data"))
 
 (define blame "blame")
+(define 3d "3d")
 
 (define NSA-num-cores 4)
 (define NSA-core-name "i7-4790")
@@ -274,4 +285,244 @@
           (if (= v 1)
             "<2x"
             (format "~ax" v)))))
+
+;; ---
+
+(define MIXED-PATH-TITLE
+  (list "Benchmark"
+        "Deep %"
+        "Shallow %"
+        "D. or S. %"))
+
+(define (render-mixed-path-table row*)
+  ;; TODO abstraction
+  (centered
+    (tabular
+      #:sep (hspace 2)
+      #:style 'block
+      #:row-properties '(bottom-border 1)
+      #:column-properties '(left right)
+      (list* MIXED-PATH-TITLE
+             (map cdr row*)))))
+
+(define (get-mixed-path-table D name*)
+  ;; TODO copied from above
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () (cons D name*)))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "mixed-path-table.rktd")
+      (λ ()
+        (for/list ([name (in-list name*)])
+          (make-mixed-path-row D name
+                          (benchmark-name->performance-info name stransient)
+                          (benchmark-name->performance-info name default-rkt-version)))))))
+
+(define (make-mixed-path-row D name pi-shallow pi-deep)
+  (define total-paths (factorial (performance-info->num-units pi-deep)))
+  (define (fmt n0 n1)
+    (~a (exact-round (pct n0 n1))))
+  (list name
+        (bm name)
+        (fmt (count-deliv-path D pi-deep) total-paths)
+        (fmt (count-deliv-path D pi-shallow) total-paths)
+        (fmt (count-deliv-path D pi-shallow pi-deep) total-paths)))
+
+;; D = 2 data
+;;    ((sieve)
+;;     (list name (bm name) "0" "0" "0"))
+;;    ((forth)
+;;     (list name (bm name) "0" "0" "17"))
+;;    ((fsm)
+;;     (list name (bm name) "33" "0" "100"))
+;;    ((fsmoo)
+;;     (list name (bm name) "0" "0" "50"))
+;;    ((mbta)
+;;     (list name (bm name) "100" "100" "100"))
+;;    ((morsecode)
+;;     (list name (bm name) "100" "0" "100"))
+;;    ((zombie)
+;;     (list name (bm name) "0" "0" "0"))
+;;    ((dungeon)
+;;     (list name (bm name) "0" "0" "0"))
+;;    ((jpeg)
+;;     (list name (bm name) "0" "100" "100"))
+;;    ((zordoz)
+;;     (list name (bm name) "50" "0" "67"))
+;;    ((lnm)
+;;     (list name (bm name) "100" "100" "100"))
+;;    ((suffixtree)
+;;     (list name (bm name) "0" "0" "0"))
+;;    ((kcfa)
+;;     (list name (bm name) "0" "100" "100"))
+;;    ((snake)
+;;     (list name (bm name) "0" "0" "0"))
+;;    ((take5)
+;;     (list name (bm name) "0" "0" "16"))
+
+;; D = 3
+;;   ((sieve)
+;;    (list name (bm name) "0" "0" "100"))
+;;   ((forth)
+;;    (list name (bm name) "0" "0" "50"))
+;;   ((fsm)
+;;    (list name (bm name) "100" "100" "100"))
+;;   ((fsmoo)
+;;    (list name (bm name) "0" "0" "50"))
+;;   ((mbta)
+;;    (list name (bm name) "100" "100" "100"))
+;;   ((morsecode)
+;;    (list name (bm name) "100" "100" "100"))
+;;   ((zombie)
+;;    (list name (bm name) "0" "0" "50"))
+;;   ((dungeon)
+;;    (list name (bm name) "0" "0" "67"))
+;;   ((jpeg)
+;;    (list name (bm name) "0" "100" "100"))
+;;   ((zordoz)
+;;    (list name (bm name) "100" "100" "100"))
+;;   ((lnm)
+;;    (list name (bm name) "100" "100" "100"))
+;;   ((suffixtree)
+;;    (list name (bm name) "0" "0" "12"))
+;;   ((kcfa)
+;;    (list name (bm name) "33" "100" "100"))
+;;   ((snake)
+;;    (list name (bm name) "0" "0" "0"))
+;;   ((take5)
+;;    (list name (bm name) "0" "100" "100"))
+;;    (else
+;;      (raise-argument-error 'make-mixed-path-row "simple-bm-name?" name))))
+
+(define (count-deliv-path D . pi*)
+  (when (null? pi*)
+    (raise-argument-error 'count-deliv-path "(non-empty-listof performance-info?)" pi*))
+  (for*/sum ((cfg-id* (all-paths (car pi*)))
+             #:when (andmap (lambda (cfg-id)
+                              (<= (apply min (map (lambda (pi) (overhead+ pi cfg-id)) pi*)) D))
+                            cfg-id*))
+      1))
+
+(define (overhead+ pi cfg-id)
+  (/ (performance-info->runtime pi cfg-id)
+     (performance-info->untyped-runtime pi)))
+
+(define (performance-info->runtime pi cfg-id)
+  (or
+    (for/first ((cfg (in-configurations pi))
+                #:when (equal? cfg-id (configuration-info->id cfg)))
+      (configuration-info->mean-runtime cfg))
+    (raise-arguments-error 'performance-info->runtime "cfg not found" "pi" pi "cfg" cfg-id)))
+
+(define (all-paths pi)
+  (define num-units (performance-info->num-units pi))
+  (all-paths-from (natural->bitstring 0 #:bits num-units)))
+
+(define (all-paths-from str)
+  (sequence-map
+    permutation->path
+    (in-permutations (range (string-length str)))))
+
+(define (permutation->path index*)
+  (define L (length index*))
+  ;; Create the path in reverse order
+  (for/fold ([acc (list (bitstring-init L #:hi? #t))])
+            ([i (in-list index*)])
+    (cons (bitstring-flip (car acc) i) acc)))
+
+(define (bitstring-init n #:hi? [hi? #f])
+  (make-string n (if hi? #\1 #\0)))
+
+(define (bitstring-flip str i)
+  (define new (if (equal? #\0 (string-ref str i)) "1" "0"))
+  (string-append (substring str 0 i)
+                 new
+                 (substring str (add1 i) (string-length str))))
+
+(define (find-lowest-3dpath-D bm-name)
+  (string->number (rnd
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () bm-name))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "mixed-bestpath.rktd")
+      (λ ()
+        (define pi (benchmark-name->performance-info3d bm-name))
+        (define total-paths (factorial (performance-info->num-units pi)))
+        (or
+          (for/or ((pre-d (in-range 10)))
+            (define D (+ 1 (/ pre-d 10)))
+            (and (= total-paths (count-deliv-path D pi))
+                 D))
+          (raise-arguments-error 'both "cannot find D for 100% paths" "bm" bm-name))))))))
+
+(define (filename-3d bm-name)
+  (define orig-filename
+    (let ((m* (glob (build-path data-dir 3d (format "~a-*.rktd" bm-name)))))
+      (if (or (null? m*) (not (null? (cdr m*))))
+        (raise-arguments-error 'benchmark-name->performance-info3d "expected one match" "bm" bm-name "match*" m*)
+        (car m*))))
+  (define best-filename (path-add-extension orig-filename ".3d"))
+  (values orig-filename best-filename))
+
+(define (benchmark-name->performance-info3d bm-name)
+  (define-values [orig-filename best-filename] (filename-3d bm-name))
+  (define best-cfg*
+    (with-input-from-file
+      orig-filename
+      (lambda ()
+        (void (read-line)) ;; ignore lang
+        (define (read-cfg) (string->value (read-line)))
+        (define untyped-cfg (read-cfg))
+        (define num-units (string-length (car untyped-cfg)))
+        (cons
+          untyped-cfg
+          (for/list ((i (in-range (- (expt 2 num-units) 1))))
+            (define cfg0 (read-cfg))
+            (define num-types (for/sum ((c (in-string (car cfg0))) #:unless (eq? #\0 c)) 1))
+            (define cfg* (for/list ((j (in-range (- (expt 2 num-types) 1)))) (read-cfg)))
+            (car (sort (cons cfg0 cfg*) <=2 #:key cfg->simple-time+mix #:cache-keys? #true)))))))
+  (void
+    (with-output-to-file
+      best-filename
+      #:exists 'replace
+      (lambda ()
+        (displayln "#lang gtp-measure/output/typed-untyped")
+        (for ((ln (in-list best-cfg*)))
+          (writeln ln)))))
+  (make-typed-racket-info best-filename #:name (string->symbol (format "~a-3d" bm-name))))
+
+(define (cfg->simple-time val)
+  (string->number (rnd (mean (map time-string->cpu-time (cadr val))))))
+
+(define (cfg->simple-time+mix val)
+  (cons (cfg->simple-time val) (has-mix? (car val))))
+
+(define (has-mix? str)
+  (define c* (string->list str))
+  (for/and ((xxx (in-list '(#\0 #\1 #\2))))
+    (memq xxx c*)))
+
+(define (<=2 p0 p1)
+  (or (<= (car p0) (car p1))
+      (and (= (car p0) (car p1))
+           (<= (cdr p0) (cdr p1)))))
+
+(define (get-3d-table bm-name*)
+  (parameterize ([*current-cache-directory* cache-dir]
+                 [*current-cache-keys* (list (λ () bm-name*))]
+                 [*with-cache-fasl?* #f])
+    (with-cache (cachefile "mixed-3d-best.rktd")
+      (λ ()
+        (for/list ((bm (in-list bm-name*)))
+          (define pi (benchmark-name->performance-info3d bm))
+          (define total-configs (performance-info->num-configurations pi))
+          (define-values [_orig best-filename] (filename-3d bm))
+          (define num-good
+            (with-input-from-file
+              best-filename
+              (lambda ()
+                (void (read-line))
+                (for/sum ((cfg (in-lines))
+                          #:when (has-mix? (car (string->value cfg))))
+                  1))))
+          (list bm (rnd (pct num-good total-configs))))))))
 
