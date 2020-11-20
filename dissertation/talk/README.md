@@ -80,7 +80,7 @@ design space (... lead into D S definitions)
    ... that'll depend but here's a closer example
    ... clear error here, but transient misses it
    ... natural catches --- well thats odd
- survey
+ survey (maybe not so much time on this)
  - don't take my word for it, put together a survey with examples like this,
    show one, see natural vs transient side-by-side,
    ask like/expected "attitude"
@@ -88,15 +88,27 @@ design space (... lead into D S definitions)
    results like the following --- transient dislike / unexpected
  - so no, transient is not clearly better
  return
- - but what's the property that distinguishes them?
-   need a property to guide the design space ... because there are other points on map to assess
- - developed one point to show that TS not it
- - hm... adapted CM from contracts ... ideas here?
-
- - not talking about blame, but also helps for that
- - gotta mention the preorder too
-
- - out of steam
+ - differences are significant,
+   need to articulate instead of example-by-example
+ - for better understanding of pros cons
+   and perhaps shed light on design space
+   ... other points worth studying / implementing
+ - more than 2 competitors, remember, wonder how they stack up
+ cm
+ - core idea back to example ... temporary vs permanent types
+   clearly temporary in transient,
+   seem to last, may be permanent, in natural
+ - eureka, from christos, visit suggest CM a property from contracts
+   test whether contract system is in control of all communications
+   ... for us, ask whether type system in control
+ - color half the space
+ - then, using the same framework, able to further classify by studying blame
+   (introduce TS colors here too)
+ - final "richness" from error preorder (lift plateaus?)
+ - let me show different repr, tabular
+   (fill out appendix table?)
+   semantics first, then properties one-by-one
+   preorder is last ... maybe 1 2 3 4 4 5 ?
 
 now, understanding of the design space, main regions,
  and have the performance results
@@ -115,16 +127,18 @@ support for thesis
 
 unpublished results, let us proceed
 
+(out of steam)
+
 transient racket
 
 
-model
- - syntax? yes gotta 
+deep + shallow
+ model
+ - syntax? yes gotta
  - ....
  - testbed for strategies, optimizations
    show D S U pict, trust boundaries
-
-combination
+ combination
  - hmm don't get too technical
 
 
