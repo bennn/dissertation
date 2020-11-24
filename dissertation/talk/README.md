@@ -75,6 +75,7 @@ design space (... lead into D S definitions)
    because both claim to be sound
  - Q is sound gt dead, published perf results,
    and yet seems like TR is dead others are fine!
+   (need "sound" qualifier, talk about unsound = static-only at some point)
  - not so fast, examples, different behaviors
    = no transient is not simply "better" because its different behavior
  - next question is whether transient behavior is preferable

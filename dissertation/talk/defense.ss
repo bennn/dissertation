@@ -670,7 +670,7 @@
     @rt{History, Lively Space}
     ;; 0. mccarthy?
     ;; 1. common lisp, strongtalk, grey etal,
-    ;; 2. gradual typing
+    ;; 2. gradual typing (mixed-typed?)
     ;; 3. GT bib
     ;; languages vs papers?
     #:go text-coord-mid
@@ -691,7 +691,7 @@
     @rrt{int across boundary}
     @rrt{typed rejects}
     @rrt{untyped allows}
-    @rrt{some gradual reject, others allow}
+    @rrt{some mixed-typed reject, others allow}
     @rrt{allowance = funny because contradicts the type})
   (pslide
     #:go heading-coord-left
@@ -699,7 +699,7 @@
     #:go text-coord-mid
     ;; may need two boundaries here
     @rrt{pair across boundary}
-    @rrt{some gradual reject early, others late, others never})
+    @rrt{some mixed-typed reject early, others late, others never})
   (pslide
     #:go heading-coord-left
     @rt{My Work, understanding the space}
@@ -709,15 +709,80 @@
     ;;  programmers can rely on types & performance
     ;; enter ben
     ;; developed "methods" to understand, during phd
-    @rrt{implications for perf and for what types mean}
+    @rrt{implications for (1) perf and for (2) what types mean}
     @rrt{thesis preview: deep and shallow can interoperate})
-  ;; now lets pursue the two threads
+  ;; now lets pursue the two threads, start with performance
   (void))
 
 (define (sec:perf)
-
+  ;; maybe ... Natural can be rocky, Transient sloped, ... ?
+  ;;  be careful, have 2 planes perf@impl design@model
+  ;;
+  ;; lets begin with perf, because it comes first
+  ;;  want to RUN these mixed-typed programs
+  ;; and focus on TR ... skull flag? danger?
+  (pslide
+    #:go heading-coord-left
+    @rt{Perf: Typed Racket}
+    ;; focus on TR city
+    #:go text-coord-mid
+    @rrt{some programs fine}
+    @rrt{others not fine}
+    @rrt{JBC q tr-pdfs, XXX slowdown}
+    @rrt{more questions, more hazards}
+    @rrt{evident problem, unclear size and severity})
+  (pslide
+    #:go heading-coord-left
+    @rt{Config Space}
+    #:go text-coord-mid
+    @rrt{need a way to measure, in total; what's total?}
+    @rrt{program N points => 2^N configs}
+    @rrt{some good some danger, via ad-hoc sample}
+    @rrt{basic idea: measure systematically})
+  (pslide
+    ;; gotta work for all programs, more than the tiny N=4 example
+    #:go heading-coord-left
+    @rt{How to Comprehend the Data?}
+    #:go text-coord-mid
+    @rrt{small N = unreadable space}
+    @rrt{modest N = infeasible}
+    @rrt{answer 2x = careful question, consumer-first})
+  (pslide
+    #:go heading-coord-left
+    @rt{D-deliverable measure}
+    #:go text-coord-mid
+    @rrt{enduser / decision maker, set Dx}
+    @rrt{worst-case tolerate ... may be 2x for ship, may be 10x for dev}
+    @rrt{with D every config is yes or no, deliverable or not}
+    @rrt{compressed to number, easy to interpret a 60% result here}
+    @rrt{also can sample})
+  (pslide
+    #:go heading-coord-left
+    @rt{Approximate D-deliverable}
+    #:go text-coord-mid
+    @rrt{knowledge vs truth ... shadow lattice?}
+    @rrt{percent in a few big samples approximates the overall})
+  (pslide
+    #:go heading-coord-left
+    @rt{Method Summary}
+    #:go text-coord-mid
+    @rrt{several programs, fully type}
+    @rrt{systematically collect, exhaustive or approx}
+    @rrt{study with range of D})
+  (pslide
+    #:go heading-coord-left
+    @rt{Overhead Plot, example}
+    #:go text-coord-mid
+    @rrt{one benchmark, D from 1 -- 20})
+  (sec:perf:tr)
+  (sec:perf:rp)
   (void))
 
+(define (sec:perf:tr)
+  (void))
+
+(define (sec:perf:rp)
+  (void))
 
 (define (sec:design)
   (void))
