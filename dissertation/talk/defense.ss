@@ -8,6 +8,24 @@
 ;; - [X] pick fonts
 ;; - [X] jfp example, slides ... take from diss pict
 ;; - [X] outline, on paper
+;; - [ ] outline on slides
+;; - [ ] technics in order!
+;; - [ ] table pict
+;; - [ ] warring states pict, D S E + concrete, pyret
+;;   - [ ] similar pict for languages? for, before the design-space analysis?
+;;   - [ ] organize along perf + design dimensions
+;;   - [ ] deep perf = bumpy, dangerous bend (or R G Y stripes)
+;;   - [ ] shallow perf = bumpy, dangerous bend
+;;   - [ ] erased perf = "untyped" flag ... for better and worse
+;;   - [ ] interop "city" at D S border
+;; - [ ] thesis + supports pict
+;; - [ ] D S U picts, the safe one and others
+;;
+;; - [ ] headlines ... gt terrific
+;; - [ ] two methods (major contributions)
+;;   - [ ] perf ... LHS 
+;;   - [ ] design ... RHS 
+;; - [ ]
 ;; - [ ]
 ;; - [ ]
 
@@ -462,13 +480,24 @@
 (define (sec:title)
   (define (st str #:size-- [size-- 0] #:color [color body-text-color])
     (txt str #:font subtitle-text-font #:size (- body-text-size size--) #:color color))
+  ;; TODO sunset, forest background
+  (define t-coord (coord 1/2 4/10 'ct #:sep pico-y-sep))
+  (define t-pict @ht{Deep and Shallow Types})
+  (define st-pict (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color))
+  (define a-sep (blank 0 small-y-sep))
+  (define a-pict @st{Ben Greenman    2020-12-19})
   (pslide
-    ;; TODO sunset, forest background
-    #:go (coord 1/2 4/10 'ct #:sep pico-y-sep)
-    @ht{Deep and Shallow Types}
-    (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color)
-    (blank 0 small-y-sep)
-    @st{Ben Greenman    2020-12-19})
+    #:go t-coord t-pict
+    st-pict a-sep a-pict)
+  (pslide
+    #:go text-coord-mid
+    (vl-append
+      small-y-sep
+      @rrt{Matthias Felleisen} @rrt{Amal Ahmed} @rrt{Jan Vitek}
+      @rrt{Shriram Krishnamurthi} @rrt{Fritz Henglein} @rrt{Sam Tobin-Hochstadt}))
+  (pslide
+    #:go t-coord t-pict
+    st-pict a-sep a-pict)
   (void))
 
 (define ex-ok "Ok")
@@ -622,6 +651,77 @@
     ex-pair-lambda)
   (void))
 
+(define (sec:intro)
+  (pslide
+    #:go center-coord
+    ;; Ershov "And I have long since taught myself to think that if I reproduce somebody's guess in my work, I should not regret not having been the first, but, on the contrary, should always bear it in mind that it is a major stimulus: since a similar idea has occured to me living thousands of kilometers away, it means that there really is something in it"
+    ;; _from hidden places knowledge i obtained_ k. Levitin
+    @rrt{Ershov quote, reinvention = real insight})
+  (pslide
+    #:go heading-coord-left
+    @rt{By that measure, GT landmark idea}
+    #:go text-coord-mid
+    ;; NOTE focus on the ties between T/U, the boundaries
+    @rrt{goal = unite two movements in PL design}
+    @rrt{typed, statically typed}
+    @rrt{untyped, dynamically typed})
+  (pslide
+    #:go heading-coord-left
+    @rt{History, Lively Space}
+    ;; 0. mccarthy?
+    ;; 1. common lisp, strongtalk, grey etal,
+    ;; 2. gradual typing
+    ;; 3. GT bib
+    ;; languages vs papers?
+    #:go text-coord-mid
+    @rrt{old idea ... over the years ... modern explosion})
+  (pslide
+    #:go heading-coord-left
+    @rt{My Work, understanding the space}
+    ;; not a giants-on-shoulders space,
+    ;; more like blindfolded people groping elephant
+    ;; contentious
+    #:go text-coord-mid
+    @rrt{chaos})
+  (pslide
+    #:go heading-coord-left
+    @rt{Example 1}
+    ;; basic example, typed first = static error
+    #:go text-coord-mid
+    @rrt{int across boundary}
+    @rrt{typed rejects}
+    @rrt{untyped allows}
+    @rrt{some gradual reject, others allow}
+    @rrt{allowance = funny because contradicts the type})
+  (pslide
+    #:go heading-coord-left
+    @rt{Example 2}
+    #:go text-coord-mid
+    ;; may need two boundaries here
+    @rrt{pair across boundary}
+    @rrt{some gradual reject early, others late, others never})
+  (pslide
+    #:go heading-coord-left
+    @rt{My Work, understanding the space}
+    #:go text-coord-mid
+    ;; back to landscape,
+    ;; examples = hint at disagreement, implications for whether
+    ;;  programmers can rely on types & performance
+    ;; enter ben
+    ;; developed "methods" to understand, during phd
+    @rrt{implications for perf and for what types mean}
+    @rrt{thesis preview: deep and shallow can interoperate})
+  ;; now lets pursue the two threads
+  (void))
+
+(define (sec:perf)
+
+  (void))
+
+
+(define (sec:design)
+  (void))
+
 (module+ main
   (set-page-numbers-visible! #false)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha spotlight-color 0.6))
@@ -630,13 +730,11 @@
     ;(test-margin-slide)
     ;(test-screenshot-slide)
     (sec:title)
-    (sec:example)
-    ;(sec:big-picture)
-    ;(sec:shallow-fast)
-    ;(sec:shallow-expressive)
-    ;(sec:shallow-simple)
-    ;(sec:shallow-bad)
-    ;(sec:cometh-soon)
+    ;(sec:example)
+    (sec:intro)
+    (sec:perf)
+    (sec:design)
+
     (pslide)
     (void))
   (void))
@@ -650,17 +748,21 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go heading-coord-left
-    @rt{Example: Enforcing a Data Structure}
-    #:go text-coord-mid
-    (scale-to-text
-      (make-2table
-        #:row-sep small-y-sep
-        #:col-sep small-x-sep
-        #:row-align lt-superimpose
-        (list
-          (cons (blank) ex-pair-retic)
-          (cons ex-pair-tr ex-pair-nom))))
+    ;#:go center-coord
+    ;(frame-bitmap "transient-blame.png" #:w% 5/10)
+
+
+;    #:go heading-coord-left
+;    @rt{Example: Enforcing a Data Structure}
+;    #:go text-coord-mid
+;    (scale-to-text
+;      (make-2table
+;        #:row-sep small-y-sep
+;        #:col-sep small-x-sep
+;        #:row-align lt-superimpose
+;        (list
+;          (cons (blank) ex-pair-retic)
+;          (cons ex-pair-tr ex-pair-nom))))
 
 
   )))

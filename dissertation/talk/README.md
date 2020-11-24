@@ -28,20 +28,18 @@ with perf, though, motivates a combo semantics
 outline 2020-11-02, 2020-11-18 (!!!), 
 ---
 
-wonderful idea, mixing typed and untyped
-
-huge response ... headlines? promises?
- maybe go like a security talk ... why not its different for me
-
-but hey different behaviors & performance
-... warring states rather than happy village (lol really 3 states in end D S E + concrete)
-
-ben = order to chaos,
- organize along 2 dimensions
- - perf for each village
- - design creats regions, deep shallow optional
- performance leads to thesis, that is D + S can interoperate
- leads to thesis question ... D + S can interact, benefits (details later)
+intro
+ - wonderful idea, mixing typed and untyped
+ - huge response ... headlines? promises?
+   maybe go like a security talk ... why not its different for me
+ - but hey different behaviors & performance
+   ... warring states rather than happy village (lol really 3 states in end D S E + concrete)
+ - ben = order to chaos,
+   organize along 2 dimensions
+   - perf for each village
+   - design creats regions, deep shallow optional
+   performance leads to thesis, that is D + S can interoperate
+   leads to thesis question ... D + S can interact, benefits (details later)
 
 perf space
  method
@@ -68,6 +66,9 @@ perf space
    much better for retic, never falls off the map, 10x for these very different benchmarks
  - night and day
    (do NOT talk about num. types yet, thats a sideline observation that we can't scalably make)
+
+ HEY shoot down other properties --- gg, ts ....
+  and criticize Max?
 
 design space (... lead into D S definitions)
  - wow this night & day is quite a surprise
@@ -113,33 +114,59 @@ design space (... lead into D S definitions)
 now, understanding of the design space, main regions,
  and have the performance results
  guarantees vs perf
- - motivates compromise = thesis statement
- - as you might have guessed we picked natural and transient
+ - what to do ... return of octopus? ... 
+   - at least, credit to "Feltey" & "Grift" & Pycket
+   - my angle
+ - compromise = thesis statement
+ - as you might have guessed we picked natural and transient, but with good reason!
  - justification
    - natural = strongest guarantees lowest on error preorder
    - transient = only sound design without wrappers, soundness minimum requirementA
 
+unpublished results, let us proceed
+  * moonlight is decent illustration,
+    can move left-to-right across major sections
+
 support for thesis
  - implement transient racket (side-by-side)
+   theory (main challenges)
+   - more types
+   - completion, shout out to fritz (anticipate future challenge)
+   impl
+   - compiler pipeline, reuse
+   - shape choices, optimize, list-rec
  - model, proves keep properties
    AND proves alluring extensions unsafe
+   - draw D S U, alterative trust zones
  - implement 3-way interactions
+   - ... remark mixed-typed API?
+   - b0: fewer errors
+   - b1: uniform behavior
+   - b2: faster with mix
+ - overall perf data
+   - best of both, natural first then superimpose, conclude xxx
+   - paths ... maybe show only the 6 small ones we have?
+   - 
 
-unpublished results, let us proceed
+conclusion
+ - with those expr, perf, data concludes defense of thesis
+ - reminder: D S can coexist
+ - whats next
+  - finishing touches, release
+  - static analysis, better completion
+  - investigate blame ... what is useful? what is realizable?
+ summarize contributions (as opposed to thesis)
 
-(out of steam)
-
-transient racket
-
-
-deep + shallow
- model
- - syntax? yes gotta
- - ....
- - testbed for strategies, optimizations
-   show D S U pict, trust boundaries
- combination
- - hmm don't get too technical
-
-
+extra
+ blame!
+ - major challenge, blame for transient / shallow
+ - perf numbers omit blame, have to switch to Natural unclear if effective
+ - yes transient does have a theory, rather lacking from our analysis but nonetheless ...
+ - implemented, but yikes
+ - show perf table, was unexpected but appears solid
+ transient rejects
+ - crazy all types, unprotected var, fix with explicit inst
+ - crazy occurrence types, ... fix by guarding branches? inferences?
+ - 
+ bonus fixes / enhancements
 
