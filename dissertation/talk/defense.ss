@@ -846,7 +846,201 @@
     #:go text-coord-mid
     @rrt{weak properties!}
     @rrt{led to design space analysis})
-  ;; ... ok now what
+  (pslide
+    #:go heading-coord-left
+    @rt{Sound}
+    #:go text-coord-mid
+    @rrt{sound refers to type sound, classic theorem}
+    @rrt{none satisfy, except concrete, must generalize} ;; can't share HO
+    @rrt{but unsound is clear thats ignoring all types})
+  (pslide
+    #:go heading-coord-left
+    @rt{Unsound, extreme weakening}
+    #:go text-coord-mid
+    @rrt{any surface, result gets uni-type}
+    @rrt{applies to X Y Z langs (Flow)})
+  (pslide
+    #:go heading-coord-left
+    @rt{F-type soundness}
+    #:go text-coord-mid
+    @rrt{our first step, study sound space}
+    @rrt{articulate the parameters}
+    ;; removal is WEAK but thats ok, don't worry for defense
+    @rrt{removes transient}
+    @rrt{still others lumped together})
+  (pslide
+    #:go heading-coord-left
+    @rt{Natural vs Forgetful}
+    #:go text-coord-mid
+    ;; temporary vs permanent types
+    @rrt{example, different behaviors, prim error vs boundary})
+  (pslide
+    #:go heading-coord-left
+    @rt{Derived channel, do types protect?}
+    #:go text-coord-mid
+    @rrt{CM => yes}
+    @rrt{TS =/> yes})
+  (pslide
+    #:go heading-coord-left
+    @rt{Blame}
+    #:go text-coord-mid
+    @rrt{CM framework, study quality of error outputs}
+    @rrt{two more properties (no details?)})
+  (pslide
+    #:go heading-coord-left
+    @rt{Error Preorder}
+    #:go text-coord-mid
+    @rrt{eager vs lazy example} ;; too many examples? how else to mention the preorder?
+    @rrt{now can partition space})
+  (pslide
+    #:go heading-coord-left
+    @rt{Map, color in}
+    #:go text-coord-mid
+    @rrt{TS; F-TS; CM; BS BC; preorder}
+    @rrt{deep vs shallow sound types})
+  (pslide
+    #:go heading-coord-left
+    @rt{Table view?}
+    #:go text-coord-mid
+    @rrt{from jfp})
+  (void))
+
+(define (sec:thesis)
+  (pslide
+    #:go heading-coord-left
+    @rt{Map guarantees and perf}
+    #:go text-coord-mid
+    @rrt{evident 2-way tradeoff}
+    @rrt{really its 3 ways, mentioned expressiveness}
+    @rrt{what to do?}
+    @rrt{improve endpoints, several workers feltey, grift, pycket, vitousek}
+    ;; can interact, don't lose anything, and really what you want
+    @rrt{my thesis, in full})
+  (pslide
+    #:go heading-coord-left
+    @rt{Entering unpublished results}
+    ;; moonlight, flows left-to-right?
+    #:go text-coord-mid
+    @rrt{XXX})
+  (sec:thesis:motivation)
+  (sec:thesis:model)
+  (sec:thesis:implementation)
+  (void))
+
+(define (sec:thesis:motivation)
+  (pslide
+    #:go heading-coord-left
+    @rt{Sieve performance?}
+    #:go text-coord-mid
+    @rrt{hm, can try to recall an example}
+    @rrt{but real win is when deep cannot budge}
+    @rrt{fully-typed back to deep})
+  (pslide
+    #:go heading-coord-left
+    @rt{Shallow removes errors}
+    #:go text-coord-mid
+    @rrt{lets set-box program run, overall simpler}
+    @rrt{very few programs that we can't run --- at end})
+  (pslide
+    #:go heading-coord-left
+    @rt{Shallow does not change behavior}
+    #:go text-coord-mid
+    @rrt{index-of example, those pesky wrappers})
+  (pslide
+    #:go heading-coord-left
+    @rt{Summary}
+    #:go text-coord-mid
+    @rrt{wow speed expressiveness correctness lets go})
+  (void))
+
+(define (sec:thesis:model)
+  (pslide
+    #:go heading-coord-left
+    @rt{Model}
+    #:go text-coord-mid
+    @rrt{first step, prototype / model}
+    @rrt{prove deep deep, shallow shallow}
+    @rrt{explore optimizations, show picture (move "wrap" boundary), details at end}
+    @rrt{results = cm, f-ts, compilation})
+  (pslide
+    #:go heading-coord-left
+    @rt{Complilation}
+    #:go text-coord-mid
+    @rrt{clear target future work}
+    @rrt{thanks fritz})
+  (void))
+
+(define (sec:thesis:implementation)
+  (pslide
+    #:go heading-coord-left
+    @rt{Code: Shallow TR}
+    #:go text-coord-mid
+    @rrt{reuse compiler pipeline}
+    @rrt{choice of shapes, rec shapes}
+    @rrt{insert checks}
+    @rrt{reuse optimizer when possible, another future work})
+  ;; anything else to say?
+  (pslide
+    #:go heading-coord-left
+    @rt{Perf data} ;; symmetry wth model results
+    #:go text-coord-mid
+    @rrt{best of both, overhead plots}
+    @rrt{paths story, maybe show the 6 small ones}
+    @rrt{any more})
+  (void))
+
+(define (sec:conclusion)
+  (pslide
+    #:go heading-coord-left
+    @rt{Summarize thesis support}
+    #:go text-coord-mid
+    @rrt{review thesis}
+    @rrt{proved in model}
+    @rrt{validated with implementation}
+    @rrt{coming out soon})
+  (pslide
+    #:go heading-coord-left
+    @rt{Contributions}
+    #:go text-coord-mid
+    @rrt{perf method}
+    @rrt{design method}
+    @rrt{transient adapted} ;; hmm.. kind of a surprise right?
+    @rrt{deep and shallow interop})
+  (void))
+
+(define (sec:extra)
+  (pslide
+    #:go heading-coord-left
+    @rt{Blame for transient / shallow}
+    #:go text-coord-mid
+    @rrt{perf omits blame}
+    @rrt{scary results after implemesting}
+    @rrt{confirmed in retic})
+  (pslide
+    #:go heading-coord-left
+    @rt{D S U boundaries}
+    #:go text-coord-mid
+    @rrt{review pictures}
+    @rrt{each in detail}
+    @rrt{challenges, dead-ends})
+  (pslide
+    #:go heading-coord-left
+    @rt{Completion Optimize}
+    #:go text-coord-mid
+    @rrt{transient strategy}
+    @rrt{easy redundancy}
+    @rrt{occurrence type to remove extra checks})
+  (pslide
+    #:go heading-coord-left
+    @rt{Cannot run}
+    #:go text-coord-mid
+    @rrt{occurrence type at boundary}
+    @rrt{all type, unrestricted, oh that inst})
+  (pslide
+    #:go heading-coord-left
+    @rt{Bonus fixes}
+    #:go text-coord-mid
+    @rrt{shallow for debugging deep})
   (void))
 
 (module+ main
@@ -861,8 +1055,10 @@
     (sec:intro)
     (sec:perf)
     (sec:design)
-
+    (sec:thesis)
+    (sec:conclusion)
     (pslide)
+
     (void))
   (void))
 
