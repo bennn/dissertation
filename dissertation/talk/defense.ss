@@ -779,12 +779,74 @@
   (void))
 
 (define (sec:perf:tr)
+  (pslide
+    ;; yikes ... teext easy = vis hard
+    #:go heading-coord-left
+    @rt{TR evaluation}
+    #:go text-coord-mid
+    @rrt{20 benchmarks}
+    @rrt{range size, purpose})
+  (pslide
+    #:go heading-coord-left
+    @rt{TR typical result}
+    #:go text-coord-mid
+    @rrt{or, a few results}
+    @rrt{yikes too slow}
+    @rrt{few are 10x deliv})
+  (pslide
+    #:go heading-coord-left
+    @rt{TR, map}
+    #:go text-coord-mid
+    @rrt{decorate, slow})
   (void))
 
 (define (sec:perf:rp)
+  (pslide
+    #:go heading-coord-left
+    @rt{map => RP}
+    #:go text-coord-mid
+    @rrt{focus, new})
+  (pslide
+    #:go heading-coord-left
+    @rt{RP evaluation ... mirror TR}
+    #:go text-coord-mid
+    @rrt{benchmarks, size purpose})
+  (pslide
+    #:go heading-coord-left
+    @rt{RP typical result}
+    #:go text-coord-mid
+    @rrt{lots 10x deliv}
+    @rrt{much faster})
+  (pslide
+    #:go heading-coord-left
+    @rt{RP vs TR night and day}
+    #:go text-coord-mid
+    @rrt{map again, side-by-side}
+    @rrt{quite a surprise, both sound types mean something}
+    @rrt{indeed TR came first, asked if sound dead})
   (void))
 
 (define (sec:design)
+  (pslide
+    #:go heading-coord-left
+    @rt{Is sound dead?}
+    #:go text-coord-mid
+    @rrt{NO, thunderous, from research community}
+    @rrt{several piped up (across the map)}
+    @rrt{papers papers all satisfy all properties})
+  (pslide
+    #:go heading-coord-left
+    @rt{Confusion}
+    #:go text-coord-mid
+    @rrt{hang on, recall different behaviors}
+    @rrt{new examples for new langs})
+  (pslide
+    #:go heading-coord-left
+    @rt{How can they all satisfy all when clearly different?}
+    #:go text-coord-mid
+    @rrt{weak properties!}
+    @rrt{led to design space analysis})
+  ;; ... ok now what
   (void))
 
 (module+ main
