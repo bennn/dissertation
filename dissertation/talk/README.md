@@ -25,7 +25,7 @@ with perf, though, motivates a combo semantics
  - implementing, several grown idioms to work around
 
 
-outline 2020-11-02, 2020-11-18 (!!!), 
+outline 2020-11-02, 2020-11-18 (!!!), final edits 2020-11-25
 ---
 
 intro
@@ -66,9 +66,6 @@ perf space
    much better for retic, never falls off the map, 10x for these very different benchmarks
  - night and day
    (do NOT talk about num. types yet, thats a sideline observation that we can't scalably make)
-
- HEY shoot down other properties --- gg, ts ....
-  and criticize Max?
 
 design space (... lead into D S definitions)
  - wow this night & day is quite a surprise

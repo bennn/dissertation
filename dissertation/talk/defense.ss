@@ -20,6 +20,8 @@
 ;;   - [ ] interop "city" at D S border
 ;; - [ ] thesis + supports pict
 ;; - [ ] D S U picts, the safe one and others
+;; - [ ] sunrise, green, theme for "published" half
+;; - [ ] moonlight, blue, theme for "new" half
 ;;
 ;; - [ ] headlines ... gt terrific
 ;; - [ ] two methods (major contributions)
@@ -679,6 +681,7 @@
     #:go heading-coord-left
     @rt{My Work, understanding the space}
     ;; not a giants-on-shoulders space,
+    ;; (battlefield not quite right for my contributions)
     ;; more like blindfolded people groping elephant
     ;; contentious
     #:go text-coord-mid
@@ -709,6 +712,7 @@
     ;;  programmers can rely on types & performance
     ;; enter ben
     ;; developed "methods" to understand, during phd
+    ;;  use colored-in picture, blurred
     @rrt{implications for (1) perf and for (2) what types mean}
     @rrt{thesis preview: deep and shallow can interoperate})
   ;; now lets pursue the two threads, start with performance
@@ -827,6 +831,7 @@
   (void))
 
 (define (sec:design)
+  ;; Q work in the survey, early, about whether transient is plain "better"?
   (pslide
     #:go heading-coord-left
     @rt{Is sound dead?}
@@ -1015,14 +1020,17 @@
     #:go text-coord-mid
     @rrt{perf omits blame}
     @rrt{scary results after implemesting}
-    @rrt{confirmed in retic})
+    @rrt{confirmed in retic}
+    (blank)
+    (frame-bitmap "transient-blame.png" #:w% 5/10))
   (pslide
     #:go heading-coord-left
     @rt{D S U boundaries}
     #:go text-coord-mid
     @rrt{review pictures}
     @rrt{each in detail}
-    @rrt{challenges, dead-ends})
+    @rrt{challenges, dead-ends}
+    (frame-bitmap "dsu-optfail.png" #:w% 5/10))
   (pslide
     #:go heading-coord-left
     @rt{Completion Optimize}
@@ -1032,15 +1040,44 @@
     @rrt{occurrence type to remove extra checks})
   (pslide
     #:go heading-coord-left
-    @rt{Cannot run}
+    @rt{Shallow cannot run 1/2}
+    #:go text-coord-mid
+    @rrt{all type, unrestricted, oh that inst}
+    (frame-bitmap "transient-fail-all.png" #:w% 5/10))
+  (pslide
+    #:go heading-coord-left
+    @rt{Shallow cannot run 2/2}
     #:go text-coord-mid
     @rrt{occurrence type at boundary}
-    @rrt{all type, unrestricted, oh that inst})
+    (frame-bitmap "transient-fail-occurrence.png" #:w% 5/10))
   (pslide
     #:go heading-coord-left
     @rt{Bonus fixes}
     #:go text-coord-mid
-    @rrt{shallow for debugging deep})
+    @rrt{shallow for debugging deep}
+    (blank)
+    (frame-bitmap "transient-bugfix.png" #:w% 5/10))
+  (pslide
+    #:go heading-text-coord
+    @st{Gradual Guarantee}
+    #:go text-coord-mid
+    (vr-append
+      pico-y-sep
+      (frame-bitmap "svcb-snapl-2015.png" #:w% 6/10)
+      @rrt{Siek, Vitousek, Cimini, Boyland   SNAPL 2015})
+    #:next
+    (blank)
+    @rrt{- only concerns the Dyn type}
+    @rrt{- satisfied by Natural, Optional, and the rest})
+  (pslide
+    #:go heading-coord-left
+    @rt{Gradual Type Theory (GTT)}
+    #:go text-coord-mid
+    @rrt{Max S. New, 2020 dissertation, Northeastern}
+    @rrt{next at Michigan}
+    ;; heaven, geometric imagery ... I am the anti-max
+    @rrt{forget the landscape, design from first principles}
+    @rrt{Natural only satisfactory answer})
   (void))
 
 (module+ main
@@ -1050,15 +1087,15 @@
   (parameterize ((current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color background-color)))
     ;(test-margin-slide)
     ;(test-screenshot-slide)
-    (sec:title)
-    ;(sec:example)
-    (sec:intro)
-    (sec:perf)
-    (sec:design)
-    (sec:thesis)
-    (sec:conclusion)
-    (pslide)
-
+;    (sec:title)
+;    ;(sec:example)
+;    (sec:intro)
+;    (sec:perf)
+;    (sec:design)
+;    (sec:thesis)
+;    (sec:conclusion)
+;    (pslide)
+    (sec:extra)
     (void))
   (void))
 
@@ -1070,9 +1107,6 @@
     (apply values (for/list ((f (in-list (list get-client-w get-client-h)))) (f #:aspect aspect))))
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
-
-    ;#:go center-coord
-    ;(frame-bitmap "transient-blame.png" #:w% 5/10)
 
 
 ;    #:go heading-coord-left
