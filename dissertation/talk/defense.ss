@@ -488,18 +488,18 @@
   (define st-pict (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color))
   (define a-sep (blank 0 small-y-sep))
   (define a-pict @st{Ben Greenman    2020-12-19})
-  (pslide
-    #:go t-coord t-pict
-    st-pict a-sep a-pict)
+  (define (title-slide)
+    (pslide
+      #:go t-coord t-pict
+      st-pict a-sep a-pict))
+  (title-slide)
   (pslide
     #:go text-coord-mid
     (vl-append
       small-y-sep
       @rrt{Matthias Felleisen} @rrt{Amal Ahmed} @rrt{Jan Vitek}
       @rrt{Shriram Krishnamurthi} @rrt{Fritz Henglein} @rrt{Sam Tobin-Hochstadt}))
-  (pslide
-    #:go t-coord t-pict
-    st-pict a-sep a-pict)
+  (title-slide)
   (void))
 
 (define ex-ok "Ok")
@@ -656,12 +656,29 @@
 (define (sec:intro)
   (pslide
     #:go center-coord
-    ;; Ershov "And I have long since taught myself to think that if I reproduce somebody's guess in my work, I should not regret not having been the first, but, on the contrary, should always bear it in mind that it is a major stimulus: since a similar idea has occured to me living thousands of kilometers away, it means that there really is something in it"
+    ;; Ershov "And I have long since taught myself to think that if I reproduce
+    ;; somebody's guess in my work, I should not regret not having been the
+    ;; first, but, on the contrary, should always bear it in mind that it is a
+    ;; major stimulus: since a similar idea has occured to me living thousands
+    ;; of kilometers away, it means that there really is something in it"
     ;; _from hidden places knowledge i obtained_ k. Levitin
-    @rrt{Ershov quote, reinvention = real insight})
+
+    @rrt{if I reproduce somebody's guess in my work .... me living thousands of}
+    @rrt{kilometers away ... it means that there really is something in it}
+    (blank)
+    @rrt{Ershov, 1983})
   (pslide
     #:go heading-coord-left
     @rt{By that measure, GT landmark idea}
+    #:go text-coord-mid
+    @rrt{began with 4 simultaneous insights}
+    @rrt{- Siek Taha   SFP 2006}
+    @rrt{- Gronski Knowles Tomb Freund Flanagan   SFP 2006}
+    @rrt{- Tobin-Hochstadt Felleisen   DLS 2006}
+    @rrt{- Matthews Findler   POPL 2007, TOPLAS 2009})
+  (pslide
+    #:go heading-coord-left
+    @rt{Basic Ideas}
     #:go text-coord-mid
     ;; NOTE focus on the ties between T/U, the boundaries
     @rrt{goal = unite two movements in PL design}
@@ -669,14 +686,22 @@
     @rrt{untyped, dynamically typed})
   (pslide
     #:go heading-coord-left
-    @rt{History, Lively Space}
+    @rt{Lively Space}
     ;; 0. mccarthy?
     ;; 1. common lisp, strongtalk, grey etal,
     ;; 2. gradual typing (mixed-typed?)
     ;; 3. GT bib
     ;; languages vs papers?
     #:go text-coord-mid
-    @rrt{old idea ... over the years ... modern explosion})
+    @rrt{4 originals, directly gave rise to a few languages}
+    ;; --> TR retic pycket grift
+    @rrt{olde pre-original}
+    ;; --> commonlisp strongtalk 
+    @rrt{many more, aca + ind labs}
+    ;; --> actionscript mypy flow hack pyre pytype rdl typescript typedclojure
+    ;;     typedlua gradualtalk tpd pyret grace pallene strongscript thorn c+
+    ;;     dart2 nom safets ts*
+    @rrt{over 200 papers in gradual-typing-bib})
   (pslide
     #:go heading-coord-left
     @rt{My Work, understanding the space}
@@ -1030,7 +1055,7 @@
     @rrt{review pictures}
     @rrt{each in detail}
     @rrt{challenges, dead-ends}
-    (frame-bitmap "dsu-optfail.png" #:w% 5/10))
+    (frame-bitmap "dsu-optfail.png" #:w% 4/10))
   (pslide
     #:go heading-coord-left
     @rt{Completion Optimize}
@@ -1087,14 +1112,14 @@
   (parameterize ((current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color background-color)))
     ;(test-margin-slide)
     ;(test-screenshot-slide)
-;    (sec:title)
-;    ;(sec:example)
-;    (sec:intro)
-;    (sec:perf)
-;    (sec:design)
-;    (sec:thesis)
-;    (sec:conclusion)
-;    (pslide)
+    (sec:title)
+    ;(sec:example)
+    (sec:intro)
+    (sec:perf)
+    (sec:design)
+    (sec:thesis)
+    (sec:conclusion)
+    (pslide)
     (sec:extra)
     (void))
   (void))
