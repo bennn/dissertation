@@ -237,12 +237,16 @@
 (define (src-path* elem*)
   (apply build-path src elem*))
 
+(define (src-bitmap ps)
+  (bitmap (src-path ps)))
+
 (define (frame-bitmap ps #:w% [w% 9/10])
   (add-rounded-border
     #:radius 2 #:x-margin (w%->pixels 3/100) #:y-margin (h%->pixels 3/100)
     #:frame-width 2 #:frame-color neutral-pen-color
     #:background-color neutral-brush-color
-    (bitmap (src-path ps))))
+    (let ((pp (src-bitmap ps)))
+      (scale-to-fit pp (w%->pixels w%) (pict-height pp)))))
 
 (struct code-arrow (src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull style) #:transparent)
 
@@ -666,12 +670,14 @@
     @rrt{if I reproduce somebody's guess in my work .... me living thousands of}
     @rrt{kilometers away ... it means that there really is something in it}
     (blank)
-    @rrt{Ershov, 1983})
+    @rrt{Ershov, 1983}
+    #:go heading-coord-right
+    (frame-bitmap "ershov.png" #:w% 2/10))
   (pslide
     #:go heading-coord-left
     @rt{By that measure, GT landmark idea}
     #:go text-coord-mid
-    @rrt{began with 4 simultaneous insights}
+    @rrt{4x insights}
     @rrt{- Siek Taha   SFP 2006}
     @rrt{- Gronski Knowles Tomb Freund Flanagan   SFP 2006}
     @rrt{- Tobin-Hochstadt Felleisen   DLS 2006}
@@ -701,44 +707,50 @@
     ;; --> actionscript mypy flow hack pyre pytype rdl typescript typedclojure
     ;;     typedlua gradualtalk tpd pyret grace pallene strongscript thorn c+
     ;;     dart2 nom safets ts*
-    @rrt{over 200 papers in gradual-typing-bib})
+    @rrt{over 200 papers in gradual-typing-bib}
+    #:next ;; not shoulders, rather elephant
+    #:go center-coord (frame-bitmap "elephant.jpg" #:w% 6/10) @rrt{Image credit: Hans Moller}
+    )
   (pslide
     #:go heading-coord-left
-    @rt{My Work, understanding the space}
-    ;; not a giants-on-shoulders space,
-    ;; (battlefield not quite right for my contributions)
-    ;; more like blindfolded people groping elephant
-    ;; contentious
-    #:go text-coord-mid
-    @rrt{chaos})
-  (pslide
-    #:go heading-coord-left
-    @rt{Example 1}
+    @rt{Example, disagreement} ;; titles are so difficult
+    ;; [[ recall, can mix typed and untyped ]]
     ;; basic example, typed first = static error
+    ;;  f(n : number) { n + 1} ... f("A")
     #:go text-coord-mid
-    @rrt{int across boundary}
-    @rrt{typed rejects}
-    @rrt{untyped allows}
+    @rrt{number across boundary} ;; get letter
     @rrt{some mixed-typed reject, others allow}
-    @rrt{allowance = funny because contradicts the type})
+    @rrt{allowance = funny because contradicts the type}
+    @rrt{you'd expect all to agree on this basic one})
   (pslide
     #:go heading-coord-left
-    @rt{Example 2}
+    @rt{Example 2: it gets worse}
+    ;; TODO what are the goals, first of all?
+    ;;  what to say about the languages here
+    ;; - change "number" to "boxof number"
+    ;; - call untyped function with the box
+    ;; -  .... result depends on where box accessed (yes thats easy enough)
     #:go text-coord-mid
-    ;; may need two boundaries here
+    ;; f(n : box(number)) { g(n) } ... f(box("A")) ... g(n) { (unbox n) + 1 }
     @rrt{pair across boundary}
     @rrt{some mixed-typed reject early, others late, others never})
   (pslide
     #:go heading-coord-left
     @rt{My Work, understanding the space}
-    #:go text-coord-mid
-    ;; back to landscape,
-    ;; examples = hint at disagreement, implications for whether
-    ;;  programmers can rely on types & performance
-    ;; enter ben
-    ;; developed "methods" to understand, during phd
-    ;;  use colored-in picture, blurred
+    ;; back to chaos +? elephant
+    #:go center-coord
+    (ht-append
+      10
+      (vl-append
+        10
+        (frame-bitmap "ruler.jpg" #:w% 2/10)
+        @rrt{performance})
+      (vl-append
+        10
+        (frame-bitmap "scale.jpeg" #:w% 2/10)
+        @rrt{guarantees}))
     @rrt{implications for (1) perf and for (2) what types mean}
+    ;; with improved understanding, compromise ... preview filled-in space
     @rrt{thesis preview: deep and shallow can interoperate})
   ;; now lets pursue the two threads, start with performance
   (void))
@@ -1083,8 +1095,8 @@
     (blank)
     (frame-bitmap "transient-bugfix.png" #:w% 5/10))
   (pslide
-    #:go heading-text-coord
-    @st{Gradual Guarantee}
+    #:go heading-coord-right
+    @rt{Gradual Guarantee}
     #:go text-coord-mid
     (vr-append
       pico-y-sep
@@ -1133,6 +1145,17 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+    #:go center-coord
+    (ht-append
+      10
+      (vl-append
+        10
+        (frame-bitmap "ruler.jpg" #:w% 2/10)
+        @rrt{performance})
+      (vl-append
+        10
+        (frame-bitmap "scale.jpeg" #:w% 2/10)
+        @rrt{guarantees}))
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
