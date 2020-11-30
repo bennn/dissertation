@@ -427,6 +427,12 @@
       r-pict)
     tu-pict))
 
+(define ruler-pict
+  (frame-bitmap "ruler.jpg" #:w% 2/10))
+
+(define scale-pict
+  (frame-bitmap "scale.jpeg" #:w% 2/10))
+
 ;; -----------------------------------------------------------------------------
 
 (define (test-margin-slide)
@@ -743,11 +749,11 @@
       10
       (vl-append
         10
-        (frame-bitmap "ruler.jpg" #:w% 2/10)
+        ruler-pict
         @rrt{performance})
       (vl-append
         10
-        (frame-bitmap "scale.jpeg" #:w% 2/10)
+        scale-pict
         @rrt{guarantees}))
     @rrt{implications for (1) perf and for (2) what types mean}
     ;; with improved understanding, compromise ... preview filled-in space
@@ -763,23 +769,72 @@
   ;;  want to RUN these mixed-typed programs
   ;; and focus on TR ... skull flag? danger?
   (pslide
+    ;; performance first
+    ;; ... and dive right in to story of typed racket
+    ;;  the FIRST big mixed language where types mean something
+    ;;  in the beginning implemented and it was good
+    ;; [ ] mag glass?
+    ;; [ ] pirate flag
     #:go heading-coord-left
-    @rt{Perf: Typed Racket}
-    ;; focus on TR city
+    @rt{Performance: Story of Typed Racket}
     #:go text-coord-mid
+    ;; black flag, zoom in,
+    ;;  but black-flag = exaggeration ... have lots of programmers some good some bad MANY q-mark
+    ;;  ... pirate fog, islands?
     @rrt{some programs fine}
-    @rrt{others not fine}
-    @rrt{JBC q tr-pdfs, XXX slowdown}
+    @rrt{others not fine})
+  (pslide
+    #:go heading-coord-left
+    @rt{Trie Example}
+    @rrt{JBC q tr-pdfs, 1200x slowdown}
+    ;; TODO
+    ;; - blur JBC / entire message
+    ;; - highlight "burned"
+    ;; - highlight "12sec vs 0ms"
+    (frame-bitmap "trie-racket-users.png" #:w% 4/10))
+  (pslide
+    #:go heading-coord-left
+    @rt{Story of Typed Racket}
+    ;; back to "woods" with some black flags
     @rrt{more questions, more hazards}
     @rrt{evident problem, unclear size and severity})
   (pslide
     #:go heading-coord-left
-    @rt{Config Space}
+    @rt{GTP Benchmarks}
     #:go text-coord-mid
-    @rrt{need a way to measure, in total; what's total?}
+    @rrt{developed benchmarks, with Dan Matthias Asumu Max}
+    @rrt{adapted from real programs, convert to TR})
+  (pslide
+    #:go heading-coord-left
+    @rt{GTP Benchmarks, table}
+    #:go text-coord-mid
+    (frame-bitmap "gtp-size.png"))
+  (pslide
+    #:go heading-coord-left
+    @rt{GTP Benchmarks, example}
+    #:go text-coord-mid
+    @rrt{size shape ... from site}
+    (frame-bitmap "jpeg-description.png" #:w% 4/10))
+  (pslide
+    #:go heading-coord-left
+    @rt{What to do with benchmarks?}
+    #:go text-coord-mid
+    @rrt{central question}
+    @rrt{have 21 programs, or 42 if typed and untyped}
+    ;; CAN get 21 / 42 numbers out. (That's what others do.) Do we learn much? NO
+    @rrt{but --- ignores entire mixed space})
+  (pslide
+    #:go heading-coord-left
+    @rt{Systematic Method}
+    #:go text-coord-mid
+    ruler-pict)
+  (pslide
+    #:go heading-coord-left
+    @rt{Perf. Method: Study All Configurations}
+    #:go text-coord-mid
     @rrt{program N points => 2^N configs}
-    @rrt{some good some danger, via ad-hoc sample}
-    @rrt{basic idea: measure systematically})
+    ;; recall JPEG picture, its N example, migratable vs contextual
+    @rrt{some good some danger, measure systematically})
   (pslide
     ;; gotta work for all programs, more than the tiny N=4 example
     #:go heading-coord-left
@@ -787,7 +842,7 @@
     #:go text-coord-mid
     @rrt{small N = unreadable space}
     @rrt{modest N = infeasible}
-    @rrt{answer 2x = careful question, consumer-first})
+    @rrt{answer to both comes from a careful consumer-first question})
   (pslide
     #:go heading-coord-left
     @rt{D-deliverable measure}
@@ -795,38 +850,48 @@
     @rrt{enduser / decision maker, set Dx}
     @rrt{worst-case tolerate ... may be 2x for ship, may be 10x for dev}
     @rrt{with D every config is yes or no, deliverable or not}
+    ;; now have one number that says a lot about the space (relative to param)
     @rrt{compressed to number, easy to interpret a 60% result here}
     @rrt{also can sample})
   (pslide
     #:go heading-coord-left
     @rt{Approximate D-deliverable}
     #:go text-coord-mid
-    @rrt{knowledge vs truth ... shadow lattice?}
-    @rrt{percent in a few big samples approximates the overall})
+    @rrt{easy to approx. with interval}
+    @rrt{knowledge vs truth, pick 1 random then D% good}
+    @rrt{well then D% in a few big samples close enough}
+    ;; no vis, no need for details
+    @rrt{success with linear samples})
   (pslide
     #:go heading-coord-left
     @rt{Method Summary}
+    ;; it's a contribution
     #:go text-coord-mid
     @rrt{several programs, fully type}
     @rrt{systematically collect, exhaustive or approx}
     @rrt{study with range of D})
   (pslide
     #:go heading-coord-left
-    @rt{Overhead Plot, example}
+    @rt{D-deliv Example}
+    ;; how to read
     #:go text-coord-mid
-    @rrt{one benchmark, D from 1 -- 20})
+    @rrt{jpeg plot})
+  (pslide
+    #:go heading-coord-left
+    @rt{Two Evaluations}
+    #:go text-coord-mid
+    @rrt{story of TR}
+    @rrt{story of RP too})
   (sec:perf:tr)
   (sec:perf:rp)
   (void))
 
 (define (sec:perf:tr)
   (pslide
-    ;; yikes ... teext easy = vis hard
     #:go heading-coord-left
     @rt{TR evaluation}
     #:go text-coord-mid
-    @rrt{20 benchmarks}
-    @rrt{range size, purpose})
+    @rrt{20 benchmarks, recall table})
   (pslide
     #:go heading-coord-left
     @rt{TR typical result}
@@ -1150,11 +1215,11 @@
       10
       (vl-append
         10
-        (frame-bitmap "ruler.jpg" #:w% 2/10)
+        ruler-pict
         @rrt{performance})
       (vl-append
         10
-        (frame-bitmap "scale.jpeg" #:w% 2/10)
+        scale-pict
         @rrt{guarantees}))
 
 ;    #:go heading-coord-left
