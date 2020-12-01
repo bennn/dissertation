@@ -46,31 +46,6 @@
 
 (define turn revolution)
 
-;; =============================================================================
-;; --- coordinates
-
-(define slide-top 4/100)
-(define slide-left 4/100)
-(define slide-right (- 1 slide-left))
-(define slide-bottom 92/100)
-(define text-left (* 3/2 slide-left))
-(define text-right (- 1 text-left))
-(define text-top (* 4 slide-top))
-(define text-bottom slide-bottom)
-
-(define (scale-to-text pp)
-  (define w (w%->pixels (- text-right text-left)))
-  (define h (h%->pixels (- text-bottom text-top)))
-  (scale-to-fit pp w h))
-
-(define heading-coord-left (coord slide-left slide-top 'lt))
-(define heading-coord-mid (coord 1/2 slide-top 'ct))
-(define heading-coord-right (coord slide-right slide-top 'rt))
-(define text-coord-left (coord text-left text-top 'lt))
-(define text-coord-mid (coord 1/2 text-top 'ct))
-(define text-coord-right (coord text-right text-top 'rt))
-(define center-coord (coord 1/2 1/2 'cc))
-
 ;; -----------------------------------------------------------------------------
 ;; --- space
 
@@ -88,9 +63,36 @@
 
 (define code-line-sep (h%->pixels 12/1000))
 (define text-line-sep (h%->pixels  4/1000))
+(define item-line-sep (h%->pixels 35/1000))
 
 (define codeblock-x-sep (w%->pixels 4/100))
 (define codeblock-y-sep (h%->pixels 4/100))
+
+;; =============================================================================
+;; --- coordinates
+
+(define slide-top 4/100)
+(define slide-left 4/100)
+(define slide-right (- 1 slide-left))
+(define slide-bottom 92/100)
+(define text-left (* 3/2 slide-left))
+(define text-right (- 1 text-left))
+(define text-top (* 5 slide-top))
+(define text-bottom slide-bottom)
+
+(define (scale-to-text pp)
+  (define w (w%->pixels (- text-right text-left)))
+  (define h (h%->pixels (- text-bottom text-top)))
+  (scale-to-fit pp w h))
+
+(define heading-coord-left (coord slide-left slide-top 'lt))
+(define heading-coord-mid (coord 1/2 slide-top 'ct))
+(define heading-coord-right (coord slide-right slide-top 'rt))
+(define text-coord-left (coord text-left text-top 'lt))
+(define text-coord-mid (coord 1/2 text-top 'ct))
+(define text-coord-right (coord text-right text-top 'rt))
+(define center-coord (coord 1/2 1/2 'cc))
+(define title-coord-mid (coord 1/2 25/100 'ct #:sep pico-y-sep))
 
 ;; -----------------------------------------------------------------------------
 ;; --- color
@@ -179,8 +181,11 @@
 (define (rt . str*)
   (rt* str*))
 
-(define (rt* str*)
-  (txt str* #:font body-text-font #:size body-text-size #:color body-text-color))
+(define (rt* str* #:color [color body-text-color])
+  (txt str* #:font body-text-font #:size body-text-size #:color color))
+
+(define (st . str*)
+  (rt* str* #:color subtitle-text-color))
 
 (define (rrt . str*)
   (rrt* str*))
@@ -205,6 +210,12 @@
 
 (define (text-line-append* pp*)
   (apply vl-append text-line-sep pp*))
+
+(define (item-line-append . pp*)
+  (item-line-append* pp*))
+
+(define (item-line-append* pp*)
+  (apply vl-append item-line-sep pp*))
 
 (define (result-bubble pp)
   (add-rounded-border
@@ -490,17 +501,16 @@
 ;; =============================================================================
 
 (define (sec:title)
-  (define (st str #:size-- [size-- 0] #:color [color body-text-color])
-    (txt str #:font subtitle-text-font #:size (- body-text-size size--) #:color color))
   ;; TODO sunset, forest background
-  (define t-coord (coord 1/2 4/10 'ct #:sep pico-y-sep))
+  (define (st str #:size-- [size-- 0] #:color [color subtitle-text-color])
+    (txt str #:font subtitle-text-font #:size (- body-text-size size--) #:color color))
   (define t-pict @ht{Deep and Shallow Types})
   (define st-pict (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color))
   (define a-sep (blank 0 small-y-sep))
-  (define a-pict @st{Ben Greenman    2020-12-19})
+  (define a-pict @st[#:color body-text-color]{Ben Greenman    2020-12-19})
   (define (title-slide)
     (pslide
-      #:go t-coord t-pict
+      #:go title-coord-mid t-pict
       st-pict a-sep a-pict))
   (title-slide)
   (pslide
@@ -1084,6 +1094,10 @@
   (void))
 
 (define (sec:thesis:model)
+  ;; HANG ON the contribution is the scaled-up transient, not so much the model
+  ;; - more types, subtyping
+  ;; - optimizations
+  ;; - no dyn = audit check sites
   (pslide
     #:go heading-coord-left
     @rt{Model}
@@ -1141,6 +1155,18 @@
     @rrt{validated with implementation}
     @rrt{coming out soon})
   (pslide
+    #:go heading-coord-left
+    @ht{Contributions}
+    #:go title-coord-mid
+    ;; icons at bottom?
+    (item-line-append
+      (hb-append @st{1. } @rt{performance analysis method})
+      (hb-append @st{2. } @rt{design analysis method})
+      (hb-append @st{3. } @rt{scaled-up Transient})
+      (hb-append @st{4. } @rt{Deep + Shallow language}))
+    #:go (coord 1/2 75/100 'cc)
+    (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?}))
+  #;(pslide
     #:go heading-coord-left
     @rt{Contributions}
     #:go text-coord-mid
@@ -1224,12 +1250,12 @@
   (parameterize ((current-slide-assembler (slide-assembler/background (current-slide-assembler) #:color background-color)))
     ;(test-margin-slide)
     ;(test-screenshot-slide)
-    (sec:title)
     ;(sec:example)
-    (sec:intro)
-    (sec:perf)
-    (sec:design)
-    (sec:thesis)
+    (sec:title)
+;    (sec:intro)
+;    (sec:perf)
+;    (sec:design)
+;    (sec:thesis)
     (sec:conclusion)
     (pslide)
     (sec:extra)
@@ -1245,17 +1271,16 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go center-coord
-    (ht-append
-      10
-      (vl-append
-        10
-        ruler-pict
-        @rrt{performance})
-      (vl-append
-        10
-        scale-pict
-        @rrt{guarantees}))
+    #:go heading-coord-left
+    @ht{Contributions}
+    #:go title-coord-mid
+    (item-line-append
+      (hb-append @st{1. } @rt{performance analysis method})
+      (hb-append @st{2. } @rt{design analysis method})
+      (hb-append @st{3. } @rt{scaled-up Transient})
+      (hb-append @st{4. } @rt{Deep + Shallow language}))
+    #:go (coord 1/2 75/100 'cc)
+    (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?})
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
