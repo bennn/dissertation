@@ -923,18 +923,18 @@
     #:go text-coord-mid
     @rrt{lots 10x deliv}
     @rrt{much faster})
-  (pslide
-    #:go heading-coord-left
-    @rt{RP vs TR night and day}
-    #:go text-coord-mid
-    @rrt{map again, side-by-side}
-    @rrt{quite a surprise, both sound types mean something}
-    @rrt{indeed TR came first, asked if sound dead})
   (void))
 
 (define (sec:design)
   ;; Q work in the survey, early, about whether transient is plain "better"?
   (pslide
+    #:go heading-coord-left
+    @rt{RP vs TR night and day}
+    #:go text-coord-mid
+    @rrt{map again, side-by-side}
+    @rrt{quite a surprise, both sound; types mean something})
+  (pslide
+    ;; the TR results came first, and our reaction was "sound dead"?
     #:go heading-coord-left
     @rt{Is sound dead?}
     #:go text-coord-mid
@@ -945,40 +945,53 @@
     #:go heading-coord-left
     @rt{Confusion}
     #:go text-coord-mid
-    @rrt{hang on, recall different behaviors}
-    @rrt{new examples for new langs})
+    @rrt{hang on, recall different behaviors})
+  (pslide
+    #:go heading-coord-left
+    @rt{Example 1}
+    #:go text-coord-mid
+    @rrt{all agree on the number-boundary question})
+  (pslide
+    #:go heading-coord-left
+    @rt{Example 2}
+    #:go text-coord-mid
+    @rrt{disagree on box-boundary}
+    @rrt{concrete cannot even express, every box starts with a type})
+  (pslide
+    #:go heading-coord-left
+    @rt{CM example, functions}
+    #:go text-coord-mid
+    @rrt{ah missing error})
   (pslide
     #:go heading-coord-left
     @rt{How can they all satisfy all when clearly different?}
+    ;; back up to the map
     #:go text-coord-mid
     @rrt{weak properties!}
-    @rrt{led to design space analysis})
+    @rrt{led to design space analysis}
+    @rrt{move UP to design map})
   (pslide
+    ;; first step, close review of TS
     #:go heading-coord-left
     @rt{Sound}
     #:go text-coord-mid
     @rrt{sound refers to type sound, classic theorem}
-    @rrt{none satisfy, except concrete, must generalize} ;; can't share HO
-    @rrt{but unsound is clear thats ignoring all types})
-  (pslide
-    #:go heading-coord-left
-    @rt{Unsound, extreme weakening}
-    #:go text-coord-mid
-    @rrt{any surface, result gets uni-type}
-    @rrt{applies to X Y Z langs (Flow)})
+    @rrt{none satisfy, must generalize}
+    @rrt{unsound, extreme end, ignoring all types})
   (pslide
     #:go heading-coord-left
     @rt{F-type soundness}
     #:go text-coord-mid
     @rrt{our first step, study sound space}
     @rrt{articulate the parameters}
-    ;; removal is WEAK but thats ok, don't worry for defense
+    ;; transient removal is WEAK but thats ok, don't worry for defense
     @rrt{removes transient}
     @rrt{still others lumped together})
   (pslide
     #:go heading-coord-left
     @rt{Natural vs Forgetful}
     #:go text-coord-mid
+    ;; recall CM example
     ;; temporary vs permanent types
     @rrt{example, different behaviors, prim error vs boundary})
   (pslide
@@ -989,13 +1002,22 @@
     @rrt{TS =/> yes})
   (pslide
     #:go heading-coord-left
-    @rt{Blame}
+    @rt{Map again, CM helps partition}
+    #:go text-coord-mid
+    @rrt{that}
+    @rrt{X})
+  (pslide
+    ;; furthermore, CM-analysis-framework helps measure quality of errors
+    #:go heading-coord-left
+    @rt{Blame, on map}
+    ;; finer distinctions even in non-CM space
     #:go text-coord-mid
     @rrt{CM framework, study quality of error outputs}
     @rrt{two more properties (no details?)})
   (pslide
     #:go heading-coord-left
     @rt{Error Preorder}
+    ;; hm, gotta predict these properties / rows with a checklist somehow ... map needs to stay low
     #:go text-coord-mid
     @rrt{eager vs lazy example} ;; too many examples? how else to mention the preorder?
     @rrt{now can partition space})
@@ -1007,7 +1029,7 @@
     @rrt{deep vs shallow sound types})
   (pslide
     #:go heading-coord-left
-    @rt{Table view?}
+    @rt{Table view}
     #:go text-coord-mid
     @rrt{from jfp})
   (void))
@@ -1018,26 +1040,27 @@
     @rt{Map guarantees and perf}
     #:go text-coord-mid
     @rrt{evident 2-way tradeoff}
-    @rrt{really its 3 ways, mentioned expressiveness}
+    @rrt{really its 3 ways, guarantees performance expressiveness}
     @rrt{what to do?}
     @rrt{improve endpoints, several workers feltey, grift, pycket, vitousek}
     ;; can interact, don't lose anything, and really what you want
     @rrt{my thesis, in full})
+  (sec:thesis:motivation)
   (pslide
     #:go heading-coord-left
     @rt{Entering unpublished results}
     ;; moonlight, flows left-to-right?
     #:go text-coord-mid
     @rrt{XXX})
-  (sec:thesis:motivation)
   (sec:thesis:model)
   (sec:thesis:implementation)
   (void))
 
 (define (sec:thesis:motivation)
   (pslide
+    ;; HM may not need example here, its clear we can toggle ... and too early to discuss transient racket
     #:go heading-coord-left
-    @rt{Sieve performance?}
+    @rt{Sieve performance ?}
     #:go text-coord-mid
     @rrt{hm, can try to recall an example}
     @rrt{but real win is when deep cannot budge}
@@ -1069,6 +1092,18 @@
     @rrt{prove deep deep, shallow shallow}
     @rrt{explore optimizations, show picture (move "wrap" boundary), details at end}
     @rrt{results = cm, f-ts, compilation})
+  (pslide
+    #:go heading-coord-left
+    @rt{Syntax}
+    #:go text-coord-mid
+    @rrt{show e, but focus on boundaries, 3 module-kinds}
+    @rrt{compile to 3 check-kinds})
+  (pslide
+    #:go heading-coord-left
+    @rt{Theorems}
+    #:go text-coord-mid
+    @rrt{TS}
+    @rrt{CM})
   (pslide
     #:go heading-coord-left
     @rt{Complilation}
