@@ -46,6 +46,9 @@
 
 (define turn revolution)
 
+(module+ test
+  (require rackunit))
+
 ;; -----------------------------------------------------------------------------
 ;; --- space
 
@@ -93,6 +96,7 @@
 (define text-coord-right (coord text-right text-top 'rt))
 (define center-coord (coord 1/2 1/2 'cc))
 (define title-coord-mid (coord 1/2 25/100 'ct #:sep pico-y-sep))
+(define icon-coord-mid (coord 1/2 75/100 'cc))
 
 ;; -----------------------------------------------------------------------------
 ;; --- color
@@ -105,7 +109,8 @@
 (define green1-3k1 (hex-triplet->color% #x598F61))
 (define green2-3k1 (hex-triplet->color% #x4F7459))
 (define green3-3k1 (hex-triplet->color% #x3D4A47))
-(define red-3k1 (hex-triplet->color% #xC0446C))
+(define red0-3k1 (hex-triplet->color% #xF0749C))
+(define red1-3k1 (hex-triplet->color% #xC0446C))
 (define orange0-3k1 (hex-triplet->color% #xE6BD82))
 (define orange1-3k1 (hex-triplet->color% #xFE9D73))
 (define orange2-3k1 (hex-triplet->color% #xB87D4A))
@@ -141,7 +146,7 @@
 (define subtitle-text-color highlight-pen-color)
 (define code-text-color black)
 (define success-color green1-3k1)
-(define error-color red-3k1)
+(define error-color red1-3k1)
 
 ;; -----------------------------------------------------------------------------
 ;; --- text
@@ -151,6 +156,10 @@
 
 (define title-text-font (small-caps-style "TeX Gyre Pagella"))
 (define title-text-size 70)
+
+(define h2-text-size 46)
+
+(define title-rm-font "TeX Gyre Pagella")
 
 (define body-text-font "Lucida Grande")
 (define body-text-size 38)
@@ -177,6 +186,12 @@
 
 (define (ht* str*)
   (txt str* #:font title-text-font #:size title-text-size #:color title-text-color))
+
+(define (ht2 . str*)
+  (ht2* str*))
+
+(define (ht2* str*)
+  (txt str* #:font title-rm-font #:size h2-text-size #:color subtitle-text-color))
 
 (define (rt . str*)
   (rt* str*))
@@ -444,6 +459,120 @@
 (define scale-pict
   (frame-bitmap "scale.jpeg" #:w% 2/10))
 
+(define (check-pict size)
+  (define outer-color green1-3k1)
+  (define inner-color green0-3k1)
+  (define line-width% 6)
+  ;;
+  (define size/2 (/ size 2))
+  (define size/3 (/ size 3))
+  (define line-width (/ size line-width%))
+  (define line-width/2 (/ line-width 2))
+  ;;
+  (define (draw-x dc% dx dy)
+    (define old-brush (send dc% get-brush))
+    (define old-pen (send dc% get-pen))
+    ;;
+    (send dc% set-brush (new brush% [color inner-color]))
+    (send dc% set-pen (new pen% [width 1] [color outer-color]))
+    ;; draw check from mid-left
+    (define path% (new dc-path%))
+    (send path% move-to line-width/2 (* 60/100 size))
+    (send path% line-to (- size/2 (/ line-width 2)) size)
+    (send path% line-to (+ size/2 (/ line-width 4)) size)
+    (send path% line-to size 0)
+    (send path% line-to (- size line-width) 0)
+    (send path% line-to (- size/2 (/ line-width 8)) (- size line-width))
+    (send path% line-to (- size/2 (/ line-width 5)) (- size line-width))
+    (send path% line-to (* 1.6 line-width) (* 60/100 size))
+    (send path% close)
+    (send dc% draw-path path% dx dy)
+    ;;
+    (send dc% set-brush old-brush)
+    (send dc% set-pen old-pen)
+    (void))
+  (dc draw-x size size))
+
+(define (x-pict size)
+  (define outer-color red1-3k1)
+  (define inner-color red0-3k1)
+  (define line-width% 6)
+  ;;
+  (define size/2 (/ size 2))
+  (define line-width (/ size line-width%))
+  (define line-width/2 (/ line-width 2))
+  ;;
+  (define (draw-x dc% dx dy)
+    (define old-brush (send dc% get-brush))
+    (define old-pen (send dc% get-pen))
+    ;;
+    (send dc% set-brush (new brush% [color inner-color]))
+    (send dc% set-pen (new pen% [width 1] [color outer-color]))
+    ;; draw X from top-left, counterclockwise
+    (define path% (new dc-path%))
+    (send path% move-to 0 0)
+    (send path% line-to (- size/2 line-width/2) size/2)
+    (send path% line-to 0 size)
+    (send path% line-to line-width size)
+    (send path% line-to size/2 (+ size/2 line-width/2))
+    (send path% line-to (- size line-width) size)
+    (send path% line-to size size)
+    (send path% line-to (+ size/2 line-width/2) size/2)
+    (send path% line-to size 0)
+    (send path% line-to (- size line-width) 0)
+    (send path% line-to size/2 (- size/2 line-width/2))
+    (send path% line-to line-width 0)
+    (send path% close)
+    (send dc% draw-path path% dx dy)
+    ;;
+    (send dc% set-brush old-brush)
+    (send dc% set-pen old-pen)
+    (void))
+  (dc draw-x size size))
+
+(define pass-pict
+  (check-pict 40))
+
+(define fail-pict
+  (x-pict 40))
+
+(define ds-model-pict
+  @rt{Model})
+
+(define ds-impl-pict
+  @rt{Implementation})
+
+(define (item-table . elem*)
+  (unless (= 0 (modulo (length elem*) 2))
+    (raise-arguments-error 'item-table "even number of args" "elem*" elem* "num elem*" (length elem*)))
+  (item-table* (pair-up elem*)))
+
+(define (pair-up x*)
+  (let loop ((prev #f)
+             (elem* x*))
+    (cond
+      [(null? elem*)
+       '()]
+      [prev
+        (cons (cons prev (car elem*))
+              (loop #f (cdr elem*)))]
+      [else
+        (loop (car elem*) (cdr elem*))])))
+
+(define (item-table* pair*)
+  (make-2table
+    #:col-sep small-x-sep
+    #:row-sep item-line-sep
+    pair*))
+
+;;(define thesis-full-pict
+;;  ;; TODO use bullet list
+;;  (text-line-append
+;;    @rt{Deep and Shallow types can coexist in a way that preserves their formal properties.}
+;;    @rt{Programmers can combine these types to strengthen Shallow-type}
+;;    @rt{guarantees, avoid unimportant Deep-type runtime errors, and lower the}
+;;    @rt{running time of typed/untyped interactions.}))
+
 ;; -----------------------------------------------------------------------------
 
 (define (test-margin-slide)
@@ -507,7 +636,7 @@
   (define t-pict @ht{Deep and Shallow Types})
   (define st-pict (st "Thesis Defense" #:size-- 6 #:color subtitle-text-color))
   (define a-sep (blank 0 small-y-sep))
-  (define a-pict @st[#:color body-text-color]{Ben Greenman    2020-12-19})
+  (define a-pict @st[#:color body-text-color]{Ben Greenman    2020-12-17})
   (define (title-slide)
     (pslide
       #:go title-coord-mid t-pict
@@ -1143,37 +1272,33 @@
     @rrt{best of both, overhead plots}
     @rrt{paths story, maybe show the 6 small ones}
     @rrt{any more})
+  ;; expressiveness + errors results?
   (void))
 
 (define (sec:conclusion)
   (pslide
-    #:go heading-coord-left
-    @rt{Summarize thesis support}
-    #:go text-coord-mid
-    @rrt{review thesis}
-    @rrt{proved in model}
-    @rrt{validated with implementation}
-    @rrt{coming out soon})
+    #:go title-coord-mid
+    @ht2{Deep and Shallow types can interoperate}
+    (blank 0 item-line-sep)
+    (item-table
+      (blank) @rt{Natural + Transient}
+      pass-pict @rt{preserves formal guarantees}
+      pass-pict @rt{enables speedups})
+    ;; instead of being stuck with pros/cons, can pick
+    ;#:go icon-coord-mid
+    ;(hc-append med-x-sep ds-model-pict ds-impl-pict)
+    )
   (pslide
     #:go heading-coord-left
     @ht{Contributions}
     #:go title-coord-mid
-    ;; icons at bottom?
     (item-line-append
       (hb-append @st{1. } @rt{performance analysis method})
       (hb-append @st{2. } @rt{design analysis method})
-      (hb-append @st{3. } @rt{scaled-up Transient})
+      (hb-append @st{3. } @rt{scaled-up Transient}) ;; hmm.. kind of a surprise right?
       (hb-append @st{4. } @rt{Deep + Shallow language}))
-    #:go (coord 1/2 75/100 'cc)
+    #:go icon-coord-mid
     (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?}))
-  #;(pslide
-    #:go heading-coord-left
-    @rt{Contributions}
-    #:go text-coord-mid
-    @rrt{perf method}
-    @rrt{design method}
-    @rrt{transient adapted} ;; hmm.. kind of a surprise right?
-    @rrt{deep and shallow interop})
   (void))
 
 (define (sec:extra)
@@ -1271,16 +1396,14 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go heading-coord-left
-    @ht{Contributions}
-    #:go title-coord-mid
-    (item-line-append
-      (hb-append @st{1. } @rt{performance analysis method})
-      (hb-append @st{2. } @rt{design analysis method})
-      (hb-append @st{3. } @rt{scaled-up Transient})
-      (hb-append @st{4. } @rt{Deep + Shallow language}))
-    #:go (coord 1/2 75/100 'cc)
-    (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?})
+
+;    #:go heading-coord-left
+;    @rt{Summarize thesis support}
+;    #:go text-coord-mid
+;    @rrt{review thesis}
+;    @rrt{proved in model}
+;    @rrt{validated with implementation}
+;    @rrt{coming out soon}
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
