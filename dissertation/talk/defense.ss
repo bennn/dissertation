@@ -105,7 +105,9 @@
 (define text-coord-mid (coord 1/2 text-top 'ct))
 (define text-coord-right (coord text-right text-top 'rt))
 (define center-coord (coord 1/2 1/2 'cc))
+(define title-coord-left (coord text-left 25/100 'ct #:sep pico-y-sep))
 (define title-coord-mid (coord 1/2 25/100 'ct #:sep pico-y-sep))
+(define title-coord-right (coord text-right 25/100 'ct #:sep pico-y-sep))
 (define icon-coord-mid (coord 1/2 75/100 'cc))
 
 ;; -----------------------------------------------------------------------------
@@ -503,6 +505,37 @@
     ((S shallow) shallow-codeblock)
     ((#f) (lambda arg* (blank)))
     (else (raise-argument-error 'dyn-codeblock "(or/c D S U)" sym))))
+
+;; TODO stop sign for wrap, bend-sign for scan?
+(define wrap-pict (rrt "wrap"))
+(define scan-pict (rrt "scan"))
+(define noop-pict (rrt "noop"))
+
+(define (DSU-pict [mode 0])
+  (ppict-do
+    (blank (w%->pixels 6/10) (h%->pixels 4/10))
+    #:go (coord 0 10/100 'lt #:abs-x 10)
+    (add-hubs (deep-code "Deep") 'D)
+    #:go (coord 1 10/100 'rt #:abs-x -10)
+    (add-hubs (shallow-code "Shallow") 'S)
+    #:go (coord 1/2 1 'cb)
+    (add-hubs (untyped-code "Untyped") 'U)
+    #:set
+    (let* ((pp ppict-do-state)
+           (lbl+arr*
+             (list
+               (list wrap-pict -18 0 (code-arrow 'D-S rb-find 'U-W lt-find (* 75/100 turn) (* 95/100 turn)  40/100 40/100 'solid))
+               (list wrap-pict -15 52 (code-arrow 'U-W lb-find 'D-S lb-find (* 54/100 turn) (* 20/100 turn)  60/100 60/100 'solid))
+               ;;
+               (list wrap-pict 0 -24 (code-arrow 'D-E rt-find 'S-W lt-find (* 11/100 turn) (* 89/100 turn)  1/4 1/4 'solid))
+               (list wrap-pict 0  16 (code-arrow 'S-W lb-find 'D-E rb-find (* 61/100 turn) (* 39/100 turn)  1/4 1/4 'solid))
+               ;;
+               (list noop-pict 13 0 (code-arrow 'S-S lb-find 'U-E rt-find (* 75/100 turn) (* 55/100 turn)  40/100 40/100 'solid))
+               (list scan-pict 10 52 (code-arrow 'U-E rb-find 'S-S rb-find (* 96/100 turn) (* 30/100 turn)  60/100 60/100 'solid))
+               )))
+      (for/fold ((pp pp))
+                ((l+a (in-list lbl+arr*)))
+        (add-code-arrow pp (fourth l+a) #:line-width 2 #:label (first l+a) #:x-adjust-label (second l+a) #:y-adjust-label (third l+a))))))
 
 (define the-swatch-str "   ")
 
@@ -1489,11 +1522,53 @@
     ;; - Natural + Transient
     @ht{Unpublished Results})
   (pslide
-    ;; alas, another transition
-    #:go center-coord @rt{???})
+    #:go center-coord
+    @rrt{show map, Deep and Shallow}
+    @rrt{Natural / TR = clear choice, best in show}
+    @rrt{Transient = no wrappers, great}
+    @rrt{goal is combine, new model + impl points}
+    @rrt{but cannot use Transient from RP, gotta add new types, remove dyn, subtyping})
+
+  (sec:thesis:transient)
+  (pslide
+    ;; HERE is a bit early to discuss blame problem, but its important signpost here
+    #:go center-coord
+    @rrt{show Transient, transient+ again}
+    @rrt{(gotta add new types, remove dyn, subtyping)}
+    @rrt{that gives sense of changes}
+    @rrt{but major blame challenges, failed})
   (sec:thesis:model)
   (sec:thesis:implementation)
   (sec:thesis:evaluation)
+  (void))
+
+(define (sec:thesis:transient)
+  (pslide
+    #:go heading-coord-left
+    @rt{Transient without Dyn}
+    #:go text-coord-mid
+    @rrt{(f x) : Num morphs to}
+    #:go title-coord-left
+    @rrt{Before}
+    @rrt{(check Num (check Fun f) (check Num x))}
+    @rrt{... because could be Dyn anywhere}
+    #:go title-coord-right
+    @rrt{After}
+    @rrt{(check Num (f x))}
+    @rrt{trust shape soundness})
+  (pslide
+    #:go heading-coord-left
+    @ht{Completion}
+    #:go text-coord-left
+    @rrt{made possible by another change}
+    #:go title-coord-left
+    @rrt{before, type elaboration}
+    #:go title-coord-right
+    @rrt{after, surf + tgt types, completion}
+    @rrt{theorem, completion correctness}
+    @rrt{opens door to optimizations}
+    #:go icon-coord-mid
+    @rrt{surface types support multi-lang too})
   (void))
 
 (define (sec:thesis:model)
@@ -1503,13 +1578,19 @@
   ;; - no dyn = audit check sites
   ;; ... okay make a checklist
   (pslide
+    ;; map again
+    #:go center-coord
+    @rrt{natural + mod. transient under one roof}
+    )
+  (pslide
+    ; {first step, prototype / model}
+    ; {prove deep deep, shallow shallow}
+    ; {explore optimizations, show picture (move "wrap" boundary), details at end}
+    ; {results = cm, f-ts, compilation}
     #:go heading-coord-left
-    @rt{Model}
+    @ht{Model}
     #:go text-coord-mid
-    @rrt{first step, prototype / model}
-    @rrt{prove deep deep, shallow shallow}
-    @rrt{explore optimizations, show picture (move "wrap" boundary), details at end}
-    @rrt{results = cm, f-ts, compilation})
+    @rt{???})
   (pslide
     #:go heading-coord-left
     @rt{Syntax}
@@ -1518,25 +1599,40 @@
     @rrt{compile to 3 check-kinds})
   (pslide
     #:go heading-coord-left
+    @rt{Complilation}
+    #:go text-coord-mid
+    @rrt{easy for Deep, Untyped}
+    @rrt{Shallow, target future work}
+    @rrt{thanks fritz}
+    @rrt{boundary strategies})
+  (pslide
+    #:go heading-coord-left
+    @ht{Compilation}
+    #:go title-coord-mid
+    'TODO
+
+    )
+  (pslide
+    #:go heading-coord-left
     @rt{Theorems}
     #:go text-coord-mid
     @rrt{TS}
     @rrt{CM})
-  (pslide
-    #:go heading-coord-left
-    @rt{Complilation}
-    #:go text-coord-mid
-    @rrt{clear target future work}
-    @rrt{thanks fritz})
   (void))
 
 (define (sec:thesis:implementation)
   (pslide
     #:go heading-coord-left
+    @ht{Map}
+    #:go center-coord
+    @rrt{ok model, down to impl now}
+    )
+  (pslide
+    #:go heading-coord-left
     @rt{Code: Shallow TR}
     #:go text-coord-mid
     @rrt{reuse compiler pipeline}
-    @rrt{choice of shapes, rec shapes}
+    @rrt{choice of shapes, rec shapes} ;; = focus!
     @rrt{insert checks}
     @rrt{reuse optimizer when possible, another future work})
   ;; anything else to say?
@@ -1713,7 +1809,7 @@
     (item-line-append
       (hb-append @st{1. } @rt{performance analysis method})
       (hb-append @st{2. } @rt{design analysis method})
-      (hb-append @st{3. } @rt{scaled-up Transient}) ;; hmm.. kind of a surprise right?
+      (hb-append @st{3. } @rt{scaled-up Transient}) ;; found several ... issue-points
       (hb-append @st{4. } @rt{Deep + Shallow language}))
     #:go icon-coord-mid
     (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?}))
@@ -1807,6 +1903,7 @@
 
 ;; =============================================================================
 
+
 (module+ raco-pict (provide raco-pict)
   (define aspect 'fullscreen)
   (define-values [client-w client-h]
@@ -1814,12 +1911,13 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-
     #:go heading-coord-left
-
-;    (big-overhead-plot 'jpeg '(D S))
-;    #:go icon-coord-mid
-;    @rt{Deep + Shallow = maximize D-deliverable cfgs.}
+    @ht{Compilation}
+    #:go title-coord-mid
+    (DSU-pict 0)
+    #:go icon-coord-mid
+    @rrt{Deep types => wrapper}
+    @rrt{Shallow types => check inputs}
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
