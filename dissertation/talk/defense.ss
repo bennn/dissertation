@@ -8,7 +8,7 @@
 ;; - [X] pick fonts
 ;; - [X] jfp example, slides ... take from diss pict
 ;; - [X] outline, on paper
-;; - [ ] outline on slides
+;; - [X] outline on slides
 ;; - [ ] technics in order!
 ;; - [ ] table pict
 ;; - [ ] warring states pict, D S E + concrete, pyret
@@ -42,12 +42,22 @@
   racket/format
   racket/runtime-path
   slideshow/code
+  (only-in math/statistics mean)
+  (only-in greenman-thesis stransient)
+  (only-in greenman-thesis/jfp-2019/main
+    MAX-OVERHEAD
+    transient-rkt-version
+    benchmark-name->performance-info)
+  gtp-plot/configuration-info gtp-plot/plot gtp-plot/typed-racket-info gtp-plot/performance-info
   plot/no-gui (except-in plot/utils min* max*))
-
-(define turn revolution)
 
 (module+ test
   (require rackunit))
+
+(define turn revolution)
+
+(define-runtime-path cache-dir "with-cache")
+(define-runtime-path src "src")
 
 ;; -----------------------------------------------------------------------------
 ;; --- space
@@ -148,6 +158,12 @@
 (define success-color green1-3k1)
 (define error-color red1-3k1)
 
+(define defense-pen-color-converter
+  (lambda (n) (case n ((0) deep-pen-color) ((1) shallow-pen-color))))
+
+(define defense-brush-color-converter
+  (lambda (n) (case n ((0) deep-brush-color) ((1) shallow-brush-color))))
+
 ;; -----------------------------------------------------------------------------
 ;; --- text
 
@@ -164,10 +180,12 @@
 (define body-text-font "Lucida Grande")
 (define body-text-size 38)
 (define sub-body-text-size 30)
+(define tiny-text-size 22)
 
 (define subtitle-text-font (small-caps-style body-text-font))
 
 (define code-text-font "Inconsolata")
+(define code-bold-font (cons 'bold code-text-font))
 (define code-text-size 26)
 
 (define (txt str*
@@ -208,11 +226,20 @@
 (define (rrt* str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color body-text-color))
 
+(define (tiny-txt str)
+  (txt str #:font body-text-font #:size tiny-text-size #:color body-text-color))
+
 (define (tt . str*)
   (tt* str*))
 
 (define (tt* str*)
   (txt str* #:font code-text-font #:size code-text-size #:color code-text-color))
+
+(define (bold-tt . str*)
+  (bold-tt* str*))
+
+(define (bold-tt* str*)
+  (txt str* #:font code-bold-font #:size code-text-size #:color code-text-color))
 
 (define (code-line-append . pp*)
   (code-line-append* pp*))
@@ -232,6 +259,12 @@
 (define (item-line-append* pp*)
   (apply vl-append item-line-sep pp*))
 
+(define (word-append . pp*)
+  (word-append* pp*))
+
+(define (word-append* pp*)
+  (apply hc-append pp*))
+
 (define (result-bubble pp)
   (add-rounded-border
     #:radius 22
@@ -244,9 +277,15 @@
   (result-bubble
     (txt str #:font body-text-font #:size body-text-size #:color success-color)))
 
+(define success-pict
+  (success-text "OK"))
+
 (define (error-text str)
   (result-bubble
     (txt str #:font body-text-font #:size body-text-size #:color error-color)))
+
+(define error-pict
+  (error-text "Error"))
 
 ;; -----------------------------------------------------------------------------
 ;; --- ???
@@ -254,8 +293,6 @@
 (define default-line-width 4)
 (define default-arrow-size 14)
 (define default-line-color highlight-pen-color)
-
-(define-runtime-path src "src")
 
 (define (src-path . elem*)
   (src-path* elem*))
@@ -266,13 +303,41 @@
 (define (src-bitmap ps)
   (bitmap (src-path ps)))
 
+(define frame-radius 2)
+
 (define (frame-bitmap ps #:w% [w% 9/10])
   (add-rounded-border
-    #:radius 2 #:x-margin (w%->pixels 3/100) #:y-margin (h%->pixels 3/100)
+    #:radius frame-radius #:x-margin (w%->pixels 3/100) #:y-margin (h%->pixels 3/100)
     #:frame-width 2 #:frame-color neutral-pen-color
     #:background-color neutral-brush-color
-    (let ((pp (src-bitmap ps)))
-      (scale-to-fit pp (w%->pixels w%) (pict-height pp)))))
+    (scale-src-bitmap ps w%)))
+
+(define (scale-src-bitmap ps w%)
+  (let ((pp (src-bitmap ps)))
+    (scale-to-fit pp (w%->pixels w%) (pict-height pp))))
+
+(define (frame-person ps w%)
+  (double-frame (scale-src-bitmap ps w%)))
+
+(define (double-frame pp)
+  (define bg-color subtitle-text-color)
+  (define fg-color green3-3k1)
+  (define border-gap 12)
+  (define fg-width 4)
+  (add-rounded-border
+    #:radius frame-radius #:x-margin border-gap #:y-margin border-gap
+    #:frame-width fg-width #:frame-color fg-color #:background-color bg-color
+    (add-rounded-border
+      #:radius frame-radius #:x-margin 0 #:y-margin 0
+      #:frame-width fg-width #:frame-color fg-color #:background-color bg-color
+      pp)))
+
+(define (takeaway-frame pp)
+  (add-rounded-border
+    #:radius 1
+    #:x-margin (/ client-w 2) #:y-margin med-y-sep
+    #:frame-width tiny-y-sep #:frame-color green2-3k1 #:background-color background-color
+    pp))
 
 (struct code-arrow (src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull style) #:transparent)
 
@@ -370,11 +435,17 @@
 (define (conslang x y)
   (if x (list* (tt x) (blank) y) y))
 
-(define (untyped-codeblock #:title [title #f] #:lang [lang "#lang racket"] . str*)
+(define (untyped-code str)
+  (untyped-codeblock #:title #f #:lang #f str))
+
+(define (untyped-codeblock #:title [title #f] #:lang [lang "#lang untyped"] . str*)
   (untyped-codeblock* #:title title (conslang lang (map tt str*))))
 
 (define (untyped-codeblock* pp* #:title [title #f])
   (X-codeblock pp* #:title title #:frame-color untyped-pen-color #:background-color untyped-brush-color))
+
+(define (shallow-code str)
+  (shallow-codeblock #:title #f #:lang #f str))
 
 (define (shallow-codeblock #:title [title #f] #:lang [lang "#lang shallow"] . str*)
   (shallow-codeblock* #:title title (conslang lang (map tt str*))))
@@ -382,11 +453,40 @@
 (define (shallow-codeblock* pp* #:title [title #f])
   (X-codeblock pp* #:title title #:frame-color shallow-pen-color #:background-color shallow-brush-color))
 
+(define (deep-code str)
+  (deep-codeblock #:title #f #:lang #f str))
+
 (define (deep-codeblock #:title [title #f] #:lang [lang "#lang deep"] . str*)
   (deep-codeblock* #:title title (conslang lang (map tt str*))))
 
 (define (deep-codeblock* pp* #:title [title #f])
   (X-codeblock pp* #:title title #:frame-color deep-pen-color #:background-color deep-brush-color))
+
+(define (dyn-codeblock sym)
+  (case sym
+    ((U untyped) untyped-codeblock)
+    ((D deep) deep-codeblock)
+    ((S shallow) shallow-codeblock)
+    ((#f) (lambda arg* (blank)))
+    (else (raise-argument-error 'dyn-codeblock "(or/c D S U)" sym))))
+
+(define (lattice-h-append . pp*)
+  (lattice-h-append* pp*))
+
+(define (lattice-h-append* pp*)
+  (apply hc-append small-x-sep pp*))
+
+(define (lattice-vl-append . pp*)
+  (lattice-vl-append* pp*))
+
+(define (lattice-vl-append* pp*)
+  (apply vl-append tiny-y-sep pp*))
+
+(define (codeblock-append . pp*)
+  (codeblock-append* pp*))
+
+(define (codeblock-append* pp*)
+  (apply ht-append tiny-x-sep pp*))
 
 (define ex-shim-sep tiny-y-sep)
 (define ex-output-x (w%->pixels 7/100))
@@ -565,10 +665,26 @@
     #:row-sep item-line-sep
     pair*))
 
+(define blockquote-newline
+  (blank 0 tiny-y-sep))
+
+(define (blockquote . pp*)
+  (blockquote* pp*))
+
+(define (blockquote* pp*)
+  (add-rounded-border
+    #:x-margin small-x-sep #:y-margin small-y-sep
+    #:radius 4
+    #:frame-width 4
+    #:background-color blue2-3k1
+    #:frame-color blue0-3k1
+    (text-line-append* pp*)))
+
 ;;(define thesis-full-pict
 ;;  ;; TODO use bullet list
 ;;  (text-line-append
-;;    @rt{Deep and Shallow types can coexist in a way that preserves their formal properties.}
+;;    @rt{Deep and Shallow types can coexist in a way
+;;    that preserves their formal properties.}
 ;;    @rt{Programmers can combine these types to strengthen Shallow-type}
 ;;    @rt{guarantees, avoid unimportant Deep-type runtime errors, and lower the}
 ;;    @rt{running time of typed/untyped interactions.}))
@@ -764,6 +880,116 @@
 (define ex-atom-title @rt{Example: Enforcing a Base Type})
 (define ex-pair-title @rt{Example: Enforcing a Data Structure})
 
+(define (bad-pair-example lhs mid rhs)
+  (codeblock-append
+    ((dyn-codeblock lhs)
+      ""
+      "(f '(\"A\" \"B\"))"
+      "")
+    ((dyn-codeblock mid)
+      "(define (f (x : (Pairof Num)))"
+      "  (g x))"
+      "")
+    ((dyn-codeblock rhs)
+      "(define (g y)"
+      "  (+ (first y) (second y)))"
+      "")))
+
+(define (higher-order-any-example lhs rhs)
+  (codeblock-append
+    ((dyn-codeblock lhs)
+     "(: b Any)"
+     "(define b (box 42))")
+    ((dyn-codeblock rhs)
+     ""
+     "(set-box! b 0)")))
+
+(define (index-of-example lang)
+  (define mk (dyn-codeblock lang))
+  (if (eq? mk untyped-codeblock)
+    (mk
+      "(index-of '(a b) 'a)")
+    (mk
+      "(: index-of"
+      "   (-> (Listof T) T (Maybe Num)))"
+      ""
+      "(index-of '(a b) 'a)")))
+
+(define (sieve-example lhs rhs)
+  (codeblock-append
+    ((dyn-codeblock lhs)
+     "...."
+     "; stream tools")
+    ((dyn-codeblock rhs)
+     "...."
+     "(get-prime 6667)")))
+
+(define (tiny-sieve-example lhs rhs)
+  (define fake-line "....         ")
+  (define pp
+    (codeblock-append
+      ((dyn-codeblock lhs)
+       fake-line)
+      ((dyn-codeblock rhs)
+       fake-line)))
+  (scale pp 55/100))
+
+(define (big-overhead-plot bm-name deco*)
+  (define pi* (map (deco->pi bm-name) deco*))
+  (define pp (ss-overhead-plot pi* 8 (w%->pixels 65/100) (h%->pixels 35/100)))
+  (vl-append 4
+    (rrt (~a bm-name))
+    (add-xticks (double-frame pp))))
+
+(define (2col-overhead-plot bm-name deco*)
+  (define pi* (map (deco->pi bm-name) deco*))
+  (define pp (ss-overhead-plot pi* 3 (w%->pixels 38/100) (h%->pixels 16/100)))
+  (vl-append 4
+    (tiny-txt (~a bm-name))
+    (double-frame pp)))
+
+(define (ss-overhead-plot pi* line-width w h)
+  (define pp
+    (parameterize ([*OVERHEAD-MAX* MAX-OVERHEAD]
+                   [*OVERHEAD-LEGEND?* #false]
+                   [*OVERHEAD-PLOT-WIDTH* w]
+                   [*OVERHEAD-PLOT-HEIGHT* h]
+                   [*OVERHEAD-LINE-WIDTH* line-width]
+                   [*OVERHEAD-LINE-COLOR* 0]
+                   [*PEN-COLOR-CONVERTER* defense-pen-color-converter]
+                   [*BRUSH-COLOR-CONVERTER* defense-brush-color-converter]
+                   [*INTERVAL-ALPHA* code-brush-alpha]
+                   [*MULTI-INTERVAL-ALPHA* code-brush-alpha])
+      (overhead-plot pi*)))
+  pp)
+
+(define ((deco->pi bm-name) d)
+  (case d
+    ((D)
+     (benchmark-name->performance-info bm-name transient-rkt-version))
+    ((S)
+     (benchmark-name->performance-info bm-name stransient))
+    ((best)
+     (define pi-deep (benchmark-name->performance-info bm-name transient-rkt-version))
+     (define pi-shallow (benchmark-name->performance-info bm-name stransient))
+     (make-typed-racket-info
+       (for/vector ((deep-cfg (in-configurations pi-deep))
+                    (shallow-cfg (in-configurations pi-shallow)))
+         (define deep-t* (configuration-info->runtime* deep-cfg))
+         (define shallow-t* (configuration-info->runtime* shallow-cfg))
+         (if (< (mean deep-t*) (mean shallow-t*))
+           deep-t*
+           shallow-t*))))
+    (else (raise-argument-error 'big-overhead-plot "(or/c 'D 'S 'best)" d))))
+
+(define (add-xticks pp)
+  (ppict-do
+    pp
+    #:go (coord 0 1 'lt) @rrt{1x}
+    #:go (coord 1/4 1 'lt) @rrt{2x}
+    #:go (coord 3/4 1 'ct) @rrt{10x}
+    #:go (coord 1 1 'rt) @rrt{20x}))
+
 (define (sec:example)
   ;; TODO
   ;; - [ ] still looks very basic ... very primary ... can enhance?
@@ -802,22 +1028,29 @@
     ex-pair-lambda)
   (void))
 
+(define full-ershov-quote
+  ;; from hidden places knowledge i obtained_ k. Levitin
+  "And I have long since taught myself to think that if I reproduce somebody's guess in my work, I should not regret not having been the first, but, on the contrary, should always bear it in mind that it is a major stimulus: since a similar idea has occured to me living thousands of kilometers away, it means that there really is something in it")
+
 (define (sec:intro)
   (pslide
-    #:go center-coord
-    ;; Ershov "And I have long since taught myself to think that if I reproduce
-    ;; somebody's guess in my work, I should not regret not having been the
-    ;; first, but, on the contrary, should always bear it in mind that it is a
-    ;; major stimulus: since a similar idea has occured to me living thousands
-    ;; of kilometers away, it means that there really is something in it"
-    ;; _from hidden places knowledge i obtained_ k. Levitin
-
-    @rrt{if I reproduce somebody's guess in my work .... me living thousands of}
-    @rrt{kilometers away ... it means that there really is something in it}
-    (blank)
-    @rrt{Ershov, 1983}
+    #:go heading-coord-left
+    @ht2{Ershov}
+    ;; A.P. Ershov 1983
+    ;; - algebra for PL (cite?)
+    ;; - correctness of optimizing compiler BETA (cite?)
+    ;; - second literacy
     #:go heading-coord-right
-    (frame-bitmap "ershov.png" #:w% 2/10))
+    (frame-person "ershov.png" 20/100)
+    #:go text-coord-left
+    (blockquote
+      @rrt{If I reproduce somebody's guess}
+      @rrt{ in my work ...}
+      blockquote-newline
+      @rrt{me living far away ...}
+      blockquote-newline
+      @rrt{it means that}
+      @rrt{ there really is something in it}))
   (pslide
     #:go heading-coord-left
     @rt{By that measure, GT landmark idea}
@@ -1184,42 +1417,31 @@
     @rrt{improve endpoints, several workers feltey, grift, pycket, vitousek}
     ;; can interact, don't lose anything, and really what you want
     @rrt{my thesis, in full})
-  (sec:thesis:motivation)
   (pslide
     #:go heading-coord-left
-    @rt{Entering unpublished results}
-    ;; moonlight, flows left-to-right?
-    #:go text-coord-mid
-    @rrt{XXX})
+    @ht{Thesis}
+    #:go title-coord-mid
+    @ht2{Deep and Shallow types can interoperate.}
+    @rrt{(preserving their formal properties)}
+    (blank 0 tiny-y-sep)
+    @ht2{Programmers can use these types to:}
+    (item-line-append
+      (hb-append @st{- } @rt{strengthen Shallow guarantees})
+      (hb-append @st{- } @rt{avoid unimportant Deep errors})
+      (hb-append @st{- } @rt{lower runtime costs})))
+  (pslide
+    #:go center-coord
+    ;; moonlight?
+    ;; TODO
+    ;; - show map (?)
+    ;; - Natural + Transient
+    @ht{Unpublished Results})
+  (pslide
+    ;; alas, another transition
+    #:go center-coord @rt{???})
   (sec:thesis:model)
   (sec:thesis:implementation)
-  (void))
-
-(define (sec:thesis:motivation)
-  (pslide
-    ;; HM may not need example here, its clear we can toggle ... and too early to discuss transient racket
-    #:go heading-coord-left
-    @rt{Sieve performance ?}
-    #:go text-coord-mid
-    @rrt{hm, can try to recall an example}
-    @rrt{but real win is when deep cannot budge}
-    @rrt{fully-typed back to deep})
-  (pslide
-    #:go heading-coord-left
-    @rt{Shallow removes errors}
-    #:go text-coord-mid
-    @rrt{lets set-box program run, overall simpler}
-    @rrt{very few programs that we can't run --- at end})
-  (pslide
-    #:go heading-coord-left
-    @rt{Shallow does not change behavior}
-    #:go text-coord-mid
-    @rrt{index-of example, those pesky wrappers})
-  (pslide
-    #:go heading-coord-left
-    @rt{Summary}
-    #:go text-coord-mid
-    @rrt{wow speed expressiveness correctness lets go})
+  (sec:thesis:evaluation)
   (void))
 
 (define (sec:thesis:model)
@@ -1265,6 +1487,128 @@
     @rrt{insert checks}
     @rrt{reuse optimizer when possible, another future work})
   ;; anything else to say?
+  (void))
+
+(define (sec:thesis:evaluation)
+  ;; (pslide
+  ;;   #:go heading-coord-left
+  ;;   @ht{Thesis}
+  ;;   #:go title-coord-mid
+  ;;   @ht2{Deep and Shallow types can interoperate.}
+  ;;   @rrt{(preserving their formal properties)}
+  ;;   (blank 0 tiny-y-sep)
+  ;;   @ht2{Programmers can use these types to:}
+  ;;   (item-line-append
+  ;;     (hb-append @st{- } @rt{strengthen Shallow guarantees})
+  ;;     (hb-append @st{- } @rt{avoid unimportant Deep errors})
+  ;;     (hb-append @st{- } @rt{lower runtime costs})))
+  (pslide
+    #:go heading-coord-left
+    @rt{Shallow to Deep = stronger guarantees}
+    #:go text-coord-mid (bad-pair-example 'U 'S 'U)
+    #:go text-coord-mid (blank 0 tiny-y-sep) (bad-pair-example #f 'D #f)
+    (blank 0 small-y-sep)
+    (item-table
+      @rt{Shallow: }
+      (word-append
+        (untyped-code "(\"A\", \"B\")")
+        @rt{ is a  }
+        (shallow-code "[Num, Num]"))
+      @rt{Deep: }
+      (word-append
+        (untyped-code "(\"A\", \"B\")")
+        @rt{ is NOT a  }
+        (deep-code "[Num, Num]")))
+    (blank 0 small-y-sep)
+    #:next
+    (takeaway-frame
+      @rt{Deep types satisfy complete monitoring}))
+  (pslide
+    #:go heading-coord-left
+    @rt{Deep to Shallow = fewer errors}
+    #:go text-coord-mid
+    (higher-order-any-example 'D 'U)
+    (word-append error-pict
+                 @rrt{ attempted to use higher-order})
+    (word-append @rrt{value passed as } (deep-code "Any"))
+    #:alt [#:go center-coord (frame-person "racket-users-ho-any.png" 8/10)]
+    (blank 0 small-y-sep)
+    (higher-order-any-example 'S 'U)
+    success-pict
+    #:next
+    #:go title-coord-mid
+    (takeaway-frame
+      @rt{Shallow can run almost all type-correct code}))
+  (pslide
+    #:go heading-coord-left
+    @rt{Deep to Shallow = simpler behavior}
+    #:go text-coord-mid
+    #:alt [(index-of-example 'U)]
+    #:alt [(index-of-example 'D)]
+    (index-of-example 'S)
+    #:go icon-coord-mid
+    (hc-append small-x-sep
+      (word-append @rt{Untyped } (untyped-code " 0 "))
+      (word-append @rt{Deep } (deep-code " #f "))
+      (word-append @rt{Shallow } (shallow-code " 0 "))))
+  (pslide
+    #:go heading-coord-left
+    @rt{Better Performance}
+    #:go text-coord-mid
+    #:alt [(sieve-example 'U 'U)]
+    (make-2table
+      #:col-sep med-x-sep
+      #:row-sep med-y-sep
+      (list
+        (cons
+          (word-append (tiny-sieve-example 'U 'U) @rrt{ ~ 2 sec.})
+          @rt{Untyped baseline})
+        (cons
+          (lattice-vl-append
+            (word-append (tiny-sieve-example 'U 'D) @rrt{ ~ 13 sec.})
+            (word-append (tiny-sieve-example 'U 'S) @rrt{ ~ 4 sec.}))
+          @rt{Mixed : Shallow wins})
+        (cons
+          (lattice-vl-append
+            (word-append (tiny-sieve-example 'D 'D) @rrt{ < 2 sec.})
+            (word-append (tiny-sieve-example 'S 'S) @rrt{ ~ 5 sec.}))
+          @rt{Typed : Deep wins}))))
+  (pslide
+    #:go heading-coord-left
+    @rt{Better Performance}
+    ;; recall, large area under curve
+    #:go text-coord-mid
+    (big-overhead-plot 'jpeg '(D S))
+    #:go icon-coord-mid
+    @rt{Deep + Shallow = maximize D-deliverable cfgs.})
+  (pslide
+    #:go heading-coord-left
+    @rt{Better Performance}
+    ;; recall, large area under curve
+    #:go text-coord-mid
+    (make-2table
+      #:row-sep tiny-y-sep
+      #:col-sep small-x-sep
+      (for/list ((sym* (in-list '((fsmoo dungeon) (suffixtree take5) (synth quadU)))))
+        (for/list ((sym (in-list sym*)))
+          (2col-overhead-plot sym '(D S))))))
+  (pslide
+    #:go heading-coord-left
+    @rt{Better Performance}
+    #:go text-coord-mid
+    (fancy-table
+      (list
+        (list "Benchmark" "Worst Deep" "Worst Shallow")
+        (list "sieve" "10x" "2x")
+        (list "jpeg" "23x" "2x")
+        (list "fsmoo" "451x" "4x")
+        (list "dungeon" "14000x" "5x")
+        (list "suffixt" "31x" "6x")
+        (list "take5" "32x" "3x")
+        (list "synth" "49x" "4x")
+        (list "quadU" "60x" "8x"))))
+  ;; path story?
+
   (pslide
     #:go heading-coord-left
     @rt{Perf data} ;; symmetry wth model results
@@ -1272,14 +1616,13 @@
     @rrt{best of both, overhead plots}
     @rrt{paths story, maybe show the 6 small ones}
     @rrt{any more})
-  ;; expressiveness + errors results?
   (void))
 
 (define (sec:conclusion)
   (pslide
     #:go title-coord-mid
-    @ht2{Deep and Shallow types can interoperate}
-    (blank 0 item-line-sep)
+    @ht2{Deep and Shallow types can interoperate.}
+    ;; TODO reword, using table from above?
     (item-table
       (blank) @rt{Natural + Transient}
       pass-pict @rt{preserves formal guarantees}
@@ -1389,6 +1732,33 @@
 
 ;; =============================================================================
 
+(define (fancy-table row* #:num-cols [num-cols 3])
+  (define title* (map bold-tt (car row*)))
+  (define col-align (cons lc-superimpose rc-superimpose))
+  (define row-align rc-superimpose)
+  (define col-sep small-x-sep)
+  (define tbl
+    (vc-append
+      (table
+        num-cols
+        title* col-align row-align col-sep 0)
+      (table
+        num-cols
+        (apply append
+               (cons
+                 (map (lambda (x) (blank (pict-width x) 0)) title*)
+                 (map (lambda (x) (map tt x)) (cdr row*))))
+        col-align
+        row-align
+        col-sep
+        (h%->pixels 4/100))))
+  (define tbl/bg
+    (add-rectangle-background
+      #:x-margin small-x-sep #:y-margin tiny-y-sep
+      #:color neutral-brush-color
+      tbl))
+  (double-frame tbl/bg))
+
 (module+ raco-pict (provide raco-pict)
   (define aspect 'fullscreen)
   (define-values [client-w client-h]
@@ -1396,14 +1766,28 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+    #:go heading-coord-left
+    @rt{Better Performance}
+    #:go text-coord-mid
+    (fancy-table
+      (list
+        (list "Benchmark" "Worst Deep" "Worst Shallow")
+        (list "sieve" "10x" "2x")
+        (list "jpeg" "23x" "2x")
+        (list "fsmoo" "451x" "4x")
+        (list "dungeon" "14000x" "5x")
+        (list "suffixt" "31x" "6x")
+        (list "take5" "32x" "3x")
+        (list "synth" "49x" "4x")
+        (list "quadU" "60x" "8x")))
 
-;    #:go heading-coord-left
-;    @rt{Summarize thesis support}
-;    #:go text-coord-mid
-;    @rrt{review thesis}
-;    @rrt{proved in model}
-;    @rrt{validated with implementation}
-;    @rrt{coming out soon}
+;    (big-overhead-plot 'jpeg '(D S))
+;    #:go icon-coord-mid
+;    @rt{Deep + Shallow = maximize D-deliverable cfgs.}
+
+;    @rrt{best of both, overhead plots}
+;    @rrt{paths story, maybe show the 6 small ones}
+;    @rrt{any more})
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
