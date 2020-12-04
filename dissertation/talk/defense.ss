@@ -1501,6 +1501,7 @@
   ;; - more types, subtyping
   ;; - optimizations
   ;; - no dyn = audit check sites
+  ;; ... okay make a checklist
   (pslide
     #:go heading-coord-left
     @rt{Model}
