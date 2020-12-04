@@ -1609,9 +1609,13 @@
     #:go heading-coord-left
     @ht{Compilation}
     #:go title-coord-mid
-    'TODO
-
-    )
+    #:go heading-coord-left
+    @ht{Compilation}
+    #:go title-coord-mid
+    (DSU-pict 0)
+    #:go icon-coord-mid
+    @rrt{Deep types => wrapper}
+    @rrt{Shallow types => check inputs})
   (pslide
     #:go heading-coord-left
     @rt{Theorems}
@@ -1629,13 +1633,34 @@
     )
   (pslide
     #:go heading-coord-left
-    @rt{Code: Shallow TR}
+    @ht{Typed Racket Pipeline}
     #:go text-coord-mid
-    @rrt{reuse compiler pipeline}
-    @rrt{choice of shapes, rec shapes} ;; = focus!
-    @rrt{insert checks}
-    @rrt{reuse optimizer when possible, another future work})
-  ;; anything else to say?
+    @rrt{Before = a b c d}
+    @rrt{After = a b cc dd}
+    @rrt{next focus on cc})
+  (pslide
+    #:go heading-coord-left
+    @ht{Types to Shapes}
+    #:go text-coord-mid
+    @rrt{like saw gotta protect (f x)}
+    @rrt{int = easy}
+    @rrt{general is full type constructors, full shape}
+    ;; table with 4 items?
+    @rrt{partly bc optimization partly errors}
+    @rrt{(-> A B) check arity too}
+    @rrt{list = recursive})
+  (pslide
+    #:go heading-coord-left
+    @ht{Optimize}
+    #:go text-coord-mid
+    @rrt{15 topics in TR}
+    @rrt{reuse 12}
+    @rrt{cannot reuse X Y})
+  (pslide
+    #:go heading-text-coord
+    @ht{Map}
+    #:go text-coord-mid
+    @rrt{ready to evaluate})
   (void))
 
 (define (sec:thesis:evaluation)
