@@ -332,12 +332,46 @@
       #:frame-width fg-width #:frame-color fg-color #:background-color bg-color
       pp)))
 
+(define (fancy-table row* #:num-cols [num-cols 3])
+  (define title* (map bold-tt (car row*)))
+  (define col-align (cons lc-superimpose rc-superimpose))
+  (define row-align rc-superimpose)
+  (define col-sep small-x-sep)
+  (define tbl
+    (vc-append
+      (table
+        num-cols
+        title* col-align row-align col-sep 0)
+      (table
+        num-cols
+        (apply append
+               (cons
+                 (map (lambda (x) (blank (pict-width x) 0)) title*)
+                 (map (lambda (x) (map tt x)) (cdr row*))))
+        col-align
+        row-align
+        col-sep
+        (h%->pixels 4/100))))
+  (define tbl/bg
+    (add-neutral-background tbl))
+  (double-frame tbl/bg))
+
+(define (add-neutral-background pp)
+  (add-rectangle-background
+    #:x-margin small-x-sep #:y-margin tiny-y-sep
+    #:color neutral-brush-color
+    #:radius 1
+    pp))
+
 (define (takeaway-frame pp)
   (add-rounded-border
     #:radius 1
     #:x-margin (/ client-w 2) #:y-margin med-y-sep
     #:frame-width tiny-y-sep #:frame-color green2-3k1 #:background-color background-color
     pp))
+
+(define (path-node sym*)
+  (apply hc-append pico-x-sep (map dyn-swatch sym*)))
 
 (struct code-arrow (src-tag src-find tgt-tag tgt-find start-angle end-angle start-pull end-pull style) #:transparent)
 
@@ -469,6 +503,24 @@
     ((S shallow) shallow-codeblock)
     ((#f) (lambda arg* (blank)))
     (else (raise-argument-error 'dyn-codeblock "(or/c D S U)" sym))))
+
+(define the-swatch-str "   ")
+
+(define untyped-swatch
+  (untyped-codeblock* #:title #f (list (blank tiny-x-sep 0))))
+
+(define shallow-swatch
+  (shallow-codeblock* #:title #f (list (blank tiny-x-sep 0))))
+
+(define deep-swatch
+  (deep-codeblock* #:title #f (list (blank tiny-x-sep 0))))
+
+(define (dyn-swatch sym)
+  (case sym
+    ((D) deep-swatch)
+    ((U) untyped-swatch)
+    ((S) shallow-swatch)
+    (else (raise-argument-error 'dyn-swatch "(or/c 'D 'S 'U)" sym))))
 
 (define (lattice-h-append . pp*)
   (lattice-h-append* pp*))
@@ -1607,22 +1659,44 @@
         (list "take5" "32x" "3x")
         (list "synth" "49x" "4x")
         (list "quadU" "60x" "8x"))))
-  ;; path story?
-
   (pslide
     #:go heading-coord-left
-    @rt{Perf data} ;; symmetry wth model results
+    @rt{New Migration Plan}
+    #:go text-coord-left
+    (item-line-append
+      (blank)
+      (hb-append @st{- } @rt{begin with Deep types})
+      (hb-append @st{- } @rt{use Shallow for speed})
+      (hb-append @st{- } @rt{return to Deep at end}))
+    #:go text-coord-right
+    (lattice-vl-append
+      (path-node '(U U U U U))
+      (path-node '(D D D U U))
+      (path-node '(D S S U U))
+      (path-node '(D S S S S))
+      (path-node '(D D D D D))))
+  (pslide
+    #:go heading-coord-left
+    @rt{New Migration Plan}
     #:go text-coord-mid
-    @rrt{best of both, overhead plots}
-    @rrt{paths story, maybe show the 6 small ones}
-    @rrt{any more})
+    @rt{Percent of 3-deliverable paths}
+    (fancy-table
+      (list
+        (list "Benchmark" "Deep or Shallow" "Deep and Shallow")
+        (list "sieve" "0%" "100%")
+        (list "jpeg" "100%" "100%")
+        (list "fsmoo" "0%" "50%")
+        (list "dungeon" "0%" "67%")
+        (list "suffixt" "0%" "12%")
+        (list "take5" "100%" "100%"))))
+  ;; TODO flash a lattice, to understand the table ... maybe 2 lattices
   (void))
 
 (define (sec:conclusion)
   (pslide
     #:go title-coord-mid
     @ht2{Deep and Shallow types can interoperate.}
-    ;; TODO reword, using table from above?
+    ;; TODO reword, using sec:thesis table from above?
     (item-table
       (blank) @rt{Natural + Transient}
       pass-pict @rt{preserves formal guarantees}
@@ -1732,33 +1806,6 @@
 
 ;; =============================================================================
 
-(define (fancy-table row* #:num-cols [num-cols 3])
-  (define title* (map bold-tt (car row*)))
-  (define col-align (cons lc-superimpose rc-superimpose))
-  (define row-align rc-superimpose)
-  (define col-sep small-x-sep)
-  (define tbl
-    (vc-append
-      (table
-        num-cols
-        title* col-align row-align col-sep 0)
-      (table
-        num-cols
-        (apply append
-               (cons
-                 (map (lambda (x) (blank (pict-width x) 0)) title*)
-                 (map (lambda (x) (map tt x)) (cdr row*))))
-        col-align
-        row-align
-        col-sep
-        (h%->pixels 4/100))))
-  (define tbl/bg
-    (add-rectangle-background
-      #:x-margin small-x-sep #:y-margin tiny-y-sep
-      #:color neutral-brush-color
-      tbl))
-  (double-frame tbl/bg))
-
 (module+ raco-pict (provide raco-pict)
   (define aspect 'fullscreen)
   (define-values [client-w client-h]
@@ -1766,28 +1813,12 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+
     #:go heading-coord-left
-    @rt{Better Performance}
-    #:go text-coord-mid
-    (fancy-table
-      (list
-        (list "Benchmark" "Worst Deep" "Worst Shallow")
-        (list "sieve" "10x" "2x")
-        (list "jpeg" "23x" "2x")
-        (list "fsmoo" "451x" "4x")
-        (list "dungeon" "14000x" "5x")
-        (list "suffixt" "31x" "6x")
-        (list "take5" "32x" "3x")
-        (list "synth" "49x" "4x")
-        (list "quadU" "60x" "8x")))
 
 ;    (big-overhead-plot 'jpeg '(D S))
 ;    #:go icon-coord-mid
 ;    @rt{Deep + Shallow = maximize D-deliverable cfgs.}
-
-;    @rrt{best of both, overhead plots}
-;    @rrt{paths story, maybe show the 6 small ones}
-;    @rrt{any more})
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
