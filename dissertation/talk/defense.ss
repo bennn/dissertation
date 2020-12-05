@@ -228,6 +228,37 @@
 (define (rrt* str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color body-text-color))
 
+(define (sst . str*)
+  (sst* str*))
+
+(define (sst* str*)
+  (txt str* #:font body-text-font #:size sub-body-text-size #:color subtitle-text-color))
+
+(define (rrt-deep . str*)
+  (rrt*-deep str*))
+
+(define (rrt*-deep str*)
+  (txt str* #:font body-text-font #:size sub-body-text-size #:color deep-pen-color))
+
+(define (rrt-shallow . str*)
+  (rrt*-shallow str*))
+
+(define (rrt*-shallow str*)
+  (txt str* #:font body-text-font #:size sub-body-text-size #:color shallow-pen-color))
+
+(define (rrt-untyped . str*)
+  (rrt*-untyped str*))
+
+(define (rrt*-untyped str*)
+  (txt str* #:font body-text-font #:size sub-body-text-size #:color untyped-pen-color))
+
+(define (make-vdash letter)
+  (ppict-do @st{⊢ } #:go (coord 3/10 58/100 'lt) letter))
+
+(define vdash-deep (make-vdash @rrt-deep{D}))
+(define vdash-shallow (make-vdash @rrt-shallow{S}))
+(define vdash-untyped (make-vdash @rrt-untyped{U}))
+
 (define (tiny-txt str)
   (txt str #:font body-text-font #:size tiny-text-size #:color body-text-color))
 
@@ -260,6 +291,28 @@
 
 (define (item-line-append* pp*)
   (apply vl-append item-line-sep pp*))
+
+(define (rt-bullet . str*)
+  (rt-bullet* str*))
+
+(define hyphen-pict @st{- })
+(define hyphen-ghost (ghost hyphen-pict))
+
+(define (rt-bullet* str*)
+  (item-line-append*
+    (for/list ((str (in-list str*)))
+      (hb-append hyphen-pict (rt str)))))
+
+(define (pipeline-append . pp*)
+  (pipeline-append* pp*))
+
+(define (pipeline-append* pp*)
+  (define pipeline-sep (h%->pixels 4/100))
+  (apply vc-append pipeline-sep
+         (for/list ((pp (in-list pp*)))
+           (if (pair? pp)
+             (ht-append small-x-sep (car pp) (cdr pp))
+             pp))))
 
 (define (word-append . pp*)
   (word-append* pp*))
@@ -365,12 +418,23 @@
     #:radius 1
     pp))
 
+(define (add-dark-background pp)
+  (add-rectangle-background
+    #:x-margin small-x-sep #:y-margin tiny-y-sep
+    #:color background-color
+    #:radius 1
+    pp))
+
 (define (takeaway-frame pp)
   (add-rounded-border
     #:radius 1
     #:x-margin (/ client-w 2) #:y-margin med-y-sep
     #:frame-width tiny-y-sep #:frame-color green2-3k1 #:background-color background-color
     pp))
+
+(define (type-to-shape lhs rhs)
+  (word-append
+    lhs @rrt{   --->   } rhs))
 
 (define (path-node sym*)
   (apply hc-append pico-x-sep (map dyn-swatch sym*)))
@@ -764,6 +828,21 @@
     #:background-color blue2-3k1
     #:frame-color blue0-3k1
     (text-line-append* pp*)))
+
+(define optimization-name*
+  '(apply box dead-code extflonum fixnum float-complex float list number pair sequence string struct vector))
+
+(define (opt->pict sym)
+  (tag-pict
+    (double-frame
+      (add-dark-background
+        (rrt (symbol->string sym))))
+    sym))
+
+(define (pad-modulo n x*)
+  (define ln (length x*))
+  (define diff (- ln (* n (quotient ln n))))
+  (append x* (make-list diff (blank))))
 
 ;;(define thesis-full-pict
 ;;  ;; TODO use bullet list
@@ -1510,10 +1589,10 @@
     @rrt{(preserving their formal properties)}
     (blank 0 tiny-y-sep)
     @ht2{Programmers can use these types to:}
-    (item-line-append
-      (hb-append @st{- } @rt{strengthen Shallow guarantees})
-      (hb-append @st{- } @rt{avoid unimportant Deep errors})
-      (hb-append @st{- } @rt{lower runtime costs})))
+    (rt-bullet
+      "strengthen Shallow guarantees"
+      "avoid unimportant Deep errors"
+      "lower runtime costs"))
   (pslide
     #:go center-coord
     ;; moonlight?
@@ -1618,10 +1697,21 @@
     @rrt{Shallow types => check inputs})
   (pslide
     #:go heading-coord-left
-    @rt{Theorems}
-    #:go text-coord-mid
-    @rrt{TS}
-    @rrt{CM})
+    @ht{Properties}
+    #:go text-coord-left
+    (item-line-append
+      (text-line-append
+        @st{Type Soundness}
+        @rrt{ types predict outcomes})
+      (blank 0 small-y-sep)
+      (text-line-append
+        @st{Complete Monitoring}
+        @rrt{ Deep types predict behaviors}))
+    #:go text-coord-right
+    (item-line-append
+      (word-append vdash-deep @st{ e : T})
+      (word-append vdash-shallow @st{ e : shape(T)})
+      (word-append vdash-untyped @st{ e})))
   (void))
 
 (define (sec:thesis:implementation)
@@ -1633,31 +1723,78 @@
     )
   (pslide
     #:go heading-coord-left
-    @ht{Typed Racket Pipeline}
+    @ht{Typed Racket Compiler}
     #:go text-coord-mid
-    @rrt{Before = a b c d}
-    @rrt{After = a b cc dd}
-    @rrt{next focus on cc})
+    (pipeline-append
+      (double-frame
+        (add-dark-background @rt{Expand}))
+      (double-frame
+        (add-dark-background
+          (text-line-append
+            @rt{Typecheck}
+            @rt{Kernel})))
+      (cons
+        (double-frame
+          (add-dark-background
+            (text-line-append
+              @rt{Generate} @rt{Contracts})))
+        (double-frame
+          (add-dark-background
+            @rt{Insert Checks})))
+      (double-frame
+        (add-dark-background
+          @rt{Type-Based Optimizer}))))
   (pslide
     #:go heading-coord-left
     @ht{Types to Shapes}
     #:go text-coord-mid
-    @rrt{like saw gotta protect (f x)}
-    @rrt{int = easy}
-    @rrt{general is full type constructors, full shape}
-    ;; table with 4 items?
-    @rrt{partly bc optimization partly errors}
-    @rrt{(-> A B) check arity too}
-    @rrt{list = recursive})
+    ;; type-term color distinction?
+    ;; add comment to each?
+    ;; in general: check full constructor
+    (word-append
+      @rrt{(f x) } @sst{: T} @rrt{    --->    (check s (f x))})
+    (blank 0 tiny-y-sep)
+    (type-to-shape @sst{T} @rrt{s})
+    #:go center-coord
+    (item-line-append* (flatten
+      (list
+        (list
+          (type-to-shape @sst{Num} @rrt{number?})
+          (type-to-shape @sst{(Listof Num)} @rrt{list?}))
+        (list
+          (type-to-shape @sst{(U Num Sym)}
+                         (text-line-append
+                           @rrt{(or number?}
+                           @rrt{    symbol?)}))
+          (type-to-shape @sst{(-> Num Num)}
+                         (text-line-append
+                           @rrt{(and procedure?}
+                           @rrt{     (arity-includes 1))})))))))
   (pslide
     #:go heading-coord-left
-    @ht{Optimize}
-    #:go text-coord-mid
-    @rrt{15 topics in TR}
-    @rrt{reuse 12}
-    @rrt{cannot reuse X Y})
+    @ht{Optimization}
+    #:go title-coord-mid
+    @rrt{(fl+ n m)}
+    @rrt{(unsafe-fl+ n m)}
+    (word-append
+      @rrt{when  n } @sst{: Float} @rrt{  and  m } @sst{: Float}))
   (pslide
-    #:go heading-text-coord
+    #:go heading-coord-left
+    @ht{Optimization}
+    #:go title-coord-mid
+    (table 4
+           (pad-modulo 4 (map opt->pict optimization-name*))
+           cc-superimpose cc-superimpose pico-x-sep small-y-sep)
+    #:go (at-find-pict 'dead-code ct-find 'cc) fail-pict
+    #:go (at-find-pict 'pair ct-find 'cc) fail-pict)
+  ;; TODO opt examples? or save to end
+  ;;  g (-> Str Str) case-lambda (x) x (x y) y
+  ;;  ~~> case-lambda (x) x (x y) void
+  ;;
+  ;;  x (pairof (pairof nat int) str)
+  ;;  cdar x -> unsafe-cdr unsafe-car x
+  (pslide
+    #:go heading-coord-left
     @ht{Map}
     #:go text-coord-mid
     @rrt{ready to evaluate})
@@ -1937,12 +2074,14 @@
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
     #:go heading-coord-left
-    @ht{Compilation}
+    @ht{Optimization}
     #:go title-coord-mid
-    (DSU-pict 0)
-    #:go icon-coord-mid
-    @rrt{Deep types => wrapper}
-    @rrt{Shallow types => check inputs}
+    (table 4
+           (pad-modulo 4 (map opt->pict optimization-name*))
+           cc-superimpose cc-superimpose pico-x-sep small-y-sep)
+    #:go (at-find-pict 'dead-code ct-find 'cc) fail-pict
+    #:go (at-find-pict 'pair ct-find 'cc) fail-pict
+
 
 ;    #:go heading-coord-left
 ;    @rt{Example: Enforcing a Data Structure}
