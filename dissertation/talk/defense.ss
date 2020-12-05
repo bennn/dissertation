@@ -81,6 +81,22 @@
 (define codeblock-x-sep (w%->pixels 4/100))
 (define codeblock-y-sep (h%->pixels 4/100))
 
+(define (hsep h)
+  (blank 0 h))
+
+(define (wsep w)
+  (blank w 0))
+
+(define (hshift n pp)
+  (if (< 0 n)
+    (vc-append n (blank) pp)
+    (vc-append (- n) pp (blank))))
+
+(define (wshift n pp)
+  (if (< 0 n)
+    (hc-append n (blank) pp)
+    (hc-append (- n) pp (blank))))
+
 ;; =============================================================================
 ;; --- coordinates
 
@@ -176,6 +192,7 @@
 (define title-text-size 70)
 
 (define h2-text-size 46)
+(define h3-text-size 34)
 
 (define title-rm-font "TeX Gyre Pagella")
 
@@ -213,6 +230,12 @@
 (define (ht2* str*)
   (txt str* #:font title-rm-font #:size h2-text-size #:color subtitle-text-color))
 
+(define (ht3 . str*)
+  (ht3* str*))
+
+(define (ht3* str*)
+  (txt str* #:font title-rm-font #:size h3-text-size #:color subtitle-text-color))
+
 (define (rt . str*)
   (rt* str*))
 
@@ -234,17 +257,59 @@
 (define (sst* str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color subtitle-text-color))
 
+(define (rt-deep . str*)
+  (rt*-deep str*))
+
+(define (rt*-deep str*)
+  (txt str* #:font body-text-font #:size body-text-size #:color deep-pen-color))
+
+(define (rt-deep2 . str*)
+  (rt*-deep2 str*))
+
+(define (rt*-deep2 str*)
+  (define bg (txt str* #:font body-text-font #:size body-text-size #:color white))
+  (define fg (txt str* #:font body-text-font #:size body-text-size #:color deep-brush-color))
+  (cc-superimpose bg fg))
+
 (define (rrt-deep . str*)
   (rrt*-deep str*))
 
 (define (rrt*-deep str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color deep-pen-color))
 
+(define (rt-shallow . str*)
+  (rt*-shallow str*))
+
+(define (rt*-shallow str*)
+  (txt str* #:font body-text-font #:size body-text-size #:color shallow-pen-color))
+
+(define (rt-shallow2 . str*)
+  (rt*-shallow2 str*))
+
+(define (rt*-shallow2 str*)
+  (define bg (txt str* #:font body-text-font #:size body-text-size #:color white))
+  (define fg (txt str* #:font body-text-font #:size body-text-size #:color shallow-brush-color))
+  (cc-superimpose bg fg))
+
 (define (rrt-shallow . str*)
   (rrt*-shallow str*))
 
 (define (rrt*-shallow str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color shallow-pen-color))
+
+(define (rt-untyped . str*)
+  (rt*-untyped str*))
+
+(define (rt*-untyped str*)
+  (txt str* #:font body-text-font #:size body-text-size #:color untyped-pen-color))
+
+(define (rt-untyped2 . str*)
+  (rt*-untyped2 str*))
+
+(define (rt*-untyped2 str*)
+  (define bg (txt str* #:font body-text-font #:size body-text-size #:color white))
+  (define fg (txt str* #:font body-text-font #:size body-text-size #:color untyped-brush-color))
+  (cc-superimpose bg fg))
 
 (define (rrt-untyped . str*)
   (rrt*-untyped str*))
@@ -285,6 +350,12 @@
 
 (define (text-line-append* pp*)
   (apply vl-append text-line-sep pp*))
+
+(define (text-c-append . pp*)
+  (text-c-append* pp*))
+
+(define (text-c-append* pp*)
+  (apply vc-append text-line-sep pp*))
 
 (define (item-line-append . pp*)
   (item-line-append* pp*))
@@ -369,10 +440,33 @@
 
 (define (scale-src-bitmap ps w%)
   (let ((pp (src-bitmap ps)))
-    (scale-to-fit pp (w%->pixels w%) (pict-height pp))))
+    (scale-to-width pp w%)))
 
-(define (frame-person ps w%)
-  (double-frame (scale-src-bitmap ps w%)))
+(define (scale-to-width pp w%)
+  (scale-to-fit pp (w%->pixels w%) (pict-height pp)))
+
+(define (frame-person name ps [w% 15/100])
+  (define pp (double-frame (scale-src-bitmap ps w%)))
+  (if name
+    (vl-append pp (ht3 (string-append "  " name)))
+    pp))
+
+(define (frame-team title-pict . name*)
+  (frame-team* title-pict name*))
+
+(define (frame-team* title-pict name*)
+  (define pp* (for/list ((n (in-list name*))) (frame-person #f n 10/100)))
+  (define sep 2)
+  (define author-grid
+    (let loop ((pp* pp*))
+      (cond
+        [(null? pp*)
+         (blank)]
+        [(null? (cdr pp*))
+         (car pp*)]
+        [else
+         (vc-append sep (ht-append sep (car pp*) (cadr pp*)) (loop (cddr pp*)))])))
+  (vc-append pico-y-sep title-pict author-grid))
 
 (define (double-frame pp)
   (define bg-color subtitle-text-color)
@@ -1196,16 +1290,20 @@
   ;; from hidden places knowledge i obtained_ k. Levitin
   "And I have long since taught myself to think that if I reproduce somebody's guess in my work, I should not regret not having been the first, but, on the contrary, should always bear it in mind that it is a major stimulus: since a similar idea has occured to me living thousands of kilometers away, it means that there really is something in it")
 
+(define ershov-pict
+  (frame-person "Ershov" "ershov.png" 20/100))
+
 (define (sec:intro)
   (pslide
     #:go heading-coord-left
-    @ht2{Ershov}
+    @ht2{On Great Ideas}
     ;; A.P. Ershov 1983
+    ;; TODO check references
     ;; - algebra for PL (cite?)
     ;; - correctness of optimizing compiler BETA (cite?)
     ;; - second literacy
     #:go heading-coord-right
-    (frame-person "ershov.png" 20/100)
+    ershov-pict
     #:go text-coord-left
     (blockquote
       @rrt{If I reproduce somebody's guess}
@@ -1216,14 +1314,24 @@
       @rrt{it means that}
       @rrt{ there really is something in it}))
   (pslide
-    #:go heading-coord-left
-    @rt{By that measure, GT landmark idea}
-    #:go text-coord-mid
-    @rrt{4x insights}
-    @rrt{- Siek Taha   SFP 2006}
-    @rrt{- Gronski Knowles Tomb Freund Flanagan   SFP 2006}
-    @rrt{- Tobin-Hochstadt Felleisen   DLS 2006}
-    @rrt{- Matthews Findler   POPL 2007, TOPLAS 2009})
+    #:go heading-coord-mid
+    (takeaway-frame
+      (vc-append
+        pico-y-sep
+        @ht2{Great Idea:}
+        (word-append
+          @rt{mixing } @rt-deep2{typed} @rt{ and } @rt-untyped2{untyped} @rt{ code})
+        (hsep item-line-sep)
+        (path-node '(D D D U U))))
+    #:go (coord text-left 43/100 'lt)
+    (frame-team @ht3{Gradual Typing} "siek.jpg" "taha.jpeg")
+    #:go (coord 24/100 68/100 'ct)
+    (frame-team @ht3{Migratory Typing} "tobin-hochstadt.jpg" "felleisen.jpg")
+    #:go (coord 53/100 51/100 'ct)
+    (frame-team (text-c-append @ht3{Multi-Language} @ht3{Semantics}) "matthews.jpeg" "findler.png")
+    #:go (coord text-right 41/100 'rt)
+    (frame-team @ht3{Hybrid Typing}
+      "unknown.png" "knowles.jpeg" "freund.png" "tomb.jpg" "flanagan.png"))
   (pslide
     #:go heading-coord-left
     @rt{Basic Ideas}
@@ -1842,7 +1950,7 @@
     (word-append error-pict
                  @rrt{ attempted to use higher-order})
     (word-append @rrt{value passed as } (deep-code "Any"))
-    #:alt [#:go center-coord (frame-person "racket-users-ho-any.png" 8/10)]
+    #:alt [#:go center-coord (frame-person "" "racket-users-ho-any.png" 8/10)]
     (blank 0 small-y-sep)
     (higher-order-any-example 'S 'U)
     success-pict
@@ -2073,14 +2181,7 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go heading-coord-left
-    @ht{Optimization}
-    #:go title-coord-mid
-    (table 4
-           (pad-modulo 4 (map opt->pict optimization-name*))
-           cc-superimpose cc-superimpose pico-x-sep small-y-sep)
-    #:go (at-find-pict 'dead-code ct-find 'cc) fail-pict
-    #:go (at-find-pict 'pair ct-find 'cc) fail-pict
+
 
 
 ;    #:go heading-coord-left
