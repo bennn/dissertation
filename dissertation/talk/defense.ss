@@ -1051,17 +1051,20 @@
          (pp (ppict-do
                pp
                #:go (coord (year->sky-x 2006) 50/100 'cc)
-               (vc-append star-pict (hc-append pico-x-sep star-pict star-pict) star-pict)
-               #:go (coord (year->sky-x 2005) 70/100 'cc)
-               star-pict
-               #:go (coord (year->sky-x 1973) 60/100 'cc)
-               star-pict
-               #:go (coord (year->sky-x 1993) 40/100 'cc)
-               star-pict))
+               (vc-append star-pict (hc-append pico-x-sep star-pict star-pict) star-pict)))
          (pp
            (for/fold ((pp pp))
-                     ((yr (in-range 2007 2020)))
-            (ppict-do pp #:go (coord (year->sky-x yr) 10/100 'ct) (apply vc-append pico-y-sep (make-list num-col star-pict)))))
+                     ((yr (in-range 1971 2020))
+                      #:unless (= yr 2006))
+            (ppict-do pp
+              #:go (coord (year->sky-x yr) 10/100 'ct)
+              (apply vc-append pico-y-sep
+                     (parameterize ((current-pseudo-random-generator (make-pseudo-random-generator)))
+                       (random-seed 19910202)
+                       (for/list ((i (in-range num-col)))
+                         (if (zero? (modulo (+ i yr) 3))
+                           (bghost star-pict)
+                           star-pict)))))))
          )
     pp))
 
@@ -1584,27 +1587,6 @@
     @ht2{Mixed-Typed Design Space}
     @rt{Lively, but Disorganized!}
     
-    )
-  (pslide
-    #:go heading-coord-left
-    @rt{Lively Space}
-    ;; 0. mccarthy?
-    ;; 1. common lisp, strongtalk, grey etal,
-    ;; 2. gradual typing (mixed-typed?)
-    ;; 3. GT bib
-    ;; languages vs papers?
-    #:go text-coord-mid
-    @rrt{4 originals, directly gave rise to a few languages}
-    ;; --> TR retic pycket grift
-    @rrt{olde pre-original}
-    ;; --> commonlisp strongtalk 
-    @rrt{many more, aca + ind labs}
-    ;; --> actionscript mypy flow hack pyre pytype rdl typescript typedclojure
-    ;;     typedlua gradualtalk tpd pyret grace pallene strongscript thorn c+
-    ;;     dart2 nom safets ts*
-    @rrt{over 200 papers in gradual-typing-bib}
-    #:next ;; not shoulders, rather elephant
-    #:go center-coord (frame-bitmap "elephant.jpg" #:w% 6/10) @rrt{Image credit: Hans Moller}
     )
   (pslide
     #:go heading-coord-left
@@ -2430,10 +2412,12 @@
     (sky-pict)
     #:go earth-coord
     (earth-pict)
+
     #:go center-coord
     @ht2{Mixed-Typed Design Space}
     @rt{Lively, but Disorganized!}
-    ;; TODO shoulders of giants
+
+    ;; TODO example disagreement
 
 
 ;    #:go heading-coord-left
