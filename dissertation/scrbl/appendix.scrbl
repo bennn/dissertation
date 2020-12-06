@@ -55,6 +55,7 @@ Alan Kay
 
 Per Martin-Loef
 
+decide what you want to say before you worry about how you are going to say it
 ..... Stracheys first law
 
 
