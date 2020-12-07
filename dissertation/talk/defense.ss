@@ -27,7 +27,7 @@
 ;; - [ ] two methods (major contributions)
 ;;   - [ ] perf ... LHS 
 ;;   - [ ] design ... RHS 
-;; - [ ]
+;; - [ ] NOTE: cannot ask if Java etc. is deep, its an FFI/Interop question
 ;; - [ ]
 ;; - [ ]
 
@@ -108,6 +108,7 @@
 (define text-right (- 1 text-left))
 (define text-top (* 5 slide-top))
 (define text-bottom slide-bottom)
+(define contribution-x 49/100)
 
 (define (scale-to-text pp)
   (define w (w%->pixels (- text-right text-left)))
@@ -128,6 +129,10 @@
 (define sky-y 3/10)
 (define sky-coord (coord 1/2 (- sky-y 26/1000) 'cb))
 (define earth-coord (coord 1/2 1 'cb))
+(define answer-y 55/100)
+(define answer-coord-left (coord 30/100 answer-y 'ct))
+(define answer-coord-mid (coord 1/2 answer-y 'ct))
+(define answer-coord-right (coord 70/100 answer-y 'ct))
 
 (define (landscape-w)
   (* 1.2 client-w))
@@ -247,6 +252,12 @@
 
 (define (ht3* str*)
   (txt str* #:font title-rm-font #:size h3-text-size #:color subtitle-text-color))
+
+(define (RT . str*)
+  (RT* str*))
+
+(define (RT* str* #:color [color body-text-color])
+  (txt str* #:font body-text-font #:size title-text-size #:color color))
 
 (define (rt . str*)
   (rt* str*))
@@ -387,6 +398,7 @@
 (define (bghost pp)
   (blank (pict-width pp) (pict-height pp)))
 
+(define big-hyphen-pict @ht2{- })
 (define hyphen-pict @st{- })
 (define hyphen-ghost (bghost hyphen-pict))
 
@@ -433,6 +445,9 @@
 
 (define error-pict
   (error-text "Error"))
+
+(define (bcellophane pp)
+  (cellophane pp 0.4))
 
 ;; -----------------------------------------------------------------------------
 ;; --- ???
@@ -680,11 +695,15 @@
 (define (deep-codeblock* pp* #:title [title #f])
   (X-codeblock pp* #:title title #:frame-color deep-pen-color #:background-color deep-brush-color))
 
+(define (typed-codeblock #:title [title #f] #:lang [lang "#lang typed"] . str*)
+  (deep-codeblock* #:title title (conslang lang (map tt str*))))
+
 (define (dyn-codeblock sym)
   (case sym
     ((U untyped) untyped-codeblock)
     ((D deep) deep-codeblock)
     ((S shallow) shallow-codeblock)
+    ((T typed) typed-codeblock)
     ((#f) (lambda arg* (blank)))
     (else (raise-argument-error 'dyn-codeblock "(or/c D S U)" sym))))
 
@@ -1059,12 +1078,10 @@
             (ppict-do pp
               #:go (coord (year->sky-x yr) 10/100 'ct)
               (apply vc-append pico-y-sep
-                     (parameterize ((current-pseudo-random-generator (make-pseudo-random-generator)))
-                       (random-seed 19910202)
-                       (for/list ((i (in-range num-col)))
-                         (if (zero? (modulo (+ i yr) 3))
-                           (bghost star-pict)
-                           star-pict)))))))
+                     (for/list ((i (in-range num-col)))
+                       (if (zero? (modulo (+ i yr) 3))
+                         (bghost star-pict)
+                         star-pict))))))
          )
     pp))
 
@@ -1124,6 +1141,9 @@
 
 (define ershov-pict
   (frame-person "Ershov" "ershov.png" 20/100))
+
+(define tally-pict
+  (filled-rectangle 4 small-y-sep #:color neutral-brush-color #:draw-border? #f))
 
 ;; -----------------------------------------------------------------------------
 
@@ -1316,7 +1336,7 @@
 (define ex-atom-title @rt{Example: Enforcing a Base Type})
 (define ex-pair-title @rt{Example: Enforcing a Data Structure})
 
-(define (basic-example lhs rhs)
+(define (basic-example lhs rhs #:arrow? [arrow? #false] #:text? [text? #true])
   (let* ((pp
           (boundary-append
             (add-hubs
@@ -1330,22 +1350,44 @@
               'BR)))
          (arr
            (code-arrow 'BR-S cb-find 'BL-E lc-find (* 3/4 turn) (* 35/100 turn) 90/100 5/100 'solid)))
-    (add-code-arrow pp arr)))
+    (if arrow? (add-code-arrow pp arr) pp)))
+
+(define q-pict @ht2{Q. })
+
+(define (question-text pp)
+  (word-append q-pict pp))
+
+(define a-pict @ht2{A. })
+
+(define (answer-text pp)
+  (word-append a-pict pp))
 
 (define (bad-pair-example lhs mid rhs)
   (codeblock-append
     ((dyn-codeblock lhs)
-      ""
       "(f '(\"A\" \"B\"))"
+      ""
       "")
     ((dyn-codeblock mid)
-      "(define (f (x : (Pairof Num)))"
+      "(define (f (x : (List Num)))"
       "  (g x))"
       "")
     ((dyn-codeblock rhs)
       "(define (g y)"
-      "  (+ (first y) (second y)))"
-      "")))
+      "  (+ (first y)"
+      "     42))")))
+
+(define (bad-fun-example lhs mid rhs)
+  (codeblock-append
+    ((dyn-codeblock lhs)
+      "(f (λ....))"
+      )
+    ((dyn-codeblock mid)
+      "(define (f (x : (-> Num)))"
+      "  (g x))")
+    ((dyn-codeblock rhs)
+      "(define (g y)"
+      "  (+ (y) 3))")))
 
 (define (higher-order-any-example lhs rhs)
   (codeblock-append
@@ -1550,14 +1592,14 @@
   (pslide
     #:go heading-coord-mid
     (boundary-node '(U D U D D))
-    (word-append
-      @ht2{Q. } @rt{What happens at the boundaries?})
+    (question-text
+      @rt{What happens at the boundaries?})
     (hsep (* 1.2 small-y-sep))
     (item-c-append
       (word-append
         @rrt{Types predict a  } (deep-code "Num")
         @rrt{  but get the letter  } (untyped-code "\"A\""))
-      (basic-example 'D 'U)))
+      (basic-example 'T 'U #:arrow? #true)))
   ;; return to Q in a minute, first more history / context
   ;;  ... now that you know roughly what solving, more about solutions
   (pslide
@@ -1573,87 +1615,161 @@
     #:go sky-coord
     (sky-pict))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict))
-
-  ;; TODO decorate
-  (pslide
+    ;; TODO decorate (?)
     #:go sky-coord (sky-pict)
     #:go earth-coord (earth-pict)
     #:next
     #:go center-coord
     @ht2{Mixed-Typed Design Space}
-    @rt{Lively, but Disorganized!}
-    
-    )
+    @rt{Lively, but Disorganized!})
   (pslide
-    #:go heading-coord-left
-    @rt{Example, disagreement} ;; titles are so difficult
-    ;; [[ recall, can mix typed and untyped ]]
-    ;; basic example, typed first = static error
-    ;;  f(n : number) { n + 1} ... f("A")
+    ;; example disagreement
+    #:go earth-coord
+    (earth-pict)
     #:go text-coord-mid
-    @rrt{number across boundary} ;; get letter
-    @rrt{some mixed-typed reject, others allow}
-    @rrt{allowance = funny because contradicts the type}
-    @rrt{you'd expect all to agree on this basic one})
+    (basic-example 'T 'U)
+    (hsep tiny-y-sep)
+    (question-text
+      (word-append
+        @rrt{Does the type  } (deep-code "Num")
+        @rrt{  keep out the letter  } (untyped-code "\"A\"")
+        @rrt{  ?}))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes!})
+    (apply ht-append pico-x-sep (make-list 3 tally-pict))
+    #:go answer-coord-right
+    (answer-text
+      @rt{No!})
+    (apply ht-append pico-x-sep (make-list 7 tally-pict)))
   (pslide
-    #:go heading-coord-left
-    @rt{Example 2: it gets worse}
-    ;; TODO what are the goals, first of all?
-    ;;  what to say about the languages here
-    ;; - change "number" to "boxof number"
-    ;; - call untyped function with the box
-    ;; -  .... result depends on where box accessed (yes thats easy enough)
+    #:go earth-coord
+    (earth-pict)
     #:go text-coord-mid
-    ;; f(n : box(number)) { g(n) } ... f(box("A")) ... g(n) { (unbox n) + 1 }
-    @rrt{pair across boundary}
-    @rrt{some mixed-typed reject early, others late, others never})
+    (bad-pair-example 'U 'T 'U)
+    (hsep tiny-y-sep)
+    (question-text
+      (word-append
+        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes!})
+    (apply ht-append pico-x-sep (make-list 2 tally-pict))
+    #:go answer-coord-right
+    (answer-text
+      @rt{No!})
+    (apply ht-append pico-x-sep (make-list 2 tally-pict)))
   (pslide
-    #:go heading-coord-left
-    @rt{My Work, understanding the space}
-    ;; back to chaos +? elephant
+    #:go earth-coord
+    (earth-pict)
+    #:go text-coord-mid
+    (bad-fun-example 'U 'T 'U)
+    (hsep tiny-y-sep)
+    (question-text
+      (word-append
+        @rrt{Does the type  } (deep-code "(-> Num)") @rrt{  keep out bad functions?}))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes})
+    (apply ht-append pico-x-sep (make-list 2 tally-pict))
+    #:go answer-coord-right
+    (answer-text
+      @rt{No})
+    (apply ht-append pico-x-sep (make-list 2 tally-pict)))
+  (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go earth-coord
+    (earth-pict)
     #:go center-coord
+    #:alt [
+      (question-text
+        @rt{What happens at the boundaries?})
+      #:go answer-coord-mid
+      (boundary-append
+        (answer-text @rrt{Nothing})
+        (answer-text @rrt{Spot-checks})
+        (answer-text @rrt{Everything!})
+        (answer-text @rrt{...}))
+    ]
+    (boundary-append
+      (question-text
+        @rt{Why?})
+      (answer-text
+        @RT{Performance!}))
+    (hsep tiny-y-sep)
+    (question-text
+      @rt{Where's the data?}))
+  (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go earth-coord
+    (earth-pict)
+    #:go center-coord
+    @ht2{Mixed-Typed Design Space}
+    @rt{Lively, but Disorganized!}
+    #:go center-coord
+    (frame-person #f "elephant.jpg" 7/10))
+  (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go earth-coord
+    (earth-pict)
+    #:go (coord text-left 34/100 'lt)
+    (text-line-append
+      @ht2{My Research}
+      @rt{ brings order to}
+      @rt{ the design space})
+    #:go (coord contribution-x 26/100 'lt)
     (ht-append
-      10
-      (vl-append
-        10
-        ruler-pict
-        @rrt{performance})
-      (vl-append
-        10
-        scale-pict
-        @rrt{guarantees}))
-    @rrt{implications for (1) perf and for (2) what types mean}
-    ;; with improved understanding, compromise ... preview filled-in space
-    @rrt{thesis preview: deep and shallow can interoperate})
-  ;; now lets pursue the two threads, start with performance
+      @ht2{1. }
+      (text-line-append
+        @rt{How to assess}
+        @rt{ type guarantees}))
+    #:go (coord contribution-x 56/100 'lt)
+    (ht-append
+      @ht2{2. }
+      (text-line-append
+        @rt{How to measure}
+        @rt{ performance})))
+  (pslide
+    ;; TODO highlight promising points at top and bottom
+    #:go sky-coord
+    (sky-pict)
+    #:go earth-coord
+    (earth-pict)
+    #:go (coord contribution-x 26/100 'lt)
+    (bcellophane (ht-append @ht2{1. } (text-line-append @rt{How to assess} @rt{ type guarantees})))
+    #:go (coord contribution-x 56/100 'lt)
+    (bcellophane (ht-append @ht2{2. } (text-line-append @rt{How to measure} @rt{ performance})))
+    #:go (coord 1/2 38/100 'ct)
+    (text-line-append
+      @ht2{Thesis Preview:}
+      @rt{ Deep and Shallow types can interoperate}))
   (void))
 
 (define (sec:perf)
-  ;; maybe ... Natural can be rocky, Transient sloped, ... ?
-  ;;  be careful, have 2 planes perf@impl design@model
-  ;;
-  ;; lets begin with perf, because it comes first
-  ;;  want to RUN these mixed-typed programs
-  ;; and focus on TR ... skull flag? danger?
   (pslide
-    ;; performance first
-    ;; ... and dive right in to story of typed racket
-    ;;  the FIRST big mixed language where types mean something
-    ;;  in the beginning implemented and it was good
-    ;; [ ] mag glass?
-    ;; [ ] pirate flag
+    #:go earth-coord
+    (earth-pict)
+    #:go (coord contribution-x 56/100 'lt)
+    (text-line-append @rt{How to measure} @rt{ performance})
+    #:go center-coord
+    @rrt{(highlight TR)})
+  (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{Performance: Story of Typed Racket}
-    #:go text-coord-mid
-    ;; black flag, zoom in,
-    ;;  but black-flag = exaggeration ... have lots of programmers some good some bad MANY q-mark
-    ;;  ... pirate fog, islands?
-    @rrt{some programs fine}
-    @rrt{others not fine})
+    @ht2{Typed Racket}
+    #:go text-coord-left
+    (rt-bullet
+      "Oldest, strongest mixed-typed language"
+      "Home of severe performance costs"))
+  (pslide
+    #:go heading-coord-left
+    @ht2{Costs ...}
+    #:go title-coord-mid
+    (frame-person #f "math-array.png" 8/10))
   (pslide
     #:go heading-coord-left
     @rt{Trie Example}
@@ -1663,6 +1779,7 @@
     ;; - highlight "burned"
     ;; - highlight "12sec vs 0ms"
     (frame-bitmap "trie-racket-users.png" #:w% 4/10))
+
   (pslide
     #:go heading-coord-left
     @rt{Story of Typed Racket}
@@ -2284,6 +2401,7 @@
         (list "suffixt" "0%" "12%")
         (list "take5" "100%" "100%"))))
   ;; TODO flash a lattice, to understand the table ... maybe 2 lattices
+  ;; TODO mixed-lattice table ((fsm 37.50) (morsecode 25.00) (jpeg 37.50) (kcfa 55.47) (zombie 6.25) (zordoz 46.88))
   (void))
 
 (define (sec:conclusion)
@@ -2408,29 +2526,13 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
+    #:go heading-coord-left
+    @ht2{... More Costs}
+    #:go heading-coord-right
+    (frame-person #f "trie-small.png" 45/100)
 
-    #:go center-coord
-    @ht2{Mixed-Typed Design Space}
-    @rt{Lively, but Disorganized!}
+    ;; TODO typed and untyped version, 12 sec 1 ms
 
-    ;; TODO example disagreement
-
-
-;    #:go heading-coord-left
-;    @rt{Example: Enforcing a Data Structure}
-;    #:go text-coord-mid
-;    (scale-to-text
-;      (make-2table
-;        #:row-sep small-y-sep
-;        #:col-sep small-x-sep
-;        #:row-align lt-superimpose
-;        (list
-;          (cons (blank) ex-pair-retic)
-;          (cons ex-pair-tr ex-pair-nom))))
 
 
   )))
