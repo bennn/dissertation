@@ -36,7 +36,43 @@ TODO
 - [ ] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
 - [ ] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
 - [ ] jv remark that Shallow\blame is mitigated by running Deep
+- [ ] fh typo TS def, chapter 6, mixing lang L with type X
+- [ ] fh review mcallester, kaist, rehof ... think semantic again
+- [ ] st benchmarks, new threat, some benchmarks have boundaries that we wrote to contextual modules!!
+         alts = consider this as partial lattice with ctx attached (is current really the same??!)
+                use unsafe boundary for context
+                port entire library
+- [ ] st benchmarks, threat, data / structs all in one file
+      arose from snake,tetris,zombie arose because of SCV limitations
+      what could results be in a ... synth2 ... without the wall
+- [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
+      ... what are the odds for that?
+- [ ] st fig 48 unclear, use new example, the point is only check at elim forms and
+      upcast changes the elim forms
+      lazy-fact is bad because it upcasts the result instead of the value
+- [ ] st p49 wrappers also cause identity problems, the trouble is not only cost and correctness
+- [ ] st sec 2 whats the idea here, what inference systems in bounds?
+      be clear the goal (stepping stones) ... why else discuss set-based analysis
+- [ ] st more lisp .... SPCL does typechecking for -> too, but undocumented
+      Typed Lisp, by Cartwright 1976 ... copy Sam's dissertation for comments
+- [ ] st StrongTalk unrelated to lisp, don't remove their history credit
+      also they'll use types to optimize when safe
+      Hack, similar, has given up
+- [ ] st remove Pycket from languages picture, it's not a PL, ditto for JFP
+- [ ] st double-check Strongscript TS* SafeTS for gradual/migratory
+- [ ] st double-check ActionScript too, add a version number
+- [ ] st add Sorbet to figure, gotta check the implementation for parts
+- [ ] st Monotonic is implemented in Grift and probably TS*
+- [ ] st Castagna close to Natural, acknowledge it, same for forgetful ... at this point in the paper they're alike
+- [ ] st fig 25 does not blame net/url blames interface! double check, get it right
+- [ ] st fig 26 be clear its the same error as no types whatsoever
+- [ ] st canonical forms ... mention in sec 4.3 supports optimization
+         put lemmas into 4.6.X ... what do they look like? ditto JFP
+- [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
+- [ ] st snake and tetris are both educational and game
+
 - [ ] GTP case study needs work
+
 
 - [ ] push MF edits up to JFP
 
