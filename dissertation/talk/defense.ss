@@ -33,8 +33,9 @@
 
 (require
   file/glob
-  pict pict/shadow
+  pict pict/shadow pict/face
   pict-abbrevs pict-abbrevs/slideshow gtp-pict
+  (only-in gtp-util pct rnd)
   ppict/2
   racket/draw
   racket/list
@@ -42,13 +43,17 @@
   racket/format
   racket/runtime-path
   slideshow/code
+  (only-in racket/math exact-floor)
   (only-in math/statistics mean)
   (only-in greenman-thesis stransient)
   (only-in greenman-thesis/jfp-2019/main
     MAX-OVERHEAD
     transient-rkt-version
     benchmark-name->performance-info)
-  gtp-plot/configuration-info gtp-plot/plot gtp-plot/typed-racket-info gtp-plot/performance-info
+  (prefix-in rp:
+    (only-in greenman-thesis/pepm-2018/main
+      benchmark-name->performance-info))
+  gtp-plot/configuration-info gtp-plot/plot gtp-plot/typed-racket-info gtp-plot/reticulated-info gtp-plot/performance-info
   plot/no-gui (except-in plot/utils min* max*))
 
 (module+ test
@@ -80,6 +85,9 @@
 
 (define codeblock-x-sep (w%->pixels 4/100))
 (define codeblock-y-sep (h%->pixels 4/100))
+
+(define lattice-x-sep small-x-sep)
+(define lattice-y-sep tiny-y-sep)
 
 (define (hsep h)
   (blank 0 h))
@@ -143,6 +151,9 @@
 (define (landscape-line-width)
   (* 5/100 (landscape-h)))
 
+(define lattice-small-n 3)
+(define lattice-large-n 6)
+
 ;; -----------------------------------------------------------------------------
 ;; --- color
 
@@ -190,7 +201,7 @@
 (define body-text-color author-3k1)
 (define subtitle-text-color highlight-pen-color)
 (define code-text-color black)
-(define success-color green1-3k1)
+(define success-color green0-3k1)
 (define error-color red1-3k1)
 
 (define defense-pen-color-converter
@@ -205,6 +216,9 @@
 (define (small-caps-style font)
   (cons 'no-combine (cons 'caps font)))
 
+(define (bold-style font)
+  (cons 'bold font))
+
 (define title-text-font (small-caps-style "TeX Gyre Pagella"))
 (define title-text-size 70)
 
@@ -214,6 +228,7 @@
 (define title-rm-font "TeX Gyre Pagella")
 
 (define body-text-font "Lucida Grande")
+(define body-bold-font (bold-style body-text-font))
 (define body-text-size 38)
 (define sub-body-text-size 30)
 (define tiny-text-size 22)
@@ -221,7 +236,7 @@
 (define subtitle-text-font (small-caps-style body-text-font))
 
 (define code-text-font "Inconsolata")
-(define code-bold-font (cons 'bold code-text-font))
+(define code-bold-font (bold-style code-text-font))
 (define code-text-size 26)
 
 (define (txt str*
@@ -262,11 +277,14 @@
 (define (rt . str*)
   (rt* str*))
 
-(define (rt* str* #:color [color body-text-color])
-  (txt str* #:font body-text-font #:size body-text-size #:color color))
+(define (rt* str* #:color [color body-text-color] #:font [font body-text-font])
+  (txt str* #:font font #:size body-text-size #:color color))
 
 (define (st . str*)
   (rt* str* #:color subtitle-text-color))
+
+(define (bold-rt . str*)
+  (rt* str* #:font body-bold-font))
 
 (define (rrt . str*)
   (rrt* str*))
@@ -392,20 +410,25 @@
 (define (item-c-append* pp*)
   (apply vc-append item-line-sep pp*))
 
-(define (rt-bullet . str*)
-  (rt-bullet* str*))
-
 (define (bghost pp)
   (blank (pict-width pp) (pict-height pp)))
 
-(define big-hyphen-pict @ht2{- })
-(define hyphen-pict @st{- })
-(define hyphen-ghost (bghost hyphen-pict))
+(define (rt-bullet . str*)
+  (rt-bullet* str*))
 
 (define (rt-bullet* str*)
+  (bullet* (map rt str*)))
+
+(define (rrt-bullet . str*)
+  (rrt-bullet* str*))
+
+(define (rrt-bullet* str*)
+  (bullet* (map rrt str*)))
+
+(define (bullet* pp*)
   (item-line-append*
-    (for/list ((str (in-list str*)))
-      (hb-append hyphen-pict (rt str)))))
+    (for/list ((pp (in-list pp*)))
+      (hb-append hyphen-pict pp))))
 
 (define (pipeline-append . pp*)
   (pipeline-append* pp*))
@@ -424,6 +447,12 @@
 (define (word-append* pp*)
   (apply hc-append pp*))
 
+(define (lattice-label-append . pp*)
+  (lattice-label-append* pp*))
+
+(define (lattice-label-append* pp*)
+  (apply vc-append small-y-sep pp*))
+
 (define (result-bubble pp)
   (add-rounded-border
     #:radius 22
@@ -433,15 +462,13 @@
     pp))
 
 (define (success-text str)
-  (result-bubble
-    (txt str #:font body-text-font #:size body-text-size #:color success-color)))
+  (txt str #:font body-text-font #:size body-text-size #:color success-color))
 
 (define success-pict
   (success-text "OK"))
 
 (define (error-text str)
-  (result-bubble
-    (txt str #:font body-text-font #:size body-text-size #:color error-color)))
+  (txt str #:font body-text-font #:size body-text-size #:color error-color))
 
 (define error-pict
   (error-text "Error"))
@@ -751,7 +778,7 @@
 
 (define (dyn-swatch sym)
   (case sym
-    ((D) deep-swatch)
+    ((D T) deep-swatch)
     ((U) untyped-swatch)
     ((S) shallow-swatch)
     (else (raise-argument-error 'dyn-swatch "(or/c 'D 'S 'U)" sym))))
@@ -760,13 +787,25 @@
   (lattice-h-append* pp*))
 
 (define (lattice-h-append* pp*)
-  (apply hc-append small-x-sep pp*))
+  (apply hc-append lattice-x-sep pp*))
 
 (define (lattice-vl-append . pp*)
   (lattice-vl-append* pp*))
 
 (define (lattice-vl-append* pp*)
-  (apply vl-append tiny-y-sep pp*))
+  (apply vl-append lattice-y-sep pp*))
+
+(define (lattice-vc-append . pp*)
+  (lattice-vc-append* pp*))
+
+(define (lattice-vc-append* pp*)
+  (apply vc-append lattice-y-sep pp*))
+
+(define (migration-append . pp*)
+  (migration-append* pp*))
+
+(define (migration-append* pp*)
+  (apply vc-append lattice-y-sep (add-between pp* down-arrow-pict)))
 
 (define (codeblock-append . pp*)
   (codeblock-append* pp*))
@@ -919,6 +958,83 @@
   (define ln (length x*))
   (define diff (- ln (* n (quotient ln n))))
   (append x* (make-list diff (blank))))
+
+(define (bits->path-node b*)
+  (path-node
+    (for/list ((b (in-list b*)))
+      (if b 'T 'U))))
+
+(define (scale-small-lattice pp)
+  (scale-to-fit pp (w%->pixels 55/100) (h%->pixels 45/100)))
+
+(define (what-to-measure size)
+  (define small-n lattice-small-n)
+  (define large-n lattice-large-n)
+  (define (make-table . pp*)
+    (make-2table
+      #:col-align ct-superimpose
+      #:row-sep small-y-sep
+      pp*))
+  (case size
+    ((small)
+     (define n small-n)
+     (define-values [tu-pict pre-lattice-pict]
+       (what-to-measure-lattice n))
+     (define lattice-pict
+       (scale-small-lattice pre-lattice-pict))
+     (make-table
+       (lattice-label-append tu-pict @rrt{@~a[n] components})
+       (lattice-label-append lattice-pict @rrt{@~a[(expt 2 n)] configurations})))
+    ((large)
+     (define n large-n)
+     (define-values [small-tu-pict small-lattice-pict]
+       (what-to-measure-lattice small-n))
+     (define-values [large-tu-pict large-lattice-pict]
+       (what-to-measure-lattice n))
+     (define tu-pict
+       (scale large-tu-pict 9/10))
+     (define lattice-pict
+       (bghost (scale-small-lattice small-lattice-pict)))
+     (define pre-table
+       (make-table
+         (lattice-label-append tu-pict @rrt{@~a[n] components})
+         (lattice-label-append lattice-pict @rrt{@~a[(expt 2 n)] configurations})))
+     (ppict-do
+       pre-table
+       #:go (at-find-pict lattice-pict lc-find 'lc)
+       (scale large-lattice-pict 20/100)))
+    (else
+      (raise-argument-error 'what-to-measure "(or/c 'small 'large)" size))))
+
+(define (what-to-measure-lattice n)
+  (define tu-pict
+    (let* ((u-pict (path-node (make-list n 'U)))
+           (t-pict (path-node (make-list n 'T))))
+      (item-line-append t-pict u-pict)))
+  (define x-sep
+    (if (< n 5) lattice-x-sep pico-x-sep))
+  (define lattice-pict
+    (make-lattice n bits->path-node #:x-margin x-sep #:y-margin lattice-y-sep))
+  (values tu-pict lattice-pict))
+
+(define (d-lattice n)
+  (define num-configs (expt 2 n))
+  (define *num-good (box 0))
+  (define (make-node bit*)
+    (define pp (bits->path-node bit*))
+    (if (equal? (first bit*) (last bit*))
+      (begin (set-box! *num-good (+ 1 (unbox *num-good))) pp)
+      (bcellophane pp)))
+  (define lattice-pict
+    (scale
+      (make-lattice n make-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep)
+      6/10))
+  (lattice-vc-append
+    @rt{@~a[(exact-floor (pct (unbox *num-good) num-configs))]%}
+    lattice-pict))
+
+(define (small-face mood)
+  (scale (face mood) 45/100))
 
 ;;(define thesis-full-pict
 ;;  ;; TODO use bullet list
@@ -1145,6 +1261,26 @@
 (define tally-pict
   (filled-rectangle 4 small-y-sep #:color neutral-brush-color #:draw-border? #f))
 
+(define trie-code* '(
+  "(require pfds/trie)"
+  ""
+  "(define t (trie ....))"
+  "(time (bind t ....))"
+))
+
+(define q-pict @ht2{Q. })
+(define a-pict @ht2{A. })
+(define D-pict @bold-rt{D})
+
+(define down-arrow-pict
+  (colorize
+    (arrowhead 20 (* 3/4 turn))
+    fog-3k1))
+
+(define big-hyphen-pict @ht2{- })
+(define hyphen-pict @st{- })
+(define hyphen-ghost (bghost hyphen-pict))
+
 ;; -----------------------------------------------------------------------------
 
 (define (test-margin-slide)
@@ -1352,12 +1488,8 @@
            (code-arrow 'BR-S cb-find 'BL-E lc-find (* 3/4 turn) (* 35/100 turn) 90/100 5/100 'solid)))
     (if arrow? (add-code-arrow pp arr) pp)))
 
-(define q-pict @ht2{Q. })
-
 (define (question-text pp)
   (word-append q-pict pp))
-
-(define a-pict @ht2{A. })
 
 (define (answer-text pp)
   (word-append a-pict pp))
@@ -1442,14 +1574,25 @@
     (tiny-txt (~a bm-name))
     (double-frame pp)))
 
+(define (2col-overhead-plot* deco bm-name*)
+  (make-2table
+    #:row-sep tiny-y-sep
+    (map (lambda (bm-name) (2col-overhead-plot bm-name (list deco))) bm-name*)))
+
 (define (ss-overhead-plot pi* line-width w h)
+  (define base-color
+    (if (and (not (null? pi*))
+             (null? (cdr pi*))
+             (reticulated-info? (car pi*)))
+      1
+      0))
   (define pp
     (parameterize ([*OVERHEAD-MAX* MAX-OVERHEAD]
                    [*OVERHEAD-LEGEND?* #false]
                    [*OVERHEAD-PLOT-WIDTH* w]
                    [*OVERHEAD-PLOT-HEIGHT* h]
                    [*OVERHEAD-LINE-WIDTH* line-width]
-                   [*OVERHEAD-LINE-COLOR* 0]
+                   [*OVERHEAD-LINE-COLOR* base-color]
                    [*PEN-COLOR-CONVERTER* defense-pen-color-converter]
                    [*BRUSH-COLOR-CONVERTER* defense-brush-color-converter]
                    [*INTERVAL-ALPHA* code-brush-alpha]
@@ -1462,7 +1605,10 @@
     ((D)
      (benchmark-name->performance-info bm-name transient-rkt-version))
     ((S)
-     (benchmark-name->performance-info bm-name stransient))
+     (or
+       (with-handlers ((exn:fail? (lambda (ex) #f)))
+         (benchmark-name->performance-info bm-name stransient))
+       (rp:benchmark-name->performance-info bm-name)))
     ((best)
      (define pi-deep (benchmark-name->performance-info bm-name transient-rkt-version))
      (define pi-shallow (benchmark-name->performance-info bm-name stransient))
@@ -1772,157 +1918,238 @@
     (frame-person #f "math-array.png" 8/10))
   (pslide
     #:go heading-coord-left
-    @rt{Trie Example}
-    @rrt{JBC q tr-pdfs, 1200x slowdown}
-    ;; TODO
-    ;; - blur JBC / entire message
-    ;; - highlight "burned"
-    ;; - highlight "12sec vs 0ms"
-    (frame-bitmap "trie-racket-users.png" #:w% 4/10))
-
+    @ht2{... More Costs}
+    #:go heading-coord-right
+    (frame-person #f "trie-small.png" 45/100)
+    #:go title-coord-mid
+    (hsep tiny-y-sep)
+    (item-table
+      (apply untyped-codeblock trie-code*)
+      @rt{12 seconds}
+      (apply typed-codeblock trie-code*)
+      @rt{1 ms!}))
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{Story of Typed Racket}
-    ;; back to "woods" with some black flags
-    @rrt{more questions, more hazards}
-    @rrt{evident problem, unclear size and severity})
+    @ht2{Typed Racket Performance}
+    #:go text-coord-left
+    (rt-bullet
+      "Problems exist ... clearly"
+      "Widespead issue?  Language bug?")
+    #:go center-coord
+    (takeaway-frame
+      @ht2{Need a way to measure!}))
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{GTP Benchmarks}
+    @ht2{Step 1: Benchmarks}
+    #:go heading-coord-right
+    @rrt{Ben Asumu Max Dan Matthias}
     #:go text-coord-mid
-    @rrt{developed benchmarks, with Dan Matthias Asumu Max}
-    @rrt{adapted from real programs, convert to TR})
+    @rt{Collected small, useful programs}
+    (boundary-append
+      (path-node '(U U U U U U))
+      (path-node '(T T))
+      (path-node '(U U U)))
+    (hsep small-y-sep)
+    @rt{Added types, if missing}
+    (boundary-append
+      (path-node '(T T T T T T))
+      (path-node '(T T))
+      (path-node '(T T T))))
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go heading-coord-left
+    @ht2{Step 1: Benchmarks}
+    #:go text-coord-left
+    (rt-bullet
+      "21 benchmark in total"
+      "from 2 to 14 modules"
+      "games, apps, libraries, ...."))
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go heading-coord-left
+    @ht2{Step 1: Benchmarks}
+    #:go center-coord
+    ;; TOOD migratable vs contextual, circle vs square
+    (scale-src-bitmap "jpeg-description.png" 95/100))
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go heading-coord-left
+    @ht2{Step 2: How to Measure}
+    #:go text-coord-mid
+    @rt{What to measure = all configurations}
+    ;; NOTE migratable vs contextual
+    (hsep small-y-sep)
+    #:alt [(what-to-measure 'small)]
+    #:alt [(what-to-measure 'large)]
+    (ht-append
+      med-x-sep
+      (question-text @rt{How to study?})
+      (question-text @rt{How to scale?}))
+    (hsep med-y-sep)
+    (answer-text @rt{Focus on the programmer ...}))
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go (coord 30/100 text-top 'ct)
+    (migration-append
+      (path-node '(U U U U U))
+      (path-node '(T U U U U))
+      (path-node '(T U T U U))
+      (path-node '(T U T T T)))
+    #:go (coord 70/100 text-top 'ct)
+    #:alt [(hc-append
+      (vl-append small-y-sep (small-face 'happy) (small-face 'happier))
+      (small-face 'sortof-unhappy))]
+    (let* ((bg (bghost (small-face 'happy)))
+           (placeholder (lambda (tag) (tag-pict bg tag)))
+           (pp (hc-append (vl-append small-y-sep (placeholder 'A) (placeholder 'C))
+                          (placeholder 'B))))
+      (for/fold ((acc pp))
+                ((tag (in-list '(A C B)))
+                 (str (in-list '("1x = baseline" "0.9x = improvement" "20x = too slow!"))))
+        (ppict-do acc #:go (at-find-pict tag cc-find 'cc) (rt str)))))
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go heading-coord-left
+    @ht2{Step 2: How to Measure}
+    #:go text-coord-mid
+    (answer-text
+      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
+    (hsep small-y-sep)
+    ;; TODO large lattice also?
+    (make-2table
+      #:row-align ct-superimpose
+      #:col-align ct-superimpose
+      (list
+        (text-line-append
+          (word-append
+            @rrt{If  } D-pict @rrt{=4, then count})
+          @rrt{configs with at most}
+          @rrt{4x overhead})
+        (d-lattice lattice-small-n))))
   (pslide
     #:go heading-coord-left
-    @rt{GTP Benchmarks, table}
+    @ht2{Step 2: How to Measure}
     #:go text-coord-mid
-    (frame-bitmap "gtp-size.png"))
+    (answer-text
+      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
+    (text-line-append
+      (word-append
+        @rrt{For a HUGE space, count  } D-pict @rrt{-deliverable configs})
+      @rrt{ in a collection of random samples})
+    (hsep small-y-sep)
+    (scale (make-lattice 12 bits->path-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep) 5/10))
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{GTP Benchmarks, example}
+    @ht2{Step 3: Picture}
     #:go text-coord-mid
-    @rrt{size shape ... from site}
-    (frame-bitmap "jpeg-description.png" #:w% 4/10))
+    (tag-pict (big-overhead-plot 'jpeg '(D)) 'plot)
+    #:set (let ((pp ppict-do-state))
+            (ppict-do pp #:go (at-find-pict 'plot lb-find 'rc)
+                      (vl-append (hsep small-y-sep) (word-append D-pict @rt{ = })))))
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{What to do with benchmarks?}
+    @ht2{Performance Method}
     #:go text-coord-mid
-    @rrt{central question}
-    @rrt{have 21 programs, or 42 if typed and untyped}
-    ;; CAN get 21 / 42 numbers out. (That's what others do.) Do we learn much? NO
-    @rrt{but --- ignores entire mixed space})
+    (item-line-append
+      (hb-append @st{1. } @rt{collect benchmarks})
+      (hb-append @st{2. }
+                 (word-append @rt{count  } D-pict @rt{-deliverable configs (or sample)}))
+      (hb-append @st{3. }
+                 (word-append @rt{plot results for many  } D-pict))))
   (pslide
-    #:go heading-coord-left
-    @rt{Systematic Method}
-    #:go text-coord-mid
-    ruler-pict)
+    #:go earth-coord
+    (earth-pict)
+    #:go title-coord-mid
+    @rt{Applications: TR and RP})
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{Perf. Method: Study All Configurations}
+    (hb-append
+      @ht2{Typed Racket}
+      @rrt{  some results from our 21 benchmarks})
     #:go text-coord-mid
-    @rrt{program N points => 2^N configs}
-    ;; recall JPEG picture, its N example, migratable vs contextual
-    @rrt{some good some danger, measure systematically})
+    (2col-overhead-plot* 'D '(jpeg suffixtree take5 synth)))
   (pslide
-    ;; gotta work for all programs, more than the tiny N=4 example
-    #:go heading-coord-left
-    @rt{How to Comprehend the Data?}
-    #:go text-coord-mid
-    @rrt{small N = unreadable space}
-    @rrt{modest N = infeasible}
-    @rrt{answer to both comes from a careful consumer-first question})
+    #:go earth-coord
+    (earth-pict)
+    #:go title-coord-mid
+    @rt{TR = bad})
   (pslide
+    #:go earth-coord
+    (earth-pict)
     #:go heading-coord-left
-    @rt{D-deliverable measure}
+    (hb-append
+      @ht2{Reticulated Python}
+      @rrt{   different benchmarks})
     #:go text-coord-mid
-    @rrt{enduser / decision maker, set Dx}
-    @rrt{worst-case tolerate ... may be 2x for ship, may be 10x for dev}
-    @rrt{with D every config is yes or no, deliverable or not}
-    ;; now have one number that says a lot about the space (relative to param)
-    @rrt{compressed to number, easy to interpret a 60% result here}
-    @rrt{also can sample})
+    (2col-overhead-plot* 'S '(spectralnorm go Espionage chaos)))
   (pslide
-    #:go heading-coord-left
-    @rt{Approximate D-deliverable}
-    #:go text-coord-mid
-    @rrt{easy to approx. with interval}
-    @rrt{knowledge vs truth, pick 1 random then D% good}
-    @rrt{well then D% in a few big samples close enough}
-    ;; no vis, no need for details
-    @rrt{success with linear samples})
-  (pslide
-    #:go heading-coord-left
-    @rt{Method Summary}
-    ;; it's a contribution
-    #:go text-coord-mid
-    @rrt{several programs, fully type}
-    @rrt{systematically collect, exhaustive or approx}
-    @rrt{study with range of D})
-  (pslide
-    #:go heading-coord-left
-    @rt{D-deliv Example}
-    ;; how to read
-    #:go text-coord-mid
-    @rrt{jpeg plot})
-  (pslide
-    #:go heading-coord-left
-    @rt{Two Evaluations}
-    #:go text-coord-mid
-    @rrt{story of TR}
-    @rrt{story of RP too})
-  (sec:perf:tr)
-  (sec:perf:rp)
-  (void))
-
-(define (sec:perf:tr)
-  (pslide
-    #:go heading-coord-left
-    @rt{TR evaluation}
-    #:go text-coord-mid
-    @rrt{20 benchmarks, recall table})
-  (pslide
-    #:go heading-coord-left
-    @rt{TR typical result}
-    #:go text-coord-mid
-    @rrt{or, a few results}
-    @rrt{yikes too slow}
-    @rrt{few are 10x deliv})
-  (pslide
-    #:go heading-coord-left
-    @rt{TR, map}
-    #:go text-coord-mid
-    @rrt{decorate, slow})
-  (void))
-
-(define (sec:perf:rp)
-  (pslide
-    #:go heading-coord-left
-    @rt{map => RP}
-    #:go text-coord-mid
-    @rrt{focus, new})
-  (pslide
-    #:go heading-coord-left
-    @rt{RP evaluation ... mirror TR}
-    #:go text-coord-mid
-    @rrt{benchmarks, size purpose})
-  (pslide
-    #:go heading-coord-left
-    @rt{RP typical result}
-    #:go text-coord-mid
-    @rrt{lots 10x deliv}
-    @rrt{much faster})
+    #:go earth-coord
+    (earth-pict)
+    #:go title-coord-mid
+    @rt{RP = much better})
   (void))
 
 (define (sec:design)
-  ;; Q work in the survey, early, about whether transient is plain "better"?
+  (pslide
+    #:go earth-coord
+    (earth-pict)
+    #:go title-coord-mid
+    @rt{WOW}
+    (hsep small-y-sep)
+    @rrt{TR vs RP, night vs day})
+  (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go title-coord-mid
+    (bghost @rt{WOW})
+    (hsep small-y-sep)
+    @rrt{TR vs RP, night vs day}
+    (hsep small-y-sep)
+    (text-line-append
+      @rrt{type sound? yes yes}
+      @rrt{gradual guarantee? yes yes}
+      @rrt{blame theorem? yes yes})
+    @rrt{TR << RP ?})
+  (pslide
+    #:go text-coord-mid
+    (bad-pair-example 'U 'T 'U)
+    (hsep tiny-y-sep)
+    (question-text
+      (word-append
+        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes!})
+    (hsep small-y-sep)
+    @rrt{Typed Racket}
+    #:go answer-coord-right
+    (answer-text
+      @rt{No!})
+    (hsep small-y-sep)
+    @rrt{Reticulated Python})
   (pslide
     #:go heading-coord-left
-    @rt{RP vs TR night and day}
+    @rt{CM example, functions}
     #:go text-coord-mid
-    @rrt{map again, side-by-side}
-    @rrt{quite a surprise, both sound; types mean something})
+    @rrt{ah missing error})
+
   (pslide
-    ;; the TR results came first, and our reaction was "sound dead"?
+    ;; NOW these are not the only contenders!
     #:go heading-coord-left
     @rt{Is sound dead?}
     #:go text-coord-mid
@@ -1934,22 +2161,7 @@
     @rt{Confusion}
     #:go text-coord-mid
     @rrt{hang on, recall different behaviors})
-  (pslide
-    #:go heading-coord-left
-    @rt{Example 1}
-    #:go text-coord-mid
-    @rrt{all agree on the number-boundary question})
-  (pslide
-    #:go heading-coord-left
-    @rt{Example 2}
-    #:go text-coord-mid
-    @rrt{disagree on box-boundary}
-    @rrt{concrete cannot even express, every box starts with a type})
-  (pslide
-    #:go heading-coord-left
-    @rt{CM example, functions}
-    #:go text-coord-mid
-    @rrt{ah missing error})
+
   (pslide
     #:go heading-coord-left
     @rt{How can they all satisfy all when clearly different?}
@@ -2402,6 +2614,7 @@
         (list "take5" "100%" "100%"))))
   ;; TODO flash a lattice, to understand the table ... maybe 2 lattices
   ;; TODO mixed-lattice table ((fsm 37.50) (morsecode 25.00) (jpeg 37.50) (kcfa 55.47) (zombie 6.25) (zordoz 46.88))
+  ;; TODO mark ALL THESE as not in document, breaking news
   (void))
 
 (define (sec:conclusion)
@@ -2526,12 +2739,31 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go heading-coord-left
-    @ht2{... More Costs}
-    #:go heading-coord-right
-    (frame-person #f "trie-small.png" 45/100)
+    #:go text-coord-mid
+    (bad-pair-example 'U 'T 'U)
+    (hsep tiny-y-sep)
+    (question-text
+      (word-append
+        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes!})
+    (hsep small-y-sep)
+    @rrt{Typed Racket}
+    #:go answer-coord-right
+    (answer-text
+      @rt{No!})
+    (hsep small-y-sep)
+    @rrt{Reticulated Python}
 
-    ;; TODO typed and untyped version, 12 sec 1 ms
+;    (answer-text
+;      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
+;    (text-line-append
+;      (word-append
+;        @rrt{For a HUGE space, count  } D-pict @rrt{-deliverable configs})
+;      @rrt{ in a collection of random samples})
+;    (hsep small-y-sep)
+;    (scale (make-lattice 12 bits->path-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep) 5/10)
 
 
 
