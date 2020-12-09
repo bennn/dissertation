@@ -1091,14 +1091,18 @@ All data collection scripts are online:
 @; -----------------------------------------------------------------------------
 @subsection[#:tag "sec:rp:benchmarks"]{Benchmarks}
 
-@(let ([num1 @Integer->word[(length (list* 'aespython 'stats rp:DLS-2014-BENCHMARK-NAMES))]]
-       [num2 @Integer->word[(length rp:POPL-2017-BENCHMARK-NAMES)]]
-       [num3 @integer->word[(length '(Espionage PythonFlow take5 sample_fsm))]]) @elem{
-   @|num1| benchmarks originate from case studies by @citet{vksb-dls-2014}.
-   @;footnote{@|dls-names|.}
-   @|num2| are from the evaluation by @citet{vss-popl-2017} on programs from
+@(let* ([num1 (length (list* 'aespython 'stats rp:DLS-2014-BENCHMARK-NAMES))]
+        [num2 (length rp:POPL-2017-BENCHMARK-NAMES)]
+        [num3 (length '(Espionage PythonFlow take5 sample_fsm))]
+        [str1 @Integer->word[num1]]
+        [str2 @Integer->word[num2]]
+        [str3 @Integer->word[num3]]
+        ) @elem{
+   There are @integer->word[(+ num1 num2 num3)] benchmarks in total.
+   @|str1| originate from case studies by @citet{vksb-dls-2014}.
+   @|str2| are from the evaluation by @citet{vss-popl-2017} on programs from
    the Python Performance Benchmark Suite.
-   The remaining @|num3| originate from open-source programs.
+   The remaining @|str3| originate from open-source programs.
 })
 
 The following descriptions credit each benchmark's original author,
