@@ -9,27 +9,27 @@
 ;; - [X] jfp example, slides ... take from diss pict
 ;; - [X] outline, on paper
 ;; - [X] outline on slides
-;; - [ ] technics in order!
-;; - [ ] table pict
-;; - [ ] warring states pict, D S E + concrete, pyret
-;;   - [ ] similar pict for languages? for, before the design-space analysis?
-;;   - [ ] organize along perf + design dimensions
-;;   - [ ] deep perf = bumpy, dangerous bend (or R G Y stripes)
-;;   - [ ] shallow perf = bumpy, dangerous bend
-;;   - [ ] erased perf = "untyped" flag ... for better and worse
-;;   - [ ] interop "city" at D S border
-;; - [ ] thesis + supports pict
-;; - [ ] D S U picts, the safe one and others
+;; - [X] technics in order!
+;; - [X] table pict
+;; - [X] warring states pict, D S E + concrete, pyret
+;;   - [X] similar pict for languages? for, before the design-space analysis?
+;;   - [X] organize along perf + design dimensions
+;;   - [-] deep perf = bumpy, dangerous bend (or R G Y stripes)
+;;   - [-] shallow perf = bumpy, dangerous bend
+;;   - [-] erased perf = "untyped" flag ... for better and worse
+;;   - [-] interop "city" at D S border
+;; - [X] thesis + supports pict
+;; - [X] D S U picts, the safe one and others
 ;; - [ ] sunrise, green, theme for "published" half
 ;; - [ ] moonlight, blue, theme for "new" half
 ;;
-;; - [ ] headlines ... gt terrific
-;; - [ ] two methods (major contributions)
-;;   - [ ] perf ... LHS 
-;;   - [ ] design ... RHS 
+;; - [-] headlines ... gt terrific
+;; - [X] two methods (major contributions)
+;;   - [X] perf ... LHS 
+;;   - [X] design ... RHS 
 ;; - [ ] NOTE: cannot ask if Java etc. is deep, its an FFI/Interop question
-;; - [ ]
-;; - [ ]
+;; - [ ] cache huge lattice
+;; - [ ] more takeaways at end, summarize?
 
 (require
   file/glob
@@ -141,6 +141,10 @@
 (define answer-coord-left (coord 30/100 answer-y 'ct))
 (define answer-coord-mid (coord 1/2 answer-y 'ct))
 (define answer-coord-right (coord 70/100 answer-y 'ct))
+(define below-sky-y 3/10)
+(define low-text-left (coord text-left below-sky-y 'lt))
+(define low-text-mid (coord 1/2 below-sky-y 'ct))
+(define low-text-right (coord text-right below-sky-y 'rt))
 
 (define (landscape-w)
   (* 1.2 client-w))
@@ -176,7 +180,8 @@
 (define blue1-3k1 (hex-triplet->color% #x5155BF))
 (define blue2-3k1 (hex-triplet->color% #x4F4DA1))
 (define teal-3k1 (hex-triplet->color% #x8ADCB3))
-(define black-3k1 (hex-triplet->color% #x514F52))
+(define black0-3k1 (hex-triplet->color% #x514F52))
+(define black1-3k1 (hex-triplet->color% #x312F32))
 (define grey-3k1 (hex-triplet->color% #x6C6685))
 (define fog-3k1 (hex-triplet->color% #xDBCAC2))
 (define title-3k1 (hex-triplet->color% #xF1E7DE))
@@ -195,7 +200,8 @@
 (define shallow-brush-color (color%-update-alpha green0-3k1 code-brush-alpha))
 (define neutral-brush-color fog-3k1)
 
-(define background-color black-3k1)
+(define background-color black0-3k1)
+(define dark-background-color black1-3k1)
 (define spotlight-color teal-3k1)
 (define title-text-color title-3k1)
 (define body-text-color author-3k1)
@@ -410,6 +416,12 @@
 (define (item-c-append* pp*)
   (apply vc-append item-line-sep pp*))
 
+(define (item-r-append . pp*)
+  (item-r-append* pp*))
+
+(define (item-r-append* pp*)
+  (apply vr-append item-line-sep pp*))
+
 (define (bghost pp)
   (blank (pict-width pp) (pict-height pp)))
 
@@ -592,7 +604,7 @@
   (add-rounded-border
     #:radius 1
     #:x-margin (/ client-w 2) #:y-margin med-y-sep
-    #:frame-width tiny-y-sep #:frame-color green2-3k1 #:background-color background-color
+    #:frame-width tiny-y-sep #:frame-color fog-3k1 #:background-color dark-background-color
     pp))
 
 (define (type-to-shape lhs rhs)
@@ -1197,9 +1209,21 @@
                      (for/list ((i (in-range num-col)))
                        (if (zero? (modulo (+ i yr) 3))
                          (bghost star-pict)
-                         star-pict))))))
-         )
+                         star-pict)))))))
     pp))
+
+(define (sky-pict-transient)
+  (let* ((pp (base-sky-pict)))
+    (ppict-do
+      pp
+      #:go (coord 20/100 5/10 'ct)
+      @rrt{Natural}
+      #:go (coord 78/100 4/10 'ct)
+      @rrt{Transient}
+      #:go (coord 58/100 3/10 'ct)
+      @rrt{T-improved}
+      #:go (coord 40/100 6/10 'ct)
+      @rrt{N + T})))
 
 (define (base-earth-pict)
   ;; TODO curve the earth
@@ -1243,6 +1267,17 @@
          )
     pp))
 
+(define racket-path (build-path src "lang" "racket.png"))
+
+(define (earth-pict-transient)
+  (let* ((pp (base-earth-pict)))
+    (ppict-do
+      pp
+      #:go (coord 40/100 2/10 'ct)
+      (word-append
+        (scale-lang-bitmap (bitmap racket-path))
+        @rrt{  + Transient}))))
+
 (define pass-pict
   (check-pict 40))
 
@@ -1280,6 +1315,25 @@
 (define big-hyphen-pict @ht2{- })
 (define hyphen-pict @st{- })
 (define hyphen-ghost (bghost hyphen-pict))
+
+(define example-client-code* '(
+  "(t-fold-file \"file.txt\" 0 count)"
+  ""
+  "(define (count acc str)"
+  "  (+ 1 acc))"))
+
+(define example-api-code* '(
+  "(: t-fold-file"
+  "   (-> Path Num"
+  "       (-> Num Str Num)"
+  "       Num))"
+  ""
+  "(define t-fold-file u-fold-file)"))
+
+(define example-library-code* '(
+  "(define (u-fold-file path acc f)"
+  "  ;; read str from path"
+  "  ... (f str acc) ...)"))
 
 ;; -----------------------------------------------------------------------------
 
@@ -2144,107 +2198,158 @@
     @rrt{Reticulated Python})
   (pslide
     #:go heading-coord-left
-    @rt{CM example, functions}
-    #:go text-coord-mid
-    @rrt{ah missing error})
-
-  (pslide
-    ;; NOW these are not the only contenders!
-    #:go heading-coord-left
-    @rt{Is sound dead?}
-    #:go text-coord-mid
-    @rrt{NO, thunderous, from research community}
-    @rrt{several piped up (across the map)}
-    @rrt{papers papers all satisfy all properties})
+    (word-append
+      (small-face 'happy)
+      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str})
+    #:go title-coord-mid
+    (boundary-append
+      (apply untyped-codeblock example-client-code*)
+      (apply typed-codeblock example-api-code*)))
   (pslide
     #:go heading-coord-left
-    @rt{Confusion}
-    #:go text-coord-mid
-    @rrt{hang on, recall different behaviors})
-
+    (word-append
+      (small-face 'unhappy)
+      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str}
+      @rt{  gets  } @deep-code{Str} @rt{ , } @deep-code{Num})
+    #:go title-coord-mid
+    (let* ((client-pict
+             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
+           (api-pict
+             (apply typed-codeblock example-api-code*))
+           (lib-pict
+             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
+           (full-pict
+             (item-r-append (boundary-append client-pict api-pict) lib-pict))
+           (arr
+             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
+           (full/arr
+             (add-code-arrow full-pict arr #:arrow-size 20)))
+      full/arr))
   (pslide
     #:go heading-coord-left
-    @rt{How can they all satisfy all when clearly different?}
-    ;; back up to the map
-    #:go text-coord-mid
-    @rrt{weak properties!}
-    @rrt{led to design space analysis}
-    @rrt{move UP to design map})
+    (word-append
+      (small-face 'unhappy)
+      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str}
+      @rt{  gets  } @deep-code{Str} @rt{ , } @deep-code{Num})
+    #:go title-coord-mid
+    (let* ((client-pict
+             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
+           (api-pict
+             (bcellophane (bcellophane (apply typed-codeblock example-api-code*))))
+           (lib-pict
+             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
+           (full-pict
+             (item-r-append (boundary-append client-pict api-pict) lib-pict))
+           (arr
+             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
+           (full/arr
+             (add-code-arrow full-pict arr #:arrow-size 20)))
+      (ppict-do
+        full/arr
+        #:go (at-find-pict api-pict cc-find 'cc)
+        (ht-append
+          q-pict
+          (text-line-append
+            @rt{Do types protect}
+            @rt{ the callback?}))
+        (hsep tiny-y-sep)
+        (answer-text
+          @rt{TR = Yes})
+        (answer-text
+          @rt{RP = No}))))
   (pslide
-    ;; first step, close review of TS
-    #:go heading-coord-left
-    @rt{Sound}
-    #:go text-coord-mid
-    @rrt{sound refers to type sound, classic theorem}
-    @rrt{none satisfy, must generalize}
-    @rrt{unsound, extreme end, ignoring all types})
+    #:go earth-coord
+    (earth-pict)
+    #:go sky-coord
+    (sky-pict)
+    #:next
+    #:go center-coord
+    (takeaway-frame
+      @ht2{Need a way to measure types!}))
   (pslide
-    #:go heading-coord-left
-    @rt{F-type soundness}
-    #:go text-coord-mid
-    @rrt{our first step, study sound space}
-    @rrt{articulate the parameters}
-    ;; transient removal is WEAK but thats ok, don't worry for defense
-    @rrt{removes transient}
-    @rrt{still others lumped together})
+    #:go sky-coord
+    (sky-pict)
+    #:go (coord contribution-x 26/100 'lt)
+    (text-line-append @rt{How to assess} @rt{ type guarantees}))
   (pslide
-    #:go heading-coord-left
-    @rt{Natural vs Forgetful}
-    #:go text-coord-mid
-    ;; recall CM example
-    ;; temporary vs permanent types
-    @rrt{example, different behaviors, prim error vs boundary})
-  (pslide
-    #:go heading-coord-left
-    @rt{Derived channel, do types protect?}
-    #:go text-coord-mid
-    @rrt{CM => yes}
-    @rrt{TS =/> yes})
-  (pslide
-    #:go heading-coord-left
-    @rt{Map again, CM helps partition}
-    #:go text-coord-mid
-    @rrt{that}
-    @rrt{X})
-  (pslide
-    ;; furthermore, CM-analysis-framework helps measure quality of errors
-    #:go heading-coord-left
-    @rt{Blame, on map}
-    ;; finer distinctions even in non-CM space
-    #:go text-coord-mid
-    @rrt{CM framework, study quality of error outputs}
-    @rrt{two more properties (no details?)})
-  (pslide
-    #:go heading-coord-left
-    @rt{Error Preorder}
-    ;; hm, gotta predict these properties / rows with a checklist somehow ... map needs to stay low
-    #:go text-coord-mid
-    @rrt{eager vs lazy example} ;; too many examples? how else to mention the preorder?
-    @rrt{now can partition space})
+    #:go sky-coord
+    (sky-pict)
+    #:go center-coord
+    (item-line-append
+      @rrt{before =  Sound vs Unsound}
+      @rrt{after = Complete Monitoring, Type S., Tag S., Unsound}
+      @rrt{        + Blame, Error Preorder}))
   (pslide
     #:go heading-coord-left
-    @rt{Map, color in}
-    #:go text-coord-mid
-    @rrt{TS; F-TS; CM; BS BC; preorder}
-    @rrt{deep vs shallow sound types})
+    @ht2{Complete Monitoring vs Type Soundness}
+    #:go title-coord-mid
+    (let* ((client-pict
+             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
+           (api-pict
+             (bcellophane (bcellophane (apply typed-codeblock example-api-code*))))
+           (lib-pict
+             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
+           (full-pict
+             (item-r-append (boundary-append client-pict api-pict) lib-pict))
+           (arr
+             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
+           (full/arr
+             (add-code-arrow full-pict arr #:arrow-size 20)))
+      (ppict-do
+        full/arr
+        #:go (at-find-pict api-pict cc-find 'cc)
+        (ht-append
+          q-pict
+          (text-line-append
+            @rt{Do types protect}
+            @rt{ the callback?}))
+        (hsep tiny-y-sep)
+        @rt{CM => Yes}
+        @rt{TS =/> Yes})))
   (pslide
-    #:go heading-coord-left
-    @rt{Table view}
-    #:go text-coord-mid
-    @rrt{from jfp})
+    #:go sky-coord
+    (sky-pict)
+    #:go center-coord
+    (item-line-append
+      @rrt{Complete Monitoring, Type S., Tag S., Unsound}
+      @rrt{useful partition Deep vs Shallow}))
+  (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go center-coord
+    (item-line-append
+      @rrt{further distinctions, new properties}
+      @rrt{- do errors find all responsible? B. Completeness}
+      @rrt{- do errors find only responsible? B. Soundness}
+      @rrt{- which programs run without error? E. Preorder}))
+  (pslide
+    #:go center-coord
+    (frame-person #f "jfp-table.png" 8/10))
   (void))
 
 (define (sec:thesis)
   (pslide
-    #:go heading-coord-left
-    @rt{Map guarantees and perf}
-    #:go text-coord-mid
-    @rrt{evident 2-way tradeoff}
-    @rrt{really its 3 ways, guarantees performance expressiveness}
-    @rrt{what to do?}
-    @rrt{improve endpoints, several workers feltey, grift, pycket, vitousek}
-    ;; can interact, don't lose anything, and really what you want
-    @rrt{my thesis, in full})
+    #:go sky-coord
+    (sky-pict)
+    #:go earth-coord
+    (earth-pict)
+    #:go (coord text-left 34/100 'lt)
+    (text-line-append
+      @ht2{My Research}
+      @rt{ brings order to}
+      @rt{ the design space})
+    #:go (coord contribution-x 26/100 'lt)
+    (ht-append
+      @ht2{1. }
+      (text-line-append
+        @rt{How to assess}
+        @rt{ type guarantees}))
+    #:go (coord contribution-x 56/100 'lt)
+    (ht-append
+      @ht2{2. }
+      (text-line-append
+        @rt{How to measure}
+        @rt{ performance})))
   (pslide
     #:go heading-coord-left
     @ht{Thesis}
@@ -2265,21 +2370,29 @@
     ;; - Natural + Transient
     @ht{Unpublished Results})
   (pslide
-    #:go center-coord
-    @rrt{show map, Deep and Shallow}
-    @rrt{Natural / TR = clear choice, best in show}
-    @rrt{Transient = no wrappers, great}
-    @rrt{goal is combine, new model + impl points}
-    @rrt{but cannot use Transient from RP, gotta add new types, remove dyn, subtyping})
-
+    #:go sky-coord
+    (sky-pict-transient)
+    #:go earth-coord
+    (earth-pict-transient)
+    #:go low-text-left
+    (item-line-append
+      @rrt{Natural / TR = strongest types}
+      @rrt{Transient / RP = no wrappers}
+      @rrt{combine})
+    #:go low-text-right
+    (item-line-append
+      @rrt{T-improved}
+      @rrt{- new types}
+      @rrt{- remove dyn}
+      @rrt{- add subtyping}
+      @rrt{- blame?}))
   (sec:thesis:transient)
   (pslide
-    ;; HERE is a bit early to discuss blame problem, but its important signpost here
-    #:go center-coord
-    @rrt{show Transient, transient+ again}
-    @rrt{(gotta add new types, remove dyn, subtyping)}
-    @rrt{that gives sense of changes}
-    @rrt{but major blame challenges, failed})
+    #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
+    #:go low-text-left
+    (item-line-append @rrt{Natural / TR = strongest types} @rrt{Transient / RP = no wrappers} @rrt{combine})
+    #:go low-text-right
+    (item-line-append @rrt{T-improved} @rrt{- new types} @rrt{- remove dyn} @rrt{- add subtyping} @rrt{- blame?}))
   (sec:thesis:model)
   (sec:thesis:implementation)
   (sec:thesis:evaluation)
@@ -2288,20 +2401,22 @@
 (define (sec:thesis:transient)
   (pslide
     #:go heading-coord-left
-    @rt{Transient without Dyn}
+    (word-append
+      @ht2{Closing the Gap:}
+      @rt{  Transient without Dyn})
     #:go text-coord-mid
     @rrt{(f x) : Num morphs to}
-    #:go title-coord-left
+    #:go low-text-left
     @rrt{Before}
     @rrt{(check Num (check Fun f) (check Num x))}
     @rrt{... because could be Dyn anywhere}
-    #:go title-coord-right
+    (hsep med-y-sep)
     @rrt{After}
     @rrt{(check Num (f x))}
-    @rrt{trust shape soundness})
-  (pslide
+    @rrt{no Dyn, fewer checks})
+  #;(pslide
     #:go heading-coord-left
-    @ht{Completion}
+    @ht2{Completion}
     #:go text-coord-left
     @rrt{made possible by another change}
     #:go title-coord-left
@@ -2315,53 +2430,35 @@
   (void))
 
 (define (sec:thesis:model)
-  ;; HANG ON the contribution is the scaled-up transient, not so much the model
-  ;; - more types, subtyping
-  ;; - optimizations
-  ;; - no dyn = audit check sites
-  ;; ... okay make a checklist
-  (pslide
-    ;; map again
-    #:go center-coord
-    @rrt{natural + mod. transient under one roof}
-    )
-  (pslide
-    ; {first step, prototype / model}
-    ; {prove deep deep, shallow shallow}
-    ; {explore optimizations, show picture (move "wrap" boundary), details at end}
-    ; {results = cm, f-ts, compilation}
-    #:go heading-coord-left
-    @ht{Model}
-    #:go text-coord-mid
-    @rt{???})
   (pslide
     #:go heading-coord-left
-    @rt{Syntax}
-    #:go text-coord-mid
-    @rrt{show e, but focus on boundaries, 3 module-kinds}
-    @rrt{compile to 3 check-kinds})
+    (word-append
+      @ht2{Model}
+      @rt{   Deep + Shallow + Untyped})
+    #:go text-coord-left
+    (frame-person #f "model-0.png" 43/100)
+    (hsep med-y-sep)
+    (frame-person #f "model-1.png" 50/100)
+    #:next
+    #:go text-coord-right
+    (hsep (* 2 med-y-sep))
+    (frame-person #f "model-2.png" 60/100))
   (pslide
     #:go heading-coord-left
-    @rt{Complilation}
-    #:go text-coord-mid
-    @rrt{easy for Deep, Untyped}
-    @rrt{Shallow, target future work}
-    @rrt{thanks fritz}
-    @rrt{boundary strategies})
-  (pslide
-    #:go heading-coord-left
-    @ht{Compilation}
-    #:go title-coord-mid
-    #:go heading-coord-left
-    @ht{Compilation}
+    (word-append
+      @ht2{Model}
+      @rt{   boundaries})
     #:go title-coord-mid
     (DSU-pict 0)
+    #:next
     #:go icon-coord-mid
     @rrt{Deep types => wrapper}
     @rrt{Shallow types => check inputs})
   (pslide
     #:go heading-coord-left
-    @ht{Properties}
+    (word-append
+      @ht2{Model}
+      @rt{  Properties})
     #:go text-coord-left
     (item-line-append
       (text-line-append
@@ -2380,14 +2477,14 @@
 
 (define (sec:thesis:implementation)
   (pslide
-    #:go heading-coord-left
-    @ht{Map}
-    #:go center-coord
-    @rrt{ok model, down to impl now}
-    )
+    #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
+    #:go low-text-mid
+    @rrt{model OK}
+    (hsep (* 3 med-y-sep))
+    @rrt{implementation})
   (pslide
     #:go heading-coord-left
-    @ht{Typed Racket Compiler}
+    @ht2{Typed Racket Compiler}
     #:go text-coord-mid
     (pipeline-append
       (double-frame
@@ -2410,16 +2507,16 @@
           @rt{Type-Based Optimizer}))))
   (pslide
     #:go heading-coord-left
-    @ht{Types to Shapes}
+    @ht2{Types to Shapes}
     #:go text-coord-mid
     ;; type-term color distinction?
     ;; add comment to each?
     ;; in general: check full constructor
     (word-append
       @rrt{(f x) } @sst{: T} @rrt{    --->    (check s (f x))})
-    (blank 0 tiny-y-sep)
+    (hsep tiny-y-sep)
     (type-to-shape @sst{T} @rrt{s})
-    #:go center-coord
+    (hsep small-y-sep)
     (item-line-append* (flatten
       (list
         (list
@@ -2436,7 +2533,7 @@
                            @rrt{     (arity-includes 1))})))))))
   (pslide
     #:go heading-coord-left
-    @ht{Optimization}
+    @ht2{Optimization}
     #:go title-coord-mid
     @rrt{(fl+ n m)}
     @rrt{(unsafe-fl+ n m)}
@@ -2444,11 +2541,12 @@
       @rrt{when  n } @sst{: Float} @rrt{  and  m } @sst{: Float}))
   (pslide
     #:go heading-coord-left
-    @ht{Optimization}
+    @ht2{Optimization}
     #:go title-coord-mid
     (table 4
            (pad-modulo 4 (map opt->pict optimization-name*))
            cc-superimpose cc-superimpose pico-x-sep small-y-sep)
+    #:next
     #:go (at-find-pict 'dead-code ct-find 'cc) fail-pict
     #:go (at-find-pict 'pair ct-find 'cc) fail-pict)
   ;; TODO opt examples? or save to end
@@ -2458,10 +2556,11 @@
   ;;  x (pairof (pairof nat int) str)
   ;;  cdar x -> unsafe-cdr unsafe-car x
   (pslide
-    #:go heading-coord-left
-    @ht{Map}
-    #:go text-coord-mid
-    @rrt{ready to evaluate})
+    #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
+    #:go low-text-mid
+    @rrt{model OK}
+    (hsep (* 3 med-y-sep))
+    @rrt{implementation OK})
   (void))
 
 (define (sec:thesis:evaluation)
@@ -2479,7 +2578,9 @@
   ;;     (hb-append @st{- } @rt{lower runtime costs})))
   (pslide
     #:go heading-coord-left
-    @rt{Shallow to Deep = stronger guarantees}
+    (word-append
+      @ht2{Shallow to Deep}
+      @rrt{  = stronger guarantees})
     #:go text-coord-mid (bad-pair-example 'U 'S 'U)
     #:go text-coord-mid (blank 0 tiny-y-sep) (bad-pair-example #f 'D #f)
     (blank 0 small-y-sep)
@@ -2500,13 +2601,16 @@
       @rt{Deep types satisfy complete monitoring}))
   (pslide
     #:go heading-coord-left
-    @rt{Deep to Shallow = fewer errors}
+    (word-append
+      @ht2{Deep to Shallow}
+      @rt{  = fewer errors})
     #:go text-coord-mid
     (higher-order-any-example 'D 'U)
     (word-append error-pict
                  @rrt{ attempted to use higher-order})
     (word-append @rrt{value passed as } (deep-code "Any"))
-    #:alt [#:go center-coord (frame-person "" "racket-users-ho-any.png" 8/10)]
+    #:next
+    #:alt [#:go center-coord (frame-person #f "racket-users-ho-any.png" 8/10)]
     (blank 0 small-y-sep)
     (higher-order-any-example 'S 'U)
     success-pict
@@ -2516,19 +2620,22 @@
       @rt{Shallow can run almost all type-correct code}))
   (pslide
     #:go heading-coord-left
-    @rt{Deep to Shallow = simpler behavior}
-    #:go text-coord-mid
-    #:alt [(index-of-example 'U)]
-    #:alt [(index-of-example 'D)]
-    (index-of-example 'S)
+    (word-append
+      @ht2{Deep to Shallow}
+      @rt{  = simpler behavior})
     #:go icon-coord-mid
     (hc-append small-x-sep
       (word-append @rt{Untyped } (untyped-code " 0 "))
       (word-append @rt{Deep } (deep-code " #f "))
-      (word-append @rt{Shallow } (shallow-code " 0 "))))
+      (word-append @rt{Shallow } (shallow-code " 0 ")))
+    #:go text-coord-mid
+    #:alt [(index-of-example 'U)]
+    #:alt [(index-of-example 'D)]
+    (index-of-example 'S)
+    )
   (pslide
     #:go heading-coord-left
-    @rt{Better Performance}
+    @ht2{Better Performance}
     #:go text-coord-mid
     #:alt [(sieve-example 'U 'U)]
     (make-2table
@@ -2550,7 +2657,7 @@
           @rt{Typed : Deep wins}))))
   (pslide
     #:go heading-coord-left
-    @rt{Better Performance}
+    @ht2{Better Performance}
     ;; recall, large area under curve
     #:go text-coord-mid
     (big-overhead-plot 'jpeg '(D S))
@@ -2558,7 +2665,7 @@
     @rt{Deep + Shallow = maximize D-deliverable cfgs.})
   (pslide
     #:go heading-coord-left
-    @rt{Better Performance}
+    @ht2{Better Performance}
     ;; recall, large area under curve
     #:go text-coord-mid
     (make-2table
@@ -2569,7 +2676,7 @@
           (2col-overhead-plot sym '(D S))))))
   (pslide
     #:go heading-coord-left
-    @rt{Better Performance}
+    @ht2{Better Performance}
     #:go text-coord-mid
     (fancy-table
       (list
@@ -2584,7 +2691,7 @@
         (list "quadU" "60x" "8x"))))
   (pslide
     #:go heading-coord-left
-    @rt{New Migration Plan}
+    @ht2{New Migration Plan}
     #:go text-coord-left
     (item-line-append
       (blank)
@@ -2592,15 +2699,18 @@
       (hb-append @st{- } @rt{use Shallow for speed})
       (hb-append @st{- } @rt{return to Deep at end}))
     #:go text-coord-right
-    (lattice-vl-append
+    (migration-append
       (path-node '(U U U U U))
       (path-node '(D D D U U))
       (path-node '(D S S U U))
       (path-node '(D S S S S))
       (path-node '(D D D D D))))
   (pslide
+    #:go center-coord
+    @rt{Brand New Results})
+  (pslide
     #:go heading-coord-left
-    @rt{New Migration Plan}
+    @ht2{New Migration Plan}
     #:go text-coord-mid
     @rt{Percent of 3-deliverable paths}
     (fancy-table
@@ -2612,9 +2722,13 @@
         (list "dungeon" "0%" "67%")
         (list "suffixt" "0%" "12%")
         (list "take5" "100%" "100%"))))
+  (pslide
+    ;; TODO mixed-lattice table ((fsm 37.50) (morsecode 25.00) (jpeg 37.50) (kcfa 55.47) (zombie 6.25) (zordoz 46.88))
+    #:go heading-coord-left
+    @ht2{Best-off Mixed}
+    #:go title-coord-mid
+    (frame-person #f "better-deep-shallow.png" 45/100))
   ;; TODO flash a lattice, to understand the table ... maybe 2 lattices
-  ;; TODO mixed-lattice table ((fsm 37.50) (morsecode 25.00) (jpeg 37.50) (kcfa 55.47) (zombie 6.25) (zordoz 46.88))
-  ;; TODO mark ALL THESE as not in document, breaking news
   (void))
 
 (define (sec:conclusion)
@@ -2639,8 +2753,9 @@
       (hb-append @st{2. } @rt{design analysis method})
       (hb-append @st{3. } @rt{scaled-up Transient}) ;; found several ... issue-points
       (hb-append @st{4. } @rt{Deep + Shallow language}))
-    #:go icon-coord-mid
-    (hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?}))
+    ;#:go icon-coord-mid
+    ;(hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?})
+    )
   (void))
 
 (define (sec:extra)
@@ -2718,12 +2833,12 @@
     ;(test-margin-slide)
     ;(test-screenshot-slide)
     ;(sec:example)
-;    (sec:title)
-;    (sec:intro)
-;    (sec:perf)
-;    (sec:design)
-;    (sec:thesis)
-;    (sec:conclusion)
+    (sec:title)
+    (sec:intro)
+    (sec:perf)
+    (sec:design)
+    (sec:thesis)
+    (sec:conclusion)
     (pslide)
     (sec:extra)
     (void))
@@ -2739,32 +2854,10 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go text-coord-mid
-    (bad-pair-example 'U 'T 'U)
-    (hsep tiny-y-sep)
-    (question-text
-      (word-append
-        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes!})
-    (hsep small-y-sep)
-    @rrt{Typed Racket}
-    #:go answer-coord-right
-    (answer-text
-      @rt{No!})
-    (hsep small-y-sep)
-    @rrt{Reticulated Python}
-
-;    (answer-text
-;      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
-;    (text-line-append
-;      (word-append
-;        @rrt{For a HUGE space, count  } D-pict @rrt{-deliverable configs})
-;      @rrt{ in a collection of random samples})
-;    (hsep small-y-sep)
-;    (scale (make-lattice 12 bits->path-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep) 5/10)
-
+    #:go heading-coord-left
+    @ht2{Best-off Mixed}
+    #:go title-coord-mid
+    (frame-person #f "better-deep-shallow.png" 65/100)
 
 
   )))
