@@ -22,14 +22,39 @@
 ;; - [X] D S U picts, the safe one and others
 ;; - [ ] sunrise, green, theme for "published" half
 ;; - [ ] moonlight, blue, theme for "new" half
-;;
 ;; - [-] headlines ... gt terrific
 ;; - [X] two methods (major contributions)
 ;;   - [X] perf ... LHS 
 ;;   - [X] design ... RHS 
+;; - [X] more takeaways at end, summarize?
+;; - [X] cache huge lattice
 ;; - [ ] NOTE: cannot ask if Java etc. is deep, its an FFI/Interop question
-;; - [ ] cache huge lattice
-;; - [ ] more takeaways at end, summarize?
+
+;; MF 2020-12-10
+;; NO GIGGLING FRESHMAN remember Max and Asumu and there are senior people here
+;;  that are assessing you! Be professional.
+;; - [ ] explain what CM is before jumping to example,
+;;      "type system in contral of all checks that went through it, or blame if goes wrong"
+;; - [ ] cut scaling the model, all but final bullet point
+;;       for picture show Natural N+T Transient and draw arrows to unite
+;; - [ ] thesis preview / prelim thesis , rests on contributions
+;; - [ ] remind people of contributors, use pictures
+;;       Jan, Zeina, Christos, Lukas ... anyone
+;; - [ ] type lattice, always go up! make sure words match pictures
+;; - [ ] only say "I" "my" for thesis statement
+;; - [ ] ... or, "I took over perf after Asumu had started"
+;; - [ ] need GOOD phrase to justify sampling
+;;       ... confirmed with ground truth many settings
+;; - [ ] DON'T measure types,
+;;       show: Need to measure the strength of guarantees
+;;       say: Need to measure the strength of the guarantees that types offer
+;; - [ ] carefully introduce Deep and Shallow,
+;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
+;; - [ ] don't confuse properties of model vs implementation
+;;       eg "TR satisfies GG"
+;; - [ ] use non-green for the earth
+;; - [ ] move 'simpler behavior' to the end
+;; - [ ] email Amal on Sunday
 
 (require
   file/glob
@@ -436,6 +461,9 @@
 
 (define (rrt-bullet* str*)
   (bullet* (map rrt str*)))
+
+(define (bullet . pp*)
+  (bullet* pp*))
 
 (define (bullet* pp*)
   (item-line-append*
@@ -1921,6 +1949,7 @@
       @rt{ brings order to}
       @rt{ the design space})
     #:go (coord contribution-x 26/100 'lt)
+    ;; TODO try 8-pointed star ... instead of number ... separate slide for thesis support
     (ht-append
       @ht2{1. }
       (text-line-append
@@ -2095,12 +2124,19 @@
     #:go text-coord-mid
     (answer-text
       (word-append @rt{Count } D-pict @rt{-deliverable configs}))
-    (text-line-append
-      (word-append
-        @rrt{For a HUGE space, count  } D-pict @rrt{-deliverable configs})
-      @rrt{ in a collection of random samples})
     (hsep small-y-sep)
-    (scale (make-lattice 12 bits->path-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep) 5/10))
+    (word-append
+      D-pict @rrt{-deliverable  ~  Bernoulli random variable})
+    (hsep item-line-sep)
+    (word-append
+      @rrt{linear-size sampling works})
+    #:go (coord 1/2 55/100 'ct)
+    #;(let* ((pp (make-lattice 11 bits->path-node #:x-margin pico-x-sep #:y-margin lattice-y-sep))
+             (pp (scale pp 5/10))
+             (pp (inset/clip pp (* -495/1000 (pict-width pp)) 0)))
+        (save-pict "src/sampling-lattice.png" pp)
+        pp)
+    (src-bitmap "sampling-lattice.png"))
   (pslide
     #:go earth-coord
     (earth-pict)
@@ -2855,9 +2891,7 @@
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
     #:go heading-coord-left
-    @ht2{Best-off Mixed}
-    #:go title-coord-mid
-    (frame-person #f "better-deep-shallow.png" 65/100)
+    (blank)
 
 
   )))
