@@ -30,6 +30,7 @@ TODO
 - [ ] sk > I know it's fashionable to say such things at NU, but I'm not sure I agree that "a compiler cannot use optional types to justify transformations". It certainly can: it just needs to then generate code that guards against using the transformed code.  It's a bit like saying "a JIT cannot use run-time values to justify specializations" — yet that's exactly what a JIT does every day?
 - [ ] sk PR talk sounds like shallow replacing TR
 - [ ] jv fig 58 be clear this is fully-typed, explain why
+      same for all "ratios" tables
 - [ ] jv fig65 what is timeout and is it worse than deep? explain
 - [ ] jv try to be clearer that end is shallow without blame ... in figures?
 - [ ] jv ack Like types with the Concrete / Erasure switch
@@ -70,6 +71,11 @@ TODO
          put lemmas into 4.6.X ... what do they look like? ditto JFP
 - [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
 - [ ] st snake and tetris are both educational and game
+- [ ] cd fig 46 unclear why checks must be there ... add example?
+      also perhaps discuss casts vs checks
+- [ ] cd "nearby" clarify cannot describe designs
+
+- [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away
 
 - [ ] GTP case study needs work
 
@@ -130,6 +136,7 @@ MF edits, leftover
 - [X] (p161) 6 labeled red, what symbol?
 - [X] (p163) 6 lemmas, explain where needed
 - [ ] (p167) 6 why can shallow be aware of deep? articulate benefits
+- [ ] 4 move error preorder to bottom row in table 2 --- just like table 1
 
 #### dependencies
 
