@@ -33,6 +33,7 @@
   render-scatterplot-example
   benchmark-name->performance-info
   benchmark->num-modules
+  performance-info->sample-info
 
   cache-dir
 

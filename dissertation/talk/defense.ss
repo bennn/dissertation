@@ -33,9 +33,9 @@
 ;; MF 2020-12-10
 ;; NO GIGGLING FRESHMAN remember Max and Asumu and there are senior people here
 ;;  that are assessing you! Be professional.
-;; - [ ] explain what CM is before jumping to example,
+;; - [X] explain what CM is before jumping to example,
 ;;      "type system in contral of all checks that went through it, or blame if goes wrong"
-;; - [ ] cut scaling the model, all but final bullet point
+;; - [X] cut scaling the model, all but final bullet point
 ;;       for picture show Natural N+T Transient and draw arrows to unite
 ;; - [ ] thesis preview / prelim thesis , rests on contributions
 ;; - [ ] remind people of contributors, use pictures
@@ -45,7 +45,7 @@
 ;; - [ ] ... or, "I took over perf after Asumu had started"
 ;; - [ ] need GOOD phrase to justify sampling
 ;;       ... confirmed with ground truth many settings
-;; - [ ] DON'T measure types,
+;; - [X] DON'T measure types,
 ;;       show: Need to measure the strength of guarantees
 ;;       say: Need to measure the strength of the guarantees that types offer
 ;; - [ ] carefully introduce Deep and Shallow,
@@ -55,6 +55,7 @@
 ;; - [ ] use non-green for the earth
 ;; - [ ] move 'simpler behavior' to the end
 ;; - [ ] email Amal on Sunday
+;; - [ ] why overhead line fuzzy?
 
 (require
   file/glob
@@ -74,6 +75,7 @@
   (only-in greenman-thesis/jfp-2019/main
     MAX-OVERHEAD
     transient-rkt-version
+    performance-info->sample-info
     benchmark-name->performance-info)
   (prefix-in rp:
     (only-in greenman-thesis/pepm-2018/main
@@ -129,6 +131,11 @@
   (if (< 0 n)
     (hc-append n (blank) pp)
     (hc-append (- n) pp (blank))))
+
+(define xsep wsep)
+(define ysep hsep)
+(define xshift wshift)
+(define yshift hshift)
 
 ;; =============================================================================
 ;; --- coordinates
@@ -215,6 +222,8 @@
 (define untyped-pen-color yellow1-3k1)
 (define deep-pen-color green2-3k1)
 (define shallow-pen-color green0-3k1)
+(define validate-pen-color #;yellow1-3k1 #;teal-3k1
+  #;grey-3k1 #;red0-3k1 red1-3k1)
 (define neutral-pen-color grey-3k1)
 (define highlight-pen-color orange1-3k1)
 
@@ -223,6 +232,7 @@
 (define untyped-brush-color (color%-update-alpha yellow1-3k1 code-brush-alpha))
 (define deep-brush-color (color%-update-alpha green2-3k1 (- code-brush-alpha 0.05)))
 (define shallow-brush-color (color%-update-alpha green0-3k1 code-brush-alpha))
+(define validate-brush-color (color%-update-alpha validate-pen-color code-brush-alpha))
 (define neutral-brush-color fog-3k1)
 
 (define background-color black0-3k1)
@@ -240,6 +250,12 @@
 
 (define defense-brush-color-converter
   (lambda (n) (case n ((0) deep-brush-color) ((1) shallow-brush-color))))
+
+(define sample-pen-color-converter
+  (lambda (n) (case n ((0) deep-pen-color) ((1) validate-pen-color))))
+
+(define sample-brush-color-converter
+  (lambda (n) (case n ((0) deep-brush-color) ((1) validate-brush-color))))
 
 ;; -----------------------------------------------------------------------------
 ;; --- text
@@ -281,11 +297,17 @@
           size)
     color))
 
+(define (initials f str)
+  (word-append* (map (compose1 f string) (string->list str))))
+
 (define (ht . str*)
   (ht* str*))
 
 (define (ht* str*)
   (txt str* #:font title-text-font #:size title-text-size #:color title-text-color))
+
+(define (ht2-initials str)
+  (initials ht2 str))
 
 (define (ht2 . str*)
   (ht2* str*))
@@ -481,11 +503,17 @@
              (ht-append small-x-sep (car pp) (cdr pp))
              pp))))
 
+;(define (word-append . pp*)
+;  (word-append* pp*))
+;
+;(define (word-append* pp*)
+;  (apply hc-append pp*))
+
 (define (word-append . pp*)
   (word-append* pp*))
 
 (define (word-append* pp*)
-  (apply hc-append pp*))
+  (apply hb-append (map clip-descent pp*)))
 
 (define (lattice-label-append . pp*)
   (lattice-label-append* pp*))
@@ -515,6 +543,11 @@
 
 (define (bcellophane pp)
   (cellophane pp 0.4))
+
+(define (bcellophane* n pp)
+  (for/fold ((pp pp))
+            ((i (in-range n)))
+    (bcellophane pp)))
 
 ;; -----------------------------------------------------------------------------
 ;; --- ???
@@ -614,6 +647,19 @@
     (add-neutral-background tbl))
   (double-frame tbl/bg))
 
+(define-syntax-rule (with-plot-params w h line-width base-color exp)
+  (parameterize ([*OVERHEAD-MAX* MAX-OVERHEAD]
+                 [*OVERHEAD-LEGEND?* #false]
+                 [*OVERHEAD-PLOT-WIDTH* w]
+                 [*OVERHEAD-PLOT-HEIGHT* h]
+                 [*OVERHEAD-LINE-WIDTH* line-width]
+                 [*OVERHEAD-LINE-COLOR* base-color]
+                 [*PEN-COLOR-CONVERTER* defense-pen-color-converter]
+                 [*BRUSH-COLOR-CONVERTER* defense-brush-color-converter]
+                 [*INTERVAL-ALPHA* code-brush-alpha]
+                 [*MULTI-INTERVAL-ALPHA* code-brush-alpha])
+    exp))
+
 (define (add-neutral-background pp)
   (add-rectangle-background
     #:x-margin small-x-sep #:y-margin tiny-y-sep
@@ -682,13 +728,25 @@
                   #:line-width pre-line-width #:color color #:label label
                   #:x-adjust-label x-label #:y-adjust-label y-label #:hide? hide?))
 
-(define (add-code-arrow* pp . arrow*)
+(define (add-code-arrows pp . arrow*)
+  (add-code-arrows* pp arrow*))
+
+(define (add-code-arrows* pp arrow*)
   (for/fold ((pp pp))
             ((arrow (in-list arrow*)))
     (add-code-arrow pp arrow)))
 
 (define (tag-append . x*)
   (string->symbol (string-join (map ~a x*) "-")))
+
+(define plot-tag 'plot)
+(define cm-client-tag 'cm:client)
+(define cm-api-tag 'cm:api)
+(define cm-library-tag 'cm:library)
+(define cm-arrow-tag 'cm:arrow)
+(define (at-cm-arrow #:abs-y [y-sep 0])
+  (at-find-pict cm-arrow-tag lc-find 'rt #:abs-y y-sep))
+(define cm-arrow-size 20)
 
 (define (add-hubs pp tag)
   (define io-margin 8)
@@ -872,7 +930,7 @@
          (pp (boundary-append* pp*))
          (gg (bghost pp))
          (pp (vc-append gg pp gg)))
-    (add-code-arrow*
+    (add-code-arrows
       ;; TODO options? gotta standardize everywhere
       pp 
       (code-arrow 'N0-E rc-find 'N1-W lc-find 0 0 0 0 'solid)
@@ -1085,6 +1143,75 @@
 ;;    @rt{guarantees, avoid unimportant Deep-type runtime errors, and lower the}
 ;;    @rt{running time of typed/untyped interactions.}))
 
+(define (cm-client-pict deco)
+  (apply (dyn-codeblock deco) example-client-code*))
+
+(define (cm-api-pict deco)
+  (apply (dyn-codeblock deco) example-api-code*))
+
+(define (cm-library-pict deco)
+  (apply (dyn-codeblock deco) example-library-code*))
+
+(define (cm-example deco* #:api-comment [api-comment #f])
+  (let* ((client-pict
+           (add-hubs (cm-client-pict (first deco*)) cm-client-tag))
+         (api-pict
+           (cm-api-pict (second deco*)))
+         (api-pict
+           (add-hubs
+             (if api-comment
+               (cc-superimpose (bcellophane* 2 api-pict) api-comment)
+               api-pict)
+             cm-api-tag))
+         (third?
+           (pair? (cddr deco*)))
+         (lib-pict
+           (add-hubs (if third? (cm-library-pict (third deco*)) (blank)) cm-library-tag))
+         (full-pict
+           (item-r-append (boundary-append client-pict api-pict) lib-pict))
+         (arr
+           (code-arrow (tag-append cm-library-tag 'W) lc-find
+                       (tag-append cm-client-tag 'S) cb-find
+                       (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
+         (full/arr
+           (if third? 
+             (add-code-arrow full-pict arr
+                             #:arrow-size cm-arrow-size
+                             #:label (tag-pict (blank) cm-arrow-tag))
+             full-pict)))
+    full/arr))
+
+(define cm-num-str
+  (hc-append @deep-code{Num} @rt{ , } @deep-code{Str}))
+
+(define cm-str-num
+  (hc-append @deep-code{Str} @rt{ , } @deep-code{Num}))
+
+(define (cm-gets pp)
+  (hc-append @rt{  gets  } pp))
+
+(define (cm-title n)
+  (define-values [lhs rhs]
+    (case n
+      ((0)
+       (values happy-face
+               @rt{  ...}))
+      ((1)
+       (values unhappy-face
+               (cm-gets error-pict)))
+      ((2)
+       (values unhappy-face
+               (cm-gets cm-str-num)))
+      (else
+        (raise-argument-error 'cm-title "(integer-in 0 X)" n))))
+  (hc-append lhs
+             @rt{  expects  } cm-num-str
+             rhs))
+
+(define (save-pict+ lbl pp)
+  (save-pict (build-path src lbl) pp)
+  pp)
+
 ;; -----------------------------------------------------------------------------
 ;; --- extra pict
 
@@ -1177,6 +1304,11 @@
 (define (basic-star size)
   (make-compass-pict size #:color fog-3k1))
 
+(define (double-star size)
+  (define fg (basic-star size))
+  (define bg (basic-star (* 9/10 size)))
+  (cc-superimpose (rotate bg (* 1/8 turn)) fg))
+
 (define (theory-star size)
   ;; TODO randomize size / rotation? tag with venue + year?
   ;; size 8 ... 30 all reasonable
@@ -1240,18 +1372,39 @@
                          star-pict)))))))
     pp))
 
+(define Natural-tag 'natural)
+(define Transient-tag 'transient)
+(define NT-tag 'NT)
+
+(define Natural-pict
+  (add-hubs @rrt{Natural} Natural-tag))
+
+(define Transient-pict
+  (add-hubs @rrt{Transient} Transient-tag))
+
+(define NT-pict
+  (add-hubs (double-star 40) NT-tag))
+
 (define (sky-pict-transient)
-  (let* ((pp (base-sky-pict)))
-    (ppict-do
-      pp
-      #:go (coord 20/100 5/10 'ct)
-      @rrt{Natural}
-      #:go (coord 78/100 4/10 'ct)
-      @rrt{Transient}
-      #:go (coord 58/100 3/10 'ct)
-      @rrt{T-improved}
-      #:go (coord 40/100 6/10 'ct)
-      @rrt{N + T})))
+  (let* ((pp (base-sky-pict))
+         (pp
+          (ppict-do
+            pp
+            #:go (coord 20/100 5/10 'ct)
+            Natural-pict
+            #:go (coord 78/100 4/10 'ct)
+            Transient-pict
+            #:go (coord 55/100 6/10 'ct)
+            NT-pict))
+         (arr*
+           (list
+             (code-arrow (tag-append Natural-tag 'E) rc-find
+                         (tag-append NT-tag 'W) lc-find
+                         0 0 1/4 1/4 'short-dash)
+             (code-arrow (tag-append Transient-tag 'W) lc-find
+                         (tag-append NT-tag 'E) rc-find
+                         (* 1/2 turn) (* 1/2 turn) 1/4 1/4 'short-dash))))
+    (add-code-arrows* pp arr*)))
 
 (define (base-earth-pict)
   ;; TODO curve the earth
@@ -1302,7 +1455,7 @@
     (ppict-do
       pp
       #:go (coord 40/100 2/10 'ct)
-      (word-append
+      (hc-append
         (scale-lang-bitmap (bitmap racket-path))
         @rrt{  + Transient}))))
 
@@ -1324,6 +1477,9 @@
 (define tally-pict
   (filled-rectangle 4 small-y-sep #:color neutral-brush-color #:draw-border? #f))
 
+(define the-boundary-pict
+  (boundary-node '(U D U D D)))
+
 (define trie-code* '(
   "(require pfds/trie)"
   ""
@@ -1334,6 +1490,13 @@
 (define q-pict @ht2{Q. })
 (define a-pict @ht2{A. })
 (define D-pict @bold-rt{D})
+
+(define cm-callback-q
+  (ht-append
+    q-pict
+    (text-line-append
+      @rt{Do types protect}
+      @rt{ the callback?})))
 
 (define down-arrow-pict
   (colorize
@@ -1360,8 +1523,12 @@
 
 (define example-library-code* '(
   "(define (u-fold-file path acc f)"
-  "  ;; read str from path"
+  "  ; read str from path"
   "  ... (f str acc) ...)"))
+
+(define unhappy-face (small-face 'unhappy))
+(define happy-face (small-face 'happy))
+(define face-offset-right (- tiny-x-sep))
 
 ;; -----------------------------------------------------------------------------
 
@@ -1642,6 +1809,21 @@
        fake-line)))
   (scale pp 55/100))
 
+(define (big-sampling-plot bm-name deco)
+  (define pi ((deco->pi bm-name) deco))
+  (define num-samples 10)
+  (define sample-rate 10)
+  (define num-units (performance-info->num-units pi))
+  (define pp (ss-validate-plot pi 8 (w%->pixels 65/100) (h%->pixels 35/100)))
+  (vl-append 4
+    (ht-append
+      (ysep (pict-height @rrt{q}))
+      (word-append
+        (rrt (~a bm-name))
+        (xsep (* 1.5 med-x-sep))
+        @rrt{@~a[num-samples] samples of @~a[(* sample-rate num-units)] configs}))
+    (add-xticks (double-frame pp))))
+
 (define (big-overhead-plot bm-name deco*)
   (define pi* (map (deco->pi bm-name) deco*))
   (define pp (ss-overhead-plot pi* 8 (w%->pixels 65/100) (h%->pixels 35/100)))
@@ -1669,17 +1851,16 @@
       1
       0))
   (define pp
-    (parameterize ([*OVERHEAD-MAX* MAX-OVERHEAD]
-                   [*OVERHEAD-LEGEND?* #false]
-                   [*OVERHEAD-PLOT-WIDTH* w]
-                   [*OVERHEAD-PLOT-HEIGHT* h]
-                   [*OVERHEAD-LINE-WIDTH* line-width]
-                   [*OVERHEAD-LINE-COLOR* base-color]
-                   [*PEN-COLOR-CONVERTER* defense-pen-color-converter]
-                   [*BRUSH-COLOR-CONVERTER* defense-brush-color-converter]
-                   [*INTERVAL-ALPHA* code-brush-alpha]
-                   [*MULTI-INTERVAL-ALPHA* code-brush-alpha])
+    (with-plot-params w h line-width base-color
       (overhead-plot pi*)))
+  pp)
+
+(define (ss-validate-plot pi line-width w h)
+  (define sample-pi (performance-info->sample-info pi #:replacement? #f))
+  (define base-color 0)
+  (define pp
+    (with-plot-params w h line-width base-color
+      (validate-samples-plot pi sample-pi)))
   pp)
 
 (define ((deco->pi bm-name) d)
@@ -1704,6 +1885,12 @@
            shallow-t*))))
     (else (raise-argument-error 'big-overhead-plot "(or/c 'D 'S 'best)" d))))
 
+(define (deco->sampling-pi bm-name d)
+  (case d
+    ((D)
+     (performance-info->sample-info ((deco->pi bm-name) d)))
+    (else (raise-argument-error 'deco->sampling-pi "(or/c 'D)" d))))
+
 (define (add-xticks pp)
   (ppict-do
     pp
@@ -1711,6 +1898,12 @@
     #:go (coord 1/4 1 'lt) @rrt{2x}
     #:go (coord 3/4 1 'ct) @rrt{10x}
     #:go (coord 1 1 'rt) @rrt{20x}))
+
+(define (add-x-label pp)
+  (ppict-do
+    pp
+    #:go (at-find-pict plot-tag lb-find 'rc)
+    (vl-append (hsep small-y-sep) (word-append D-pict @rt{ = }))))
 
 (define (sec:example)
   ;; TODO
@@ -1819,7 +2012,7 @@
           (path-node '(U D U D D))))))
   (pslide
     #:go heading-coord-mid
-    (boundary-node '(U D U D D))
+    the-boundary-pict
     (question-text
       @rt{What happens at the boundaries?})
     (hsep (* 1.2 small-y-sep))
@@ -2143,10 +2336,11 @@
     #:go heading-coord-left
     @ht2{Step 3: Picture}
     #:go text-coord-mid
-    (tag-pict (big-overhead-plot 'jpeg '(D)) 'plot)
-    #:set (let ((pp ppict-do-state))
-            (ppict-do pp #:go (at-find-pict 'plot lb-find 'rc)
-                      (vl-append (hsep small-y-sep) (word-append D-pict @rt{ = })))))
+    (tag-pict (big-overhead-plot 'quadU '(D)) plot-tag)
+    #:set (add-x-label ppict-do-state)
+    #:next
+    #:go text-coord-mid
+    (tag-pict (big-sampling-plot 'quadU 'D) plot-tag))
   (pslide
     #:go earth-coord
     (earth-pict)
@@ -2168,7 +2362,7 @@
     #:go earth-coord
     (earth-pict)
     #:go heading-coord-left
-    (hb-append
+    (word-append
       @ht2{Typed Racket}
       @rrt{  some results from our 21 benchmarks})
     #:go text-coord-mid
@@ -2182,7 +2376,7 @@
     #:go earth-coord
     (earth-pict)
     #:go heading-coord-left
-    (hb-append
+    (word-append
       @ht2{Reticulated Python}
       @rrt{   different benchmarks})
     #:go text-coord-mid
@@ -2233,66 +2427,25 @@
     (hsep small-y-sep)
     @rrt{Reticulated Python})
   (pslide
-    #:go heading-coord-left
-    (word-append
-      (small-face 'happy)
-      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str})
     #:go title-coord-mid
-    (boundary-append
-      (apply untyped-codeblock example-client-code*)
-      (apply typed-codeblock example-api-code*)))
+    (cm-example '(U T))
+    #:go heading-coord-left
+    #:alt [(cm-title 0)]
+    (cm-title 1))
   (pslide
     #:go heading-coord-left
-    (word-append
-      (small-face 'unhappy)
-      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str}
-      @rt{  gets  } @deep-code{Str} @rt{ , } @deep-code{Num})
+    (cm-title 2)
     #:go title-coord-mid
-    (let* ((client-pict
-             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
-           (api-pict
-             (apply typed-codeblock example-api-code*))
-           (lib-pict
-             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
-           (full-pict
-             (item-r-append (boundary-append client-pict api-pict) lib-pict))
-           (arr
-             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
-           (full/arr
-             (add-code-arrow full-pict arr #:arrow-size 20)))
-      full/arr))
-  (pslide
-    #:go heading-coord-left
-    (word-append
-      (small-face 'unhappy)
-      @rt{  expects  } @deep-code{Num} @rt{ , } @deep-code{Str}
-      @rt{  gets  } @deep-code{Str} @rt{ , } @deep-code{Num})
-    #:go title-coord-mid
-    (let* ((client-pict
-             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
-           (api-pict
-             (bcellophane (bcellophane (apply typed-codeblock example-api-code*))))
-           (lib-pict
-             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
-           (full-pict
-             (item-r-append (boundary-append client-pict api-pict) lib-pict))
-           (arr
-             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
-           (full/arr
-             (add-code-arrow full-pict arr #:arrow-size 20)))
-      (ppict-do
-        full/arr
-        #:go (at-find-pict api-pict cc-find 'cc)
-        (ht-append
-          q-pict
-          (text-line-append
-            @rt{Do types protect}
-            @rt{ the callback?}))
-        (hsep tiny-y-sep)
-        (answer-text
-          @rt{TR = Yes})
-        (answer-text
-          @rt{RP = No}))))
+    #:alt [(cm-example '(U T U))]
+    (cm-example '(U T U)
+                #:api-comment
+                (vc-append
+                  cm-callback-q
+                  (hsep tiny-y-sep)
+                  (answer-text
+                    @rt{TR = Yes})
+                  (answer-text
+                    @rt{RP = No}))))
   (pslide
     #:go earth-coord
     (earth-pict)
@@ -2300,12 +2453,14 @@
     (sky-pict)
     #:next
     #:go center-coord
+    ;; TODO show boundary pict here?
     (takeaway-frame
-      @ht2{Need a way to measure types!}))
+      @ht2{Need to measure type guarantees}))
   (pslide
     #:go sky-coord
     (sky-pict)
     #:go (coord contribution-x 26/100 'lt)
+    ;; .... need a way to measure the strength of guarantees that types provide
     (text-line-append @rt{How to assess} @rt{ type guarantees}))
   (pslide
     #:go sky-coord
@@ -2316,32 +2471,49 @@
       @rrt{after = Complete Monitoring, Type S., Tag S., Unsound}
       @rrt{        + Blame, Error Preorder}))
   (pslide
+    #:go sky-coord
+    (sky-pict)
+    #:go center-coord
+    ;; ... syntactic proporty
+    (item-line-append
+      (hc-append
+        med-x-sep
+        @rrt{star =  Complete Monitoring}
+        (scale the-boundary-pict 60/100))
+      @rrt{Do types supervise all boundaries?}))
+  (pslide
     #:go heading-coord-left
-    @ht2{Complete Monitoring vs Type Soundness}
+    ;; TODO use the sky-colors for each
+    (word-append
+      @ht2{Complete Monitoring}
+      @rt{  vs. }
+      @ht2{Type Soundness})
+    #:next
     #:go title-coord-mid
-    (let* ((client-pict
-             (add-hubs (apply untyped-codeblock example-client-code*) 'client))
-           (api-pict
-             (bcellophane (bcellophane (apply typed-codeblock example-api-code*))))
-           (lib-pict
-             (add-hubs (apply untyped-codeblock example-library-code*) 'lib))
-           (full-pict
-             (item-r-append (boundary-append client-pict api-pict) lib-pict))
-           (arr
-             (code-arrow 'lib-W lc-find 'client-S cb-find (* 1/2 turn) (* 1/4 turn) 5/10 5/10 'solid))
-           (full/arr
-             (add-code-arrow full-pict arr #:arrow-size 20)))
-      (ppict-do
-        full/arr
-        #:go (at-find-pict api-pict cc-find 'cc)
-        (ht-append
-          q-pict
-          (text-line-append
-            @rt{Do types protect}
-            @rt{ the callback?}))
-        (hsep tiny-y-sep)
-        @rt{CM => Yes}
-        @rt{TS =/> Yes})))
+    (cm-example '(U T U)
+                #:api-comment
+                (vc-append
+                  cm-callback-q
+                  (hsep tiny-y-sep)
+                  (make-2table
+                    #:row-align lb-superimpose
+                    #:col-sep tiny-x-sep
+                    #:row-sep pico-y-sep
+                    (list
+                      (clip-descent @ht2-initials{TS}) @rt{=/> Yes}
+                      (clip-descent @ht2-initials{CM}) @rt{=> Yes}))))
+    #:set (let* ((pp ppict-do-state))
+            (ppict-do
+              pp
+              #:go (at-cm-arrow #:abs-y (- small-y-sep))
+              (hc-append
+                (make-2table
+                  #:row-align lt-superimpose
+                  #:col-sep tiny-x-sep
+                  #:row-sep tiny-y-sep
+                  (list @ht2-initials{TS} @untyped-code{nothing}
+                        @ht2-initials{CM} cm-num-str))
+                (xsep small-x-sep)))))
   (pslide
     #:go sky-coord
     (sky-pict)
@@ -2412,57 +2584,30 @@
     (earth-pict-transient)
     #:go low-text-left
     (item-line-append
-      @rrt{Natural / TR = strongest types}
-      @rrt{Transient / RP = no wrappers}
-      @rrt{combine})
-    #:go low-text-right
-    (item-line-append
-      @rrt{T-improved}
-      @rrt{- new types}
-      @rrt{- remove dyn}
-      @rrt{- add subtyping}
-      @rrt{- blame?}))
-  (sec:thesis:transient)
-  (pslide
-    #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
-    #:go low-text-left
-    (item-line-append @rrt{Natural / TR = strongest types} @rrt{Transient / RP = no wrappers} @rrt{combine})
-    #:go low-text-right
-    (item-line-append @rrt{T-improved} @rrt{- new types} @rrt{- remove dyn} @rrt{- add subtyping} @rrt{- blame?}))
+      @rrt{Natural = strongest types}
+      @rrt{Transient = no wrappers}
+      @rrt{combine in TR})
+    #:go (coord 56/100 sky-y 'ct)
+    (let* ((ycolor yellow1-3k1)
+           (ray
+            (filled-rectangle
+              tiny-x-sep
+              (h%->pixels 1/2)
+              #:draw-border? #f
+              #:color ycolor))
+           (star
+             (make-compass-pict 18 #:color ycolor))
+           (ray
+            (hc-append pico-x-sep star ray star))
+           (ray
+             (ppict-do
+               ray
+               #:go (coord 1 1/10 'lc) @rrt{1. Model}
+               #:go (coord 1 9/10 'lc) @rrt{2. Implementation})))
+      ray))
   (sec:thesis:model)
   (sec:thesis:implementation)
   (sec:thesis:evaluation)
-  (void))
-
-(define (sec:thesis:transient)
-  (pslide
-    #:go heading-coord-left
-    (word-append
-      @ht2{Closing the Gap:}
-      @rt{  Transient without Dyn})
-    #:go text-coord-mid
-    @rrt{(f x) : Num morphs to}
-    #:go low-text-left
-    @rrt{Before}
-    @rrt{(check Num (check Fun f) (check Num x))}
-    @rrt{... because could be Dyn anywhere}
-    (hsep med-y-sep)
-    @rrt{After}
-    @rrt{(check Num (f x))}
-    @rrt{no Dyn, fewer checks})
-  #;(pslide
-    #:go heading-coord-left
-    @ht2{Completion}
-    #:go text-coord-left
-    @rrt{made possible by another change}
-    #:go title-coord-left
-    @rrt{before, type elaboration}
-    #:go title-coord-right
-    @rrt{after, surf + tgt types, completion}
-    @rrt{theorem, completion correctness}
-    @rrt{opens door to optimizations}
-    #:go icon-coord-mid
-    @rrt{surface types support multi-lang too})
   (void))
 
 (define (sec:thesis:model)
@@ -2616,30 +2761,28 @@
     #:go heading-coord-left
     (word-append
       @ht2{Shallow to Deep}
-      @rrt{  = stronger guarantees})
-    #:go text-coord-mid (bad-pair-example 'U 'S 'U)
-    #:go text-coord-mid (blank 0 tiny-y-sep) (bad-pair-example #f 'D #f)
-    (blank 0 small-y-sep)
-    (item-table
-      @rt{Shallow: }
-      (word-append
-        (untyped-code "(\"A\", \"B\")")
-        @rt{ is a  }
-        (shallow-code "[Num, Num]"))
-      @rt{Deep: }
-      (word-append
-        (untyped-code "(\"A\", \"B\")")
-        @rt{ is NOT a  }
-        (deep-code "[Num, Num]")))
-    (blank 0 small-y-sep)
+      @rt{ = stronger guarantees})
+    #:go title-coord-mid
+    (cm-example '(U S U))
+    #:go (at-find-pict cm-api-tag rt-find 'rc #:abs-x face-offset-right) unhappy-face
     #:next
+    #:go (at-find-pict cm-api-tag rb-find 'rb #:abs-x (- pico-x-sep) #:abs-y (- tiny-y-sep))
+    (let* ((pp (cm-api-pict 'D))
+           (pp (ppict-do pp #:go (coord 1 0 'rc #:abs-x face-offset-right) happy-face)))
+      pp)
+    #:go (at-find-pict cm-arrow-tag lc-find 'rc)
+    (hc-append
+      cm-num-str
+      (xsep small-x-sep))
+    #:go title-coord-mid
     (takeaway-frame
-      @rt{Deep types satisfy complete monitoring}))
+      ;; TODO clearer takeaway?
+      @rt{Deep satisfies complete monitoring}))
   (pslide
     #:go heading-coord-left
     (word-append
       @ht2{Deep to Shallow}
-      @rt{  = fewer errors})
+      @rt{ = fewer errors})
     #:go text-coord-mid
     (higher-order-any-example 'D 'U)
     (word-append error-pict
@@ -2861,6 +3004,38 @@
     @rrt{Natural only satisfactory answer})
   (void))
 
+(define (sec:thesis:transient)
+  ;; TODO move to 'extra'
+  (pslide
+    #:go heading-coord-left
+    (word-append
+      @ht2{Closing the Gap:}
+      @rt{  Transient without Dyn})
+    #:go text-coord-mid
+    @rrt{(f x) : Num morphs to}
+    #:go low-text-left
+    @rrt{Before}
+    @rrt{(check Num (check Fun f) (check Num x))}
+    @rrt{... because could be Dyn anywhere}
+    (hsep med-y-sep)
+    @rrt{After}
+    @rrt{(check Num (f x))}
+    @rrt{no Dyn, fewer checks})
+  #;(pslide
+    #:go heading-coord-left
+    @ht2{Completion}
+    #:go text-coord-left
+    @rrt{made possible by another change}
+    #:go title-coord-left
+    @rrt{before, type elaboration}
+    #:go title-coord-right
+    @rrt{after, surf + tgt types, completion}
+    @rrt{theorem, completion correctness}
+    @rrt{opens door to optimizations}
+    #:go icon-coord-mid
+    @rrt{surface types support multi-lang too})
+  (void))
+
 (module+ main
   (set-page-numbers-visible! #false)
   (set-spotlight-style! #:size 60 #:color (color%-update-alpha spotlight-color 0.6))
@@ -2890,8 +3065,7 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go heading-coord-left
-    (blank)
-
+    #:go center-coord
+    (double-star 40)
 
   )))
