@@ -42,8 +42,8 @@
 ;;       Jan, Zeina, Christos, Lukas ... anyone
 ;; - [ ] type lattice, always go up! make sure words match pictures
 ;; - [ ] only say "I" "my" for thesis statement
-;; - [ ] ... or, "I took over perf after Asumu had started"
-;; - [ ] need GOOD phrase to justify sampling
+;;       ... or, "I took over perf after Asumu had started"
+;; - [X] need GOOD phrase to justify sampling
 ;;       ... confirmed with ground truth many settings
 ;; - [X] DON'T measure types,
 ;;       show: Need to measure the strength of guarantees
@@ -53,7 +53,7 @@
 ;; - [ ] don't confuse properties of model vs implementation
 ;;       eg "TR satisfies GG"
 ;; - [ ] use non-green for the earth
-;; - [ ] move 'simpler behavior' to the end
+;; - [X] move 'simpler behavior' to the end
 ;; - [ ] email Amal on Sunday
 ;; - [ ] why overhead line fuzzy?
 
@@ -548,6 +548,9 @@
   (for/fold ((pp pp))
             ((i (in-range n)))
     (bcellophane pp)))
+
+(define (bcellophane2 pp)
+  (bcellophane* 2 pp))
 
 ;; -----------------------------------------------------------------------------
 ;; --- ???
@@ -2745,18 +2748,6 @@
   (void))
 
 (define (sec:thesis:evaluation)
-  ;; (pslide
-  ;;   #:go heading-coord-left
-  ;;   @ht{Thesis}
-  ;;   #:go title-coord-mid
-  ;;   @ht2{Deep and Shallow types can interoperate.}
-  ;;   @rrt{(preserving their formal properties)}
-  ;;   (blank 0 tiny-y-sep)
-  ;;   @ht2{Programmers can use these types to:}
-  ;;   (item-line-append
-  ;;     (hb-append @st{- } @rt{strengthen Shallow guarantees})
-  ;;     (hb-append @st{- } @rt{avoid unimportant Deep errors})
-  ;;     (hb-append @st{- } @rt{lower runtime costs})))
   (pslide
     #:go heading-coord-left
     (word-append
@@ -2797,21 +2788,6 @@
     #:go title-coord-mid
     (takeaway-frame
       @rt{Shallow can run almost all type-correct code}))
-  (pslide
-    #:go heading-coord-left
-    (word-append
-      @ht2{Deep to Shallow}
-      @rt{  = simpler behavior})
-    #:go icon-coord-mid
-    (hc-append small-x-sep
-      (word-append @rt{Untyped } (untyped-code " 0 "))
-      (word-append @rt{Deep } (deep-code " #f "))
-      (word-append @rt{Shallow } (shallow-code " 0 ")))
-    #:go text-coord-mid
-    #:alt [(index-of-example 'U)]
-    #:alt [(index-of-example 'D)]
-    (index-of-example 'S)
-    )
   (pslide
     #:go heading-coord-left
     @ht2{Better Performance}
@@ -3002,6 +2978,31 @@
     ;; heaven, geometric imagery ... I am the anti-max
     @rrt{forget the landscape, design from first principles}
     @rrt{Natural only satisfactory answer})
+  (let* ((u-result (word-append @rt{Untyped } (untyped-code " 0 ")))
+         (d-result (word-append @rt{Deep } (deep-code " #f ")))
+         (s-result (word-append @rt{Shallow } (shallow-code " 0 ")))
+         (r* (list u-result d-result s-result))
+         (make-icon (lambda (i)
+                      (define pp*
+                        (for/list ((r (in-list r*))
+                                   (k (in-naturals)))
+                          (if (<= k i) r (bcellophane2 r))))
+                      (apply hc-append small-x-sep pp*))))
+    (pslide
+      #:go heading-coord-left
+      (word-append
+        @ht2{Deep to Shallow}
+        @rt{ = simpler behavior})
+      #:alt [#:go icon-coord-mid (make-icon 0)
+             #:go text-coord-mid (index-of-example 'U) ]
+      #:alt [#:go icon-coord-mid (make-icon 1)
+             #:go text-coord-mid (index-of-example 'D) ]
+      #:go icon-coord-mid (make-icon 2)
+      #:go text-coord-mid (index-of-example 'S)
+      #:next
+      #:go center-coord
+      (takeaway-frame
+        @rt{No wrappers = fewer surprises})))
   (void))
 
 (define (sec:thesis:transient)
