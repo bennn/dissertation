@@ -9,7 +9,7 @@ These design efforts explore a range of goals;
 On the other hand, experience with type-sound designs has revealed major challenges.
 We do not know how to measure the performance costs of sound interaction.
 Nor do we have criteria that distinguish ``truly sound'' mixed-typed languages
- from others that ignore type obligations in untyped code.
+ from others that enforce type obligations locally rather than globally.
 
 In this dissertation, I introduce methods for assessing
  mixed-typed languages and bring order to the design space.
@@ -26,10 +26,11 @@ Further distinctions arise by asking whether error outputs can
 I apply the methods to several designs and discover limitations that motivate
  a synthesis of two ideas from the literature:
  @|sdeep| types and @|sshallow| types.
-@|sDeep| types offer strong guarantees but impose a high cost on interactions.
-@|sShallow| types come with weak guarantees but lower worst-case costs.
+@|sDeep| types offer strong guarantees but impose a high interaction cost.
+@;@|sShallow| types come with weak guarantees but lower worst-case costs.
+@|sShallow| types offer weak guarantees and better worst-case costs.
 This dissertation proves that @|sdeep| and @|sshallow| types can interoperate
- and shows that a three-way mix is often desirable.
+ and measures the benefits of a three-way mix.
 
 
 Touch! 
