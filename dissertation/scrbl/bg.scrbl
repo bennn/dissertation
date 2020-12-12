@@ -18,7 +18,10 @@
 @include-abstract{abstract.scrbl}
 
 @; need newline above
-@;@include-acknowledgements{acknowledgments.scrbl}
+@include-dedication{dedication.scrbl}
+
+@; need newline above
+@include-acknowledgements{acknowledgments.scrbl}
 
 @table-of-contents[]
 @end-front-matter[]

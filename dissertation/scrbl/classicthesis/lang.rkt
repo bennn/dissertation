@@ -195,6 +195,7 @@
 
 (define-includer include-abstract "Sabstract")
 (define-includer include-acknowledgements "Sacknowledgements")
+(define-includer include-dedication "Sdedication")
 
 ;; A variant of include-section that adds a grouper style to make it a part
 (define-syntax (include-part stx)
