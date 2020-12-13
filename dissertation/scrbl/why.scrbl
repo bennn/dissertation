@@ -177,11 +177,12 @@ Compilation erases types to arrive at an untyped program that can safely
  interoperate with the rest of the program.
 
 Despite their widespread adoption (@section-ref{sec:design:landscape}),
- optional types are a badge of shame for the research community because
+ optional types are a bit of a disappointment for the research community because
  these types are unsound.
 A programmer cannot use optional types to predict the inputs that a function
- will receive, and likewise a compiler cannot use optional types to justify
- transformations.
+ will receive, and likewise a compiler cannot trust an optional type without
+ inserting a run-time guard or studying the values that can flow to the
+ typed position.
 
 @emph{History Note:}
 Optional typing is one valid way to use Lisp type hints.

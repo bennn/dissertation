@@ -7,6 +7,7 @@
 @; - ....
 
 @(require
+   (prefix-in tr: greenman-thesis/jfp-2019/main)
    (only-in greenman-thesis/shallow/main
      SHALLOW-CURRENT-BENCHMARK*
      get-mixed-path-table
@@ -25,6 +26,8 @@
      both:index-of
      untyped-codeblock
      typed-codeblock)
+   (only-in gtp-plot/performance-info
+     performance-info->num-units)
    (only-in math/statistics
      mean))
 
@@ -2418,54 +2421,54 @@ In short, the ``after'' case is always better and can be an arbitrarily large
 }])
 
 
-@subsubsection[#:tag "sec:both:perf:path"]{Migration Paths}
-
-@(let* ([bm* '(sieve forth fsm fsmoo mbta morsecode
-               zombie dungeon jpeg zordoz lnm suffixtree
-               kcfa snake take5)]
-        [D 3]
-        [PT (get-mixed-path-table D bm*)]
-        [deep-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (caddr path-info))) (car path-info))]
-        [shallow-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr path-info))) (car path-info))]
-        [mix-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr (cdr path-info)))) (car path-info))]
-        [_md (unless (= 1 (length mix-dead*)) (printf "HELP expected one mix-dead row got ~s~n" mix-dead*))]
-        [mix-path-bm 'fsm]
-        [mix-best-D (find-lowest-3dpath-D mix-path-bm)]
-        )
-@list[
-@figure*[
-  "fig:both:mixed-path"
-  @elem{Percent of @ddeliverable[D] paths in three lattices:
-   the @|sdeep|-typed lattice, the @|sshallow|-typed lattice,
-   and a hybrid that chooses the best of @|sdeep| or @|sshallow| types at each point.}
-  @render-mixed-path-table[PT]
-]
-@elem{
-@|sShallow| types make step-by-step migration more practical in Typed Racket.
-Originally, with @|sdeep| types, a programmer who adds types one module at
- a time is likely to hit a performance wall; that is, a few configurations
- along the migration path are likely to suffer a large overhead.
-Adding more @|sdeep| types is a sure way to reduce the overhead,
- especially if the programmer adds the best-possible types (@figure-ref{fig:example-path}),
- but these multi-step pitfalls contradict the promise of migratory typing.
-High overhead makes it hard to tell whether the new types are compatible with
- the rest of the codebase.
-
-By choosing @|sdeep| or @|sshallow| types at each point along a path, the
- worst-case overhead along migration paths goes down.
-@Figure-ref{fig:both:mixed-path} quantifies the improvement by showing the
- percent of all paths that are @ddeliverable[D] at each step.
-With @|sdeep| types alone, all paths in @integer->word[(length deep-dead*)]
- benchmarks hit a point that exceeds the @~a[D]x limit.
-With @|sshallow| types alone, all paths in @integer->word[(length shallow-dead*)] benchmarks
- exceed the limit as well.
-With the mix, however, only @integer->word[(length mix-dead*)] benchmark (@bm[(car mix-dead*)])
- has zero @ddeliverable[D] paths.
-Fine-grained combinations of @|sdeep| and @|sshallow| types can further improve
- the number of viable migration paths.
-In @bm[mix-path-bm], for example, every path is @ddeliverable[mix-best-D] if the programmer
- picks the fastest-running mix of @|sdeep| and @|sshallow| types for each configuration.
-}])
+@;@subsubsection[#:tag "sec:both:perf:path"]{Migration Paths}
+@;
+@;@(let* ([bm* '(sieve forth fsm fsmoo mbta morsecode
+@;               zombie dungeon jpeg zordoz lnm suffixtree
+@;               kcfa snake take5)]
+@;        [D 3]
+@;        [PT (get-mixed-path-table D bm*)]
+@;        [deep-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (caddr path-info))) (car path-info))]
+@;        [shallow-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr path-info))) (car path-info))]
+@;        [mix-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr (cdr path-info)))) (car path-info))]
+@;        [_md (unless (= 1 (length mix-dead*)) (printf "HELP expected one mix-dead row got ~s~n" mix-dead*))]
+@;        [mix-path-bm 'fsm]
+@;        [mix-best-D (find-lowest-3dpath-D mix-path-bm)]
+@;        )
+@;@list[
+@;@figure*[
+@;  "fig:both:mixed-path"
+@;  @elem{Percent of @ddeliverable[D] paths in three lattices:
+@;   the @|sdeep|-typed lattice, the @|sshallow|-typed lattice,
+@;   and a hybrid that chooses the best of @|sdeep| or @|sshallow| types at each point.}
+@;  @render-mixed-path-table[PT]
+@;]
+@;@elem{
+@;@|sShallow| types make step-by-step migration more practical in Typed Racket.
+@;Originally, with @|sdeep| types, a programmer who adds types one module at
+@; a time is likely to hit a performance wall; that is, a few configurations
+@; along the migration path are likely to suffer a large overhead.
+@;Adding more @|sdeep| types is a sure way to reduce the overhead,
+@; especially if the programmer adds the best-possible types (@figure-ref{fig:example-path}),
+@; but these multi-step pitfalls contradict the promise of migratory typing.
+@;High overhead makes it hard to tell whether the new types are compatible with
+@; the rest of the codebase.
+@;
+@;By choosing @|sdeep| or @|sshallow| types at each point along a path, the
+@; worst-case overhead along migration paths goes down.
+@;@Figure-ref{fig:both:mixed-path} quantifies the improvement by showing the
+@; percent of all paths that are @ddeliverable[D] at each step.
+@;With @|sdeep| types alone, all paths in @integer->word[(length deep-dead*)]
+@; benchmarks hit a point that exceeds the @~a[D]x limit.
+@;With @|sshallow| types alone, all paths in @integer->word[(length shallow-dead*)] benchmarks
+@; exceed the limit as well.
+@;With the mix, however, only @integer->word[(length mix-dead*)] benchmark (@bm[(car mix-dead*)])
+@; has zero @ddeliverable[D] paths.
+@;Fine-grained combinations of @|sdeep| and @|sshallow| types can further improve
+@; the number of viable migration paths.
+@;In @bm[mix-path-bm], for example, every path is @ddeliverable[mix-best-D] if the programmer
+@; picks the fastest-running mix of @|sdeep| and @|sshallow| types for each configuration.
+@;}])
 
 
 @subsubsection[#:tag "sec:both:perf:both"]{Case Studies: @|sDeep| and @|sShallow|}
@@ -2568,16 +2571,47 @@ Such libraries are ideal, but until we have them for the next data exchange
  that are available today.
 
 
-@parag{GTP Benchmarks}
-
-@(let* ((DDD (get-3d-table '(fsm morsecode jpeg kcfa zombie zordoz))))
-  ;; TODO note future challenges 
-@list[
-@(apply itemlist
-   (for/list ((d-row (in-list DDD)))
-     (item (format "~a% of ~a configurations" (cadr d-row) (car d-row)))))
-
-])
+@;@parag{GTP Benchmarks}
+@;
+@;@(let* ((DDD (get-3d-table '(fsm morsecode jpeg kcfa zombie zordoz)))
+@;        (num-DDD (length DDD))
+@;        (S (tr:benchmark-name->performance-info 'fsm tr:default-rkt-version))
+@;        (fsm-num-modules (performance-info->num-units S))
+@;        (fsm-num-configs (expt 2 fsm-num-modules))
+@;        (fsm-non-mixed (+ 1 fsm-num-modules))
+@;        (fsm-mixed (- fsm-num-configs fsm-non-mixed)))
+@;@list[
+@;@elem{
+@;  For @integer->word[num-DDD] small benchmarks, I measured the full
+@;   space of @${3^N} configurations that can arise by combining @|sdeep|
+@;   and @|sshallow| types.
+@;  Each configuration ran successfully, affirming that @|sdeep| and @|sshallow|
+@;   can interoperate.
+@;  Furthermore, a surprising percent of all @${2^N} mixed-typed configurations
+@;   in each benchmark ran fastest using a mixture of @|sdeep| and @|sshallow|
+@;   types:
+@;}
+@;@(apply itemlist
+@;   (for/list ((d-row (in-list DDD))
+@;              (i (in-naturals 1)))
+@;     (item (format "~a% of " (cadr d-row))
+@;           (bm (car d-row))
+@;           (format " configurations~a"
+@;                   (cond
+@;                    [(= i num-DDD)
+@;                     "."]
+@;                    [(= (+ i 1) num-DDD)
+@;                     "; and"]
+@;                    [else
+@;                     ";"])))))
+@;@elem{
+@;@|noindent|In @bm{fsm}, for example, there are @integer->word[fsm-num-configs] mixed-typed configurations.
+@;@Integer->word[fsm-non-mixed] of these cannot mix @|sdeep| and @|sshallow|
+@; because they contain at most one typed module.
+@;Of the remaining @~a[fsm-mixed] configurations, over half run fastest with a
+@; combination of @|sdeep| and @|sshallow| types.
+@;}
+@;])
 
 
 @; Last case study, three way lattice, how many points best with mix?
@@ -2592,11 +2626,10 @@ Such libraries are ideal, but until we have them for the next data exchange
 
 @|sShallow| Typed Racket is publicly available in a pull request to Typed Racket:
 @github-pull["racket" "typed-racket" "948"].
+The patch adds support for @|sshallow| types, giving Typed Racket programmers
+ a choice between @|sshallow| and @|sdeep| type guarantees.
 I expect to merge the pull request early in 2021.
-After the release, I look forward to collecting more anecdotal experiences
- with the system.
-
-
-
+After the release, I look forward to studying programmers' experience with
+ the multi-faceted system.
 
 

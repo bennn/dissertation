@@ -27,8 +27,8 @@ TODO
 - [X] "methods" -> "method" goddammit I am the first with these great METHOD canonical,
       you can improve but you will be second (abstract intro conclusion)
 - [X] diss to committee
-- [ ] sk > I know it's fashionable to say such things at NU, but I'm not sure I agree that "a compiler cannot use optional types to justify transformations". It certainly can: it just needs to then generate code that guards against using the transformed code.  It's a bit like saying "a JIT cannot use run-time values to justify specializations" — yet that's exactly what a JIT does every day?
-- [ ] sk PR talk sounds like shallow replacing TR
+- [X] sk > I know it's fashionable to say such things at NU, but I'm not sure I agree that "a compiler cannot use optional types to justify transformations".  It certainly can: it just needs to then generate code that guards against using the transformed code.  It's a bit like saying "a JIT cannot use run-time values to justify specializations" — yet that's exactly what a JIT does every day?
+- [X] sk PR talk sounds like shallow replacing TR
 - [ ] jv fig 58 be clear this is fully-typed, explain why
       same for all "ratios" tables
 - [ ] jv fig65 what is timeout and is it worse than deep? explain
