@@ -33,29 +33,30 @@
 ;; MF 2020-12-10
 ;; NO GIGGLING FRESHMAN remember Max and Asumu and there are senior people here
 ;;  that are assessing you! Be professional.
+;; - [-] only say "I" "my" for thesis statement
+;;       ... or, "I took over perf after Asumu had started"
+;; - [-] don't confuse properties of model vs implementation
+;;       eg "TR satisfies GG"
 ;; - [X] explain what CM is before jumping to example,
 ;;      "type system in contral of all checks that went through it, or blame if goes wrong"
 ;; - [X] cut scaling the model, all but final bullet point
 ;;       for picture show Natural N+T Transient and draw arrows to unite
-;; - [ ] thesis preview / prelim thesis , rests on contributions
-;; - [ ] remind people of contributors, use pictures
-;;       Jan, Zeina, Christos, Lukas ... anyone
-;; - [ ] type lattice, always go up! make sure words match pictures
-;; - [ ] only say "I" "my" for thesis statement
-;;       ... or, "I took over perf after Asumu had started"
+;; - [X] thesis preview / prelim thesis , rests on contributions
 ;; - [X] need GOOD phrase to justify sampling
 ;;       ... confirmed with ground truth many settings
 ;; - [X] DON'T measure types,
 ;;       show: Need to measure the strength of guarantees
 ;;       say: Need to measure the strength of the guarantees that types offer
+;; - [X] use non-green for the earth
+;; - [X] move 'simpler behavior' to the end
+;; - [X] why overhead line fuzzy? ... oh, thats a general gtp-plot issue
+;; - [ ] remind people of contributors, use pictures
+;;       Jan, Zeina, Christos, Lukas ... anyone
+;; - [ ] type lattice, always go up! make sure words match pictures
 ;; - [ ] carefully introduce Deep and Shallow,
 ;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
-;; - [ ] don't confuse properties of model vs implementation
-;;       eg "TR satisfies GG"
-;; - [ ] use non-green for the earth
-;; - [X] move 'simpler behavior' to the end
+;; - [ ] sync the benchmarks, for displays ... avoid intro new names
 ;; - [ ] email Amal on Sunday
-;; - [ ] why overhead line fuzzy?
 
 (require
   file/glob
@@ -148,7 +149,10 @@
 (define text-right (- 1 text-left))
 (define text-top (* 5 slide-top))
 (define text-bottom slide-bottom)
-(define contribution-x 49/100)
+(define contribution-x-left 10/100)
+(define contribution-x-right 49/100)
+(define contribution-y-top 26/100)
+(define contribution-y-bot 56/100)
 
 (define (scale-to-text pp)
   (define w (w%->pixels (- text-right text-left)))
@@ -222,8 +226,7 @@
 (define untyped-pen-color yellow1-3k1)
 (define deep-pen-color green2-3k1)
 (define shallow-pen-color green0-3k1)
-(define validate-pen-color #;yellow1-3k1 #;teal-3k1
-  #;grey-3k1 #;red0-3k1 red1-3k1)
+(define validate-pen-color red1-3k1)
 (define neutral-pen-color grey-3k1)
 (define highlight-pen-color orange1-3k1)
 
@@ -250,12 +253,6 @@
 
 (define defense-brush-color-converter
   (lambda (n) (case n ((0) deep-brush-color) ((1) shallow-brush-color))))
-
-(define sample-pen-color-converter
-  (lambda (n) (case n ((0) deep-pen-color) ((1) validate-pen-color))))
-
-(define sample-brush-color-converter
-  (lambda (n) (case n ((0) deep-brush-color) ((1) validate-brush-color))))
 
 ;; -----------------------------------------------------------------------------
 ;; --- text
@@ -650,12 +647,12 @@
     (add-neutral-background tbl))
   (double-frame tbl/bg))
 
-(define-syntax-rule (with-plot-params w h line-width base-color exp)
+(define-syntax-rule (with-plot-params w h base-color exp)
   (parameterize ([*OVERHEAD-MAX* MAX-OVERHEAD]
                  [*OVERHEAD-LEGEND?* #false]
                  [*OVERHEAD-PLOT-WIDTH* w]
                  [*OVERHEAD-PLOT-HEIGHT* h]
-                 [*OVERHEAD-LINE-WIDTH* line-width]
+                 [*OVERHEAD-LINE-WIDTH* 3]
                  [*OVERHEAD-LINE-COLOR* base-color]
                  [*PEN-COLOR-CONVERTER* defense-pen-color-converter]
                  [*BRUSH-COLOR-CONVERTER* defense-brush-color-converter]
@@ -665,10 +662,13 @@
 
 (define (add-neutral-background pp)
   (add-rectangle-background
-    #:x-margin small-x-sep #:y-margin tiny-y-sep
+    #:x-margin 0 #:y-margin 0
     #:color neutral-brush-color
     #:radius 1
-    pp))
+    (add-rectangle-background
+      #:x-margin small-x-sep #:y-margin tiny-y-sep
+      #:color white
+      pp)))
 
 (define (add-dark-background pp)
   (add-rectangle-background
@@ -906,7 +906,7 @@
   (migration-append* pp*))
 
 (define (migration-append* pp*)
-  (apply vc-append lattice-y-sep (add-between pp* down-arrow-pict)))
+  (apply vc-append lattice-y-sep (add-between pp* up-arrow-pict)))
 
 (define (codeblock-append . pp*)
   (codeblock-append* pp*))
@@ -1304,7 +1304,7 @@
     (void))
   (dc draw-x size size))
 
-(define (basic-star size)
+(define (basic-star size #:color [color fog-3k1])
   (make-compass-pict size #:color fog-3k1))
 
 (define (double-star size)
@@ -1410,9 +1410,8 @@
     (add-code-arrows* pp arr*)))
 
 (define (base-earth-pict)
-  ;; TODO curve the earth
-  (define outer-color green2-3k1)
-  (define inner-color green1-3k1)
+  (define inner-color red0-3k1)
+  (define outer-color red1-3k1)
   (define pen-width (landscape-line-width))
   (define w (landscape-w))
   (define h (landscape-h))
@@ -1501,10 +1500,22 @@
       @rt{Do types protect}
       @rt{ the callback?})))
 
-(define down-arrow-pict
+(define (arrowhead-pict rad)
   (colorize
-    (arrowhead 20 (* 3/4 turn))
+    (arrowhead 20 rad)
     fog-3k1))
+
+(define up-arrow-pict
+  (arrowhead-pict (* 1/4 turn)))
+
+(define right-arrow-pict
+  (arrowhead-pict 0))
+
+(define left-arrow-pict
+  (arrowhead-pict (* 1/2 turn)))
+
+(define down-arrow-pict
+  (arrowhead-pict (* 3/4 turn)))
 
 (define big-hyphen-pict @ht2{- })
 (define hyphen-pict @st{- })
@@ -1532,6 +1543,20 @@
 (define unhappy-face (small-face 'unhappy))
 (define happy-face (small-face 'happy))
 (define face-offset-right (- tiny-x-sep))
+
+(define how-to-guarantees-pict
+  (ht-append
+    @ht2{* }
+    (text-line-append
+      @rt{How to assess}
+      @rt{ type guarantees})))
+
+(define how-to-perf-pict
+  (ht-append
+    @ht2{* }
+    (text-line-append
+      @rt{How to measure}
+      @rt{ performance})))
 
 ;; -----------------------------------------------------------------------------
 
@@ -1817,7 +1842,7 @@
   (define num-samples 10)
   (define sample-rate 10)
   (define num-units (performance-info->num-units pi))
-  (define pp (ss-validate-plot pi 8 (w%->pixels 65/100) (h%->pixels 35/100)))
+  (define pp (ss-validate-plot pi (w%->pixels 65/100) (h%->pixels 35/100)))
   (vl-append 4
     (ht-append
       (ysep (pict-height @rrt{q}))
@@ -1829,14 +1854,14 @@
 
 (define (big-overhead-plot bm-name deco*)
   (define pi* (map (deco->pi bm-name) deco*))
-  (define pp (ss-overhead-plot pi* 8 (w%->pixels 65/100) (h%->pixels 35/100)))
+  (define pp (ss-overhead-plot pi* (w%->pixels 65/100) (h%->pixels 35/100)))
   (vl-append 4
     (rrt (~a bm-name))
     (add-xticks (double-frame pp))))
 
 (define (2col-overhead-plot bm-name deco*)
   (define pi* (map (deco->pi bm-name) deco*))
-  (define pp (ss-overhead-plot pi* 3 (w%->pixels 38/100) (h%->pixels 16/100)))
+  (define pp (ss-overhead-plot pi* (w%->pixels 38/100) (h%->pixels 16/100)))
   (vl-append 4
     (tiny-txt (~a bm-name))
     (double-frame pp)))
@@ -1846,7 +1871,7 @@
     #:row-sep tiny-y-sep
     (map (lambda (bm-name) (2col-overhead-plot bm-name (list deco))) bm-name*)))
 
-(define (ss-overhead-plot pi* line-width w h)
+(define (ss-overhead-plot pi* w h)
   (define base-color
     (if (and (not (null? pi*))
              (null? (cdr pi*))
@@ -1854,15 +1879,15 @@
       1
       0))
   (define pp
-    (with-plot-params w h line-width base-color
+    (with-plot-params w h base-color
       (overhead-plot pi*)))
   pp)
 
-(define (ss-validate-plot pi line-width w h)
+(define (ss-validate-plot pi w h)
   (define sample-pi (performance-info->sample-info pi #:replacement? #f))
   (define base-color 0)
   (define pp
-    (with-plot-params w h line-width base-color
+    (with-plot-params w h base-color
       (validate-samples-plot pi sample-pi)))
   pp)
 
@@ -1906,7 +1931,9 @@
   (ppict-do
     pp
     #:go (at-find-pict plot-tag lb-find 'rc)
-    (vl-append (hsep small-y-sep) (word-append D-pict @rt{ = }))))
+    (vl-append
+      (ysep (* 1.8 tiny-y-sep))
+      (word-append D-pict @rt{ = }))))
 
 (define (sec:example)
   ;; TODO
@@ -1955,10 +1982,10 @@
     #:go heading-coord-left
     @ht2{On Great Ideas}
     ;; A.P. Ershov 1983
-    ;; TODO check references
-    ;; - algebra for PL (cite?)
-    ;; - correctness of optimizing compiler BETA (cite?)
+    ;; - correctness of optimizing compiler
     ;; - second literacy
+    ;; ... one day at conference, idea to colleague, memo of same idea,
+    ;;     this ershovs response, compliment
     #:go heading-coord-right
     ershov-pict
     #:go text-coord-left
@@ -2135,39 +2162,32 @@
     #:go center-coord
     (frame-person #f "elephant.jpg" 7/10))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
+    #:go sky-coord (sky-pict)
+    #:go earth-coord (earth-pict)
     #:go (coord text-left 34/100 'lt)
     (text-line-append
       @ht2{My Research}
       @rt{ brings order to}
       @rt{ the design space})
-    #:go (coord contribution-x 26/100 'lt)
-    ;; TODO try 8-pointed star ... instead of number ... separate slide for thesis support
-    (ht-append
-      @ht2{1. }
-      (text-line-append
-        @rt{How to assess}
-        @rt{ type guarantees}))
-    #:go (coord contribution-x 56/100 'lt)
-    (ht-append
-      @ht2{2. }
-      (text-line-append
-        @rt{How to measure}
-        @rt{ performance})))
+    #:go (coord contribution-x-right contribution-y-top 'lt)
+    how-to-guarantees-pict
+    #:go (coord contribution-x-right contribution-y-bot 'lt)
+    how-to-perf-pict)
   (pslide
-    ;; TODO highlight promising points at top and bottom
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
-    #:go (coord contribution-x 26/100 'lt)
-    (bcellophane (ht-append @ht2{1. } (text-line-append @rt{How to assess} @rt{ type guarantees})))
-    #:go (coord contribution-x 56/100 'lt)
-    (bcellophane (ht-append @ht2{2. } (text-line-append @rt{How to measure} @rt{ performance})))
-    #:go (coord 1/2 38/100 'ct)
+    #:next
+    #:go (coord contribution-x-left contribution-y-top 'lt)
+    (text-c-append
+      how-to-perf-pict
+      (ysep tiny-y-sep)
+      @rrt{(the problem)})
+    #:go (coord contribution-x-right contribution-y-top 'lt)
+    (text-c-append
+      how-to-guarantees-pict
+      (ysep tiny-y-sep)
+      @rrt{(solution space)})
+    #:next
+    #:go (coord 1/2 50/100 'ct)
+    ;; TODO ? highlight promising points, to illustrate Deep and Shallow?
     (text-line-append
       @ht2{Thesis Preview:}
       @rt{ Deep and Shallow types can interoperate}))
@@ -2175,10 +2195,9 @@
 
 (define (sec:perf)
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go (coord contribution-x 56/100 'lt)
-    (text-line-append @rt{How to measure} @rt{ performance})
+    #:go earth-coord (earth-pict)
+    #:go (coord contribution-x-left contribution-y-top 'lt)
+    how-to-perf-pict
     #:go center-coord
     @rrt{(highlight TR)})
   (pslide
@@ -2278,10 +2297,10 @@
     (earth-pict)
     #:go (coord 30/100 text-top 'ct)
     (migration-append
-      (path-node '(U U U U U))
-      (path-node '(T U U U U))
+      (path-node '(T U T T T))
       (path-node '(T U T U U))
-      (path-node '(T U T T T)))
+      (path-node '(T U U U U))
+      (path-node '(U U U U U)))
     #:go (coord 70/100 text-top 'ct)
     #:alt [(hc-append
       (vl-append small-y-sep (small-face 'happy) (small-face 'happier))
@@ -2343,7 +2362,7 @@
     #:set (add-x-label ppict-do-state)
     #:next
     #:go text-coord-mid
-    (tag-pict (big-sampling-plot 'quadU 'D) plot-tag))
+    (big-sampling-plot 'quadU 'D))
   (pslide
     #:go earth-coord
     (earth-pict)
@@ -2462,7 +2481,7 @@
   (pslide
     #:go sky-coord
     (sky-pict)
-    #:go (coord contribution-x 26/100 'lt)
+    #:go (coord contribution-x-right contribution-y-top 'lt)
     ;; .... need a way to measure the strength of guarantees that types provide
     (text-line-append @rt{How to assess} @rt{ type guarantees}))
   (pslide
@@ -2549,13 +2568,13 @@
       @ht2{My Research}
       @rt{ brings order to}
       @rt{ the design space})
-    #:go (coord contribution-x 26/100 'lt)
+    #:go (coord contribution-x-right contribution-y-top 'lt)
     (ht-append
       @ht2{1. }
       (text-line-append
         @rt{How to assess}
         @rt{ type guarantees}))
-    #:go (coord contribution-x 56/100 'lt)
+    #:go (coord contribution-x-right contribution-y-bot 'lt)
     (ht-append
       @ht2{2. }
       (text-line-append
@@ -2850,24 +2869,29 @@
     #:go text-coord-left
     (item-line-append
       (blank)
-      (hb-append @st{- } @rt{begin with Deep types})
-      (hb-append @st{- } @rt{use Shallow for speed})
-      (hb-append @st{- } @rt{return to Deep at end}))
+      (hb-append @st{1. } @rt{Deep, until slow})
+      (hb-append @st{2. } @rt{Shallow, to fix boundaries})
+      (hb-append @st{3. } @rt{Deep, or mix, at end}))
     #:go text-coord-right
     (migration-append
-      (path-node '(U U U U U))
-      (path-node '(D D D U U))
-      (path-node '(D S S U U))
+      (path-node '(D S D D D))
       (path-node '(D S S S S))
-      (path-node '(D D D D D))))
-  (pslide
-    #:go center-coord
-    @rt{Brand New Results})
+      (path-node '(D S S U U))
+      (path-node '(D D D U U))
+      (path-node '(U U U U U))))
   (pslide
     #:go heading-coord-left
     @ht2{New Migration Plan}
     #:go text-coord-mid
-    @rt{Percent of 3-deliverable paths}
+    #:alt [
+     (text-c-append
+       (word-append @rt{What % of paths are  } D-pict @rt{-deliverable})
+       @rt{at each step?})
+     (ysep med-y-sep)
+     (scale (make-lattice 4 bits->path-node #:x-margin pico-x-sep #:y-margin lattice-y-sep) 7/10)
+    ]
+    @rt{% of 3-deliverable paths}
+    (ysep tiny-y-sep)
     (fancy-table
       (list
         (list "Benchmark" "Deep or Shallow" "Deep and Shallow")
@@ -2878,12 +2902,20 @@
         (list "suffixt" "0%" "12%")
         (list "take5" "100%" "100%"))))
   (pslide
-    ;; TODO mixed-lattice table ((fsm 37.50) (morsecode 25.00) (jpeg 37.50) (kcfa 55.47) (zombie 6.25) (zordoz 46.88))
     #:go heading-coord-left
-    @ht2{Best-off Mixed}
-    #:go title-coord-mid
-    (frame-person #f "better-deep-shallow.png" 45/100))
-  ;; TODO flash a lattice, to understand the table ... maybe 2 lattices
+    @ht2{Better Together}
+    #:go text-coord-mid
+    @rt{How many configs do best with a mix?}
+    (ysep tiny-y-sep)
+    (fancy-table
+      (list
+        (list "Benchmark" "" "D+S ≥ D|S")
+        (list "fsm" "" "37%")
+        (list "morsecode" "" "25%")
+        (list "jpeg" "" "37%")
+        (list "kcfa" "" "55%")
+        (list "zombie" ""  "6%")
+        (list "zordoz" "" "46%"))))
   (void))
 
 (define (sec:conclusion)
@@ -3066,7 +3098,13 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go center-coord
-    (double-star 40)
+    #:go earth-coord
+    (earth-pict)
+    #:go heading-coord-left
+    @ht2{Step 3: Picture}
+    #:go text-coord-mid
+    (tag-pict (big-overhead-plot 'quadU '(D)) plot-tag)
+    #:set (add-x-label ppict-do-state)
+
 
   )))
