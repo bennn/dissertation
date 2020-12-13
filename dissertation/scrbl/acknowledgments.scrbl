@@ -84,7 +84,7 @@ One night, between cleanings, I got talking to the security guard (Rusty?)
  about life and college.
 ``Learn a trade,'' he said, ``something they can't take away from you.''
 That was some excellent advice.
-Next semester I took an intro programming course from @|Andrew-Hurd|,
+Next semester I took a programming course from @|Andrew-Hurd|,
  who suggested we students code on paper first instead of throwing ideas at the
  Java compiler.
 What an idea.
@@ -102,6 +102,7 @@ Classmates @|Ben-Carriel| and @|Sam-Park|, among many others, inspired harder an
  apply broadly for graduate school.
 @|Ehsan-Hoque| insisted I go somewhere new, really anywhere but Cornell.
 @|Fabian-Muehlboeck| recommended the @|PRL-Lab-at-Northeastern|.
+@; whose members spoke for themselves.
 Thank you all.
 
 @; I tried to fit all but sometimes in life you have to give up.
