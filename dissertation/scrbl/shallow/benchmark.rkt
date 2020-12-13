@@ -214,8 +214,11 @@
        (time-string->cpu-time dl))]))
 
 (define (format-blame-data bd u-t)
+  (define timeout-ms (* 10 ;; min
+                        60 ;; min->sec
+                        1000)) ;; sec->ms
   (case bd
-    ((timeout) "timeout")
+    ((timeout) (format "timeout (>~a)" (exact-floor (/ timeout-ms u-t))))
     ((oom) "out of memory")
     (else (rnd (/ (mean bd) u-t)))))
 
@@ -235,10 +238,12 @@
        v))
 
 (define (blame-row-shallow r)
-  (string->number (caddr (cdr r))))
+  (define str (caddr (cdr r)))
+  (string->number str))
 
 (define (blame-row-deep r)
-  (string->number (cadddr (cdr r))))
+  (define str (cadddr (cdr r)))
+  (string->number str))
 
 ;; ---
 

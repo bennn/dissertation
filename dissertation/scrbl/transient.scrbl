@@ -40,6 +40,7 @@
      transient:subtype
      transient:opt
      transient:blame:map)
+   (only-in racket/string string-prefix?)
    (only-in math/statistics
      mean))
 
@@ -1219,7 +1220,7 @@ All data is from a dedicated Linux box with @id[NSA-num-cores] physical
 @list[
 @figure*[
   "fig:transient:ratio"
-  @elem{Performance ratios for @|sdeep| and @|sshallow| types on the @|GTP| benchmarks.}
+  @elem{Performance ratios (fully-typed vs untyped) for @|sdeep| and @|sshallow| types on the @|GTP| benchmarks.}
   @render-ratios-table[RT]
 ]
 @elem{
@@ -1327,7 +1328,9 @@ As the overhead plots anticipate, the linear cost is typically much lower
 @(let* ((BT (get-blame-table SHALLOW-CURRENT-BENCHMARK*))
         (blame-timeout*
          (for/list ((r (in-list BT))
-                    #:when (equal? "timeout" (blame-row-blame r)))
+                    #:when (let ((bval (blame-row-blame r)))
+                             (and (string? bval)
+                                  (string-prefix? bval "timeout"))))
            (blame-row-name r)))
         (blame-oom*
          (for/list ((r (in-list BT))
@@ -1353,10 +1356,11 @@ As the overhead plots anticipate, the linear cost is typically much lower
 @list[
 @figure*[
   "fig:transient:blame-performance"
-  @; TODO is "perf ratio" the right word? These are really typed/baseline right?
   @elem{
-   Performance ratios for @|sShallow| Racket with blame,
-    @|sShallow| without blame, and the worst-case of @|sDeep| types.
+   Performance ratios for
+    @|sShallow| Racket with blame and
+    @|sShallow| without blame,
+    and also the worst-case of @|sDeep| types.
    The @|sShallow| columns are for the fully-typed configuration;
     the @|sDeep| column uses the slowest configuration.
    The blame experiments ran on a dedicated Linux machine with @id[NSA-RAM] RAM

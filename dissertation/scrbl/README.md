@@ -27,11 +27,11 @@ TODO
 - [X] "methods" -> "method" goddammit I am the first with these great METHOD canonical,
       you can improve but you will be second (abstract intro conclusion)
 - [X] diss to committee
+- [X] GTP case study needs work
 - [X] sk > I know it's fashionable to say such things at NU, but I'm not sure I agree that "a compiler cannot use optional types to justify transformations".  It certainly can: it just needs to then generate code that guards against using the transformed code.  It's a bit like saying "a JIT cannot use run-time values to justify specializations" — yet that's exactly what a JIT does every day?
 - [X] sk PR talk sounds like shallow replacing TR
-- [ ] jv fig 58 be clear this is fully-typed, explain why
-      same for all "ratios" tables
-- [ ] jv fig65 what is timeout and is it worse than deep? explain
+- [X] jv fig 58 be clear this is fully-typed, explain why; same for all "ratios" tables
+- [X] jv fig65 what is timeout and is it worse than deep? explain
 - [ ] jv try to be clearer that end is shallow without blame ... in figures?
 - [ ] jv ack Like types with the Concrete / Erasure switch
 - [ ] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
@@ -77,13 +77,9 @@ TODO
 
 - [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away
 
-- [ ] GTP case study needs work
 
 
 - [ ] push MF edits up to JFP
-
-HEY
-- [ ] perf from NSA
 
 Style
 - [ ] goddammit typed-color too dark in oopsla-2019/pict
@@ -108,6 +104,7 @@ Style
 - [ ] soft typing, remove bullet points
 - [X] 2.2.2 still awkward
 - [ ] 2.2.3 very awkward ... when do I have time to fix?!
+- [ ] add x to all overheads?
 
 MF edits, leftover
 - [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger
