@@ -32,8 +32,9 @@ TODO
 - [X] sk PR talk sounds like shallow replacing TR
 - [X] jv fig 58 be clear this is fully-typed, explain why; same for all "ratios" tables
 - [X] jv fig65 what is timeout and is it worse than deep? explain
-- [ ] jv try to be clearer that end is shallow without blame ... in figures?
-- [ ] jv ack Like types with the Concrete / Erasure switch
+- [-] jv try to be clearer that end is shallow without blame ... in figures?
+      no, it's fine, future work makes it clear
+- [X] jv ack Like types with the Concrete / Erasure switch
 - [ ] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
 - [ ] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
 - [ ] jv remark that Shallow\blame is mitigated by running Deep

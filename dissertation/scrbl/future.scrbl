@@ -51,7 +51,7 @@ Without the need to filter, the blame map does not need to store types or
  actions---only pointers and source locations.
 
 
-@section{Fully-Typed @|sTransient|}
+@section{Improve Fully-Typed @|sTransient|}
 
 Despite the large improvement relative to @|snatural|, the cost of
  @|sshallow| @|stransient| types is still high.
@@ -256,5 +256,11 @@ If performance is the only concern, then an implementation can let the dynamical
 @;Summarize the different @|snatural| semantics in the literature as a
 @; natural transformation between two functors.
 @;}
+@item{
+  Add erased types to the mix; determine what is needed for @|sdeep| types,
+   @|sshallow| types, and optional types to interact.
+  The prior work on @emph{like types}, which combines optional and concrete
+   types, may be a useful guide@~cite{wzlov-popl-2010,rzv-ecoop-2015}.
+}
 ]
 
