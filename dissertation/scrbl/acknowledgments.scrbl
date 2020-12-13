@@ -57,8 +57,8 @@ Without Sarah, I might still be a Ph.D. student (why not?) living the monastic
  lifestyle.
 You know the drill: saltine crackers and peanut butter, candlelight,
  frequent nights at the lab, and austere conditions at home.
-With Sarah, I have two cats to attend and a baby to look forward to.
-It's been fun.
+With Sarah, I have two cats to attend and a baby on the way.
+It's been more fun, too.
 
 Thank you parents for your support, financial and otherwise.
 One stormy high-school afternoon, I set out to test my domestic liberty
