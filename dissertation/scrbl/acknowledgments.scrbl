@@ -35,7 +35,7 @@
 @(define-href ILR-School-at-Cornell "https://www.ilr.cornell.edu/")
 @(define-href Kevin-Dolan "https://www.linkedin.com/in/kevin-j-dolan-655b3314")
 @(define-href Dan-Rothenberg "http://danielrothenberg.com")
-@(define-href Dave-Viera "https://www.google.com")
+@(define-href Dave-Viera "https://www.youtube.com/channel/UCO4N3t4IHxg4IAXZ2XvsKsQ")
 @(define-href Mark-Vigeant "https://www.markvigeant.com")
 @(define-href Nicole-Roy "https://www.cs.cornell.edu/undergrad/ustaff")
 @(define-href Thorsten-Joachims "http://www.cs.cornell.edu/people/tj/")
