@@ -1598,8 +1598,8 @@ The statement of type soundness relies on one new notation and a family of
  metafunctions.
 The notation @${\ssurface_0 \srr \sexpr_0} defines evaluation for surface
  expressions; the meaning is that @${\ssurface_0} is well-typed somehow
- (@${\fexists{\stspec}{\vdash \ssurface_0 : \stspec}}),
- compiles to an evaluation expression (@${\vdash \ssurface_0 : \stspec \scompile \sexpr_1}),
+ (@${\fexists{\stspec}{\sST \ssurface_0 : \stspec}}),
+ compiles to an evaluation expression (@${\sST \ssurface_0 : \stspec \scompile \sexpr_1}),
  and then the compiled expression steps to the result (@${\sexpr_1 \srr \sexpr_0}).
 The metafunctions---@${\stypemapzero}, @${\stypemapshape}, and @${\stypemapone}---map
  surface-language types to evaluation types.
@@ -1611,13 +1611,13 @@ These tools enable a concise, parameterized statement of type soundness.
 
 @exact|{
 \begin{definition}[TS$(\stypemap)$]
-  Language\ $\sX$
+  Language\ $\slang$
   satisfies\ $\fTS{\stypemap}$
   if for all\ $\ssurface_0$
-  such that\ $\vdash \ssurface_0 : \stspec$
+  such that\ $\sST \ssurface_0 : \stspec$
   holds, one of the following holds:
   \begin{itemize}
-    \item $\ssurface_0 \srr \svalue_0$ and\ $\sWTX \svalue_0 : \ftypemap{\stspec}$
+    \item $\ssurface_0 \srr \svalue_0$ and\ $\sWTlang \svalue_0 : \ftypemap{\stspec}$
     \item $\ssurface_0 \srr \serror$
     \item $\ssurface_0 \srr$ diverges
   \end{itemize}
@@ -1652,8 +1652,8 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 
 @exact|{
 \begin{theorem}[complete monitoring]
-  If\ $~\vdash \ssurface_0 : \stspec$
-  and\ $\vdash \ssurface_0 : \stspec \scompile \sexpr_0$
+  If\ $~\sST \ssurface_0 : \stspec$
+  and\ $\sST \ssurface_0 : \stspec \scompile \sexpr_0$
   and\ $\sowner_0; \cdot \Vdash \sexpr_0$
   and\ $\sexpr_0 \srr \sexpr_1$
   then\ $\sowner_0; \cdot \Vdash \sexpr_1$.
@@ -1793,10 +1793,18 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @; @subsection[#:tag "sec:both:model:lemmas"]{Lemmas}
 
 @exact|{
-\begin{lemma}\label{lemma:both:completion}
-  If\ $\vdash \ssurface_0 : \stspec$
-  then\ $\vdash \ssurface_0 : \stspec \scompile \sexpr_0$
-  and\ $\sWTX \sexpr_0 : \ftypemap{\stspec}$
+\begin{lemma}[completion]\label{lemma:both:completion}
+  If\ $\sST \ssurface_0 : \stspec$
+  then\ $\sST \ssurface_0 : \stspec \scompile \sexpr_0$
+  and either:
+  \begin{itemize}
+  \item $\stspec \in \stype$
+        and\ $\sWTT \sexpr_0 : \stspec$
+  \item $\stspec \in \tfloor{\stype}$
+        and\ $\sWTS \sexpr_0 : \ftypemapshape{\stspec}$
+  \item $\stspec \in \tdyn$
+        and\ $\sWTU \sexpr_0 : \tdyn$
+  \end{itemize}
 \end{lemma}
 }|
 
@@ -1810,7 +1818,7 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;
 @;@exact|{
 @;\begin{lemma}[type progress]
-@;  If\ $~\vdash \sexpr_0 : \stspec$
+@;  If\ $~\sST \sexpr_0 : \stspec$
 @;  then either\ $\sexpr_0 \in \svalue \cup \serror$
 @;  or\ $\sexpr_0 \scc \sexpr_1$
 @;\end{lemma}
@@ -1818,9 +1826,9 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 @;
 @;@exact|{
 @;\begin{lemma}[type preservation]
-@;  If\ $~\vdash \sexpr_0 : \stspec$
+@;  If\ $~\sST \sexpr_0 : \stspec$
 @;  and\ $\sexpr_0 \scc \sexpr_1$
-@;  then\ $\vdash \sexpr_1 : \stspec$
+@;  then\ $\sST \sexpr_1 : \stspec$
 @;\end{lemma}
 @;}|
 
@@ -1829,30 +1837,43 @@ If no such labeling exist for a term, then the theorem holds vacuously.
   \begin{itemize}
     \item
       If\ $~\sDelta(\sunop, \tdyn) = \tdyn$
-      and\ $\vdash \svalue_0 : \tdyn$
+      and\ $\sWTU \svalue_0 : \tdyn$
     \item[]
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
-      then\ $\vdash \sdelta(\sunop, \svalue_0) : \tdyn$
+      then\ $\sWTU \sdelta(\sunop, \svalue_0) : \tdyn$
     \item
       If\ $~\sDelta(\sunop, \sshape_0) = \sshape_1$
-      and\ $\vdash \svalue_0 : \sshape_0$
+      and\ $\sWTS \svalue_0 : \sshape_0$
     \item[]
       and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
-      then\ $\vdash \sdelta(\sunop, \svalue_0) : \sshape_1$
+      then\ $\sWTS \sdelta(\sunop, \svalue_0) : \sshape_1$
+    \item
+      If\ $~\sDelta(\sunop, \stype_0) = \stype_1$
+      and\ $\sWTD \svalue_0 : \stype_0$
+    \item[]
+      and\ $\fdefined{\sdelta(\sunop, \svalue_0)}$
+      then\ $\sWTD \sdelta(\sunop, \svalue_0) : \stype_1$
     \item
       If\ $~\sDelta(\sbinop, \tdyn, \tdyn) = \tdyn$
-      and\ $\vdash \svalue_0 : \tdyn$
-      and\ $\vdash \svalue_1 : \tdyn$
+      and\ $\sWTU \svalue_0 : \tdyn$
+      and\ $\sWTU \svalue_1 : \tdyn$
     \item[]
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
-      then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \tdyn$
+      then\ $\sWTU \sdelta(\sbinop, \svalue_0, \svalue_1) : \tdyn$
     \item
       If\ $~\sDelta(\sbinop, \sshape_0, \sshape_1) = \sshape_2$
-      and\ $\vdash \svalue_0 : \sshape_0$
-      and\ $\vdash \svalue_1 : \sshape_1$
+      and\ $\sWTS \svalue_0 : \sshape_0$
+      and\ $\sWTS \svalue_1 : \sshape_1$
     \item[]
       and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
-      then\ $\vdash \sdelta(\sbinop, \svalue_0, \svalue_1) : \sshape_2$
+      then\ $\sWTS \sdelta(\sbinop, \svalue_0, \svalue_1) : \sshape_2$
+    \item
+      If\ $~\sDelta(\sbinop, \stype_0, \stype_1) = \stype_2$
+      and\ $\sWTD \svalue_0 : \stype_0$
+      and\ $\sWTD \svalue_1 : \stype_1$
+    \item[]
+      and\ $\fdefined{\sdelta(\sbinop, \svalue_0, \svalue_1)}$
+      then\ $\sWTD \sdelta(\sbinop, \svalue_0, \svalue_1) : \stype_2$
   \end{itemize}
 \end{lemma}
 }|
@@ -1917,17 +1938,17 @@ If no such labeling exist for a term, then the theorem holds vacuously.
 \begin{lemma}[boundary-crossing]\label{lemma:both:boundary}\leavevmode
   \begin{itemize}
     \item
-      If\ $\vdash \svalue_0 : \stspec$
+      If\ $\sWTlang \svalue_0 : \stspec$
       and\ $\fshapematch{\sshape_0}{\svalue_0}$
-      then\ $\vdash \svalue_0 : \sshape_0$
+      then\ $\sWTS \svalue_0 : \sshape_0$
     \item
-      If\ $\vdash \svalue_0 : \sshape_0$
-      then\ $\vdash \svalue_0 : \tdyn$
+      If\ $\sWTS \svalue_0 : \sshape_0$
+      then\ $\sWTU \svalue_0 : \tdyn$
     \item
-      If\ $\vdash \svalue_0 : \stype_0$
+      If\ $\sWTD \svalue_0 : \stype_0$
       and\ $\ewrap{\stype_0}{\svalue_0} \snr \svalue_1$
-      then\ $\vdash \svalue_1 : \ftypemapshape{\stype_0}$
-      and\ $\vdash \svalue_1 : \tdyn$
+      then\ $\sWTS \svalue_1 : \ftypemapshape{\stype_0}$
+      and\ $\sWTU \svalue_1 : \tdyn$
   \end{itemize}
 \end{lemma}
 }|

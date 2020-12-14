@@ -37,9 +37,8 @@ TODO
 - [X] jv ack Like types with the Concrete / Erasure switch
 - [-] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
 - [X] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
-- [ ] jv remark that Shallow\blame is mitigated by running Deep
-- [ ] fh typo TS def, chapter 6, mixing lang L with type X
-- [ ] fh review mcallester, kaist, rehof ... think semantic again
+- [-] jv remark that Shallow\blame is mitigated by running Deep
+- [X] fh typo TS def, chapter 6, mixing lang L with type X
 - [ ] st benchmarks, new threat, some benchmarks have boundaries that we wrote to contextual modules!!
          alts = consider this as partial lattice with ctx attached (is current really the same??!)
                 use unsafe boundary for context
@@ -74,7 +73,8 @@ TODO
 - [ ] st snake and tetris are both educational and game
 - [ ] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks
-- [ ] cd "nearby" clarify cannot describe designs
+- [ ] cd "nearby" clarify 'cannot describe designs'
+- [-] fh review mcallester, kaist, rehof ... think semantic again
 
 - [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away
 
