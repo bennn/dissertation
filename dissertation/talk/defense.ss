@@ -20,15 +20,15 @@
 ;;   - [-] interop "city" at D S border
 ;; - [X] thesis + supports pict
 ;; - [X] D S U picts, the safe one and others
-;; - [ ] sunrise, green, theme for "published" half
-;; - [ ] moonlight, blue, theme for "new" half
+;; - [-] sunrise, green, theme for "published" half
+;; - [-] moonlight, blue, theme for "new" half
 ;; - [-] headlines ... gt terrific
 ;; - [X] two methods (major contributions)
 ;;   - [X] perf ... LHS 
 ;;   - [X] design ... RHS 
 ;; - [X] more takeaways at end, summarize?
 ;; - [X] cache huge lattice
-;; - [ ] NOTE: cannot ask if Java etc. is deep, its an FFI/Interop question
+;; - [-] NOTE: cannot ask if Java etc. is deep, its an FFI/Interop question
 
 ;; MF 2020-12-10
 ;; NO GIGGLING FRESHMAN remember Max and Asumu and there are senior people here
@@ -50,13 +50,17 @@
 ;; - [X] use non-green for the earth
 ;; - [X] move 'simpler behavior' to the end
 ;; - [X] why overhead line fuzzy? ... oh, thats a general gtp-plot issue
-;; - [ ] remind people of contributors, use pictures
+;; - [X] email Amal on Sunday
+;; - [ ] (from the top) remind people of contributors, use pictures
 ;;       Jan, Zeina, Christos, Lukas ... anyone
 ;; - [ ] type lattice, always go up! make sure words match pictures
 ;; - [ ] carefully introduce Deep and Shallow,
 ;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
 ;; - [ ] sync the benchmarks, for displays ... avoid intro new names
-;; - [ ] email Amal on Sunday
+
+;; visuals
+;; - [ ] fancier takeaway frame
+;; - [ ] text size ... rt vs rrt
 
 (require
   file/glob
@@ -171,22 +175,26 @@
 (define title-coord-right (coord text-right 25/100 'ct #:sep pico-y-sep))
 (define icon-coord-mid (coord 1/2 75/100 'cc))
 (define sky-y 3/10)
-(define sky-coord (coord 1/2 (- sky-y 26/1000) 'cb))
-(define earth-coord (coord 1/2 1 'cb))
+(define landscape-offset 26/1000)
+(define sky-coord (coord 1/2 (- sky-y landscape-offset) 'cb))
+(define earth-y 7/10)
+(define earth-coord (coord 1/2 (+ earth-y landscape-offset) 'ct))
 (define answer-y 55/100)
 (define answer-coord-left (coord 30/100 answer-y 'ct))
 (define answer-coord-mid (coord 1/2 answer-y 'ct))
 (define answer-coord-right (coord 70/100 answer-y 'ct))
-(define below-sky-y 3/10)
+(define below-sky-y sky-y)
+(define above-earth-y (- earth-y 35/1000))
 (define low-text-left (coord text-left below-sky-y 'lt))
 (define low-text-mid (coord 1/2 below-sky-y 'ct))
 (define low-text-right (coord text-right below-sky-y 'rt))
+(define bot-text-left (coord text-left above-earth-y 'lt))
 
 (define (landscape-w)
-  (* 1.2 client-w))
+  (* 1.1 client-w))
 
 (define (landscape-h)
-  (h%->pixels sky-y))
+  (h%->pixels 29/100 #;sky-y))
 
 (define (landscape-line-width)
   (* 5/100 (landscape-h)))
@@ -206,7 +214,8 @@
 (define green2-3k1 (hex-triplet->color% #x4F7459))
 (define green3-3k1 (hex-triplet->color% #x3D4A47))
 (define red0-3k1 (hex-triplet->color% #xF0749C))
-(define red1-3k1 (hex-triplet->color% #xC0446C))
+(define red1-3k1 (hex-triplet->color% #xC3476F))
+(define red2-3k1 (hex-triplet->color% #xB0244C))
 (define orange0-3k1 (hex-triplet->color% #xE6BD82))
 (define orange1-3k1 (hex-triplet->color% #xFE9D73))
 (define orange2-3k1 (hex-triplet->color% #xB87D4A))
@@ -220,6 +229,7 @@
 (define black1-3k1 (hex-triplet->color% #x312F32))
 (define grey-3k1 (hex-triplet->color% #x6C6685))
 (define fog-3k1 (hex-triplet->color% #xDBCAC2))
+(define darkfog-3k1 (hex-triplet->color% #xAB9A92))
 (define title-3k1 (hex-triplet->color% #xF1E7DE))
 (define author-3k1 (hex-triplet->color% #xE5E6E6))
 
@@ -317,6 +327,12 @@
 
 (define (ht3* str*)
   (txt str* #:font title-rm-font #:size h3-text-size #:color subtitle-text-color))
+
+(define (ht4 . str*)
+  (ht4* str*))
+
+(define (ht4* str*)
+  (txt str* #:font title-rm-font #:size h3-text-size #:color body-text-color))
 
 (define (RT . str*)
   (RT* str*))
@@ -681,7 +697,9 @@
   (add-rounded-border
     #:radius 1
     #:x-margin (/ client-w 2) #:y-margin med-y-sep
-    #:frame-width tiny-y-sep #:frame-color fog-3k1 #:background-color dark-background-color
+    #:frame-width tiny-y-sep
+    #:frame-color darkfog-3k1
+    #:background-color dark-background-color
     pp))
 
 (define (type-to-shape lhs rhs)
@@ -1037,13 +1055,10 @@
   (blockquote* pp*))
 
 (define (blockquote* pp*)
-  (add-rounded-border
-    #:x-margin small-x-sep #:y-margin small-y-sep
-    #:radius 4
-    #:frame-width 4
-    #:background-color blue2-3k1
-    #:frame-color blue0-3k1
-    (text-line-append* pp*)))
+  (define pp
+    (text-line-append* pp*))
+  (takeaway-frame
+    (ht-append pp (xsep (w%->pixels 25/100)))))
 
 (define optimization-name*
   '(apply box dead-code extflonum fixnum float-complex float list number pair sequence string struct vector))
@@ -1215,8 +1230,52 @@
   (save-pict (build-path src lbl) pp)
   pp)
 
+(define q-pict @ht2{Q. })
+(define a-pict @ht2{A. })
+(define D-pict @bold-rt{D})
+
+(define cm-callback-q
+  (ht-append
+    q-pict
+    (text-line-append
+      @rt{Do types protect}
+      @rt{ the callback?})))
+
+(define (arrowhead-pict rad)
+  (colorize
+    (arrowhead 20 rad)
+    fog-3k1))
+
+(define up-arrow-pict
+  (arrowhead-pict (* 1/4 turn)))
+
+(define right-arrow-pict
+  (arrowhead-pict 0))
+
+(define left-arrow-pict
+  (arrowhead-pict (* 1/2 turn)))
+
+(define down-arrow-pict
+  (arrowhead-pict (* 3/4 turn)))
+
+(define big-hyphen-pict @ht2{- })
+(define hyphen-pict @st{- })
+(define hyphen-ghost (bghost hyphen-pict))
+
+(define (question-text pp)
+  (word-append q-pict pp))
+
+(define (answer-text pp)
+  (word-append a-pict pp))
+
 ;; -----------------------------------------------------------------------------
 ;; --- extra pict
+
+(define q-num-letter-pict
+  (hc-append
+    @rrt{Does the type  } (deep-code "Num")
+    @rrt{  keep out the letter  } (untyped-code "\"A\"")
+    @rrt{  ?}))
 
 (define ruler-pict
   (frame-bitmap "ruler.jpg" #:w% 2/10))
@@ -1304,6 +1363,19 @@
     (void))
   (dc draw-x size size))
 
+(define (add-mt-originals pp)
+  (ppict-do
+    pp
+    #:go (coord text-left 43/100 'lt)
+    (frame-team @ht3{Gradual Typing} "siek.jpg" "taha.jpeg")
+    #:go (coord 24/100 68/100 'ct)
+    (frame-team @ht3{Migratory Typing} "tobin-hochstadt.jpg" "felleisen.jpg")
+    #:go (coord 53/100 51/100 'ct)
+    (frame-team (text-c-append @ht3{Multi-Language} @ht3{Semantics}) "matthews.jpeg" "findler.png")
+    #:go (coord text-right 41/100 'rt)
+    (frame-team @ht3{Hybrid Typing}
+      "unknown.png" "knowles.jpeg" "freund.png" "tomb.jpg" "flanagan.png")))
+
 (define (basic-star size #:color [color fog-3k1])
   (make-compass-pict size #:color fog-3k1))
 
@@ -1319,29 +1391,16 @@
   (basic-star size))
 
 (define (base-sky-pict)
-  ;; TODO curve the sky
-  (define outer-color blue1-3k1)
+  (define outer-color blue2-3k1)
+  (define mid-color blue1-3k1)
   (define inner-color blue0-3k1)
   (define pen-width (landscape-line-width))
   (define w (landscape-w))
   (define h (landscape-h))
-  ;;
-  (define (draw-sky dc% dx dy)
-    (define old-brush (send dc% get-brush))
-    (define old-pen (send dc% get-pen))
-    ;;
-    (send dc% set-brush (new brush% [color inner-color]))
-    (send dc% set-pen (new pen% [width 0] [color inner-color]))
-    (send dc% draw-rectangle dx dy (+ dx w) (+ dy h))
-    (send dc% set-brush (new brush% [color outer-color]))
-    (send dc% set-pen (new pen% [width 0] [color outer-color]))
-    (send dc% draw-rectangle dx (+ dy (- h (* 2 pen-width))) w pen-width)
-
-    ;;
-    (send dc% set-brush old-brush)
-    (send dc% set-pen old-pen)
-    (void))
-  (dc draw-sky w h))
+  (vc-append
+    (filled-rectangle w h #:draw-border? #f #:color inner-color)
+    (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color mid-color)
+    (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color outer-color)))
 
 (define gt-year0 1971)
 (define gt-year1 2020)
@@ -1353,40 +1412,88 @@
     (raise-argument-error 'year->sky-x "(integer-in 1971 2020)" y))
   (/ (- y start) (- end start)))
 
-(define (sky-pict)
+(define sky-pico-star-pict 
+  (theory-star 9))
+
+(define sky-tiny-star-pict 
+  (theory-star 16))
+
+(define (originals-sky-pict)
   (let* ((pp (base-sky-pict))
-         (star-size 16)
-         (num-col 7)
-         (star-pict (theory-star star-size))
+         (star-pict sky-tiny-star-pict)
          (pp (ppict-do
                pp
                #:go (coord (year->sky-x 2006) 50/100 'cc)
-               (vc-append star-pict (hc-append pico-x-sep star-pict star-pict) star-pict)))
+               (vc-append star-pict (hc-append pico-x-sep star-pict star-pict) star-pict))))
+    pp))
+
+(define (research-sky-pict)
+  (let* ((pp (base-sky-pict))
+         (num-col 9)
+         (star-pict sky-tiny-star-pict)
+         (star-pict2 (cc-superimpose (bghost star-pict) sky-pico-star-pict))
+         (*curr (box 0))
          (pp
            (for/fold ((pp pp))
-                     ((yr (in-range 1971 2020))
-                      #:unless (= yr 2006))
+                     ((yr (in-range 1971 2020)))
             (ppict-do pp
-              #:go (coord (year->sky-x yr) 10/100 'ct)
+              #:go (coord (year->sky-x yr) 2/100 'ct)
               (apply vc-append pico-y-sep
-                     (for/list ((i (in-range num-col)))
-                       (if (zero? (modulo (+ i yr) 3))
-                         (bghost star-pict)
+                     (for/list ((_i (in-range num-col)))
+                       (set-box! *curr (+ (unbox *curr) 1))
+                       (if (zero? (modulo (unbox *curr) 2))
+                         star-pict2
                          star-pict)))))))
     pp))
 
-(define Natural-tag 'natural)
-(define Transient-tag 'transient)
+(define (semantics-sky-pict #:names? [names? #true])
+  (let* ((pp (base-sky-pict))
+         (pp
+           (for/fold ((pp pp))
+                     ((txt (in-list (list natural-pict conatural-pict forgetful-pict transient-pict amnesic-pict erasure-pict)))
+                      (crd (in-list (list natural-coord-sky conatural-coord-sky forgetful-coord-sky transient-coord-sky amnesic-coord-sky erasure-coord-sky))))
+             (ppict-do pp
+               #:go crd (hc-append big-theory-star (if names? txt (blank)))))))
+    pp))
+
+(define (sky-pict)
+  (research-sky-pict))
+
+(define (caption-text pp)
+  (vl-append
+    (ysep tiny-y-sep)
+    (clip-ascent pp)))
+
+(define natural-tag 'natural)
+(define conatural-tag 'conatural)
+(define forgetful-tag 'forgetful)
+(define transient-tag 'transient)
+(define amnesic-tag 'amnesic)
+(define erasure-tag 'erasure)
 (define NT-tag 'NT)
 
-(define Natural-pict
-  (add-hubs @rrt{Natural} Natural-tag))
+(define natural-coord-sky (coord 10/100 66/100 'lt))
+(define conatural-coord-sky (coord 16/100 27/100 'lt))
+(define amnesic-coord-sky (coord 36/100 62/100 'lt))
+(define forgetful-coord-sky (coord 52/100 21/100 'lt))
+(define transient-coord-sky (coord 60/100 54/100 'lt))
+(define erasure-coord-sky (coord 80/100 32/100 'lt))
 
-(define Transient-pict
-  (add-hubs @rrt{Transient} Transient-tag))
+(define natural-pict (add-hubs @rrt{Natural} natural-tag))
+(define conatural-pict (add-hubs @rrt{Co-Natural} conatural-tag))
+(define forgetful-pict (add-hubs @rrt{Forgetful} forgetful-tag))
+(define transient-pict (add-hubs @rrt{Transient} transient-tag))
+(define amnesic-pict (add-hubs @rrt{Amnesic} amnesic-tag))
+(define erasure-pict (add-hubs @rrt{Erasure} erasure-tag))
+
+(define big-theory-star
+  (theory-star 22))
+
+(define huge-theory-star
+  (double-star 40))
 
 (define NT-pict
-  (add-hubs (double-star 40) NT-tag))
+  (add-hubs huge-theory-star NT-tag))
 
 (define (sky-pict-transient)
   (let* ((pp (base-sky-pict))
@@ -1394,58 +1501,41 @@
           (ppict-do
             pp
             #:go (coord 20/100 5/10 'ct)
-            Natural-pict
+            natural-pict
             #:go (coord 78/100 4/10 'ct)
-            Transient-pict
+            transient-pict
             #:go (coord 55/100 6/10 'ct)
             NT-pict))
          (arr*
            (list
-             (code-arrow (tag-append Natural-tag 'E) rc-find
+             (code-arrow (tag-append natural-tag 'E) rc-find
                          (tag-append NT-tag 'W) lc-find
                          0 0 1/4 1/4 'short-dash)
-             (code-arrow (tag-append Transient-tag 'W) lc-find
+             (code-arrow (tag-append transient-tag 'W) lc-find
                          (tag-append NT-tag 'E) rc-find
                          (* 1/2 turn) (* 1/2 turn) 1/4 1/4 'short-dash))))
     (add-code-arrows* pp arr*)))
 
 (define (base-earth-pict)
   (define inner-color red0-3k1)
-  (define outer-color red1-3k1)
+  (define mid-color red1-3k1)
+  (define outer-color red2-3k1)
   (define pen-width (landscape-line-width))
   (define w (landscape-w))
   (define h (landscape-h))
-  ;;
-  (define (draw-sky dc% dx dy)
-    (define old-brush (send dc% get-brush))
-    (define old-pen (send dc% get-pen))
-    ;;
-    (send dc% set-brush (new brush% [color inner-color]))
-    (send dc% set-pen (new pen% [width 0] [color inner-color]))
-    (send dc% draw-rectangle dx dy (+ dx w) (+ dy h))
-    (send dc% set-brush (new brush% [color outer-color]))
-    (send dc% set-pen (new pen% [width 0] [color outer-color]))
-    (send dc% draw-rectangle dx dy w pen-width)
-
-    ;;
-    (send dc% set-brush old-brush)
-    (send dc% set-pen old-pen)
-    (void))
-  (dc draw-sky w h))
+  (vc-append
+    (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color outer-color)
+    (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color mid-color)
+    (filled-rectangle w h #:draw-border? #f #:color inner-color)))
 
 (define (earth-pict)
   (let* ((pp (base-earth-pict))
          (lang-pict* (map (compose1 scale-lang-bitmap bitmap)
                           (glob (build-path src "lang" "*.png"))))
-         (xy* '(
-                (28/100 80/100) (32/100 10/100) (36/100 70/100) (40/100 20/100)
-                (44/100 80/100) (48/100 10/100) (52/100 70/100) (56/100 20/100)
-                (60/100 80/100) (64/100 10/100) (68/100 70/100) (72/100 20/100)
-                (76/100 80/100) (80/100 10/100) (84/100 70/100) (88/100 20/100)))
          (pp (for/fold ((pp pp))
                        ((lang-pict (in-list lang-pict*))
-                        (pre-x (in-range (+ gt-year0 2) (- gt-year1 2) 3))
-                        (y (in-cycle (in-list '(28 74)))))
+                        (pre-x (in-range (+ gt-year0 6) (- gt-year1 2) 3))
+                        (y (in-cycle (in-list '(28 68)))))
                (ppict-do pp #:go (coord (year->sky-x pre-x) (/ y 100) 'cc) lang-pict)))
          )
     pp))
@@ -1482,44 +1572,18 @@
 (define the-boundary-pict
   (boundary-node '(U D U D D)))
 
+(define the-boundary-q-pict
+  (vc-append
+    the-boundary-pict
+    (question-text
+      @rt{What happens at the boundaries?})))
+
 (define trie-code* '(
   "(require pfds/trie)"
   ""
   "(define t (trie ....))"
   "(time (bind t ....))"
 ))
-
-(define q-pict @ht2{Q. })
-(define a-pict @ht2{A. })
-(define D-pict @bold-rt{D})
-
-(define cm-callback-q
-  (ht-append
-    q-pict
-    (text-line-append
-      @rt{Do types protect}
-      @rt{ the callback?})))
-
-(define (arrowhead-pict rad)
-  (colorize
-    (arrowhead 20 rad)
-    fog-3k1))
-
-(define up-arrow-pict
-  (arrowhead-pict (* 1/4 turn)))
-
-(define right-arrow-pict
-  (arrowhead-pict 0))
-
-(define left-arrow-pict
-  (arrowhead-pict (* 1/2 turn)))
-
-(define down-arrow-pict
-  (arrowhead-pict (* 3/4 turn)))
-
-(define big-hyphen-pict @ht2{- })
-(define hyphen-pict @st{- })
-(define hyphen-ghost (bghost hyphen-pict))
 
 (define example-client-code* '(
   "(t-fold-file \"file.txt\" 0 count)"
@@ -1765,12 +1829,6 @@
            (code-arrow 'BR-S cb-find 'BL-E lc-find (* 3/4 turn) (* 35/100 turn) 90/100 5/100 'solid)))
     (if arrow? (add-code-arrow pp arr) pp)))
 
-(define (question-text pp)
-  (word-append q-pict pp))
-
-(define (answer-text pp)
-  (word-append a-pict pp))
-
 (define (bad-pair-example lhs mid rhs)
   (codeblock-append
     ((dyn-codeblock lhs)
@@ -1975,7 +2033,11 @@
 
 (define full-ershov-quote
   ;; from hidden places knowledge i obtained_ k. Levitin
-  "And I have long since taught myself to think that if I reproduce somebody's guess in my work, I should not regret not having been the first, but, on the contrary, should always bear it in mind that it is a major stimulus: since a similar idea has occured to me living thousands of kilometers away, it means that there really is something in it")
+  "And I have long since taught myself to think that if I reproduce somebody's
+  guess in my work, I should not regret not having been the first, but, on the
+  contrary, should always bear it in mind that it is a major stimulus: since a
+  similar idea has occured to me living thousands of kilometers away, it means
+  that there really is something in it")
 
 (define (sec:intro)
   (pslide
@@ -1986,17 +2048,16 @@
     ;; - second literacy
     ;; ... one day at conference, idea to colleague, memo of same idea,
     ;;     this ershovs response, compliment
-    #:go heading-coord-right
-    ershov-pict
-    #:go text-coord-left
+    #:go text-coord-mid
     (blockquote
-      @rrt{If I reproduce somebody's guess}
-      @rrt{ in my work ...}
+      @ht4{If I reproduce somebody's guess}
+      @ht4{ in my work ...}
       blockquote-newline
-      @rrt{me living far away ...}
+      @ht4{ me living far away ...}
       blockquote-newline
-      @rrt{it means that}
-      @rrt{ there really is something in it}))
+      @ht4{ it means that}
+      @ht4{ there really is something in it.})
+    #:go heading-coord-right ershov-pict)
   (pslide
     #:go heading-coord-mid
     (takeaway-frame
@@ -2006,15 +2067,7 @@
           @rt{mixing } @rt-deep2{typed} @rt{ and } @rt-untyped2{untyped} @rt{ code})
         (hsep item-line-sep)
         mixed-typed-pict))
-    #:go (coord text-left 43/100 'lt)
-    (frame-team @ht3{Gradual Typing} "siek.jpg" "taha.jpeg")
-    #:go (coord 24/100 68/100 'ct)
-    (frame-team @ht3{Migratory Typing} "tobin-hochstadt.jpg" "felleisen.jpg")
-    #:go (coord 53/100 51/100 'ct)
-    (frame-team (text-c-append @ht3{Multi-Language} @ht3{Semantics}) "matthews.jpeg" "findler.png")
-    #:go (coord text-right 41/100 'rt)
-    (frame-team @ht3{Hybrid Typing}
-      "unknown.png" "knowles.jpeg" "freund.png" "tomb.jpg" "flanagan.png"))
+    #:set (add-mt-originals ppict-do-state))
   (pslide
     #:go heading-coord-left
     @ht2{The Basics}
@@ -2042,37 +2095,43 @@
           (path-node '(U D U D D))))))
   (pslide
     #:go heading-coord-mid
-    the-boundary-pict
-    (question-text
-      @rt{What happens at the boundaries?})
-    (hsep (* 1.2 small-y-sep))
+    the-boundary-q-pict
+    #:next
+    (ysep (h%->pixels 14/100))
     (item-c-append
-      (word-append
-        @rrt{Types predict a  } (deep-code "Num")
-        @rrt{  but get the letter  } (untyped-code "\"A\""))
+      q-num-letter-pict
       (basic-example 'T 'U #:arrow? #true)))
   ;; return to Q in a minute, first more history / context
   ;;  ... now that you know roughly what solving, more about solutions
   (pslide
-    #:go (coord text-left 43/100 'lt)
-    (frame-team @ht3{Gradual Typing} "siek.jpg" "taha.jpeg")
-    #:go (coord 24/100 68/100 'ct)
-    (frame-team @ht3{Migratory Typing} "tobin-hochstadt.jpg" "felleisen.jpg")
-    #:go (coord 53/100 51/100 'ct)
-    (frame-team (text-c-append @ht3{Multi-Language} @ht3{Semantics}) "matthews.jpeg" "findler.png")
-    #:go (coord text-right 41/100 'rt)
-    (frame-team @ht3{Hybrid Typing}
-      "unknown.png" "knowles.jpeg" "freund.png" "tomb.jpg" "flanagan.png")
-    #:go sky-coord
-    (sky-pict))
+    #:alt [
+     #:set (add-mt-originals ppict-do-state)
+     #:next
+     #:go sky-coord (originals-sky-pict)
+     #:go low-text-left (caption-text @rrt{research landscape})]
+    #:alt [
+     #:go sky-coord (research-sky-pict)
+     #:go low-text-left (caption-text @rrt{research landscape ... over 200 publications})
+     #:next
+     #:go (coord 1/2 46/100 'ct) (scale the-boundary-q-pict 8/10) ]
+    #:go sky-coord (semantics-sky-pict #:names? #f)
+    #:go (coord 1/2 46/100 'ct) (scale the-boundary-q-pict 8/10)
+    #:go low-text-left
+    (item-line-append
+      (caption-text @rrt{research landscape ... over 200 publications})
+      @rrt{ 6+ ideas for boundaries}))
   (pslide
-    ;; TODO decorate (?)
-    #:go sky-coord (sky-pict)
+    #:go sky-coord (semantics-sky-pict #:names? #f)
+    #:alt [
+     #:go low-text-left (caption-text @rrt{research landscape})
+     #:next
+     #:go earth-coord (earth-pict)
+     #:go bot-text-left (word-append @rrt{language landscape ... many implementations}) ]
     #:go earth-coord (earth-pict)
-    #:next
     #:go center-coord
     @ht2{Mixed-Typed Design Space}
-    @rt{Lively, but Disorganized!})
+    @rt{Lively, but Disorganized!} )
+
   (pslide
     ;; example disagreement
     #:go earth-coord
@@ -3077,14 +3136,18 @@
     ;(test-margin-slide)
     ;(test-screenshot-slide)
     ;(sec:example)
-    (sec:title)
-    (sec:intro)
-    (sec:perf)
-    (sec:design)
-    (sec:thesis)
-    (sec:conclusion)
-    (pslide)
-    (sec:extra)
+;    (sec:title)
+;    (sec:intro)
+;    (sec:perf)
+;    (sec:design)
+;    (sec:thesis)
+;    (sec:conclusion)
+;    (pslide)
+;    (sec:extra)
+    (pslide
+
+
+      )
     (void))
   (void))
 
@@ -3098,13 +3161,24 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+    ;; example disagreement
     #:go earth-coord
     (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 3: Picture}
     #:go text-coord-mid
-    (tag-pict (big-overhead-plot 'quadU '(D)) plot-tag)
-    #:set (add-x-label ppict-do-state)
+    (item-c-append
+      (basic-example 'T 'U)
+      ;; TODO going for yes or no???
+      (hc-append
+        q-pict
+        q-num-letter-pict))
+    #:go answer-coord-left
+    (answer-text
+      @rt{Yes!})
+    (apply ht-append pico-x-sep (make-list 3 tally-pict))
+    #:go answer-coord-right
+    (answer-text
+      @rt{No!})
+    (apply ht-append pico-x-sep (make-list 7 tally-pict))
 
 
   )))
