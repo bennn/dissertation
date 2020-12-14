@@ -21,8 +21,10 @@ Because so many benchmarks run slower with blame than in the worst case
  of @|sdeep| types, @|sShallow| Racket does not even attempt to track blame.
 
 This result demands a two-step investigation.
-The first step is to assess the usefulness of the original blame algorithm.
+The first step is to assess the usefulness of the original @|stransient| blame algorithm.
 Both user studies and automated analyses@~cite{lksfd-popl-2020} can help.
+Preliminary investigations suggest that @|stransient| can effectively
+ ignore all but the first boundary in a blame set.
 Once the community knows more about what makes blame valuable,
  then the second step is the development of efficient algorithms that are
   tailored to developers' needs.
@@ -51,7 +53,7 @@ Without the need to filter, the blame map does not need to store types or
  actions---only pointers and source locations.
 
 
-@section{Improve Fully-Typed @|sTransient|}
+@section{Speed up Fully-Typed @|sTransient|}
 
 Despite the large improvement relative to @|snatural|, the cost of
  @|sshallow| @|stransient| types is still high.

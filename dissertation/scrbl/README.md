@@ -35,8 +35,8 @@ TODO
 - [-] jv try to be clearer that end is shallow without blame ... in figures?
       no, it's fine, future work makes it clear
 - [X] jv ack Like types with the Concrete / Erasure switch
-- [ ] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
-- [ ] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
+- [-] jv isn't this a challenge to explain two behaviors and modes to programmers (yes, we haven't even explained the first!)
+- [X] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
 - [ ] jv remark that Shallow\blame is mitigated by running Deep
 - [ ] fh typo TS def, chapter 6, mixing lang L with type X
 - [ ] fh review mcallester, kaist, rehof ... think semantic again
