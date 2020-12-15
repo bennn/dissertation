@@ -68,7 +68,10 @@ More precisely, this chapter analyzes six distinct semantics via four properties
 
 @|noindent|@Tableref{tbl:technical} points out, however, that the weakest strategies
  are the only ones that do not require wrapper values.
-Perhaps a future design can strengthen the wrapper-free guarantees.
+Wrappers impose space costs, time costs, and object identity issues@~cite{stff-oopsla-2012,vksb-dls-2014,kgsgt-ecoop-2015},
+ but seem essential for strong mixed-typed guarantees.
+Perhaps future work can find a way to satisfy additional properties without
+ using wrappers.
 
 @exact|{
 \begin{table}[t]

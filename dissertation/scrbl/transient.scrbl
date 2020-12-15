@@ -248,27 +248,25 @@ By contrast, the dynamic type can type the code but asks callers to be ready
 Adapting @|stransient| to include subtyping is therefore an essential task
  for @|sShallow| Racket.
 The addition is straightforward, but reveals a surprising distinction
- between declaration-site types and use-site types; @|stransient| with
- subtyping may miss certain type mistakes.
-@Figure-ref{fig:transient:subtype} illustrates the pitfall of @|stransient|
- subtyping with a lazy factorial function.
-This typed function asks for a thunk that computes a non-negative number
- and returns a thunk that computes a factorial.
-Because of the type declaration on @codett{lazy-n}, it looks like @|stransient|
- should check that the call @codett{(lazy-n)} returns a non-negative number.
-The actual behavior, however, depends on the type of the call expression.
-If the implementation replaces the placeholder @codett{???} with the valid type
- @codett{Integer}, then @|stransient| checks for an integer and the untyped
- code at the bottom of the figure enters an infinite loop.
+ between boundary types and use-site types.
+@|sTransient| with subtyping may miss certain type mistakes declared at a
+ boundary because its run-time checks are based on elimination forms.
+If a value goes through an upcast, then @|stransient| checks may not test
+ the full type.
+@Figure-ref{fig:transient:subtype} illustrates the issue using list types.
+The typed function @codett{nat-product} expects a list of non-negative integers
+ and sends the list through an upcast to an @codett{int-product} function
+ that multiplies the list elements.
+Because of the upcast, there is a run-time check that @codett{(first is)}
+ returns an integer.
+There is no check that list elements are natural numbers, and so when untyped
+ code sends an even-length list of negative numbers across the boundary,
+ @|stransient| does not detect a mistake.
 
 @figure*[
   "fig:transient:subtype"
-  @elem{Lazy factorial function, may diverge under @|stransient| depending on the type subsituted for the @tt{???} placeholder.}
+  @elem{An upcast hides a type boundary mismatch from @|stransient|.}
   transient:subtype]
-
-In summary, the flexibility of subtyping limits the ability of @|stransient|
- checks to find mismatches due to type boundaries.
-Checks are based on local uses, while boundaries are claims with a broad scope.
 
 
 @subsection[#:tag "sec:transient:theory:completion"]{From Elaboration to Completion}

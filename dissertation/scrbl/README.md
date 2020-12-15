@@ -39,20 +39,24 @@ TODO
 - [X] jv what can Shallow do to approximate blame? (keep 1st only, use srcloc instead of id)
 - [-] jv remark that Shallow\blame is mitigated by running Deep
 - [X] fh typo TS def, chapter 6, mixing lang L with type X
-- [ ] st benchmarks, new threat, some benchmarks have boundaries that we wrote to contextual modules!!
-         alts = consider this as partial lattice with ctx attached (is current really the same??!)
-                use unsafe boundary for context
-                port entire library
-- [ ] st benchmarks, threat, data / structs all in one file
+- [X] st benchmarks, new threat, some benchmarks have boundaries that we wrote to contextual modules!!
+         alts = consider this as partial lattice with
+         ctx attached (is current really the same??!) use unsafe boundary for context port entire library
+- [X] st benchmarks, threat, data / structs all in one file
       arose from snake,tetris,zombie arose because of SCV limitations
       what could results be in a ... synth2 ... without the wall
-- [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
-      ... what are the odds for that?
-
-- [ ] st fig 48 unclear, use new example, the point is only check at elim forms and
+- [X] st fig 48 unclear, use new example, the point is only check at elim forms and
       upcast changes the elim forms
       lazy-fact is bad because it upcasts the result instead of the value
-- [ ] st p49 wrappers also cause identity problems, the trouble is not only cost and correctness
+- [X] st p49 wrappers also cause identity problems, the trouble is not only cost and correctness
+- [X] st fig 25 does not blame net/url blames interface! double check, get it right
+- [X] st fig 26 be clear its the same error as no types whatsoever
+- [X] st snake and tetris are both educational and game
+- [X] cd "nearby" clarify 'cannot describe designs'
+- [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
+      ... what are the odds for that?
+- [ ] cd fig 46 unclear why checks must be there ... add example?
+      also perhaps discuss casts vs checks
 - [ ] st sec 2 whats the idea here, what inference systems in bounds?
       be clear the goal (stepping stones) ... why else discuss set-based analysis
 - [ ] st more lisp .... SPCL does typechecking for -> too, but undocumented
@@ -66,15 +70,9 @@ TODO
 - [ ] st add Sorbet to figure, gotta check the implementation for parts
 - [ ] st Monotonic is implemented in Grift and probably TS*
 - [ ] st Castagna close to Natural, acknowledge it, same for forgetful ... at this point in the paper they're alike
-- [X] st fig 25 does not blame net/url blames interface! double check, get it right
-- [X] st fig 26 be clear its the same error as no types whatsoever
 - [ ] st canonical forms ... mention in sec 4.3 supports optimization
          put lemmas into 4.6.X ... what do they look like? ditto JFP
 - [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
-- [X] st snake and tetris are both educational and game
-- [ ] cd fig 46 unclear why checks must be there ... add example?
-      also perhaps discuss casts vs checks
-- [X] cd "nearby" clarify 'cannot describe designs'
 - [-] fh review mcallester, kaist, rehof ... think semantic again
 
 - [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away

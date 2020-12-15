@@ -496,13 +496,14 @@
 
 (define transient:subtype
   (make-example-atom-pict
-    '("(define (lazy-fact (lazy-n : (-> Natural)))"
-      "  (lambda ()"
-      "    (let fact ((n : ??? (lazy-n)))"
-      "      (if (zero? n)"
-      "        1"
-      "        (* n (fact (- n 1)))))))")
-    '("((lazy-fact (λ() -4)))")
+    '("(: nat-product (-> (List Nat Nat) Nat))"
+      "(define (nat-product nats)"
+      "  (assert (product nats) natural?))"
+      ""
+      "(: product (-> (List Int Int) Int))"
+      "(define (product ints)"
+      "  (* (first ints) (second ints)))")
+    '("(nat-product '(-6 -4))")
     #true
     #false))
 

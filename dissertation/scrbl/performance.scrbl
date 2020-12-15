@@ -995,12 +995,30 @@ In particular, each benchmark explores one choice of types.
 Different types may lead to different conclusions, as @bm{quadT} and
  @bm{quadU} demonstrate at a small scale.
 
-Some benchmarks use a different modularization than the original program.
 The @bm{kcfa} benchmark is modularized according to comments in the original,
  single-module program.
+If the original author had made the split, there could be different overhead.
+
 The @bm{suffixtree}, @bm{synth}, and @bm{gregor} benchmarks each have a single
  file containing all their data structure definitions, but the original programs
  defined these structures in the same module as the functions on the structures.
+Additionally, @bm{snake} and  @bm{tetris} define their data structures in
+ one file.
+The boundary to the data is often expensive, and may lead to higher overheads
+ than a typical design that puts tightly-coupled functions next to the data.
+
+The @bm{gregor}, @bm{mbta}, @bm{quad}, and @bm{zordoz} benchmarks depend
+ on untyped libraries.
+To enable library use from typed code, each benchmark comes with a typed
+ interface file.
+The interface solution is standard for Typed Racket users,
+ but it adds overhead that may skew the picture of costs within the benchmark.
+If the libraries came with typed interface files,
+ then an experiment could use those contextual modules with no questions.
+As it stands, our choice of interface types constitutes a threat.
+Other interface choices may lead to different conclusions.
+Alternatively, it may be best to remove these costs 
+ by typing the libraries or (unsafely) trusting the interface.
 
 
 @; -----------------------------------------------------------------------------
