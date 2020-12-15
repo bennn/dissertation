@@ -48,6 +48,7 @@ TODO
       what could results be in a ... synth2 ... without the wall
 - [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
       ... what are the odds for that?
+
 - [ ] st fig 48 unclear, use new example, the point is only check at elim forms and
       upcast changes the elim forms
       lazy-fact is bad because it upcasts the result instead of the value
@@ -65,20 +66,18 @@ TODO
 - [ ] st add Sorbet to figure, gotta check the implementation for parts
 - [ ] st Monotonic is implemented in Grift and probably TS*
 - [ ] st Castagna close to Natural, acknowledge it, same for forgetful ... at this point in the paper they're alike
-- [ ] st fig 25 does not blame net/url blames interface! double check, get it right
-- [ ] st fig 26 be clear its the same error as no types whatsoever
+- [X] st fig 25 does not blame net/url blames interface! double check, get it right
+- [X] st fig 26 be clear its the same error as no types whatsoever
 - [ ] st canonical forms ... mention in sec 4.3 supports optimization
          put lemmas into 4.6.X ... what do they look like? ditto JFP
 - [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
-- [ ] st snake and tetris are both educational and game
+- [X] st snake and tetris are both educational and game
 - [ ] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks
-- [ ] cd "nearby" clarify 'cannot describe designs'
+- [X] cd "nearby" clarify 'cannot describe designs'
 - [-] fh review mcallester, kaist, rehof ... think semantic again
 
 - [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away
-
-
 
 - [ ] push MF edits up to JFP
 

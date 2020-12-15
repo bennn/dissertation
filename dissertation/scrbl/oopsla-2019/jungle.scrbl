@@ -284,8 +284,8 @@ The generated contract ensures that the untyped client provides three
 When the @codett{net/url} library eventually applies the callback
  function to a URL structure, the function contract for the callback halts
  the program.
-The blame message says that @codett{net/url} broke the
- contract on the back-channel from it to @codett{client}, but warns the
+The blame message says that interface for @codett{call/input-url} broke the
+ contract, but warns the
  developer on the last line with ``assuming the contract is correct.''
 A quick look confirms that the contract---that is, the type
  from which the contract is derived---is wrong.
@@ -307,8 +307,9 @@ These same arguments then pass to the untyped @codett{get} function in the
  @codett{requests} module.
 When the untyped @codett{get} eventually uses the string
  @codett{"zero"} as a float, Python raises an exception that
- originates from the @codett{requests} module---possibly leading the programmer to
- search for a bug in the library.
+ originates from the @codett{requests} module.
+A completly untyped version of this program gives the same behavior;
+ the Reticulated types are no help for debugging.
 
 In this example, the programmer is lucky because the call to the typed
  version of @codett{get} is still visible on the stack trace,

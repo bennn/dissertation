@@ -230,17 +230,19 @@ A type system for untyped code must either include a subtyping
 Rewriting takes time and invites mistakes, therefore the
  migratory typing perspective demands a subtyping judgment.
 
-The dynamic type is not a replacement for subtyping because it cannot describe designs.
+The dynamic type is not a replacement for subtyping because it is an imprecise
+ catch-all.
 For example, the untyped @codett{divide} function in @figure-ref{fig:transient:divide}
  either divides two numbers or returns the symbol @tt{'undef} if the divisor
  is zero.
-Typed Racket lets a programmer express this union of two base types.
-By contrast, the dynamic type can only summarize the result in an over-approximate
- way that provides no information to callers.
+Typed Racket lets a programmer express this union of two base types
+ and subtyping justifies the code.
+By contrast, the dynamic type can type the code but asks callers to be ready
+ for any possible return value.
 
 @figure*[
   "fig:transient:divide"
-  @elem{Untyped division function with two kinds of output.}
+  @elem{Untyped division function with two kinds of output. A typical gradual language without subtyping can only over-approximate the result with type dynamic.}
   transient:divide]
 
 Adapting @|stransient| to include subtyping is therefore an essential task

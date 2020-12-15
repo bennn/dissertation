@@ -716,7 +716,7 @@ Each summary comes with four fields:
   @bm{zombie}
   #:author "David Van Horn"
   #:origin "Research"
-  #:purpose "Game"
+  #:purpose "Educational Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
   Implements a game where players dodge ``zombie'' tokens.
   Curried functions over symbols implement game entities and repeatedly cross type boundaries.
@@ -796,7 +796,7 @@ Each summary comes with four fields:
   @bm{snake}
   #:author "David Van Horn"
   #:origin "Research"
-  #:purpose "Game"
+  #:purpose "Educational Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
   Implements the Snake game; the benchmark replays a fixed sequence of moves.
 }
@@ -820,7 +820,7 @@ Each summary comes with four fields:
   @bm{tetris}
   #:author "David Van Horn"
   #:origin "Research"
-  #:purpose "Game"
+  #:purpose "Educational Game"
   #:url "https://github.com/philnguyen/soft-contract"]{
   Replays a pre-recorded game of Tetris.
 }
