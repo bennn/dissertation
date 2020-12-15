@@ -179,16 +179,17 @@
 (define sky-coord (coord 1/2 (- sky-y landscape-offset) 'cb))
 (define earth-y 7/10)
 (define earth-coord (coord 1/2 (+ earth-y landscape-offset) 'ct))
-(define answer-y 55/100)
-(define answer-coord-left (coord 30/100 answer-y 'ct))
+(define answer-y 60/100)
+(define answer-coord-left (coord 20/100 answer-y 'ct))
 (define answer-coord-mid (coord 1/2 answer-y 'ct))
-(define answer-coord-right (coord 70/100 answer-y 'ct))
+(define answer-coord-right (coord 80/100 answer-y 'ct))
 (define below-sky-y sky-y)
 (define above-earth-y (- earth-y 35/1000))
 (define low-text-left (coord text-left below-sky-y 'lt))
 (define low-text-mid (coord 1/2 below-sky-y 'ct))
 (define low-text-right (coord text-right below-sky-y 'rt))
 (define bot-text-left (coord text-left above-earth-y 'lt))
+(define bot-text-right (coord text-right above-earth-y 'rt))
 
 (define (landscape-w)
   (* 1.1 client-w))
@@ -603,11 +604,15 @@
 (define (scale-to-width pp w%)
   (scale-to-fit pp (w%->pixels w%) (pict-height pp)))
 
-(define (frame-person name ps [w% 15/100])
+(define (frame-person name ps [pre-w% #f])
+  (define w% (or pre-w% 15/100))
   (define pp (double-frame (scale-src-bitmap ps w%)))
   (if name
     (vl-append pp (ht3 (string-append "  " name)))
     pp))
+
+(define (frame-picture ps [w% #f])
+  (frame-person #f ps w%))
 
 (define (frame-team title-pict . name*)
   (frame-team* title-pict name*))
@@ -1277,6 +1282,12 @@
     @rrt{  keep out the letter  } (untyped-code "\"A\"")
     @rrt{  ?}))
 
+(define-values [why-perf-0 why-perf-1]
+  (let* ((lhs (question-text @rt{Why?}))
+         (rhs (answer-text @RT{Performance!})))
+    (values (boundary-append lhs (bghost rhs))
+            (boundary-append lhs rhs))))
+
 (define ruler-pict
   (frame-bitmap "ruler.jpg" #:w% 2/10))
 
@@ -1528,16 +1539,79 @@
     (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color mid-color)
     (filled-rectangle w h #:draw-border? #f #:color inner-color)))
 
-(define (earth-pict)
+(define (symbol->lang-pict sym)
+  (path->lang-pict (glob1 (build-path src "lang" (format "~a.png" sym)))))
+
+(define (glob1 pat)
+  (define m* (glob pat))
+  (cond
+    [(or (null? m*) (not (null? (cdr m*))))
+     (raise-arguments-error 'glob1 "expected 1 match" "match*" m*)]
+    [else
+      (car m*)]))
+
+(define (path->lang-pict path)
+  (scale-lang-bitmap (bitmap path)))
+
+(define (earth-add-all-lang* pp [pre-render-one #f])
+  (define render-one
+    (or pre-render-one
+        path->lang-pict))
+  (define lang-path* (glob (build-path src "lang" "*.png")))
+  (for/fold ((pp pp))
+              ((lang-path (in-list lang-path*))
+               (pre-x (in-range (+ gt-year0 6) (- gt-year1 2) 3))
+               (y (in-cycle (in-list '(28 68)))))
+    (ppict-do pp #:go (coord (year->sky-x pre-x) (/ y 100) 'cc) (render-one lang-path))))
+
+(define (earth-add-left* pp sym*)
+  (earth-add-lang-stack* pp sym* (coord 12/100 28/100 'lc)))
+
+(define (earth-add-right* pp sym*)
+  (earth-add-lang-stack* pp sym* (coord 92/100 55/100 'rc)))
+
+(define (earth-add-lang-stack* pp sym* crd)
+  (ppict-do
+    pp
+    #:go crd
+    (earth-lang-stack sym*)))
+
+(define (earth-lang-stack sym*)
+  (define the-blank (blank 220 0))
+  (for/fold ((acc (blank)))
+            ((sym (in-list sym*)))
+    (hc-append (- small-x-sep) acc (symbol->lang-pict sym))
+    #;
+    (rc-superimpose acc
+                    (cc-superimpose the-blank (symbol->lang-pict sym)))))
+
+(define (earth-pict #:mode [mode #f])
   (let* ((pp (base-earth-pict))
-         (lang-pict* (map (compose1 scale-lang-bitmap bitmap)
-                          (glob (build-path src "lang" "*.png"))))
-         (pp (for/fold ((pp pp))
-                       ((lang-pict (in-list lang-pict*))
-                        (pre-x (in-range (+ gt-year0 6) (- gt-year1 2) 3))
-                        (y (in-cycle (in-list '(28 68)))))
-               (ppict-do pp #:go (coord (year->sky-x pre-x) (/ y 100) 'cc) lang-pict)))
-         )
+         (pp
+           (case mode
+             ((erasure)
+              (earth-add-left*
+                (earth-add-right* pp '(clojure flow javascript hack lua php pyre typescript))
+                '(dart pyret python racket thorn)))
+             ((post-erasure)
+              (earth-add-left*
+                pp
+                '(dart pyret python racket thorn)))
+             ((forgetful)
+              (earth-add-left*
+                (earth-add-right* pp '(pyret python))
+                '(dart thorn racket)))
+             ((tr-begin) ;; show all
+              (define (hide-non-tr ps)
+                (define fn (path->string (file-name-from-path ps)))
+                (if (string-prefix? fn "racket")
+                  (path->lang-pict ps)
+                  (bcellophane2 (path->lang-pict ps))))
+              (earth-add-all-lang* pp hide-non-tr))
+             ((#f) ;; show all
+              (earth-add-all-lang* pp))
+             (else
+               (raise-argument-error 'earth-pict "earth-mode?" mode)))))
     pp))
 
 (define racket-path (build-path src "lang" "racket.png"))
@@ -1847,14 +1921,14 @@
 (define (bad-fun-example lhs mid rhs)
   (codeblock-append
     ((dyn-codeblock lhs)
-      "(f (λ....))"
+      "(f (λ \"A\"))"
       )
     ((dyn-codeblock mid)
       "(define (f (x : (-> Num)))"
       "  (g x))")
     ((dyn-codeblock rhs)
       "(define (g y)"
-      "  (+ (y) 3))")))
+      "  (.... y))")))
 
 (define (higher-order-any-example lhs rhs)
   (codeblock-append
@@ -2131,70 +2205,33 @@
     #:go center-coord
     @ht2{Mixed-Typed Design Space}
     @rt{Lively, but Disorganized!} )
-
   (pslide
     ;; example disagreement
-    #:go earth-coord
-    (earth-pict)
     #:go text-coord-mid
-    (basic-example 'T 'U)
-    (hsep tiny-y-sep)
-    (question-text
-      (word-append
-        @rrt{Does the type  } (deep-code "Num")
-        @rrt{  keep out the letter  } (untyped-code "\"A\"")
-        @rrt{  ?}))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes!})
-    (apply ht-append pico-x-sep (make-list 3 tally-pict))
-    #:go answer-coord-right
-    (answer-text
-      @rt{No!})
-    (apply ht-append pico-x-sep (make-list 7 tally-pict)))
+    (item-c-append
+      (basic-example 'T 'U)
+      (hc-append q-pict q-num-letter-pict))
+    #:alt [#:go earth-coord (earth-pict)]
+    #:go earth-coord (earth-pict #:mode 'erasure)
+    #:go answer-coord-left (answer-text @rt{Yes!})
+    #:go answer-coord-right (answer-text @rt{No}))
   (pslide
-    #:go earth-coord
-    (earth-pict)
     #:go text-coord-mid
-    (bad-pair-example 'U 'T 'U)
-    (hsep tiny-y-sep)
-    (question-text
-      (word-append
-        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes!})
-    (apply ht-append pico-x-sep (make-list 2 tally-pict))
-    #:go answer-coord-right
-    (answer-text
-      @rt{No!})
-    (apply ht-append pico-x-sep (make-list 2 tally-pict)))
+    (item-c-append
+      (bad-fun-example 'U 'T 'U)
+      (hc-append
+        q-pict
+        @rrt{Can the type  } (deep-code "(-> Num)") @rrt{  detect bad functions?}))
+    #:alt [ #:go earth-coord (earth-pict #:mode 'post-erasure) ]
+    #:go answer-coord-left (answer-text @rt{Yes})
+    #:go answer-coord-right (answer-text @rt{No})
+    #:go earth-coord (earth-pict #:mode 'forgetful))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go text-coord-mid
-    (bad-fun-example 'U 'T 'U)
-    (hsep tiny-y-sep)
-    (question-text
-      (word-append
-        @rrt{Does the type  } (deep-code "(-> Num)") @rrt{  keep out bad functions?}))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes})
-    (apply ht-append pico-x-sep (make-list 2 tally-pict))
-    #:go answer-coord-right
-    (answer-text
-      @rt{No})
-    (apply ht-append pico-x-sep (make-list 2 tally-pict)))
-  (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
-    #:go center-coord
+    #:go sky-coord (semantics-sky-pict #:names? #false)
+    #:go earth-coord (earth-pict)
+    #:go (coord 1/2 42/100 'ct)
     #:alt [
-      (question-text
-        @rt{What happens at the boundaries?})
+      (question-text @rt{What happens at the boundaries?})
       #:go answer-coord-mid
       (boundary-append
         (answer-text @rrt{Nothing})
@@ -2202,50 +2239,40 @@
         (answer-text @rrt{Everything!})
         (answer-text @rrt{...}))
     ]
-    (boundary-append
-      (question-text
-        @rt{Why?})
-      (answer-text
-        @RT{Performance!}))
-    (hsep tiny-y-sep)
-    (question-text
-      @rt{Where's the data?}))
+    #:alt [
+     #:next
+     #:alt [why-perf-0]
+     why-perf-1
+     #:next
+     #:go answer-coord-mid (question-text @rt{Where's the data?})
+    ]
+    #:go center-coord (frame-picture "elephant.jpg" 78/100))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
-    #:go center-coord
-    @ht2{Mixed-Typed Design Space}
-    @rt{Lively, but Disorganized!}
-    #:go center-coord
-    (frame-person #f "elephant.jpg" 7/10))
-  (pslide
-    #:go sky-coord (sky-pict)
+    #:go sky-coord (semantics-sky-pict #:names? #false)
     #:go earth-coord (earth-pict)
     #:go (coord text-left 34/100 'lt)
     (text-line-append
       @ht2{My Research}
       @rt{ brings order to}
       @rt{ the design space})
-    #:go (coord contribution-x-right contribution-y-top 'lt)
+    #:go (coord contribution-x-right below-sky-y 'lt)
     how-to-guarantees-pict
     #:go (coord contribution-x-right contribution-y-bot 'lt)
     how-to-perf-pict)
   (pslide
     #:next
-    #:go (coord contribution-x-left contribution-y-top 'lt)
+    #:go (coord contribution-x-left below-sky-y 'lt)
     (text-c-append
       how-to-perf-pict
       (ysep tiny-y-sep)
       @rrt{(the problem)})
-    #:go (coord contribution-x-right contribution-y-top 'lt)
+    #:go (coord contribution-x-right below-sky-y 'lt)
     (text-c-append
       how-to-guarantees-pict
       (ysep tiny-y-sep)
       @rrt{(solution space)})
     #:next
-    #:go (coord 1/2 50/100 'ct)
+    #:go (coord 1/2 56/100 'ct)
     ;; TODO ? highlight promising points, to illustrate Deep and Shallow?
     (text-line-append
       @ht2{Thesis Preview:}
@@ -2254,11 +2281,10 @@
 
 (define (sec:perf)
   (pslide
-    #:go earth-coord (earth-pict)
-    #:go (coord contribution-x-left contribution-y-top 'lt)
-    how-to-perf-pict
-    #:go center-coord
-    @rrt{(highlight TR)})
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go (coord contribution-x-right contribution-y-bot 'lt)
+    how-to-perf-pict)
+
   (pslide
     #:go earth-coord
     (earth-pict)
@@ -3144,10 +3170,9 @@
 ;    (sec:conclusion)
 ;    (pslide)
 ;    (sec:extra)
-    (pslide
 
 
-      )
+
     (void))
   (void))
 
@@ -3161,24 +3186,9 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    ;; example disagreement
-    #:go earth-coord
-    (earth-pict)
-    #:go text-coord-mid
-    (item-c-append
-      (basic-example 'T 'U)
-      ;; TODO going for yes or no???
-      (hc-append
-        q-pict
-        q-num-letter-pict))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes!})
-    (apply ht-append pico-x-sep (make-list 3 tally-pict))
-    #:go answer-coord-right
-    (answer-text
-      @rt{No!})
-    (apply ht-append pico-x-sep (make-list 7 tally-pict))
 
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go (coord contribution-x-right contribution-y-bot 'lt)
+    how-to-perf-pict
 
   )))
