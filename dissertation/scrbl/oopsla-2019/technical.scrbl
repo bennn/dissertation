@@ -2743,7 +2743,7 @@ This information leads to sound and complete blame messages.
    into one wrapper.
   \tname{} takes extra steps to place pre-values on the heap and to conservatively
    check the result of elimination forms.
-  In fact, @|aname| and @|tname| behave exactly the same aside from bookkeeping
+  In fact, \aname{} and \tname{} behave exactly the same aside from bookkeeping
    to create wrappers and track blame.
 \end{proofsketch}
 }|
