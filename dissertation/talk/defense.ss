@@ -58,6 +58,9 @@
 ;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
 ;; - [ ] sync the benchmarks, for displays ... avoid intro new names
 
+;; words
+;; - [ ] migration, faces ... 0.9x
+
 ;; visuals
 ;; - [ ] fancier takeaway frame
 ;; - [ ] text size ... rt vs rrt
@@ -190,6 +193,8 @@
 (define low-text-right (coord text-right below-sky-y 'rt))
 (define bot-text-left (coord text-left above-earth-y 'lt))
 (define bot-text-right (coord text-right above-earth-y 'rt))
+(define overhead-coord-top (coord 1/2 18/100 'ct))
+(define overhead-coord-mid (coord 1/2 36/100 'ct))
 
 (define (landscape-w)
   (* 1.1 client-w))
@@ -631,6 +636,15 @@
          (vc-append sep (ht-append sep (car pp*) (cadr pp*)) (loop (cddr pp*)))])))
   (vc-append pico-y-sep title-pict author-grid))
 
+(define (frame-credits . name*)
+  (frame-credits* name*))
+
+(define (frame-credits* name*)
+  (define micro-scale 1/10)
+  (define xsep 2)
+  (define pp* (for/list ((n (in-list name*))) (frame-person #f n micro-scale)))
+  (scale (apply hc-append xsep pp*) 65/100))
+
 (define (double-frame pp)
   (define bg-color subtitle-text-color)
   (define fg-color green3-3k1)
@@ -691,9 +705,9 @@
       #:color white
       pp)))
 
-(define (add-dark-background pp)
+(define (add-dark-background pp #:x-margin [xm #f] #:y-margin [ym #f])
   (add-rectangle-background
-    #:x-margin small-x-sep #:y-margin tiny-y-sep
+    #:x-margin (or xm small-x-sep) #:y-margin (or ym tiny-y-sep)
     #:color background-color
     #:radius 1
     pp))
@@ -706,6 +720,12 @@
     #:frame-color darkfog-3k1
     #:background-color dark-background-color
     pp))
+
+(define (wide-takeaway-frame pp)
+  (takeaway-frame (cc-superimpose (xsep client-w) pp)))
+
+(define (wider pp)
+  (hc-append (xsep small-x-sep) pp (xsep small-x-sep)))
 
 (define (type-to-shape lhs rhs)
   (word-append
@@ -1103,9 +1123,14 @@
        (what-to-measure-lattice n))
      (define lattice-pict
        (scale-small-lattice pre-lattice-pict))
-     (make-table
-       (lattice-label-append tu-pict @rrt{@~a[n] components})
-       (lattice-label-append lattice-pict @rrt{@~a[(expt 2 n)] configurations})))
+     (define pre-pict
+       (make-table
+         (lattice-label-append tu-pict (tag-pict @rrt{@~a[n] components} 'component))
+         (lattice-label-append lattice-pict @rrt{@~a[(expt 2 n)] configurations})))
+     (ppict-do
+       pre-pict
+       #:go (at-find-pict 'component rc-find 'lc #:abs-x small-x-sep)
+       right-arrow-pict))
     ((large)
      (define n large-n)
      (define-values [small-tu-pict small-lattice-pict]
@@ -1118,10 +1143,12 @@
        (bghost (scale-small-lattice small-lattice-pict)))
      (define pre-table
        (make-table
-         (lattice-label-append tu-pict @rrt{@~a[n] components})
+         (lattice-label-append tu-pict (tag-pict @rrt{@~a[n] components} 'component))
          (lattice-label-append lattice-pict @rrt{@~a[(expt 2 n)] configurations})))
      (ppict-do
        pre-table
+       #:go (at-find-pict 'component rc-find 'lc #:abs-x small-x-sep)
+       right-arrow-pict
        #:go (at-find-pict lattice-pict lc-find 'lc)
        (scale large-lattice-pict 20/100)))
     (else
@@ -1151,8 +1178,8 @@
       (make-lattice n make-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep)
       6/10))
   (lattice-vc-append
-    @rt{@~a[(exact-floor (pct (unbox *num-good) num-configs))]%}
-    lattice-pict))
+    lattice-pict
+    @rt{= @~a[(exact-floor (pct (unbox *num-good) num-configs))]%}))
 
 (define (small-face mood)
   (scale (face mood) 45/100))
@@ -1601,13 +1628,28 @@
               (earth-add-left*
                 (earth-add-right* pp '(pyret python))
                 '(dart thorn racket)))
-             ((tr-begin) ;; show all
+             ((tr-begin)
               (define (hide-non-tr ps)
                 (define fn (path->string (file-name-from-path ps)))
                 (if (string-prefix? fn "racket")
                   (path->lang-pict ps)
                   (bcellophane2 (path->lang-pict ps))))
               (earth-add-all-lang* pp hide-non-tr))
+             ((rp-begin)
+              (define (hide-non-rp ps)
+                (define fn (path->string (file-name-from-path ps)))
+                (if (string-prefix? fn "python")
+                  (path->lang-pict ps)
+                  (bcellophane2 (path->lang-pict ps))))
+              (earth-add-all-lang* pp hide-non-rp))
+             ((tr-rp)
+              (define (hide-non-tr/rp ps)
+                (define fn (path->string (file-name-from-path ps)))
+                (if (or (string-prefix? fn "racket")
+                        (string-prefix? fn "python"))
+                  (path->lang-pict ps)
+                  (bcellophane2 (path->lang-pict ps))))
+              (earth-add-all-lang* pp hide-non-tr/rp))
              ((#f) ;; show all
               (earth-add-all-lang* pp))
              (else
@@ -1630,6 +1672,11 @@
 
 (define fail-pict
   (x-pict 40))
+
+(define pass-fail-icon
+  (let* ((top pass-pict #;(check-pict 32))
+         (bot fail-pict #;(x-pict 32)))
+    (hc-append tiny-x-sep top bot)))
 
 (define ds-model-pict
   @rt{Model})
@@ -1659,6 +1706,45 @@
   "(time (bind t ....))"
 ))
 
+(define (scale-trie pp)
+  (scale pp 7/10))
+
+(define trie-untyped
+  (scale-trie (apply untyped-codeblock trie-code*)))
+
+(define trie-typed
+  (scale-trie (apply typed-codeblock trie-code*)))
+
+(define (trie-append lhs rhs)
+  (hc-append tiny-x-sep lhs rhs))
+
+(define trie-lhs
+  (trie-append trie-untyped @rt{12 seconds}))
+
+(define trie-rhs
+  (trie-append trie-typed @rt{1 ms!}))
+
+(define perf-tr-team
+  '("greenman.png" "takikawa.png" "new.jpg" "feltey.png" "findler.png" "vitek.jpg" "felleisen.jpg"))
+
+(define perf-rp-team
+  '("greenman.png" "migeed.png"))
+
+(define (collect-benchmarks-pict sym)
+  (case sym
+    ((U)
+     (boundary-append
+       (path-node '(U U U U U U))
+       (path-node '(T T))
+       (path-node '(U U U))))
+    ((T)
+     (boundary-append
+       (path-node '(T T T T T T))
+       (path-node '(T T))
+       (path-node '(T T T))))
+    (else
+      (raise-argument-error 'collect-benchmarks-pict "(or/c 'U 'T)" sym))))
+
 (define example-client-code* '(
   "(t-fold-file \"file.txt\" 0 count)"
   ""
@@ -1679,8 +1765,45 @@
   "  ... (f str acc) ...)"))
 
 (define unhappy-face (small-face 'unhappy))
+(define unhappier-face (small-face 'sortof-unhappy))
 (define happy-face (small-face 'happy))
+(define happier-face (small-face 'happier))
 (define face-offset-right (- tiny-x-sep))
+
+(define (migration-face i)
+  (define f0 happy-face)
+  (define f1 unhappier-face)
+  (define f2 happier-face)
+  (define arrow-sep pico-x-sep)
+  (define caption-sep tiny-x-sep)
+  (define (mk3 top mid bot)
+    (hc-append (vl-append small-y-sep (tag-pict top 'top) (tag-pict bot 'bot)) (tag-pict mid 'mid)))
+  (define (arrow1 pp)
+    (ppict-do
+      pp
+      #:go (at-find-pict 'bot rc-find 'lb #:abs-x arrow-sep)
+      up-arrow-pict))
+  (define (arrow2 pp)
+    (ppict-do
+      (arrow1 pp)
+      #:go (at-find-pict 'top rc-find 'lt #:abs-x arrow-sep)
+      up-arrow-pict))
+  (let loop ((i i))
+    (case i
+      ((0)
+       (mk3 (bghost f2) (bghost f1) f0))
+      ((1)
+       (arrow1 (mk3 (bghost f2) f1 f0)))
+      ((2)
+       (arrow2 (mk3 f2 f1 f0)))
+      ((3)
+       (ppict-do
+         (migration-face 2)
+         #:go (at-find-pict 'bot lc-find 'rc #:abs-x (- caption-sep)) @rt{1x}
+         #:go (at-find-pict 'mid rc-find 'lc #:abs-x caption-sep) @rt{20x}
+         #:go (at-find-pict 'top lc-find 'rc #:abs-x (- caption-sep)) @rt{.9x}))
+      (else
+        (raise-argument-error 'migration-face "(integer-in 0 3)" i)))))
 
 (define how-to-guarantees-pict
   (ht-append
@@ -1695,6 +1818,45 @@
     (text-line-append
       @rt{How to measure}
       @rt{ performance})))
+
+(define the-problem-pict
+  (text-c-append
+    how-to-perf-pict
+    (ysep tiny-y-sep)
+    @rrt{(the problem)}))
+
+(define benchmark-source-pict
+  (let* ((bg (disk 90 #:draw-border? #f #:color fog-3k1))
+         (pp*
+          (for/list ((name (in-list '("github.png" "neu.png" "planet.png"))))
+            (define pp (scale-lang-bitmap (src-bitmap name)))
+            (if (string-prefix? name "planet")
+              (ppict-do bg #:go (coord 54/100 54/100 'cc) pp)
+              (cc-superimpose bg pp))))
+         (pp
+          (hc-append
+            (vc-append (first pp*) (second pp*))
+            (third pp*))))
+    (scale pp 6/10)))
+
+(define perf-step1-pict
+  (word-append @ht2{Step 1: } @rt{Benchmarks}))
+
+(define perf-step2-pict
+  (word-append @ht2{Step 2: } @rt{How to Measure}))
+
+(define perf-step3-pict
+  (word-append @ht2{Step 3: } @rt{Summarize with a Picture}))
+
+(define (perf-make-sampling-lattice)
+  (let* ((pp (make-lattice 11 bits->path-node #:x-margin pico-x-sep #:y-margin lattice-y-sep))
+         (pp (scale pp 5/10))
+         (pp (inset/clip pp (* -495/1000 (pict-width pp)) 0)))
+    (save-pict "src/sampling-lattice.png" pp)
+    pp))
+
+(define perf-D-answer-pict
+  (answer-text (word-append @rt{Count } D-pict @rt{-deliverable configs})))
 
 ;; -----------------------------------------------------------------------------
 
@@ -1969,25 +2131,25 @@
        fake-line)))
   (scale pp 55/100))
 
+(define big-plot-ysep 4)
+
 (define (big-sampling-plot bm-name deco)
   (define pi ((deco->pi bm-name) deco))
   (define num-samples 10)
   (define sample-rate 10)
   (define num-units (performance-info->num-units pi))
   (define pp (ss-validate-plot pi (w%->pixels 65/100) (h%->pixels 35/100)))
-  (vl-append 4
-    (ht-append
-      (ysep (pict-height @rrt{q}))
-      (word-append
-        (rrt (~a bm-name))
-        (xsep (* 1.5 med-x-sep))
-        @rrt{@~a[num-samples] samples of @~a[(* sample-rate num-units)] configs}))
+  (vl-append big-plot-ysep
+    (hc-append
+      (add-dark-background (rrt (~a bm-name)) #:x-margin 0 #:y-margin 0)
+      (xsep (* 1.5 med-x-sep))
+      @rrt{@~a[num-samples] samples of @~a[(* sample-rate num-units)] configs})
     (add-xticks (double-frame pp))))
 
 (define (big-overhead-plot bm-name deco*)
   (define pi* (map (deco->pi bm-name) deco*))
   (define pp (ss-overhead-plot pi* (w%->pixels 65/100) (h%->pixels 35/100)))
-  (vl-append 4
+  (vl-append big-plot-ysep
     (rrt (~a bm-name))
     (add-xticks (double-frame pp))))
 
@@ -1996,11 +2158,16 @@
   (define pp (ss-overhead-plot pi* (w%->pixels 38/100) (h%->pixels 16/100)))
   (vl-append 4
     (tiny-txt (~a bm-name))
-    (double-frame pp)))
+    (add-tiny-xticks (double-frame pp))))
+
+(define (tiny-overhead-plot bm-name deco*)
+  (define pi* (map (deco->pi bm-name) deco*))
+  (define pp (ss-overhead-plot pi* (w%->pixels 38/100) (h%->pixels 16/100)))
+  (double-frame pp))
 
 (define (2col-overhead-plot* deco bm-name*)
   (make-2table
-    #:row-sep tiny-y-sep
+    #:row-sep small-y-sep
     (map (lambda (bm-name) (2col-overhead-plot bm-name (list deco))) bm-name*)))
 
 (define (ss-overhead-plot pi* w h)
@@ -2059,12 +2226,18 @@
     #:go (coord 3/4 1 'ct) @rrt{10x}
     #:go (coord 1 1 'rt) @rrt{20x}))
 
+(define (add-tiny-xticks pp)
+  (ppict-do
+    pp
+    #:go (coord 1/4 1 'lt) @tiny-txt{2x}
+    #:go (coord 1 1 'rt) @tiny-txt{20x}))
+
 (define (add-x-label pp)
   (ppict-do
     pp
     #:go (at-find-pict plot-tag lb-find 'rc)
     (vl-append
-      (ysep (* 1.8 tiny-y-sep))
+      (ysep (* 1.7 tiny-y-sep))
       (word-append D-pict @rt{ = }))))
 
 (define (sec:example)
@@ -2262,10 +2435,7 @@
   (pslide
     #:next
     #:go (coord contribution-x-left below-sky-y 'lt)
-    (text-c-append
-      how-to-perf-pict
-      (ysep tiny-y-sep)
-      @rrt{(the problem)})
+    the-problem-pict
     #:go (coord contribution-x-right below-sky-y 'lt)
     (text-c-append
       how-to-guarantees-pict
@@ -2282,104 +2452,86 @@
 (define (sec:perf)
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-begin)
-    #:go (coord contribution-x-right contribution-y-bot 'lt)
-    how-to-perf-pict)
-
+    #:go (coord contribution-x-left below-sky-y 'lt) the-problem-pict)
   (pslide
-    #:go earth-coord
-    (earth-pict)
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
     #:go heading-coord-left
     @ht2{Typed Racket}
     #:go text-coord-left
-    (rt-bullet
+    (rrt-bullet
       "Oldest, strongest mixed-typed language"
       "Home of severe performance costs"))
   (pslide
-    #:go heading-coord-left
-    @ht2{Costs ...}
-    #:go title-coord-mid
-    (frame-person #f "math-array.png" 8/10))
-  (pslide
-    #:go heading-coord-left
-    @ht2{... More Costs}
-    #:go heading-coord-right
-    (frame-person #f "trie-small.png" 45/100)
-    #:go title-coord-mid
-    (hsep tiny-y-sep)
-    (item-table
-      (apply untyped-codeblock trie-code*)
-      @rt{12 seconds}
-      (apply typed-codeblock trie-code*)
-      @rt{1 ms!}))
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Typed Racket Performance}
-    #:go text-coord-left
-    (rt-bullet
-      "Problems exist ... clearly"
-      "Widespead issue?  Language bug?")
-    #:go center-coord
-    (takeaway-frame
-      @ht2{Need a way to measure!}))
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 1: Benchmarks}
-    #:go heading-coord-right
-    @rrt{Ben Asumu Max Dan Matthias}
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left @ht2{Costs ...}
     #:go text-coord-mid
-    @rt{Collected small, useful programs}
-    (boundary-append
-      (path-node '(U U U U U U))
-      (path-node '(T T))
-      (path-node '(U U U)))
+    @rt{25x to 50x}
+    (ysep tiny-y-sep)
+    (frame-picture "math-array.png" 8/10))
+  (pslide
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left @ht2{... More Costs}
+    #:go text-coord-mid
+    (frame-picture "trie-small.png" 45/100)
     (hsep small-y-sep)
-    @rt{Added types, if missing}
-    (boundary-append
-      (path-node '(T T T T T T))
-      (path-node '(T T))
-      (path-node '(T T T))))
+    #:alt [(boundary-append trie-lhs (bghost trie-rhs))]
+    (boundary-append trie-lhs trie-rhs))
   (pslide
-    #:go earth-coord
-    (earth-pict)
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
     #:go heading-coord-left
-    @ht2{Step 1: Benchmarks}
-    #:go text-coord-left
-    (rt-bullet
-      "21 benchmark in total"
-      "from 2 to 14 modules"
-      "games, apps, libraries, ...."))
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 1: Benchmarks}
+    @ht2{Typed Racket, Performance}
+    #:go text-coord-left (rrt-bullet "Clearly, problems exist")
+    #:next
     #:go center-coord
-    ;; TOOD migratable vs contextual, circle vs square
+    (takeaway-frame (wider @ht2{Need a way to measure!})))
+  (pslide
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    ;; 21 total, variety size purpose
+    #:go heading-coord-left perf-step1-pict
+    #:go heading-coord-right
+    (frame-credits* perf-tr-team)
+    #:next
+    #:go (coord 10/100 35/100 'cc) benchmark-source-pict
+    #:go title-coord-mid
+    @rt{Collected small, useful programs}
+    (ysep tiny-y-sep)
+    (collect-benchmarks-pict 'U)
+    (hsep med-y-sep)
+    #:next
+    @rt{Added types, if missing}
+    (ysep tiny-y-sep)
+    (collect-benchmarks-pict 'T))
+  #;(pslide
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left @ht2{Step 1: Benchmarks}
+    #:go text-coord-left (rt-bullet "21 benchmark in total" "from 2 to 14 modules" "games, apps, libraries, ...."))
+  (pslide
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left perf-step1-pict
+    #:go heading-coord-mid
+    (ysep (h%->pixels 14/100))
+    (hc-append (path-node '(U U U U U)) @rt{  +  } (path-node '(T U)))
+    (ysep pico-y-sep)
     (scale-src-bitmap "jpeg-description.png" 95/100))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 2: How to Measure}
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left perf-step2-pict
     #:go text-coord-mid
     @rt{What to measure = all configurations}
-    ;; NOTE migratable vs contextual
+    #:next
     (hsep small-y-sep)
     #:alt [(what-to-measure 'small)]
     #:alt [(what-to-measure 'large)]
+    (hsep small-y-sep)
     (ht-append
       med-x-sep
       (question-text @rt{How to study?})
       (question-text @rt{How to scale?}))
+    #:next
     (hsep med-y-sep)
     (answer-text @rt{Focus on the programmer ...}))
   (pslide
-    #:go earth-coord
-    (earth-pict)
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
     #:go (coord 30/100 text-top 'ct)
     (migration-append
       (path-node '(T U T T T))
@@ -2387,27 +2539,16 @@
       (path-node '(T U U U U))
       (path-node '(U U U U U)))
     #:go (coord 70/100 text-top 'ct)
-    #:alt [(hc-append
-      (vl-append small-y-sep (small-face 'happy) (small-face 'happier))
-      (small-face 'sortof-unhappy))]
-    (let* ((bg (bghost (small-face 'happy)))
-           (placeholder (lambda (tag) (tag-pict bg tag)))
-           (pp (hc-append (vl-append small-y-sep (placeholder 'A) (placeholder 'C))
-                          (placeholder 'B))))
-      (for/fold ((acc pp))
-                ((tag (in-list '(A C B)))
-                 (str (in-list '("1x = baseline" "0.9x = improvement" "20x = too slow!"))))
-        (ppict-do acc #:go (at-find-pict tag cc-find 'cc) (rt str)))))
+    #:alt [(migration-face 0)]
+    #:alt [(migration-face 1)]
+    #:alt [(migration-face 2)]
+    (migration-face 3))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 2: How to Measure}
-    #:go text-coord-mid
-    (answer-text
-      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
-    (hsep small-y-sep)
-    ;; TODO large lattice also?
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left perf-step2-pict
+    #:go text-coord-mid perf-D-answer-pict
+    (hsep (h%->pixels 8/100))
+    #:next
     (make-2table
       #:row-align ct-superimpose
       #:col-align ct-superimpose
@@ -2415,94 +2556,78 @@
         (text-line-append
           (word-append
             @rrt{If  } D-pict @rrt{=4, then count})
+          (blank)
           @rrt{configs with at most}
+          (blank)
           @rrt{4x overhead})
         (d-lattice lattice-small-n))))
   (pslide
-    #:go heading-coord-left
-    @ht2{Step 2: How to Measure}
-    #:go text-coord-mid
-    (answer-text
-      (word-append @rt{Count } D-pict @rt{-deliverable configs}))
+    #:go heading-coord-left perf-step2-pict
+    #:go (coord 1/2 55/100 'ct) (src-bitmap "sampling-lattice.png") ;; (perf-make-sampling-lattice)
+    #:go text-coord-mid perf-D-answer-pict
+    #:next
     (hsep small-y-sep)
-    (word-append
-      D-pict @rrt{-deliverable  ~  Bernoulli random variable})
-    (hsep item-line-sep)
-    (word-append
-      @rrt{linear-size sampling works})
-    #:go (coord 1/2 55/100 'ct)
-    #;(let* ((pp (make-lattice 11 bits->path-node #:x-margin pico-x-sep #:y-margin lattice-y-sep))
-             (pp (scale pp 5/10))
-             (pp (inset/clip pp (* -495/1000 (pict-width pp)) 0)))
-        (save-pict "src/sampling-lattice.png" pp)
-        pp)
-    (src-bitmap "sampling-lattice.png"))
+    (word-append D-pict @rrt{-deliverable  ~  Bernoulli random variable})
+    (hsep small-y-sep)
+    (word-append @rrt{linear-size sampling works}))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Step 3: Picture}
-    #:go text-coord-mid
-    (tag-pict (big-overhead-plot 'quadU '(D)) plot-tag)
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left perf-step3-pict
+    #:next
+    #:go text-coord-mid (tag-pict (big-overhead-plot 'quadU '(D)) plot-tag)
     #:set (add-x-label ppict-do-state)
     #:next
+    #:go text-coord-mid (big-sampling-plot 'quadU 'D))
+  (pslide
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left @ht2{Performance Method}
+    #:next
     #:go text-coord-mid
-    (big-sampling-plot 'quadU 'D))
+    (table
+      2
+      (list
+        (hc-append @st{1. } @rrt{collect mixed-typed benchmarks})
+        (scale (make-lattice 2 bits->path-node #:x-margin lattice-x-sep #:y-margin lattice-y-sep) 5/10)
+        (hc-append @st{2. } (vl-append tiny-y-sep (word-append @rrt{count  } D-pict @rrt{-deliverable configs}) @rrt{ (or sample)}))
+        (vc-append (ysep small-y-sep) pass-fail-icon)
+        (hc-append @st{3. } (word-append @rrt{plot results}))
+        (scale (tiny-overhead-plot 'quadU '(D)) 6/10))
+      (cons lt-superimpose ct-superimpose)
+      lt-superimpose
+      tiny-x-sep
+      small-y-sep))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    @ht2{Performance Method}
+    #:go earth-coord (earth-pict #:mode 'tr-rp)
     #:go text-coord-mid
-    (item-line-append
-      (hb-append @st{1. } @rt{collect benchmarks})
-      (hb-append @st{2. }
-                 (word-append @rt{count  } D-pict @rt{-deliverable configs (or sample)}))
-      (hb-append @st{3. }
-                 (word-append @rt{plot results for many  } D-pict))))
+    @ht2{Applications:}
+    (ysep tiny-y-sep)
+    (make-2table
+      #:row-sep tiny-y-sep
+      (list
+        (symbol->lang-pict 'racket) @rt{Typed Racket}
+        (symbol->lang-pict 'python) @rt{Reticulated Python})))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go title-coord-mid
-    @rt{Applications: TR and RP})
+    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go heading-coord-left (word-append @ht2{Typed Racket} @rrt{  some results from our 21 benchmarks})
+    #:go overhead-coord-mid (2col-overhead-plot* 'D '(jpeg suffixtree take5 synth))
+    #:next
+    #:go overhead-coord-mid (wide-takeaway-frame @ht2{Bad}))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    (word-append
-      @ht2{Typed Racket}
-      @rrt{  some results from our 21 benchmarks})
-    #:go text-coord-mid
-    (2col-overhead-plot* 'D '(jpeg suffixtree take5 synth)))
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go title-coord-mid
-    @rt{TR = bad})
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go heading-coord-left
-    (word-append
-      @ht2{Reticulated Python}
-      @rrt{   different benchmarks})
-    #:go text-coord-mid
-    (2col-overhead-plot* 'S '(spectralnorm go Espionage chaos)))
-  (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go title-coord-mid
-    @rt{RP = much better})
+    #:go earth-coord (earth-pict #:mode 'rp-begin)
+    #:go heading-coord-left (word-append @ht2{Reticulated Python} @rrt{   different benchmarks})
+    #:go overhead-coord-top (src-bitmap "retic-overhead.png") #;(let ((pp (2col-overhead-plot* 'S '(spectralnorm pystone chaos go)))) (save-pict+ "retic-overhead.png" (ct-superimpose (blank (pict-width pp) (+ (pict-height pp) med-x-sep)) pp)))
+    #:next
+    #:go overhead-coord-mid (wide-takeaway-frame @ht2{Not so bad}))
   (void))
 
 (define (sec:design)
   (pslide
-    #:go earth-coord
-    (earth-pict)
+    #:go earth-coord (earth-pict #:mode 'tr-rp)
     #:go title-coord-mid
     @rt{WOW}
     (hsep small-y-sep)
     @rrt{TR vs RP, night vs day})
+
   (pslide
     #:go sky-coord
     (sky-pict)
@@ -3171,7 +3296,10 @@
 ;    (pslide)
 ;    (sec:extra)
 
+(pslide
 
+
+)
 
     (void))
   (void))
@@ -3186,9 +3314,11 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+    #:go earth-coord (earth-pict #:mode 'rp-begin)
+    #:go heading-coord-left (word-append @ht2{Reticulated Python} @rrt{   different benchmarks})
+    #:go overhead-coord-top (src-bitmap "retic-overhead.png") #;(let ((pp (2col-overhead-plot* 'S '(spectralnorm pystone chaos go)))) (save-pict+ "retic-overhead.png" (ct-superimpose (blank (pict-width pp) (+ (pict-height pp) med-x-sep)) pp)))
+    #:next
+    #:go overhead-coord-mid (wide-takeaway-frame @ht2{Not so bad})
 
-    #:go earth-coord (earth-pict #:mode 'tr-begin)
-    #:go (coord contribution-x-right contribution-y-bot 'lt)
-    how-to-perf-pict
 
   )))
