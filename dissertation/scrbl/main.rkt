@@ -112,6 +112,7 @@
   example-type-shape
   make-example-program-pict
   gtp-url
+  performance-info->worst-case-sample-info
 )
 
 (require
@@ -545,5 +546,19 @@
     \(\tagof{\stype}\) & \(=\) & @codett[s-str]\!\!\!\!
   \end{tabular}})
 
+(define (performance-info->worst-case-sample-info pi)
+  (define num-in-sample
+    (* SAMPLE-RATE (performance-info->num-units pi)))
+  (define cfg*
+    (sort
+      (for/list ((x (in-configurations pi))) x)
+      <
+      #:key configuration-info->mean-runtime))
+  (define best* (take cfg* num-in-sample))
+  (define worst* (take-right cfg* num-in-sample))
+  (list
+    (make-sample-info pi (list best*))
+    (make-sample-info pi (list worst*))
+    (make-sample-info pi (list best* worst*))))
 
 

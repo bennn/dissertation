@@ -30,6 +30,7 @@
   render-relative-overhead-plot
   render-relative-exact-plot
   make-render-validate-plot
+  make-render-worst-case-validate-plot*
   render-scatterplot-example
   benchmark-name->performance-info
   benchmark->num-modules
@@ -61,7 +62,7 @@
   (only-in scribble/base bold centered hyperlink tabular hspace tt linebreak)
   greenman-thesis/jfp-2019/parameter
   greenman-thesis/util
-  (only-in greenman-thesis bm)
+  (only-in greenman-thesis bm performance-info->worst-case-sample-info)
   gtp-plot
   gtp-util
   file/glob
@@ -467,6 +468,14 @@
     (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
     (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
       (validate-samples-plot pi si))))
+
+(define (make-render-worst-case-validate-plot* rkt-version)
+  (lambda (bm-name)
+    (define pi (benchmark-name->performance-info bm-name rkt-version))
+    (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
+    (for/list ((si (in-list (performance-info->worst-case-sample-info pi))))
+      (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+        (validate-samples-plot pi si)))))
 
 (define (render-scatterplot-example bm-name)
   (define pi-collapse

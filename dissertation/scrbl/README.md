@@ -53,8 +53,10 @@ TODO
 - [X] st fig 26 be clear its the same error as no types whatsoever
 - [X] st snake and tetris are both educational and game
 - [X] cd "nearby" clarify 'cannot describe designs'
+
 - [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
       ... what are the odds for that?
+      2020-12-15 well it can get quite bad, quadU fills the frame
 - [ ] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks
 - [ ] st sec 2 whats the idea here, what inference systems in bounds?

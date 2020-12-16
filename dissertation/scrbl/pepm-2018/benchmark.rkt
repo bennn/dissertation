@@ -16,7 +16,7 @@
   render-overhead-plot
   render-exact-plot
   render-validate-plot
-  render-exact-runtime-plot*
+  render-worst-case-validate-plot*
   exact-runtime-category
   lib-desc
   u/p-ratio
@@ -44,7 +44,7 @@
   gtp-util
   gtp-util/system
   gtp-plot
-  (only-in greenman-thesis bm github-commit)
+  (only-in greenman-thesis bm github-commit performance-info->worst-case-sample-info)
   greenman-thesis/util
   json
   pict
@@ -166,8 +166,12 @@
   (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
     (validate-samples-plot pi si)))
 
-(define (render-exact-runtime-plot* bm-name*)
-  (blank))
+(define (render-worst-case-validate-plot* bm-name)
+  (define pi (benchmark-name->performance-info bm-name 'exhaustive))
+  (log-bg-thesis-info "rendering validate-samples-plot for ~a" bm-name)
+  (for/list ((si (in-list (performance-info->worst-case-sample-info pi))))
+    (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+      (validate-samples-plot pi si))))
 
 (define (exact-runtime-category title bm* make-text)
   (raise-user-error 'exact-runtime-category "not-implemented"))
