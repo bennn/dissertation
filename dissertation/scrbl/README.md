@@ -57,6 +57,27 @@ TODO
 - [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
       ... what are the odds for that?
       2020-12-15 well it can get quite bad, quadU fills the frame
+      2020-12-16 ok theres more
+      - take5 tetris synth quadU quadT
+      - repeatedly take 10 samples of 10*n
+      - get average width of intervals, plot on a histogram
+      - show committee tomorrow
+- [ ] st zombie needs more analysis ... what know? what learned?
+      our TR data led to simple fixes ... late-neg, struct pred
+       but vector contracts = no broad lessons
+      call for better tool? (don't say tool, ask about size / number ... cite Grace "almost free")
+
+- [ ] st "big" blame, clearer about conclusions,
+      (a) basic transient works as expected for TR
+      (b) mixing optimal sometimes
+      (c) blame bad, useless?
+      anyway, the section lesson is NOT how to implement blame for your lang.
+- [ ] st "big" the lambda-dom checks are a serious model weakness,
+      say how to fix ... new language with sequencing , prove simulation
+       add to sec 7
+- [ ] st "big" some intuition for CM ... yes the labels are right but why
+      do we care? maybe copy from chap 4
+
 - [ ] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks
 - [ ] st sec 2 whats the idea here, what inference systems in bounds?
@@ -75,6 +96,40 @@ TODO
 - [ ] st canonical forms ... mention in sec 4.3 supports optimization
          put lemmas into 4.6.X ... what do they look like? ditto JFP
 - [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
+- [ ] st2 sec 5.3 fig 51? tr-pipeline, draw forks for transient
+- [ ] st2 (next page) "ensure ... get-field / send succeed" HEY its not
+      succeed , be clear about object members check
+- [ ] st2 remove (Syntaxof Symbol) too weird
+- [ ] st2 explain why (All (A) (Box A)) is sound, or give simpler example
+- [ ] st2 121 say that occurrence types are a general problem, not new to transient
+- [ ] st2 fig57 are all PR's merged? say so
+- [ ] st2 5.4 more about experimental conditions ... sw versions, commits (at top)
+- [ ] st2 fig59 copy to appendix that goes beyond 20x to the worst
+- [ ] st2 fig65 remove decimals from big numbers (dungeon) try a color scale
+          or at least bold for bad ones
+- [ ] st2 c6 fig68 put all typing rules in appendix, or here
+- [ ] st2 \Gamma_0 -> \Gamma
+- [ ] st2 sum -> plus
+- [ ] st2 rename "Completion" section to "Compilation" be clear that the completing step is an essential part of compiling
+- [ ] st2 (nearby) bad figures, too far from text
+- [ ] st2 fig76 add E defenition, we are compatible with respect to E
+- [ ] st2 (TS def) avoid type U lang U pun .... maybe just say "language" more
+- [ ] st2 TS add sentence about how to articulate errors (finer context / InvariantErr)
+- [ ] st2 6.2.1 cite stepping-stones ... You Want When, Advanced Mac., Lang as Lib
+- [ ] st2 6.2.2 unclear call_f explanation, rewrite
+- [ ] st2 6.2.3 tu-utils from Neil Toronto, give credit
+- [ ] st2 6.3.1 move emails to citations, add title date author, give credit
+      "people actually wrote them" instead of simple links
+- [ ] st2 xx cite Findler Blume about Any ... least restrictive contract ... any/c vs none/c
+- [ ] st2 fig81 change 42 to symbol, thats what we'd like to allow but overapproximately reject
+- [ ] st2 (No Missing Wrappers) cite wrapper-eq papers ... Thiemann, Miller ... search for more
+- [ ] st2 (External Data) "Deep is eager" major simplification ... refer to TR choices instead
+- [ ] st2 7.2 vitousek is not whole-program, be clear about their boundary assumption
+- [ ] st2 7.2 vitousek reports no-jit results, already answers the "jit essential" question
+      the wonder is whether non-jit can do so well
+- [ ] st2 7.3 cite Allende Garcia Tanter about ooplsa ... fortified types ... 
+- [ ] st2 8 say where quote came from, if anon. survey then fine
+
 - [-] fh review mcallester, kaist, rehof ... think semantic again
 
 - [ ] blame-trail: matthias asked for a handmade bug in acquire that goes 6-7 hops away
