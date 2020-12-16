@@ -51,12 +51,12 @@
 ;; - [X] move 'simpler behavior' to the end
 ;; - [X] why overhead line fuzzy? ... oh, thats a general gtp-plot issue
 ;; - [X] email Amal on Sunday
-;; - [ ] (from the top) remind people of contributors, use pictures
+;; - [X] type lattice, always go up! make sure words match pictures
+;; - [X] (from the top) remind people of contributors, use pictures
 ;;       Jan, Zeina, Christos, Lukas ... anyone
-;; - [ ] type lattice, always go up! make sure words match pictures
-;; - [ ] carefully introduce Deep and Shallow,
+;; - [X] carefully introduce Deep and Shallow,
 ;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
-;; - [ ] sync the benchmarks, for displays ... avoid intro new names
+;; - [X] sync the benchmarks, for displays ... avoid intro new names
 
 ;; words
 ;; - [ ] migration, faces ... 0.9x
@@ -169,6 +169,9 @@
 (define heading-coord-left (coord slide-left slide-top 'lt))
 (define heading-coord-mid (coord 1/2 slide-top 'ct))
 (define heading-coord-right (coord slide-right slide-top 'rt))
+(define bottom-coord-left (coord slide-left slide-bottom 'lb))
+(define bottom-coord-mid (coord 1/2 slide-bottom 'cb))
+(define bottom-coord-right (coord slide-right slide-bottom 'rb))
 (define text-coord-left (coord text-left text-top 'lt))
 (define text-coord-mid (coord 1/2 text-top 'ct))
 (define text-coord-right (coord text-right text-top 'rt))
@@ -340,6 +343,12 @@
 (define (ht4* str*)
   (txt str* #:font title-rm-font #:size h3-text-size #:color body-text-color))
 
+(define (dark-ht4 . str*)
+  (dark-ht4* str*))
+
+(define (dark-ht4* str*)
+  (txt str* #:font title-rm-font #:size h3-text-size #:color code-text-color))
+
 (define (RT . str*)
   (RT* str*))
 
@@ -363,6 +372,12 @@
 
 (define (rrt* str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color body-text-color))
+
+(define (dark-rrt . str*)
+  (dark-rrt* str*))
+
+(define (dark-rrt* str*)
+  (txt str* #:font body-text-font #:size sub-body-text-size #:color code-text-color))
 
 (define (sst . str*)
   (sst* str*))
@@ -678,6 +693,64 @@
         row-align
         col-sep
         (h%->pixels 4/100))))
+  (define tbl/bg
+    (add-neutral-background tbl))
+  (double-frame tbl/bg))
+
+(define y-str "Yes")
+(define n-str "No")
+
+(define natural-str "Natural")
+(define conatural-str "Co-Natural")
+(define forgetful-str "Forgetful")
+(define transient-str "Transient")
+(define amnesic-str "Amnesic")
+(define erasure-str "Erasure")
+
+(define design-pre-bg-table*
+  (list
+    (list "" natural-str transient-str)
+    (list "type soundness" y-str y-str)
+    (list "gradual guarantee" y-str y-str)
+    (list "blame theorem" y-str y-str)))
+
+(define design-post-bg-table*
+  (list
+    (list ""                natural-str "C" "F" transient-str "A" "E")
+    (list "type soundness"        y-str y-str y-str "y" y-str   n-str)
+    (list "complete monitoring"   y-str y-str n-str n-str n-str n-str)
+    (list "blame soundness"       y-str y-str y-str "h"   y-str "0")
+    (list "blame completeness"    y-str y-str y-str n-str y-str n-str)
+    (list "error preorder"        " "   "<"   "<"   "<"   "="   "<")))
+
+(define (property-table row* #:hide? [hide? #f] #:num-cols [num-cols 3])
+  (define title*
+    (for/list ((str (in-list (car row*))))
+      (define pp (dark-rrt str))
+      (if (< num-cols 5)
+        pp
+        (cc-superimpose (blank 70 0) pp))))
+  (define col-align (cons lt-superimpose ct-superimpose))
+  (define row-align cc-superimpose)
+  (define col-sep (if (< num-cols 5) small-x-sep (w%->pixels 15/1000)))
+  (define tbl
+    (vc-append
+      (table
+        num-cols
+        (apply append
+               (cons
+                 title*
+                 (map (lambda (x)
+                        (cons (bold-tt (car x))
+                              (for/list ((r-str (in-list (cdr x))))
+                                (define pp (dark-ht4 r-str))
+                                (if hide? (bghost pp) pp))))
+                      (cdr row*))))
+        col-align
+        row-align
+        col-sep
+        (h%->pixels 4/100))
+      (ysep pico-y-sep)))
   (define tbl/bg
     (add-neutral-background tbl))
   (double-frame tbl/bg))
@@ -1231,6 +1304,9 @@
              full-pict)))
     full/arr))
 
+(define cm-nothing
+  @untyped-code{nothing})
+
 (define cm-num-str
   (hc-append @deep-code{Num} @rt{ , } @deep-code{Str}))
 
@@ -1247,8 +1323,8 @@
        (values happy-face
                @rt{  ...}))
       ((1)
-       (values unhappy-face
-               (cm-gets error-pict)))
+       (values surprise-face
+               (cm-gets (untyped-code "Error: + bad input"))))
       ((2)
        (values unhappy-face
                (cm-gets cm-str-num)))
@@ -1289,6 +1365,14 @@
 
 (define down-arrow-pict
   (arrowhead-pict (* 3/4 turn)))
+
+(define (big-arrowhead-pict rad)
+  (colorize
+    (arrowhead 44 rad)
+    title-3k1))
+
+(define big-up-arrow-pict
+  (big-arrowhead-pict (* 1/4 turn)))
 
 (define big-hyphen-pict @ht2{- })
 (define hyphen-pict @st{- })
@@ -1484,14 +1568,52 @@
                          star-pict)))))))
     pp))
 
-(define (semantics-sky-pict #:names? [names? #true])
+(define (add-cm-line pp)
+  (ppict-do
+    pp
+    #:go (coord 35/100 1/2 'cc)
+    (filled-rectangle 4 (landscape-h) #:color deep-pen-color #:draw-border? #f)))
+
+(define (add-ts-line pp)
+  (ppict-do
+    pp
+    #:go (coord 78/100 1/2 'cc)
+    (filled-rectangle 2 (landscape-h) #:color shallow-pen-color #:draw-border? #f)))
+
+(define (add-other-line pp)
+  (define pen-width 2)
+  (ppict-do
+    pp
+    #:go (coord 20/100 55/100 'cc)
+    (filled-rectangle (w%->pixels 30/100) pen-width #:color black #:draw-border? #f)
+    #:go (coord 56/100 49/100 'cc)
+    (filled-rectangle (w%->pixels 40/100) pen-width #:color black #:draw-border? #f)
+    #:go (coord 55/100 70/100 'cc)
+    (filled-rectangle pen-width (* 1/2 (landscape-h)) #:color black #:draw-border? #f)
+    ))
+
+(define (semantics-sky-pict #:names? [names? #true] #:boundary [boundary #f])
   (let* ((pp (base-sky-pict))
          (pp
            (for/fold ((pp pp))
                      ((txt (in-list (list natural-pict conatural-pict forgetful-pict transient-pict amnesic-pict erasure-pict)))
                       (crd (in-list (list natural-coord-sky conatural-coord-sky forgetful-coord-sky transient-coord-sky amnesic-coord-sky erasure-coord-sky))))
              (ppict-do pp
-               #:go crd (hc-append big-theory-star (if names? txt (blank)))))))
+               #:go crd (hc-append big-theory-star
+                                   (cond
+                                     [(eq? #t names?) txt]
+                                     [(and (list? names?) (memq txt names?)) txt]
+                                     [else (bghost txt)])))))
+         (pp
+           (case boundary
+             ((all)
+              (add-other-line (add-cm-line (add-ts-line pp))))
+             ((cm)
+              (add-cm-line (add-ts-line pp)))
+             ((ts)
+              (add-ts-line pp))
+             ((#f)
+              pp))))
     pp))
 
 (define (sky-pict)
@@ -1566,8 +1688,16 @@
     (filled-rectangle w (* 1/2 pen-width) #:draw-border? #f #:color mid-color)
     (filled-rectangle w h #:draw-border? #f #:color inner-color)))
 
+(define (path->lang-pict path)
+  (scale-lang-bitmap (bitmap path)))
+
 (define (symbol->lang-pict sym)
   (path->lang-pict (glob1 (build-path src "lang" (format "~a.png" sym)))))
+
+(define (tiny-lang-pict sym)
+  (cc-superimpose
+    (blank 50 0)
+    (scale (symbol->lang-pict sym) 6/10)))
 
 (define (glob1 pat)
   (define m* (glob pat))
@@ -1576,9 +1706,6 @@
      (raise-arguments-error 'glob1 "expected 1 match" "match*" m*)]
     [else
       (car m*)]))
-
-(define (path->lang-pict path)
-  (scale-lang-bitmap (bitmap path)))
 
 (define (earth-add-all-lang* pp [pre-render-one #f])
   (define render-one
@@ -1624,6 +1751,10 @@
               (earth-add-left*
                 pp
                 '(dart pyret python racket thorn)))
+             ((tr-vs-rp)
+              (earth-add-left*
+                (earth-add-right* pp '(python))
+                '(racket)))
              ((forgetful)
               (earth-add-left*
                 (earth-add-right* pp '(pyret python))
@@ -1650,7 +1781,7 @@
                   (path->lang-pict ps)
                   (bcellophane2 (path->lang-pict ps))))
               (earth-add-all-lang* pp hide-non-tr/rp))
-             ((#f) ;; show all
+             ((all #f)
               (earth-add-all-lang* pp))
              (else
                (raise-argument-error 'earth-pict "earth-mode?" mode)))))
@@ -1730,6 +1861,9 @@
 (define perf-rp-team
   '("greenman.png" "migeed.png"))
 
+(define design-team
+  '("greenman.png" "dimoulas.jpg" "felleisen.jpg"))
+
 (define (collect-benchmarks-pict sym)
   (case sym
     ((U)
@@ -1765,6 +1899,7 @@
   "  ... (f str acc) ...)"))
 
 (define unhappy-face (small-face 'unhappy))
+(define surprise-face (small-face 'surprised))
 (define unhappier-face (small-face 'sortof-unhappy))
 (define happy-face (small-face 'happy))
 (define happier-face (small-face 'happier))
@@ -1857,6 +1992,37 @@
 
 (define perf-D-answer-pict
   (answer-text (word-append @rt{Count } D-pict @rt{-deliverable configs})))
+
+(define design-step-0
+  (hc-append @st{0. } @rrt{before = sound vs. unsound}))
+
+(define design-step-1
+  (hc-append @st{1. }
+             @rrt{Complete Monitoring  ~  types guard all boundaries}))
+
+(define design-step-2
+  (hc-append @st{2. }
+             @rrt{Blame Soundness  ~  errors are accurate}))
+
+(define design-step-3
+  (hc-append @st{3. }
+             @rrt{Blame Completeness  ~  errors are exhaustive}))
+
+(define design-step-4
+  (hc-append @st{4. }
+             @rrt{Error Preorder  ~  head-to-head test}))
+
+(define design-step-cm
+  (item-line-append (blank) design-step-0 design-step-1))
+
+(define design-step-bs
+  (item-line-append design-step-cm design-step-2))
+
+(define design-step-bc
+  (item-line-append design-step-bs design-step-3))
+
+(define design-step-preorder
+  (item-line-append design-step-bc design-step-4))
 
 ;; -----------------------------------------------------------------------------
 
@@ -2240,6 +2406,18 @@
       (ysep (* 1.7 tiny-y-sep))
       (word-append D-pict @rt{ = }))))
 
+(define design-bad-fun-example
+  (item-c-append
+    (bad-fun-example 'U 'T 'U)
+    (hc-append
+      q-pict
+      @rrt{Can the type  } (deep-code "(-> Num)") @rrt{  detect bad functions?})))
+
+(define tiny-tr-pict (tiny-lang-pict 'racket))
+(define tiny-rp-pict (tiny-lang-pict 'python))
+
+;; -----------------------------------------------------------------------------
+
 (define (sec:example)
   ;; TODO
   ;; - [ ] still looks very basic ... very primary ... can enhance?
@@ -2389,12 +2567,7 @@
     #:go answer-coord-left (answer-text @rt{Yes!})
     #:go answer-coord-right (answer-text @rt{No}))
   (pslide
-    #:go text-coord-mid
-    (item-c-append
-      (bad-fun-example 'U 'T 'U)
-      (hc-append
-        q-pict
-        @rrt{Can the type  } (deep-code "(-> Num)") @rrt{  detect bad functions?}))
+    #:go text-coord-mid design-bad-fun-example
     #:alt [ #:go earth-coord (earth-pict #:mode 'post-erasure) ]
     #:go answer-coord-left (answer-text @rt{Yes})
     #:go answer-coord-right (answer-text @rt{No})
@@ -2428,10 +2601,8 @@
       @ht2{My Research}
       @rt{ brings order to}
       @rt{ the design space})
-    #:go (coord contribution-x-right below-sky-y 'lt)
-    how-to-guarantees-pict
-    #:go (coord contribution-x-right contribution-y-bot 'lt)
-    how-to-perf-pict)
+    #:go (coord contribution-x-right below-sky-y 'lt) how-to-guarantees-pict
+    #:go (coord contribution-x-right contribution-y-bot 'lt) how-to-perf-pict)
   (pslide
     #:next
     #:go (coord contribution-x-left below-sky-y 'lt)
@@ -2483,7 +2654,7 @@
     #:go text-coord-left (rrt-bullet "Clearly, problems exist")
     #:next
     #:go center-coord
-    (takeaway-frame (wider @ht2{Need a way to measure!})))
+    (wide-takeaway-frame @ht2{Need a way to measure!}))
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-begin)
     ;; 21 total, variety size purpose
@@ -2579,7 +2750,7 @@
     #:next
     #:go text-coord-mid (big-sampling-plot 'quadU 'D))
   (pslide
-    #:go earth-coord (earth-pict #:mode 'tr-begin)
+    #:go earth-coord (earth-pict #:mode 'all)
     #:go heading-coord-left @ht2{Performance Method}
     #:next
     #:go text-coord-mid
@@ -2598,8 +2769,8 @@
       small-y-sep))
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-rp)
-    #:go text-coord-mid
-    @ht2{Applications:}
+    #:go heading-coord-right (frame-credits* (append perf-rp-team (cdr perf-tr-team)))
+    #:go text-coord-mid @ht2{Applications:}
     (ysep tiny-y-sep)
     (make-2table
       #:row-sep tiny-y-sep
@@ -2609,7 +2780,7 @@
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-begin)
     #:go heading-coord-left (word-append @ht2{Typed Racket} @rrt{  some results from our 21 benchmarks})
-    #:go overhead-coord-mid (2col-overhead-plot* 'D '(jpeg suffixtree take5 synth))
+    #:go overhead-coord-top (2col-overhead-plot* 'D '(jpeg suffixtree take5 synth))
     #:next
     #:go overhead-coord-mid (wide-takeaway-frame @ht2{Bad}))
   (pslide
@@ -2623,41 +2794,33 @@
 (define (sec:design)
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-rp)
-    #:go title-coord-mid
-    @rt{WOW}
-    (hsep small-y-sep)
-    @rrt{TR vs RP, night vs day})
-
-  (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go title-coord-mid
-    (bghost @rt{WOW})
-    (hsep small-y-sep)
-    @rrt{TR vs RP, night vs day}
-    (hsep small-y-sep)
-    (text-line-append
-      @rrt{type sound? yes yes}
-      @rrt{gradual guarantee? yes yes}
-      @rrt{blame theorem? yes yes})
-    @rrt{TR << RP ?})
-  (pslide
     #:go text-coord-mid
-    (bad-pair-example 'U 'T 'U)
-    (hsep tiny-y-sep)
-    (question-text
-      (word-append
-        @rrt{Does the type  } (deep-code "(List Num)") @rrt{  keep out the list of letters?}))
-    #:go answer-coord-left
-    (answer-text
-      @rt{Yes!})
-    (hsep small-y-sep)
-    @rrt{Typed Racket}
-    #:go answer-coord-right
-    (answer-text
-      @rt{No!})
-    (hsep small-y-sep)
-    @rrt{Reticulated Python})
+    (bghost @ht2{Applications:})
+    (ysep tiny-y-sep)
+    (make-2table
+      #:row-sep tiny-y-sep
+      (list
+        (symbol->lang-pict 'racket) @rt{Bad}
+        (symbol->lang-pict 'python) @rt{Not bad}))
+    #:next
+    (ysep tiny-y-sep)
+    (question-text @rt{Is Reticulated better, overall?}))
+  (pslide
+    #:go earth-coord (earth-pict #:mode 'tr-rp)
+    #:go center-coord big-up-arrow-pict
+    #:go sky-coord
+    #:alt [ (semantics-sky-pict #:names? #f) ]
+    (semantics-sky-pict #:names? (list natural-pict transient-pict)))
+  (pslide
+    #:go sky-coord (semantics-sky-pict #:names? (list natural-pict transient-pict))
+    #:go low-text-mid
+    #:alt [ (property-table #:hide? #true design-pre-bg-table*) ]
+    (property-table design-pre-bg-table*))
+  (pslide
+    #:go text-coord-mid design-bad-fun-example
+    #:next
+    #:go answer-coord-left (answer-text @rt{Yes}) @rrt{Natural}
+    #:go answer-coord-right (answer-text @rt{No}) @rrt{Transient})
   (pslide
     #:go title-coord-mid
     (cm-example '(U T))
@@ -2674,45 +2837,38 @@
                 (vc-append
                   cm-callback-q
                   (hsep tiny-y-sep)
-                  (answer-text
-                    @rt{TR = Yes})
-                  (answer-text
-                    @rt{RP = No}))))
+                  (vl-append
+                    (answer-text @rrt{Transient = No})
+                    (ysep pico-y-sep)
+                    (answer-text @rrt{Natural = Yes})))))
   (pslide
-    #:go earth-coord
-    (earth-pict)
-    #:go sky-coord
-    (sky-pict)
+    #:go sky-coord (semantics-sky-pict #:names? (list natural-pict transient-pict))
+    #:go low-text-mid
+    (scale (property-table design-pre-bg-table*) 7/10)
+    (ysep small-y-sep)
+    (rrt-bullet "But Natural and Transient disagree")
     #:next
     #:go center-coord
-    ;; TODO show boundary pict here?
-    (takeaway-frame
-      @ht2{Need to measure type guarantees}))
+    (wide-takeaway-frame @ht2{Need to measure type guarantees}))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go (coord contribution-x-right contribution-y-top 'lt)
+    #:go sky-coord (semantics-sky-pict #:names? (list natural-pict transient-pict))
     ;; .... need a way to measure the strength of guarantees that types provide
-    (text-line-append @rt{How to assess} @rt{ type guarantees}))
+    #:go (coord contribution-x-right below-sky-y 'lt) how-to-guarantees-pict)
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go center-coord
-    (item-line-append
-      @rrt{before =  Sound vs Unsound}
-      @rrt{after = Complete Monitoring, Type S., Tag S., Unsound}
-      @rrt{        + Blame, Error Preorder}))
+    #:go bottom-coord-right (frame-credits* design-team)
+    #:go sky-coord (semantics-sky-pict #:names? #true))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go center-coord
-    ;; ... syntactic proporty
+    #:go bottom-coord-right (frame-credits* design-team)
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'ts)
+    #:go low-text-left
     (item-line-append
-      (hc-append
-        med-x-sep
-        @rrt{star =  Complete Monitoring}
-        (scale the-boundary-pict 60/100))
-      @rrt{Do types supervise all boundaries?}))
+      (blank)
+      design-step-0))
+  (pslide
+    #:go bottom-coord-right (frame-credits* design-team)
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'cm)
+    #:go low-text-left design-step-cm
+    #:go (coord 1/2 50/100 'ct) (scale the-boundary-q-pict 8/10))
   (pslide
     #:go heading-coord-left
     ;; TODO use the sky-colors for each
@@ -2732,6 +2888,7 @@
                     #:col-sep tiny-x-sep
                     #:row-sep pico-y-sep
                     (list
+                      ;; TODO => pict
                       (clip-descent @ht2-initials{TS}) @rt{=/> Yes}
                       (clip-descent @ht2-initials{CM}) @rt{=> Yes}))))
     #:set (let* ((pp ppict-do-state))
@@ -2743,62 +2900,60 @@
                   #:row-align lt-superimpose
                   #:col-sep tiny-x-sep
                   #:row-sep tiny-y-sep
-                  (list @ht2-initials{TS} @untyped-code{nothing}
+                  (list @ht2-initials{TS} cm-nothing
                         @ht2-initials{CM} cm-num-str))
                 (xsep small-x-sep)))))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go center-coord
+    #:go bottom-coord-right (frame-credits* design-team)
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'cm)
+    #:go (coord 12/100 below-sky-y 'lt) @rt-deep2{Deep}
+    #:go (coord 62/100 below-sky-y 'lt) @rt-shallow2{Shallow}
+    #:next
+    #:go (coord 1/2 44/100 'ct)
     (item-line-append
-      @rrt{Complete Monitoring, Type S., Tag S., Unsound}
-      @rrt{useful partition Deep vs Shallow}))
+      (word-append
+        @rt-shallow2{Shallow} @rrt{  types  are sound})
+      (word-append
+        @rt-deep2{Deep} @rrt{  types  protect untyped code, too})
+      (blank)
+      @rrt{complete monitoring tells them apart}))
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go center-coord
-    (item-line-append
-      @rrt{further distinctions, new properties}
-      @rrt{- do errors find all responsible? B. Completeness}
-      @rrt{- do errors find only responsible? B. Soundness}
-      @rrt{- which programs run without error? E. Preorder}))
+    #:go bottom-coord-right (frame-credits* design-team)
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'cm)
+    #:go low-text-left
+    #:alt [ design-step-cm ]
+    #:alt [ design-step-bs ]
+    #:alt [ design-step-bc ]
+    design-step-preorder)
   (pslide
-    #:go center-coord
-    (frame-person #f "jfp-table.png" 8/10))
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'all)
+    #:alt [ #:go bottom-coord-right (frame-credits* design-team) ]
+    #:go low-text-mid
+    #:alt [ (property-table #:num-cols 7 #:hide? #true design-post-bg-table*) ]
+    ;; TODO offset the error preorder
+    (property-table #:num-cols 7 design-post-bg-table*))
   (void))
 
 (define (sec:thesis)
   (pslide
-    #:go sky-coord
-    (sky-pict)
-    #:go earth-coord
-    (earth-pict)
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'all)
+    #:go earth-coord (earth-pict)
     #:go (coord text-left 34/100 'lt)
     (text-line-append
       @ht2{My Research}
       @rt{ brings order to}
       @rt{ the design space})
-    #:go (coord contribution-x-right contribution-y-top 'lt)
-    (ht-append
-      @ht2{1. }
-      (text-line-append
-        @rt{How to assess}
-        @rt{ type guarantees}))
-    #:go (coord contribution-x-right contribution-y-bot 'lt)
-    (ht-append
-      @ht2{2. }
-      (text-line-append
-        @rt{How to measure}
-        @rt{ performance})))
+    #:go (coord contribution-x-right below-sky-y 'lt) how-to-guarantees-pict
+    #:go (coord contribution-x-right contribution-y-bot 'lt) how-to-perf-pict)
   (pslide
-    #:go heading-coord-left
-    @ht{Thesis}
+    #:go heading-coord-mid
+    @ht4{Thesis Statement}
     #:go title-coord-mid
     @ht2{Deep and Shallow types can interoperate.}
-    @rrt{(preserving their formal properties)}
+    @rrt{preserving their formal properties}
     (blank 0 tiny-y-sep)
-    @ht2{Programmers can use these types to:}
-    (rt-bullet
+    @ht3{Programmers can use these types to:}
+    (rrt-bullet
       "strengthen Shallow guarantees"
       "avoid unimportant Deep errors"
       "lower runtime costs"))
@@ -2810,10 +2965,8 @@
     ;; - Natural + Transient
     @ht{Unpublished Results})
   (pslide
-    #:go sky-coord
-    (sky-pict-transient)
-    #:go earth-coord
-    (earth-pict-transient)
+    #:go sky-coord (sky-pict-transient)
+    #:go earth-coord (earth-pict-transient)
     #:go low-text-left
     (item-line-append
       @rrt{Natural = strongest types}
@@ -2849,52 +3002,39 @@
       @ht2{Model}
       @rt{   Deep + Shallow + Untyped})
     #:go text-coord-left
-    (frame-person #f "model-0.png" 43/100)
-    (hsep med-y-sep)
-    (frame-person #f "model-1.png" 50/100)
+    (frame-picture "model-0.png" 43/100)
     #:next
-    #:go text-coord-right
-    (hsep (* 2 med-y-sep))
-    (frame-person #f "model-2.png" 60/100))
+    (hsep med-y-sep)
+    (frame-picture "model-1.png" 50/100))
   (pslide
     #:go heading-coord-left
     (word-append
       @ht2{Model}
-      @rt{   boundaries})
+      @rt{   Boundaries})
     #:go title-coord-mid
     (DSU-pict 0)
     #:next
     #:go icon-coord-mid
-    @rrt{Deep types => wrapper}
-    @rrt{Shallow types => check inputs})
+    @rrt{Deep types => full check / wrap}
+    @rrt{Shallow types => spot-check})
   (pslide
-    #:go heading-coord-left
-    (word-append
-      @ht2{Model}
-      @rt{  Properties})
-    #:go text-coord-left
+    #:go sky-coord (sky-pict-transient)
+    #:go (coord contribution-x-left below-sky-y 'lt)
     (item-line-append
       (text-line-append
         @st{Type Soundness}
         @rrt{ types predict outcomes})
-      (blank 0 small-y-sep)
       (text-line-append
         @st{Complete Monitoring}
         @rrt{ Deep types predict behaviors}))
-    #:go text-coord-right
-    (item-line-append
-      (word-append vdash-deep @st{ e : T})
-      (word-append vdash-shallow @st{ e : shape(T)})
-      (word-append vdash-untyped @st{ e})))
+    #:go (coord contribution-x-right below-sky-y 'lt)
+    @rrt{Can interoperate})
   (void))
 
 (define (sec:thesis:implementation)
   (pslide
-    #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
-    #:go low-text-mid
-    @rrt{model OK}
-    (hsep (* 3 med-y-sep))
-    @rrt{implementation})
+    #:go sky-coord (sky-pict-transient)
+    #:go earth-coord (earth-pict-transient))
   (pslide
     #:go heading-coord-left
     @ht2{Typed Racket Compiler}
@@ -2970,10 +3110,12 @@
   ;;  cdar x -> unsafe-cdr unsafe-car x
   (pslide
     #:go sky-coord (sky-pict-transient) #:go earth-coord (earth-pict-transient)
-    #:go low-text-mid
-    @rrt{model OK}
-    (hsep (* 3 med-y-sep))
-    @rrt{implementation OK})
+    #:go center-coord
+    @ht3{Benefits}
+    (rrt-bullet
+      "strengthen Shallow guarantees"
+      "avoid unimportant Deep errors"
+      "lower runtime costs"))
   (void))
 
 (define (sec:thesis:evaluation)
@@ -2985,16 +3127,18 @@
     #:go title-coord-mid
     (cm-example '(U S U))
     #:go (at-find-pict cm-api-tag rt-find 'rc #:abs-x face-offset-right) unhappy-face
-    #:next
+    #:alt [
+     #:go (at-find-pict cm-arrow-tag lc-find 'rc)
+     (hc-append cm-nothing (xsep small-x-sep))
+    ]
     #:go (at-find-pict cm-api-tag rb-find 'rb #:abs-x (- pico-x-sep) #:abs-y (- tiny-y-sep))
     (let* ((pp (cm-api-pict 'D))
            (pp (ppict-do pp #:go (coord 1 0 'rc #:abs-x face-offset-right) happy-face)))
       pp)
     #:go (at-find-pict cm-arrow-tag lc-find 'rc)
-    (hc-append
-      cm-num-str
-      (xsep small-x-sep))
-    #:go title-coord-mid
+    (hc-append cm-num-str (xsep small-x-sep))
+    #:next
+    #:go center-coord
     (takeaway-frame
       ;; TODO clearer takeaway?
       @rt{Deep satisfies complete monitoring}))
@@ -3005,11 +3149,12 @@
       @rt{ = fewer errors})
     #:go text-coord-mid
     (higher-order-any-example 'D 'U)
-    (word-append error-pict
-                 @rrt{ attempted to use higher-order})
-    (word-append @rrt{value passed as } (deep-code "Any"))
     #:next
-    #:alt [#:go center-coord (frame-person #f "racket-users-ho-any.png" 8/10)]
+    (word-append @rt{Error:}
+                 @rrt{  attempted to use higher-order})
+    (hc-append @rrt{value passed as } (deep-code "Any"))
+    #:next
+    #:alt [#:go text-coord-mid (frame-person #f "racket-users-ho-any.png" 8/10)]
     (blank 0 small-y-sep)
     (higher-order-any-example 'S 'U)
     success-pict
@@ -3055,9 +3200,9 @@
     (make-2table
       #:row-sep tiny-y-sep
       #:col-sep small-x-sep
-      (for/list ((sym* (in-list '((fsmoo dungeon) (suffixtree take5) (synth quadU)))))
+      (for/list ((sym* (in-list '((jpeg suffixtree) (take5 synth) (quadU sieve)))))
         (for/list ((sym (in-list sym*)))
-          (2col-overhead-plot sym '(D S))))))
+          (if sym (2col-overhead-plot sym '(D S)) (blank))))))
   (pslide
     #:go heading-coord-left
     @ht2{Better Performance}
@@ -3065,14 +3210,12 @@
     (fancy-table
       (list
         (list "Benchmark" "Worst Deep" "Worst Shallow")
-        (list "sieve" "10x" "2x")
         (list "jpeg" "23x" "2x")
-        (list "fsmoo" "451x" "4x")
-        (list "dungeon" "14000x" "5x")
         (list "suffixt" "31x" "6x")
         (list "take5" "32x" "3x")
         (list "synth" "49x" "4x")
-        (list "quadU" "60x" "8x"))))
+        (list "quadU" "60x" "8x")
+        (list "sieve" "10x" "2x"))))
   (pslide
     #:go heading-coord-left
     @ht2{New Migration Plan}
@@ -3105,12 +3248,13 @@
     (fancy-table
       (list
         (list "Benchmark" "Deep or Shallow" "Deep and Shallow")
-        (list "sieve" "0%" "100%")
         (list "jpeg" "100%" "100%")
-        (list "fsmoo" "0%" "50%")
-        (list "dungeon" "0%" "67%")
         (list "suffixt" "0%" "12%")
-        (list "take5" "100%" "100%"))))
+        (list "take5" "100%" "100%")
+        (list ""      ""   "")
+        (list "sieve" "0%" "100%")
+        (list "fsmoo" "0%" "50%")
+        (list "dungeon" "0%" "67%"))))
   (pslide
     #:go heading-coord-left
     @ht2{Better Together}
@@ -3134,7 +3278,8 @@
     @ht2{Deep and Shallow types can interoperate.}
     ;; TODO reword, using sec:thesis table from above?
     (item-table
-      (blank) @rt{Natural + Transient}
+      (blank) (blank)
+      pass-pict @rt{Natural + Transient}
       pass-pict @rt{preserves formal guarantees}
       pass-pict @rt{enables speedups})
     ;; instead of being stuck with pros/cons, can pick
@@ -3143,19 +3288,23 @@
     )
   (pslide
     #:go heading-coord-left
-    @ht{Contributions}
+    @ht2{Contributions}
     #:go title-coord-mid
     (item-line-append
       (hb-append @st{1. } @rt{performance analysis method})
       (hb-append @st{2. } @rt{design analysis method})
       (hb-append @st{3. } @rt{scaled-up Transient}) ;; found several ... issue-points
-      (hb-append @st{4. } @rt{Deep + Shallow language}))
+      (hb-append @st{4. } @rt{Deep + Shallow model, implementation}))
     ;#:go icon-coord-mid
     ;(hc-append small-x-sep scale-pict ruler-pict @rt{?} @rt{?})
     )
   (void))
 
 (define (sec:extra)
+  (pslide
+    #:go sky-coord (semantics-sky-pict #:names? #true #:boundary 'all)
+    #:go low-text-mid
+    (property-table #:num-cols 7 design-post-bg-table*))
   (pslide
     #:go heading-coord-left
     @rt{Blame for transient / shallow}
@@ -3287,19 +3436,15 @@
     ;(test-margin-slide)
     ;(test-screenshot-slide)
     ;(sec:example)
-;    (sec:title)
-;    (sec:intro)
-;    (sec:perf)
-;    (sec:design)
-;    (sec:thesis)
-;    (sec:conclusion)
-;    (pslide)
-;    (sec:extra)
+    (sec:title)
+    (sec:intro)
+    (sec:perf)
+    (sec:design)
+    (sec:thesis)
+    (sec:conclusion)
+    (pslide)
+    (sec:extra)
 
-(pslide
-
-
-)
 
     (void))
   (void))
@@ -3314,11 +3459,6 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-    #:go earth-coord (earth-pict #:mode 'rp-begin)
-    #:go heading-coord-left (word-append @ht2{Reticulated Python} @rrt{   different benchmarks})
-    #:go overhead-coord-top (src-bitmap "retic-overhead.png") #;(let ((pp (2col-overhead-plot* 'S '(spectralnorm pystone chaos go)))) (save-pict+ "retic-overhead.png" (ct-superimpose (blank (pict-width pp) (+ (pict-height pp) med-x-sep)) pp)))
-    #:next
-    #:go overhead-coord-mid (wide-takeaway-frame @ht2{Not so bad})
 
 
   )))
