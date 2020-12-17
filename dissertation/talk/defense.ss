@@ -1786,7 +1786,8 @@
                 (define fn (path->string (file-name-from-path ps)))
                 (if (or (string-prefix? fn "racket")
                         (string-prefix? fn "python"))
-                  (path->lang-pict ps)
+                  (add-hubs (path->lang-pict ps)
+                            (if (string-prefix? fn "racket") 'racket 'python))
                   (bcellophane2 (path->lang-pict ps))))
               (earth-add-all-lang* pp hide-non-tr/rp))
              ((all #f)
@@ -1888,10 +1889,10 @@
   (trie-append trie-typed @rt{1 ms!}))
 
 (define perf-tr-team
-  '("greenman.png" "takikawa.png" "new.jpg" "feltey.png" "findler.png" "vitek.jpg" "felleisen.jpg"))
+  '("greenman.png" "takikawa.png" "new.jpg" "feltey.png" "vitek.jpg" "felleisen.jpg"))
 
 (define perf-rp-team
-  '("greenman.png" "migeed.png"))
+  '("greenman.png" "migeed.png" "findler.png" "tobin-hochstadt.jpg"))
 
 (define design-team
   '("greenman.png" "dimoulas.jpg" "felleisen.jpg"))
@@ -2393,16 +2394,16 @@
   (let* ((pp
           (boundary-append
             (add-hubs
+              ((dyn-codeblock rhs)
+               "(f \"A\")")
+              'BR)
+            (add-hubs
               ((dyn-codeblock lhs)
                "(define (f (n : Num))"
                "  (+ n 1))")
-              'BL)
-            (add-hubs
-              ((dyn-codeblock rhs)
-               "(f \"A\")")
-              'BR)))
+              'BL)))
          (arr
-           (code-arrow 'BR-S cb-find 'BL-E lc-find (* 3/4 turn) (* 35/100 turn) 90/100 5/100 'solid)))
+           (code-arrow 'BR-S cb-find 'BL-W lc-find (* 3/4 turn) (* 15/100 turn) 90/100 5/100 'solid)))
     (if arrow? (add-code-arrow pp arr) pp)))
 
 (define (bad-pair-example lhs mid rhs)
@@ -2481,7 +2482,7 @@
   (define pp (ss-overhead-plot pi* (w%->pixels 65/100) (h%->pixels 35/100)))
   (vl-append big-plot-ysep
     (rrt (~a bm-name))
-    (add-xticks (double-frame pp))))
+    (add-yticks (add-xticks (double-frame pp)))))
 
 (define (2col-overhead-plot bm-name deco*)
   (define pi* (map (deco->pi bm-name) deco*))
@@ -2555,6 +2556,11 @@
     #:go (coord 1/4 1 'lt) @rrt{2x}
     #:go (coord 3/4 1 'ct) @rrt{10x}
     #:go (coord 1 1 'rt) @rrt{20x}))
+
+(define (add-yticks pp)
+  (ppict-do
+    pp
+    #:go (coord 1 0 'lt) @rrt{100%}))
 
 (define (add-tiny-xticks pp)
   (ppict-do
@@ -2863,7 +2869,7 @@
     @ht2{Typed Racket}
     #:go text-coord-left
     (rrt-bullet
-      "Oldest, strongest mixed-typed language"
+      "Mature, strong mixed-typed language"
       "Home of severe performance costs"))
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-begin)
@@ -2920,9 +2926,9 @@
   (pslide
     #:go earth-coord (earth-pict #:mode 'tr-begin)
     #:go heading-coord-left perf-step2-pict
+    #:next
     #:go text-coord-mid
     @rt{What to measure = all configurations}
-    #:next
     (hsep small-y-sep)
     #:alt [(what-to-measure 'small)]
     #:alt [(what-to-measure 'large)]
@@ -3041,7 +3047,19 @@
     #:go center-coord big-up-arrow-pict
     #:go sky-coord
     #:alt [ (semantics-sky-pict #:names? #f) ]
-    (semantics-sky-pict #:names? (list natural-pict transient-pict)))
+    (semantics-sky-pict #:names? (list natural-pict transient-pict))
+    #:set (let* ((pp ppict-do-state)
+                 (arr*
+                   (list
+                     (code-arrow 'racket-N ct-find
+                                 (tag-append natural-tag 'S) cb-find
+                                 (* 1/4 turn) (* 1/4 turn)
+                                 2/4 1/4 'solid)
+                     (code-arrow 'python-N ct-find
+                                 (tag-append transient-tag 'S) cb-find
+                                 (* 1/4 turn) (* 1/4 turn)
+                                 1/4 1/4 'solid))))
+            (add-code-arrows* pp arr*)))
   (pslide
     #:go sky-coord (semantics-sky-pict #:names? (list natural-pict transient-pict))
     #:go low-text-mid
