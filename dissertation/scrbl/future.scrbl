@@ -156,7 +156,7 @@ For first-order interactions,
 Higher-order communication is the real source of difficulties.
 For example,
  if @|sshallow| imports an @|suntyped| map function, then @|sshallow| must be
- prepared to wrap every function that it sends to map just in case such a function
+ prepared to wrap every function that it sends to map just in case one of the functions
  is @|sdeep|-typed.
 
 If a language can create wrappers in @|sshallow| code, however, then the
