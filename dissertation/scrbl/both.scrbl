@@ -939,6 +939,7 @@ The application of a @|sshallow|-typed function always @|sscan|s the
 This design simplifies the model and proof details regarding substitution,
  but the lack of an explicit domain check means that the model cannot
  support a pass that eliminates redundant checks.
+Fixing this limitation is a top priority for future extensions of the model.
 
 @Figure-ref{fig:both:completion2} presents the completion rules for module
  boundaries.
@@ -1592,7 +1593,8 @@ The primary meta-theoretic results are about type soundness and
 Type soundness predicts the possible outcomes of a well-typed expression.
 Naturally, these outcomes depend on the ``strength'' of the static types;
  for example, @|suntyped| code has weaker guarantees than @|sshallow| code.
-Complete monitoring asks whether single-owner consistency is an invariant.
+Complete monitoring asks whether single-owner consistency is an invariant;
+ if so, then programmers can trust @|sdeep| types as behavioral guarantees.
 
 The statement of type soundness relies on one new notation and a family of
  metafunctions.

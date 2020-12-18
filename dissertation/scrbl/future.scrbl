@@ -98,6 +98,10 @@ My investigations in @chapter-ref{chap:transient} suggest two additional
    a function from an untyped list (@codett{f = (car f*)}),
    cannot be trusted.
 }]
+@|noindent|To experiment with similar improvements, the model from
+ @sectionref{sec:both:model} must gain syntax for the function-domain checks
+ that are currently baked in to the semantics.
+Refer to @sectionref{sec:both:model:completion} for a discussion.
 
 The Pycket compiler adds a JIT to @|sDeep| Typed Racket and significantly
  reduces the overhead of type boundaries@~cite{bbhkpst-icfp-2015,bbst-oopsla-2017}.

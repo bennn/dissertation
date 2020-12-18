@@ -74,9 +74,8 @@ To fully benefit from removing blame, @|sNatural| needs a new strategy for alloc
 
 Adapting the theory of @|stransient|@~cite{vss-popl-2017} to Typed Racket required
  several generalizations and insights (@sectionref{sec:transient:theory}).
-In the course of this work, I also adapted the @|stransient| heap-based blame
- algorithm and identified several challenges (@sectionref{sec:transient:blame});
- first and foremost, the basic blame algorithm is prohibitively slow.
+In the course of this work, I adapted the @|stransient| heap-based blame
+ algorithm but identified several challenges that make it impractical (@sectionref{sec:transient:blame}).
 The final implementation takes care to reuse large parts of Typed Racket
  (@sectionref{sec:transient:implementation}).
 
@@ -344,6 +343,8 @@ First, scaling the original blame algorithm to Typed Racket raises
 Second, @|stransient| blame has a tremendous performance cost.
 This section explains the challenges; performance concerns are deferred
  to @section-ref{sec:transient:blame-performance}.
+Overall, I do not recommend the current blame algorithm for use in future
+ implementations of @|stransient|.
 
 
 @subsection{Basics of @|sTransient| Blame}
@@ -1242,10 +1243,15 @@ Because these @|sshallow| types are implemented with the @|stransient| semantics
          on untyped library code.})
 @|sShallow| typically does well, with overhead under 5x, but a few benchmarks
  have larger slowdowns due to @|stransient| checks.
-The worst is @bm{zombie}, which suffers a 30x ovehead because of the many
- elimination forms in typed code.
-A better completion pass may be able to reduce this high cost.
-The best case for @|stransient| is @bm{lnm}, which nearly runs faster than
+The worst is @bm{zombie}, which suffers a 30x overhead due to the many
+ elimination forms that appear in one module.
+This module simulates objects with functions and therefore contains several
+ layers of indirection that all slow down with @|stransient| checks.
+A better completion pass may be able to reduce this high cost;
+ that said, the real-time cost of this overhead in @bm{zombie} is close to one
+ second.
+The best-case benchmark for @|stransient| is @bm{lnm}, which runs only slightly
+ slower than
  the fully-untyped configuration.
 }])
 

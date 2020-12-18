@@ -53,8 +53,7 @@ TODO
 - [X] st fig 26 be clear its the same error as no types whatsoever
 - [X] st snake and tetris are both educational and game
 - [X] cd "nearby" clarify 'cannot describe designs'
-
-- [ ] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
+- [X] st sampling, try the worst-case bounds ... what if picked (N slowest) (N fastest) (N slow, N fast)
       ... what are the odds for that?
       2020-12-15 well it can get quite bad, quadU fills the frame
       2020-12-16 ok theres more
@@ -62,20 +61,19 @@ TODO
       - repeatedly take 10 samples of 10*n
       - get average width of intervals, plot on a histogram
       - show committee tomorrow
-- [ ] st zombie needs more analysis ... what know? what learned?
+- [X] st zombie needs more analysis ... what know? what learned?
       our TR data led to simple fixes ... late-neg, struct pred
        but vector contracts = no broad lessons
       call for better tool? (don't say tool, ask about size / number ... cite Grace "almost free")
-
-- [ ] st "big" blame, clearer about conclusions,
+- [X] st "big" blame, clearer about conclusions,
       (a) basic transient works as expected for TR
       (b) mixing optimal sometimes
       (c) blame bad, useless?
       anyway, the section lesson is NOT how to implement blame for your lang.
-- [ ] st "big" the lambda-dom checks are a serious model weakness,
+- [X] st "big" the lambda-dom checks are a serious model weakness,
       say how to fix ... new language with sequencing , prove simulation
        add to sec 7
-- [ ] st "big" some intuition for CM ... yes the labels are right but why
+- [X] st "big" some intuition for CM ... yes the labels are right but why
       do we care? maybe copy from chap 4
 
 - [ ] cd fig 46 unclear why checks must be there ... add example?
