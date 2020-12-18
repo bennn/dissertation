@@ -12,6 +12,12 @@
 ;;  accurate vs. inaccurate intervals
 ;;
 
+(provide
+  num-experiments
+  bm*
+
+  )
+
 (require
   file/glob
   (only-in racket/random random-sample)
@@ -182,9 +188,11 @@
 
 (define (make-avg-x-ticks x*)
   (define min-x (min* x*))
-  (define max-x (max* x*))
+  (define max-x
+    (let ((m (max* x*)))
+      (if (= (+ 1 m) max-%-plot) #f m)))
   (define MAJOR-TICKS
-    (sort (list min-x max-x (- max-%-plot) 0 max-%-plot) <))
+    (sort (filter values (list min-x max-x (- max-%-plot) 0 max-%-plot)) <))
   (define MINOR-TICKS
     (list -5 5))
   (define m-ticks
@@ -211,7 +219,7 @@
 
 
     (printf "~a go ...~n" bm)
-    (parameterize ((*current-cache-directory* "sample")
+    (parameterize ((*current-cache-directory* "all")
                    (*current-cache-keys* (list (lambda () bm*)))
                    (*with-cache-fasl?* #f))
       (let* ((sample-data ;; (list D %-deliv (listof lo-% hi-%))

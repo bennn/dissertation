@@ -443,7 +443,7 @@ But at function-level granularity and finer, the practical limit quickly rules
  out interesting programs.
 
 
-@section{Approximate Evaluation Method}
+@section[#:tag "sec:perf:approximate"]{Approximate Evaluation Method}
 
 The proportion of @ddeliverable{D} configurations in a program can be
  approximated using random sampling.
@@ -535,6 +535,7 @@ The orange interval is a 95% confidence interval based on
  where @${N} is the number of typed units in the benchmark program.
 The sample intervals all tightly cover the true proportion
  of @ddeliverable{D} configurations.
+@Appendix-ref{appendix:sample} contains additional empirical data.
 
 
 @subsection{Statistical Protocol}

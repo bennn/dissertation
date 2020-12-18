@@ -12,6 +12,7 @@
     racket/list
     scriblib/figure
     scribble/example)
+  begin-appendix
 
   PYBENCH
   SLOCCOUNT
@@ -44,6 +45,8 @@
   section-ref
   Chapter-ref
   chapter-ref
+  Appendix-ref
+  appendix-ref
   Table-ref
   table-ref
   Figures-ref
@@ -361,6 +364,12 @@
   types.
   })
 
+(define (Appendix-ref s)
+  (elem "Appendix" ~ (seclink s)))
+
+(define (appendix-ref s)
+  (elem "appendix" ~ (seclink s)))
+
 (define (Section-ref s)
   (elem "Chapter" ~ (seclink s)))
 
@@ -561,4 +570,7 @@
     (make-sample-info pi (list worst*))
     (make-sample-info pi (list best* worst*))))
 
+(define begin-appendix
+  (make-paragraph (make-style 'pretitle '())
+    (make-element (make-style "appendix" '(exact-chars)) '())))
 

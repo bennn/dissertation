@@ -129,6 +129,7 @@ TODO
       the wonder is whether non-jit can do so well
 - [ ] st2 7.3 cite Allende Garcia Tanter about ooplsa ... fortified types ... 
 - [ ] st2 8 say where quote came from, if anon. survey then fine
+- [ ] cite Gray etal
 
 - [-] fh review mcallester, kaist, rehof ... think semantic again
 

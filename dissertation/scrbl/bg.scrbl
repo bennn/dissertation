@@ -35,5 +35,6 @@
 @;@include-section{related.scrbl}
 @include-section{future.scrbl}
 @include-section{conclusion.scrbl}
+@include-section{appendix.scrbl}
 
 

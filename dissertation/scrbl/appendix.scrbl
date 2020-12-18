@@ -1,61 +1,90 @@
 #lang greenman-thesis/include
 
-@section{Favorite Quotations}
+@(require
+   (only-in file/glob glob)
+   (only-in pict text vl-append table bitmap lt-superimpose blank scale)
+   (prefix-in sample: greenman-thesis/validate-sample/main))
 
-```We are not amused.' So Queen Victoria baldly stated a fact that was
-disconcerting to someone. Yet the thing was very likely amusing in its
-nature; it did not amuse the person whose amusement mattered, that was
-all.''
+@appendix
 
-A Dictionary of Modern English Usage, 2nd edition.
-H.W. Fowler . Ed. Sir Ernest Gowers.
+@title[#:tag "appendix"]{Appendix}
+
+@section[#:tag "appendix:sample"]{Sample Validation}
+
+@(define (snoc x x*) (append x* (list x)))
+
+@(define (validate-sample-plot sub-dir)
+   (table
+     2
+     (snoc
+       (blank)
+       (for/list ((bm (in-list sample:bm*)))
+         (vl-append 4
+           (text (~a bm) (cons 'bold "Liberation Serif") 9)
+           (scale (bitmap (car (glob (build-path "validate-sample" sub-dir (format "~a-*.png" bm))))) 49/100))))
+     lt-superimpose lt-superimpose 20 10))
+
+The approximate evaluation method in @chapter-ref{sec:perf:approximate}
+ uses simple random sampling to guess the proportion of @ddeliverable{D}
+ configurations in a benchmark.
+Random sampling is statistically likely to yield an accurate and precise guess, and
+ indeed @figure-ref["fig:tr:validate-sample" "fig:tr:validate-sample"]
+ present correct and thin intervals.
+But sampling can go poorly.
+An unlucky guess based on @${r\!=\!@id[NUM-SAMPLE-TRIALS]} samples
+ that each contain @${s\!=\!@id[SAMPLE-RATE]\!*\!N} of the absolute-fastest
+ configurations is overly optimistic.
+The figures in this section double-check our earlier results with additional
+ samples and suggest that precise intervals are indeed the norm.
+
+These validation results use new, randomly-generated random samples.
+In this section, one @emph{sampling experiment} for a benchmark with
+ @${N} modules is a collection of
+ @${r\!=\!@id[NUM-SAMPLE-TRIALS]} samples
+ that each contain @${s\!=\!@id[SAMPLE-RATE]\!*\!N} configurations
+ chosen uniformly at random without replacement.
+The question is whether the sampling experiments, as a whole, are typically
+ accurate.
+One test of accuracy is to measure the average distance from sample conclusions
+ to the truth.
+More precisely, for 200 evenly-spaced values of @${D} between @${1} and @${20},
+ the first test compares the true proportion of @ddeliverable{D} configurations to
+ average distance across all upper and lower-bound guesses generated from each
+ sample experiment.
+A second test is to validate each upper and lower bound individually by taking its
+ distance and negating the number if the guess is in the wrong direction.
+
+@Figure-ref{fig:appendix:validate-sample-avg} counts the average distance
+ from an approximation to the truth across @~a[sample:num-experiments]
+ sampling experiments.
+If the samples are accurate, these distances should be close to zero.
+And indeed, the worst average distance is 4% away from the true proportion
+ of @ddeliverable{D} configurations.
+
+@Figure-ref{fig:appendix:validate-sample-all} presents data on both the
+ accuracy and correctness of @~a[sample:num-experiments] different sampling
+ experiments.
+For each individual guess, the data records both its distance from the truth
+ and whether the direction is correct.
+Ideally, every guess should end up with a small positive number.
+The figure is slightly worse, but still good.
+Most guesses fall within 0% and 5% from the truth.
+The few bad guesses end up with a worst case of 9% off in the correct direction
+ and -4% off in the misleading one.
+
+@figure*[
+  "fig:appendix:validate-sample-avg"
+  @elem{Average distance from the true proportion of @ddeliverable{D}
+   configurations across @~a[sample:num-experiments] approximate intervals.}
+  (validate-sample-plot "avg")]
+
+@figure*[
+  "fig:appendix:validate-sample-all"
+  @elem{Exact difference between the true proportion of @ddeliverable{D}
+  configurations and the bounds at each point along @~a[sample:num-experiments]
+  approximate intervals. A negative number reflects a misleading upper or lower bound.}
+  (validate-sample-plot "all")]
 
 
-``... we should stand on each others shoulders instead of their toes. But
-after you have fallen off a few people's shoulders, you go for the toes!''
-
-Jim Morris. War Stories from Andrew.
-
-
-``People who get their epigraphs from a book of quotations rather than their
-own reading are like people who cheat at solitaire. I do not understand what
-game they're playing, but it's obviously not the same one I am.''
-
-Marie-Claire van Leunen. A Handbook for Scholars.
-
-
-``Don't use footnotes in your books, Don.``
-
-Jill Knuth, 1962. The Texbook.
-
-
-``We are still groping perhaps, but we grope intelligently, like a gynecologist
-feeling for a tumor.''
-
-Nabokov, Lolita.
-
-
-``After all, it is rating ones conjectures at a very high price to roast a
-man alive on the strength of them.''
-
-Michel de Montaigne 
-
-
-``Writing is nature's way of letting you know how sloppy your thinking is.''
-
-Dick Guindon
-
-
-``A computer is simply an instrument whose music is ideas.''
-
-Alan Kay
-
-
-``In the end, everybody must learn for himself``
-
-Per Martin-Loef
-
-decide what you want to say before you worry about how you are going to say it
-..... Stracheys first law
-
-
+@; -----------------------------------------------------------------------------
+@exact|{\bibliography{bg}}|

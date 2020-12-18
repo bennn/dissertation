@@ -67,6 +67,3 @@ With both styles available, programmers can avoid severe roadblocks.
 Yet much remains to be done, especially to see how programmers comprehend
  the new types and leverage the new choices.
 
-
-@; -----------------------------------------------------------------------------
-@exact|{\bibliography{bg}}|
