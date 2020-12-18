@@ -32,5 +32,3 @@ I apply the methods to several designs and discover limitations that motivate
 This dissertation proves that @|sdeep| and @|sshallow| types can interoperate
  and measures the benefits of a three-way mix.
 
-
-Touch! 
