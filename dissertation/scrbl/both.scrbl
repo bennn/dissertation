@@ -2038,11 +2038,11 @@ This API needed generalizations to handle @|sshallow| types (@sectionref{sec:bot
 
 @subsection[#:tag "sec:both:impl:code"]{@|sDeep| and @|sShallow| Interaction}
 
-Racket supports separate compilation@~cite{tscff-pldi-2011,f-icfp-2002,ctf-sfp-2007}.
+Racket supports both separate compilation and hygienic macros@~cite{f-icfp-2002}.
 Each module in a program gets compiled to a core language individually, and
  other modules can re-use the output.
 Typed Racket cooperates with the separate compilation protocol by serializing
- the results of type checking.
+ the results of type checking@~cite{tscff-pldi-2011,ctf-sfp-2007}.
 A well-typed module compiles to untyped code (with appropriate contracts)
  and a local type environment.
 When one @|sdeep| module imports from another, it can find the type of the
@@ -2082,7 +2082,7 @@ A surprising consequence of the final protocol is that a @|sshallow| module must
  be prepared to create wrappers for its exports.
 The wrapper-making code is generated during compilation, at the end of
  type checking, but it does not run until needed by a @|sdeep| client.
-In this way, only @|sdeep| code appears to suffer from the expressiveness
+In this way, only programs that depend on @|sdeep| code suffer from the expressiveness
  limits of wrappers.
 
 
@@ -2091,7 +2091,7 @@ In this way, only @|sdeep| code appears to suffer from the expressiveness
 @|sShallow| code cannot use @|sdeep| macros.
 Re-use is desirable to avoid copying code, but it requires a static analysis
  to enforce soundness.
-This section explains the problem and suggests requirements for a solution.
+This section explains the problem and criteria for a solution.
 
 To appreciate the problem, consider the following simple macro.
 This macro applies a typed function @tt{f} to an input, and is consequently
@@ -2108,7 +2108,9 @@ Unless @tt{f} makes no assumptions about its input, such values can break
 One possible fix is to put a contract around every @|sdeep| identifier that
  appears in a macro.
 Doing so would require an analysis to find out which contracts are needed,
- and a second analysis to install the contracts (ideally without repeats).
+ and a second analysis to install contracts wisely;
+ each identifier requires a contract, but repeated occurrences of one identifier
+ should not lead to repeated contract checks.
 It should also be possible to avoid the contracts if the macro goes only to @|sdeep| clients.
 These are major changes.
 
@@ -2306,8 +2308,14 @@ Worst of all, the wrappers that @|sDeep| inserts can change hehavior.
 @subsubsection{Less-strict Any Type}
 
 @user-inspiration['(
- "https://groups.google.com/g/racket-users/c/cCQ6dRNybDg/m/CKXgX1PyBgAJ"
- "https://groups.google.com/g/racket-users/c/jtmVDFCGL28/m/jwl4hsjtBQAJ")]
+ ("Denis Michiels"
+  "error : Attempted to use a higher-order value passed as `Any` in untyped code"
+  "2018-04-16"
+  "https://groups.google.com/g/racket-users/c/cCQ6dRNybDg/m/CKXgX1PyBgAJ")
+ ("Marc Kaufmann"
+  "Typed Racket: 'Unable to protect opaque value passed as `Any`' with interesting behavior"
+  "2019-12-11"
+  "https://groups.google.com/g/racket-users/c/jtmVDFCGL28/m/jwl4hsjtBQAJ"))]
 
 The @|sdeep| type named @tt{Any} is a normal ``top'' type at compile-time,
  but it is surprisingly strict at run-time.
@@ -2316,6 +2324,8 @@ For compile-time type checking, @tt{Any} is a supertype of every other
 A function that expects an @tt{Any} input must ask occurrence-typing questions
  before it can do anything to it.
 At run-time, the @tt{Any} type is enforced with an opaque wrapper.
+Refer to @citet{fb-tr-2006} for further discussion of why the opaque wrapper is
+ necessary.
 
 @figure*[
   "fig:both:any-wrap"
@@ -2371,8 +2381,8 @@ But syntax wrappers would require changes to many parts of the Racket compiler,
  including the macro expander.
 })
 
-@|sShallow| Racket avoids the question of wrappers thanks to the @|sTransient|
- semantics.
+@|sShallow| Racket avoids the question of how to implement complex wrappers thanks to
+ the @|stransient| semantics.
 Consequently, programmers gain the ability to send new types across boundaries
  and explore new mixed-typed designs.
 
@@ -2380,8 +2390,14 @@ Consequently, programmers gain the ability to send new types across boundaries
 @subsubsection{Uniform Behavior}
 
 @user-inspiration['(
- "https://groups.google.com/g/racket-users/c/UD20HadJ9Ec/m/Lmuw0U8mBwAJ"
- "https://groups.google.com/g/racket-users/c/ZbYRQCy93dY/m/kF_Ek0VvAQAJ")]
+ ("Bertrand"
+  "Typed code from untyped code"
+  "2020-02-17"
+  "https://groups.google.com/g/racket-users/c/UD20HadJ9Ec/m/Lmuw0U8mBwAJ")
+ ("John B. Clements"
+  "index-of + TR ... parametricity problem?"
+  "2019-12-15"
+  "https://groups.google.com/g/racket-users/c/ZbYRQCy93dY/m/kF_Ek0VvAQAJ"))]
 
 Although the purpose of @|sDeep| Racket wrappers is to reject certain operations
  without changing anything else about a program, wrappers can cause some
@@ -2404,8 +2420,9 @@ Unfortunately, these input wrappers change the behavior of @tt{index-of};
   @elem{The @|sdeep| contract for an @tt{All} type can change the behavior of untyped code.}
   both:index-of]
 
-@|sShallow| Racket avoids all such changes in behavior because the @|sTransient|
- semantics does not use wrappers to enforce types.
+@|sShallow| Racket avoids all such changes in behavior,
+ including the well-know object identity issues@~cite{stff-oopsla-2012,kt-icfp-2015,vksb-dls-2014,vm-ecoop-2013},
+ because the @|stransient| semantics does not use wrappers to enforce types.
 
 
 @subsection[#:tag "sec:both:performance"]{Performance}
@@ -2417,7 +2434,7 @@ Unfortunately, these input wrappers change the behavior of @tt{index-of};
 With the @|sShallow| Racket implementation, the tradeoffs of @chapter-ref{chap:transient} disappear.
 For all our benchmarks, the choice improves the worst-case overhead of
  type boundaries.
-By implication, Typed Racket can offer a new migration story:
+By implication, Typed Racket can offer a new migration story (@appendix-ref{appendix:paths}):
 
 @nested-inset[@emph{
  use @|sshallow| types when converting an untyped application and switch to
@@ -2453,60 +2470,11 @@ After, the costs can be avoided by changing the first line (the language specifi
 The first data column reports the old worst-case overheads.
 The second columns reports the new worst-case, now that programmers can
  pick the best of @|sdeep| and @|sshallow| types.
-The final column is the quoient between the first two.
+The final column is the quotient between the first two.
 In short, the ``after'' case is always better and can be an arbitrarily large
  improvement.
 }])
 
-
-@;@subsubsection[#:tag "sec:both:perf:path"]{Migration Paths}
-@;
-@;@(let* ([bm* '(sieve forth fsm fsmoo mbta morsecode
-@;               zombie dungeon jpeg zordoz lnm suffixtree
-@;               kcfa snake take5)]
-@;        [D 3]
-@;        [PT (get-mixed-path-table D bm*)]
-@;        [deep-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (caddr path-info))) (car path-info))]
-@;        [shallow-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr path-info))) (car path-info))]
-@;        [mix-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr (cdr path-info)))) (car path-info))]
-@;        [_md (unless (= 1 (length mix-dead*)) (printf "HELP expected one mix-dead row got ~s~n" mix-dead*))]
-@;        [mix-path-bm 'fsm]
-@;        [mix-best-D (find-lowest-3dpath-D mix-path-bm)]
-@;        )
-@;@list[
-@;@figure*[
-@;  "fig:both:mixed-path"
-@;  @elem{Percent of @ddeliverable[D] paths in three lattices:
-@;   the @|sdeep|-typed lattice, the @|sshallow|-typed lattice,
-@;   and a hybrid that chooses the best of @|sdeep| or @|sshallow| types at each point.}
-@;  @render-mixed-path-table[PT]
-@;]
-@;@elem{
-@;@|sShallow| types make step-by-step migration more practical in Typed Racket.
-@;Originally, with @|sdeep| types, a programmer who adds types one module at
-@; a time is likely to hit a performance wall; that is, a few configurations
-@; along the migration path are likely to suffer a large overhead.
-@;Adding more @|sdeep| types is a sure way to reduce the overhead,
-@; especially if the programmer adds the best-possible types (@figure-ref{fig:example-path}),
-@; but these multi-step pitfalls contradict the promise of migratory typing.
-@;High overhead makes it hard to tell whether the new types are compatible with
-@; the rest of the codebase.
-@;
-@;By choosing @|sdeep| or @|sshallow| types at each point along a path, the
-@; worst-case overhead along migration paths goes down.
-@;@Figure-ref{fig:both:mixed-path} quantifies the improvement by showing the
-@; percent of all paths that are @ddeliverable[D] at each step.
-@;With @|sdeep| types alone, all paths in @integer->word[(length deep-dead*)]
-@; benchmarks hit a point that exceeds the @~a[D]x limit.
-@;With @|sshallow| types alone, all paths in @integer->word[(length shallow-dead*)] benchmarks
-@; exceed the limit as well.
-@;With the mix, however, only @integer->word[(length mix-dead*)] benchmark (@bm[(car mix-dead*)])
-@; has zero @ddeliverable[D] paths.
-@;Fine-grained combinations of @|sdeep| and @|sshallow| types can further improve
-@; the number of viable migration paths.
-@;In @bm[mix-path-bm], for example, every path is @ddeliverable[mix-best-D] if the programmer
-@; picks the fastest-running mix of @|sdeep| and @|sshallow| types for each configuration.
-@;}])
 
 
 @subsubsection[#:tag "sec:both:perf:both"]{Case Studies: @|sDeep| and @|sShallow|}
@@ -2518,6 +2486,7 @@ In short, the ``after'' case is always better and can be an arbitrarily large
 Early experience with @|sShallow| Racket shows that the combination of
  @|sdeep| and @|sshallow| types can be better that either alone.
 Here are three motivating case studies.
+@Appendix-ref{appendix:paths} contains additional data.
 
 
 @parag{synth}
@@ -2583,8 +2552,8 @@ Moving the rest of the library from @|sdeep| to @|sshallow| types adds only a sl
 @parag{External Data}
 Typed code that deals with data from an external source is often better off
  with @|sshallow| types because they lazily validate data as it is accessed.
-By contrast, the @|sdeep|-type guarantee requires a full traversal to validate
- data as soon as it reaches a type boundary.
+By contrast, Typed Racket's implementation of @|sdeep| types eagerly
+ traverses a data structure as soon as it reaches a type boundary.
 If the boundary types allow mutable values, then the traversal is even more
  expensive because it creates wrappers as it copies the dataset.
 
@@ -2608,56 +2577,6 @@ Such libraries are ideal, but until we have them for the next data exchange
  format (SQL, XML, YAML, ...) @|sshallow| types get the job done with the parsers
  that are available today.
 
-
-@;@parag{GTP Benchmarks}
-@;
-@;@(let* ((DDD (get-3d-table '(fsm morsecode jpeg kcfa zombie zordoz)))
-@;        (num-DDD (length DDD))
-@;        (S (tr:benchmark-name->performance-info 'fsm tr:default-rkt-version))
-@;        (fsm-num-modules (performance-info->num-units S))
-@;        (fsm-num-configs (expt 2 fsm-num-modules))
-@;        (fsm-non-mixed (+ 1 fsm-num-modules))
-@;        (fsm-mixed (- fsm-num-configs fsm-non-mixed)))
-@;@list[
-@;@elem{
-@;  For @integer->word[num-DDD] small benchmarks, I measured the full
-@;   space of @${3^N} configurations that can arise by combining @|sdeep|
-@;   and @|sshallow| types.
-@;  Each configuration ran successfully, affirming that @|sdeep| and @|sshallow|
-@;   can interoperate.
-@;  Furthermore, a surprising percent of all @${2^N} mixed-typed configurations
-@;   in each benchmark ran fastest using a mixture of @|sdeep| and @|sshallow|
-@;   types:
-@;}
-@;@(apply itemlist
-@;   (for/list ((d-row (in-list DDD))
-@;              (i (in-naturals 1)))
-@;     (item (format "~a% of " (cadr d-row))
-@;           (bm (car d-row))
-@;           (format " configurations~a"
-@;                   (cond
-@;                    [(= i num-DDD)
-@;                     "."]
-@;                    [(= (+ i 1) num-DDD)
-@;                     "; and"]
-@;                    [else
-@;                     ";"])))))
-@;@elem{
-@;@|noindent|In @bm{fsm}, for example, there are @integer->word[fsm-num-configs] mixed-typed configurations.
-@;@Integer->word[fsm-non-mixed] of these cannot mix @|sdeep| and @|sshallow|
-@; because they contain at most one typed module.
-@;Of the remaining @~a[fsm-mixed] configurations, over half run fastest with a
-@; combination of @|sdeep| and @|sshallow| types.
-@;}
-@;])
-
-
-@; Last case study, three way lattice, how many points best with mix?
-@; Prohibitive experiment, now 3n for normal points a whole lattice to explore at
-@;  each, but also the both files can be toggled making an extra 2m for the m both
-@;  files.
-@; Those are the adaptors, extreme example is kcfa adds 4 for adaptor.
-@; future work
 
 
 @subsubsection[#:tag "sec:both:perf:release"]{Release Information}

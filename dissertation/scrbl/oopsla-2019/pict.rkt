@@ -48,7 +48,7 @@
 (define output-y 12)
 
 (define untyped-color "white")
-(define typed-color "LightGray")
+(define typed-color "Gainsboro")
 (define success-color "Forest Green")
 (define error-color "Firebrick")
 
@@ -560,20 +560,29 @@
         (let* ((sep (blank med-x-sep 0))
                (pp+ (hc-append 4 acc sep pp)))
           (pin-arrow-line 6 pp+ sep lc-find sep rc-find #:line-width 2 #:color "black"))))
-    (define (make-x-step #:border-color bc str*)
+    (define (make-x-step #:border-width [bw 4] #:border-color bc str*)
       (add-rounded-border
-        #:radius 8 #:frame-color bc #:frame-width 4 #:background-color "white"
+        #:radius 8 #:frame-color bc #:frame-width bw #:background-color "white"
         #:x-margin tiny-x-sep #:y-margin tiny-y-sep
         (apply
           vc-append 4
           (map (lambda (str) (text str "Inconsolata" 14)) str*))))
     (define (make-natural-step str)
       (make-x-step #:border-color "light gray" str))
-    (make-pipeline
-      (make-natural-step '("Expand"))
-      (make-natural-step '("Typecheck" "Kernel"))
-      (make-natural-step '("Generate" "Contracts"))
-      (make-natural-step '("Type-Based" "Optimizer")))))
+    (define (make-transient-step str)
+      (make-x-step #:border-width 2 #:border-color "light gray" str))
+    (define tr-base
+      (make-pipeline
+        (make-natural-step '("Expand"))
+        (make-natural-step '("Typecheck" "Kernel"))
+        (tag-pict (make-natural-step '("Generate" "Contracts")) 'ctc)
+        (make-natural-step '("Type-Based" "Optimizer"))))
+    (define below-step
+      (make-transient-step '("Insert Shape Checks")))
+    (ppict-do
+      (vc-append (+ 6 (pict-height below-step)) tr-base (blank))
+      #:go (at-find-pict 'ctc cb-find 'ct #:abs-y 8)
+      below-step)))
 
 (define transient:defense
   (typed-codeblock '(
@@ -686,7 +695,7 @@
       "  (box '$))"
       ""
       "(define any : Any b)")
-    '("(set-box! any 42)")
+    '("(set-box! any 'qq)")
     #false
     "Deep: cannot set Any-wrapped box"
     #:extra-x 215))

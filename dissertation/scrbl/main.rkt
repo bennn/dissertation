@@ -161,12 +161,26 @@
 (define (citet . txt*)
   (exact (list "\\citet{" txt* "}")))
 
-(define (user-inspiration url*)
+(define ui-name car)
+(define ui-title cadr)
+(define ui-date caddr)
+(define ui-url cadddr)
+
+(define (user-inspiration data*)
+  (define num-msgs (length data*))
   (nested-inset
-    (list (emph "Inspired by:")
+    (list (emph (format "Inspired by ~a messages to the Racket-Users mailing list:" num-msgs))
           (apply itemlist
-                 (for/list ((url (in-list url*)))
-                   (item (format-url url)))))))
+                 (for/list ((ui (in-list data*)))
+                   (item
+                     (elem (emph (ui-title ui))
+                           ", sent by "
+                           (ui-name ui)
+                           " on "
+                           (ui-date ui)
+                           ". ")
+                     (linebreak)
+                     (format-url (ui-url ui))))))))
 
 (define (jointwork #:people* people* #:paper* [paper* '()] #:extra [e-elem #f])
   (nested-inset

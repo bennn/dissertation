@@ -114,22 +114,21 @@ TODO
 - [X] st2 6.2.1 cite stepping-stones ... You Want When, Advanced Mac., Lang as Lib
 - [X] st2 6.2.2 unclear call_f explanation, rewrite
 - [X] st2 6.2.3 tu-utils from Neil Toronto, give credit
-- [ ] st2 fig81 change 42 to symbol, thats what we'd like to allow but overapproximately reject
-- [ ] st2 xx cite Findler Blume about Any ... least restrictive contract ... any/c vs none/c
-- [ ] st2 (No Missing Wrappers) cite wrapper-eq papers ... Thiemann, Miller ... search for more
-- [ ] st2 (External Data) "Deep is eager" major simplification ... refer to TR choices instead
-- [ ] st2 7.2 vitousek is not whole-program, be clear about their boundary assumption
-- [ ] st2 7.2 vitousek reports no-jit results, already answers the "jit essential" question
+- [X] st2 fig81 change 42 to symbol, thats what we'd like to allow but overapproximately reject
+- [X] st2 xx cite Findler Blume about Any ... least restrictive contract ... any/c vs none/c
+- [X] st2 (No Missing Wrappers) cite wrapper-eq papers ... Thiemann, Miller ... search for more
+- [X] st2 (External Data) "Deep is eager" major simplification ... refer to TR choices instead
+- [X] st2 7.2 vitousek is not whole-program, be clear about their boundary assumption
+- [X] st2 7.2 vitousek reports no-jit results, already answers the "jit essential" question
       the wonder is whether non-jit can do so well
-- [ ] st2 7.3 cite Allende Garcia Tanter about ooplsa ... fortified types ... 
-- [ ] st2 8 say where quote came from, if anon. survey then fine
-- [ ] cite Gray etal
-
-- [ ] st2 6.3.1 move emails to citations, add title date author, give credit
+- [X] st2 7.3 cite Allende Garcia Tanter about ooplsa ... fortified types ... 
+- [X] st2 8 say where quote came from, if anon. survey then fine
+- [X] cite Gray etal
+- [X] st2 6.3.1 move emails to citations, add title date author, give credit
       "people actually wrote them" instead of simple links
-- [ ] st fig5 colors, pick new ones
-- [ ] st2 sec 5.3 fig 51? tr-pipeline, draw forks for transient
+- [X] st2 sec 5.3 fig 51? tr-pipeline, draw forks for transient
 
+- [-] st fig5 colors, pick new ones
 - [-] st2 fig65 remove decimals from big numbers (dungeon) try a color scale
           or at least bold for bad ones
 - [-] st add Sorbet to figure, gotta check the implementation for parts
@@ -141,34 +140,33 @@ TODO
 - [ ] push MF edits up to JFP
 
 Style
-- [ ] goddammit typed-color too dark in oopsla-2019/pict
+- [X] goddammit typed-color too dark in oopsla-2019/pict
 - [X] chapter or section for references? no
 - [ ] fig 62+, bad titles for deep vs shallow exact plots
 - [ ] shallow/CACHE too big, why are files so huge?
       could zip them
 - [ ] hyperlinks broken because scribble labels
-- [ ] paragraph style looks bad with subsections
+- [-] paragraph style looks bad with subsections
 - [ ] why not scribble/text ???
 - [ ] color-code ideas:
   - sec 2 typed=black, untyped=white
   - sec 3 typed=grey, untyped=white ... moving beyond black/white but not sure yet
   - beyond : multi-color for typed components, depends on semantics
   - apply to figures in BOTH chapter
-- [ ] print "x" after overheads
+- [X] print "x" after overheads
 - [X] too many exercises, looks like everything has holes, save those for end
 - [X] freeze body for exact plots ,,, also they are too wide! reduce max-width by 1 or 2?
 - [X] careful about common lisp characterization ... free to ignore, opt non-mand
 - [X] start every chapter with acks, papers, people
-- [ ] MF has boxes around hyperlinks why
-- [ ] soft typing, remove bullet points
+- [-] MF has boxes around hyperlinks why
+- [X] soft typing, remove bullet points
 - [X] 2.2.2 still awkward
 - [ ] 2.2.3 very awkward ... when do I have time to fix?!
-- [ ] add x to all overheads?
 
 MF edits, leftover
 - [ ] (p3) 1 compare sim / dif. in the "two properties" paragraph ... make it stronger
 - [ ] (p13) 3 novel configurations in between
-- [ ] (p14) 3 experience with TR section
+- [X] (p14) 3 experience with TR section
 - [X] (p45) 3 cache?
 - [ ] (p53) 4 think about solid vs dashed arrows
 - [ ] (p54) 4 specify error, in fig?

@@ -56,17 +56,23 @@ Without the need to filter, the blame map does not need to store types or
 @section{Speed up Fully-Typed @|sTransient|}
 
 Despite the large improvement relative to @|snatural|, the cost of
- @|sshallow| @|stransient| types is still high.
+ @|stransient| types is still high.
 The fully-typed configurations of the benchmarks make this problem apparent (@figureref{fig:transient:ratio});
  in the worst case, @|stransient| is 30x slower than untyped even with type-directed optimizations.
 @|sTransient| needs a way to reduce the cost of shape checks.
 
-@citet{vsc-dls-2019} have demonstrated that a whole-program static analysis
- and a tracing JIT compiler can greatly improve performance in Reticulated Python.
-What remains to be seen is how well a compositional analysis can do, and
- whether the JIT is essential.
+@citet{vsc-dls-2019} have demonstrated that a static analysis
+ and a tracing JIT compiler can greatly improve performance in Reticulated Python
+ under the assumption that the program does not interact with un-analyzed
+ ``open world'' code.
+The work sets a high bar; every benchmark runs within 1.25x overhead.
+What remains to be seen is how well an analysis can do without the closed-world
+ assumption, and whether ahead-of-time techniques can replicate the speedups
+ enabled by the JIT.
+
 Earlier versions of @|sShallow| Racket ran much slower due to redundant checks
- and the overhead of contract library combinators; perhaps further analysis
+ and the overhead of contract library combinators.
+Perhaps further analysis
  and ahead-of-time optimization can close the gap between fully-typed @|sshallow|
  and @|sdeep|.
 Starting points for such an analysis include occurrence typing@~cite{tf-icfp-2010},
@@ -170,6 +176,13 @@ If a language can create wrappers in @|sshallow| code, however, then the
  values; that is, the interactions do not require a static analysis
  because the wrappers carry information.
 
+A wholly-different approach is to adapt the idea of confined types@~cite{afgt-oopsla-2014}.
+If the type system can prove that a value originates in typed code
+ and never escapes to untyped, then @|sdeep| and @|sshallow| can freely share
+ the value.
+In particular, a @|sshallow| function with a confined-type domain may
+ not require any shape checks.
+
 
 @section{Evaluate Alternative Shape Designs}
 
@@ -257,6 +270,21 @@ If performance is the only concern, then an implementation can let the dynamical
   A language of blame types may be necessary to guide choices.
   Measure the quality of errors and the performance cost that results from the
    extra bookkeeping.
+}
+@item{
+  Build a method to help programmers find the best mixture of @|sdeep| and
+   @|sshallow| types in a codebase.
+  Static analysis may suffice because the goal is to predict relative
+   performance, not the absolute cost@~cite{ccw-icfp-2018}.
+  Running the untyped configuration can provide data about the number of
+   boundary-crossings that occur.
+  Running the configurations with exactly one typed module may help
+   predict the cost of interactions, especially for @|stransient|@~cite{grmhn-vmil-2019}.
+}
+@item{
+  The cost of a @|sdeep| boundary depends heavily on its type,
+   and an existential type is often cheaper than types that exposes internal details.
+  Design a refactoring that converts a transparent typed API to use opaque existentials.
 }
 @;@item{
 @;Summarize the different @|snatural| semantics in the literature as a

@@ -57,13 +57,14 @@ The step from @emph{untyped-or-typed} to @emph{mixed-typed} has presented a
  serious challenge to the conventional wisdom about static types.
 Standard techniques that realize strong guarantees and fast performance in a fully-typed
  setting yield weaker guarantees and slower running times in mixed programs.
-In the words of one Racket programmer, mixed languages ``seemed to combine the
- best of both worlds .... but in practice seems to combine mainly the
+In the words of one anonymous Racket survey respondent, mixed languages ``seemed to combine the
+ best of both worlds .... but in practice seem to combine mainly the
  downsides'' because of friction between static and dynamic typing.
 Methods and measurements have improved our understanding of the design space
- and articulated the benefits of combining @|sdeep| and @|sshallow|
- types.
-With both styles available, programmers can avoid severe roadblocks.
+ and articulated the benefits of mixing @|sdeep| and @|sshallow|
+ types to soften the edges.
+With both styles available, programmers can avoid severe performance and
+ expressiveness issues.
 Yet much remains to be done, especially to see how programmers comprehend
  the new types and leverage the new choices.
 

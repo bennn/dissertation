@@ -73,7 +73,7 @@ As validation, this chapter evaluates the performance of two
 
 The goal of performance evaluation is to predict the experiences of future
  users.
-Intuition suggests that the users of a mixed-typed language will begin
+Intuition suggests that the users of migratory typing will begin
  with an untyped codebase and add types step-by-step.
 Experience with Typed Racket supports the intuition.
 Programmers add types in an incremental fashion and experiment with all sorts of combinations.

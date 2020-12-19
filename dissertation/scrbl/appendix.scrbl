@@ -1,9 +1,17 @@
 #lang greenman-thesis/include
 
 @(require
+   (prefix-in tr: greenman-thesis/jfp-2019/main)
    (only-in gtp-plot/plot *OVERHEAD-MAX*)
-   (only-in greenman-thesis/jfp-2019/main render-relative-overhead-plot transient-rkt-version)
-   (only-in greenman-thesis/shallow/main SHALLOW-CURRENT-BENCHMARK* s:cache-dir)
+   (only-in greenman-thesis/shallow/main
+     SHALLOW-CURRENT-BENCHMARK*
+     get-mixed-path-table
+     render-mixed-path-table
+     get-mixed-worst-table
+     render-mixed-worst-table
+     find-lowest-3dpath-D
+     get-3d-table
+     s:cache-dir)
    (only-in file/glob glob)
    (only-in pict text vl-append table bitmap lt-superimpose blank scale)
    (prefix-in sample: greenman-thesis/validate-sample/main))
@@ -104,13 +112,14 @@ Whereas the plots in @chapter-ref{sec:transient:overhead} stop at 20x overhead,
   Deep vs. Shallow
   }
   ""
-  render-relative-overhead-plot
+  tr:render-relative-overhead-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
-    (cons bm-name (cons transient-rkt-version stransient)))
+    (cons bm-name (cons tr:transient-rkt-version stransient)))
   s:cache-dir
 ])
 
 
+@exact{\clearpage}
 @section[#:tag "appendix:rules"]{Missing Rules}
 
 @Figure-ref{fig:appendix:surface-type} and @figure-ref{fig:appendix:completion}
@@ -123,7 +132,7 @@ The model in @chapter-ref{chap:design} avoids this technicality by
 
 @figure*[
   "fig:appendix:surface-type"
-  @elem{Additional surface typing judgment rules}
+  @elem{Additional surface typing rules}
 
 @exact|{
 \begin{mathpar}
@@ -293,6 +302,102 @@ The model in @chapter-ref{chap:design} avoids this technicality by
 
 \end{mathpar}
 }|]
+
+
+@exact{\clearpage}
+@section[#:tag "appendix:paths"]{More Evidence for @|sDeep| and @|sShallow|}
+
+@subsection{Migration Paths}
+
+@(let* ([bm* '(sieve forth fsm fsmoo mbta morsecode
+               zombie dungeon jpeg zordoz lnm suffixtree
+               kcfa snake take5)]
+        [D 3]
+        [PT (get-mixed-path-table D bm*)]
+        [deep-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (caddr path-info))) (car path-info))]
+        [shallow-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr path-info))) (car path-info))]
+        [mix-dead* (for/list ((path-info (in-list PT)) #:when (string=? "0" (cadddr (cdr path-info)))) (car path-info))]
+        [_md (unless (= 1 (length mix-dead*)) (printf "HELP expected one mix-dead row got ~s~n" mix-dead*))]
+        [mix-path-bm 'fsm]
+        [mix-best-D (find-lowest-3dpath-D mix-path-bm)]
+        )
+@list[
+@figure*[
+  "fig:both:mixed-path"
+  @elem{Percent of @ddeliverable[D] paths in three lattices:
+   the @|sdeep|-typed lattice, the @|sshallow|-typed lattice,
+   and a hybrid that chooses the best of @|sdeep| or @|sshallow| types at each point.}
+  @render-mixed-path-table[PT]
+]
+@elem{
+@|sShallow| types make step-by-step migration more practical in Typed Racket.
+Originally, with @|sdeep| types, a programmer who adds types one module at
+ a time is likely to hit a performance wall; that is, a few configurations
+ along the migration path are likely to suffer a large overhead.
+Adding more @|sdeep| types is a sure way to reduce the overhead,
+ especially if the programmer adds the best-possible types (@figure-ref{fig:example-path}),
+ but these multi-step pitfalls contradict the promise of migratory typing.
+High overhead makes it hard to tell whether the new types are compatible with
+ the rest of the codebase.
+
+By choosing @|sdeep| or @|sshallow| types at each point along a path, the
+ worst-case overhead along migration paths goes down.
+@Figure-ref{fig:both:mixed-path} quantifies the improvement by showing the
+ percent of all paths that are @ddeliverable[D] at each step.
+With @|sdeep| types alone, all paths in @integer->word[(length deep-dead*)]
+ benchmarks hit a point that exceeds the @~a[D]x limit.
+With @|sshallow| types alone, all paths in @integer->word[(length shallow-dead*)] benchmarks
+ exceed the limit as well.
+With the mix, however, only @integer->word[(length mix-dead*)] benchmark (@bm[(car mix-dead*)])
+ has zero @ddeliverable[D] paths.
+Fine-grained combinations of @|sdeep| and @|sshallow| types can further improve
+ the number of viable migration paths.
+In @bm[mix-path-bm], for example, every path is @ddeliverable[mix-best-D] if the programmer
+ picks the fastest-running mix of @|sdeep| and @|sshallow| types for each configuration.
+}])
+
+@subsection{Case Study: GTP Benchmarks}
+
+@(let* ((DDD (get-3d-table '(fsm morsecode jpeg kcfa zombie zordoz)))
+        (num-DDD (length DDD))
+        (S (tr:benchmark-name->performance-info 'fsm tr:default-rkt-version))
+        (fsm-num-modules (performance-info->num-units S))
+        (fsm-num-configs (expt 2 fsm-num-modules))
+        (fsm-non-mixed (+ 1 fsm-num-modules))
+        (fsm-mixed (- fsm-num-configs fsm-non-mixed)))
+@list[
+@elem{
+  For @integer->word[num-DDD] small benchmarks, I measured the full
+   space of @${3^N} configurations that can arise by combining @|sdeep|
+   and @|sshallow| types.
+  Each configuration ran successfully, affirming that @|sdeep| and @|sshallow|
+   can interoperate.
+  Furthermore, a surprising percent of all @${2^N} mixed-typed configurations
+   in each benchmark ran fastest using a mixture of @|sdeep| and @|sshallow|
+   types:
+}
+@(apply itemlist
+   (for/list ((d-row (in-list DDD))
+              (i (in-naturals 1)))
+     (item (format "~a% of " (cadr d-row))
+           (bm (car d-row))
+           (format " configurations~a"
+                   (cond
+                    [(= i num-DDD)
+                     "."]
+                    [(= (+ i 1) num-DDD)
+                     "; and"]
+                    [else
+                     ";"])))))
+@elem{
+@|noindent|In @bm{fsm}, for example, there are @integer->word[fsm-num-configs] mixed-typed configurations.
+@Integer->word[fsm-non-mixed] of these cannot mix @|sdeep| and @|sshallow|
+ because they contain at most one typed module.
+Of the remaining @~a[fsm-mixed] configurations, over half run fastest with a
+ combination of @|sdeep| and @|sshallow| types.
+}
+])
+
 
 
 @; -----------------------------------------------------------------------------

@@ -434,8 +434,10 @@ Micro/macro is a useful mnemonic for the first dimension,
 @section[#:tag "sec:why:history"]{Recent History}
 
 @citet{t-thesis-2010} developed migratory typing alongside Typed Racket.
-The basic ideas arose from work on soft typing@~cite{f-thesis-1992,w-thesis-1994},
+The basic ideas arose from work on
+ soft typing@~cite{f-thesis-1992,w-thesis-1994},
  higher-order contracts@~cite{f-thesis-2002},
+ language interoperability@~cite{gff-oopsla-2005},
  and modular set-based analysis@~cite{m-thesis-2006}.
 Subsequent work adapted migratory typing to
  multi-paradigm language features:

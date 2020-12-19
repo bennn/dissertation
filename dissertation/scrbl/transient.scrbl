@@ -638,7 +638,7 @@ A related question, though, is whether @|stransient| is better off with
 
 @figure*[
   "fig:transient:tr-overview"
-  @elem{Stages in the @|sDeep| Racket compiler. @|sShallow| can re-use the expander and type checker in full, and parts of the optimizer.}
+  @elem{Stages in the @|sDeep| Racket compiler. @|sShallow| can re-use the expander and type checker in full, and parts of the optimizer, but must replace contract generation with a rewriting pass.}
   tr:compiler
 ]
 
