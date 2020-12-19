@@ -113,8 +113,8 @@ Our goal is a systematic comparison of type guarantees across the wide design sp
 Such a comparison is possible because, despite the variety, the different guarantees
  arise from choices about how to enforce types at the boundaries between
  type-checked code and arbitrary dynamically-typed code.
-To illustrate, the following three subsections discuss type boundary examples in the
- context of for languages:
+To illustrate, the following three subchapters discuss type boundary examples in the
+ context of four languages:
   Flow@~citep{cvgrl-oopsla-2017},
   Reticulated@~citep{vss-popl-2017},
   Typed Racket@~citep{tfffgksst-snapl-2017},

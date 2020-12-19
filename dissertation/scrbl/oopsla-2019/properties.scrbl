@@ -93,8 +93,8 @@ Furthermore, the type-centric nature of the equivalences offers no direct
  information to the untyped side.
 Authors of untyped code can at best deduce that the behavior of their programs
  cannot be affected by certain changes in typed libraries.
-As a final remark, techniques for proving equivalence preservation are an
- active area of research but results so far indicate that they require a lot of
+As a final remark, techniques for proving that the chosen equivalences hold are an
+ active area of research but results so far indicate that they require
  ingenuity to adapt from one linguistic setting to another.
 
 Another well-studied property is the @emph{blame theorem}@~citep{tf-dls-2006, wf-esop-2009, afsw-popl-2011,

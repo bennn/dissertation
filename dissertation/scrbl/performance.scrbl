@@ -62,7 +62,7 @@ This chapter presents a systematic and scalable method to assess the performance
  of a mixed-typed language.
 The method summarizes performance for the exponentially-many ways that a programmer
  can mix typed and untyped code by focusing on a binary quality measure.
-Informally, a mixture is good if runs within a user-supplied overhead limit.
+Informally, a mixture is good if it runs within a user-supplied overhead limit.
 Random sampling can approximate the proportion of good mixtures for programs
  in which exhaustive evaluation is not practical.
 As validation, this chapter evaluates the performance of two
@@ -322,7 +322,8 @@ The added flexibility means that an experimenter must choose whether to explore:
 
 For example, @citet{tfgnvf-popl-2016} evaluate Typed Racket at the granularity
  of modules.
-@citet{vss-popl-2017} evaluate Reticulated at the granularity of whole programs,
+@citet{vss-popl-2017} evaluate Reticulated at the granularity of whole programs
+ (missing all the ways that a programmer can mix types),
  and @citet{gm-pepm-2018} evaluate Reticulated at the granularity of whole
  functions and whole class field sets (@section-ref{sec:rp:protocol}).
 
@@ -620,9 +621,9 @@ Typed Racket benchmarks with this issue include additional contextual
 @; -----------------------------------------------------------------------------
 @section[#:tag "sec:tr:evaluation"]{Application 1: Typed Racket}
 
-This section presents an exhaustive evaluation of Typed Racket v7.7
+This subchapter presents an exhaustive evaluation of Typed Racket v7.7
  on a set of @integer->word[tr:num-benchmarks] benchmark programs;
- namely, the GTP suite v@|tr:gtp-version| (@|gtp-url|).
+ namely, the @|GTP| suite v@|tr:gtp-version| (@|gtp-url|).
 The main purpose of this evaluation is to confirm that the
  exhaustive method provides a useful summary of a mixed-typed language.
 A secondary result is that it reveals performance challenges
@@ -658,10 +659,11 @@ The processor has @id[proc-ram] RAM and @integer->word[num-proc-cores] cores,
 
 @subsection[#:tag "sec:tr:benchmarks"]{Benchmarks}
 
-This section summarizes @integer->word[tr:num-benchmarks] benchmark programs.
-These benchmarks are sorted in order of increasing size, as measured by the
+The @|GTP| benchmark suite consists of @integer->word[tr:num-benchmarks]
+ programs.
+Below, these benchmarks appear in order of increasing size, as measured by the
  number of migratable modules.
-Each summary comes with four fields:
+Each comes with a summary and four fields:
  @emph{Origin} indicates the benchmark's source,
  @emph{Purpose} describes what it computes,
  @emph{Author} credits the original author,
@@ -878,7 +880,7 @@ The SLOC column reports lines of code in the fully-typed configuration.
 With type annotations, these benchmarks gain between 10 and 300 lines of
  code.
 For details about the graph structure of each benchmark and
- the specific types on boundaries, refer to the GTP web page: @|gtp-url|.
+ the specific types on boundaries, refer to the @|GTP| web page: @|gtp-url|.
 
 @figure*["fig:tr:static-benchmark" @elem{
   Static characteristics of the migratable code in the @|GTP| benchmarks.
@@ -1034,7 +1036,7 @@ One would expect fast performance from @|stransient| on mixed-typed code.
 The first-ever evaluation, however, only reports data for untyped and fully-typed
  programs@~cite{vss-popl-2017}.
 
-This section presents a systematic evaluation of
+This subchapter presents a systematic evaluation of
  Reticulated without its experimental blame algorithm@~cite{gm-pepm-2018}.
 The data offers a big-picture view of @|stransient|,
  further validates the approximate method,
@@ -1616,9 +1618,8 @@ The method presented in this chapter targets our most effective answer
  to the question of how to evaluate the performance of a mixed-typed language.
 In particular, the notion of @ddeliverable{} configurations is a
  clear and scalable way to summarize performance.
-But a mixed-typed language has other interesting properties.
-This section presents visualizations that help answer different, targeted
- questions.
+A mixed-typed language has other interesting properties, however,
+ and these call for tailored visualizations.
 
 
 @subsection[#:tag "sec:perf:exact"]{Exact Runtime Plots}
@@ -1689,7 +1690,7 @@ More precisely, a point @${(X, Y)} shows the overhead in both systems.
 The first coordinate, @${X}, is the overhead with collapsible.
 The @${Y} coordinate is the baseline overhead, without collapsible.
 If collapsible always led to a lower overhead, then all
- point would lie above the @${X=Y} line (because @${X < Y}).
+ points would lie above the @${X=Y} line (because @${X < Y} when collapsible wins).
 }])
 
 

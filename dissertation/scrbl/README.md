@@ -75,6 +75,7 @@ TODO
        add to sec 7
 - [X] st "big" some intuition for CM ... yes the labels are right but why
       do we care? maybe copy from chap 4
+- [X] aa see pdf
 
 - [ ] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks

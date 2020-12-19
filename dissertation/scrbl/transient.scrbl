@@ -286,18 +286,23 @@ The goal is to insert enough checks to create a target-language term with
 
 @exact|{
 \theoremsketch{completion correctness}{
-  If\/ ${\sWT \sexpr_0 : \stype_0}$
-  then\/ ${\sWT \sexpr_0 : \stype_0 \compilesto \sexpr_1}$
-  and\/ ${\sWTtag \sexpr_1 : \tagof{\stype_0}}$.
+  If\/ ${\stypeenv \sWT \sexpr_0 : \stype_0}$
+  then\/ ${\stypeenv \sWT \sexpr_0 : \stype_0 \compilesto \sexpr_1}$
+  and\/ ${\stypeenv \sWTtag \sexpr_1 : \tagof{\stype_0}}$.
 }
 }|
 
 @|noindent|@exact{\Lemmaref{lemma:both:completion}} adapts the theorem sketch to a model.
 
 The first benefit of this theorem is that it rules out nonsensical completions.
+The surface typing judgment @${(\sWT)} establishes basic properties
+ that a sensible completion must preserve.
 By contrast, a type elaboration that converts all surface terms to the
  integer @${42} satisfies every theorem used to validate the original
- @|stransient|@~cite{vss-popl-2017}.
+ @|stransient| because elaboration is the only method for analyzing the
+ surface syntax@~cite{vss-popl-2017}.
+(This meta-theoretic lapse made it difficult to adapt @|stransient| to a
+ new language of types.)
 
 Second, the clear requirement makes it easier to adapt the idea of @|stransient|
  to a new language.
@@ -707,7 +712,7 @@ Actual shapes in the implementation do not use contract combinators such
 @item{
   @example-type-shape[
     #:type "(List Real Real)"
-    #:shape "(and/c list? (λ(v) (= 2 (length l))))"
+    #:shape "(and/c list? (λ(v) (= 2 (length v))))"
     #:cost "O(v)"
   ]
 

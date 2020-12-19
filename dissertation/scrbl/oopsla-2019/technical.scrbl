@@ -600,7 +600,7 @@ The four shapes, @${\stag}, correspond both to type constructors and to value
  constructors.
 Half of the correpondence is defined by the @${\tagof{\cdot}} metafunction,
  which maps a type to a shape.
-The @${\sshallow} metafunction is the other half;
+The @${\sshapematch} metafunction is the other half;
  it checks the top-level shape of a value.
 
 Both metafunctions use an @${\,\cdot \in \cdot\,} judgment,
@@ -613,11 +613,11 @@ The term @${(\efun{\svar}{\svalue})}, for instance, describes the
  set @${\eset{(\efun{\svar_i}{\svalue_j}) \mid \svar_i \in \svar \wedge \svalue_j \in \svalue}}
  of all functions that return some value.
 
-The @${\sshallow} metafunction also makes reference to two value constructors
+The @${\sshapematch} metafunction also makes reference to two value constructors
  unique to the higher-order evaluation syntax:
  guard @${(\emon{\sbnd}{\svalue})} and trace @${(\ehist{\sbset}{\svalue})} wrappers.
 A guard has a shape determined by the type in its boundary.
-A trace is metadata, so @${\sshallow} looks past it.
+A trace is metadata, so @${\sshapematch} looks past it.
 @Sectionref{sec:design:semantic-framework} informally justifies the design, and
  @figureref{fig:evaluation-ho} formally introduces these wrapper values.
 
@@ -732,7 +732,7 @@ A trace wrapper @${(\ehist{\sbset}{\svalue})} attaches metadata to a value.
 
 Type-enforcement strategies typically use guard wrappers to constrain the
  behavior of a value.
-For example, the @|cname| semantics wraps any pair that crosses a boundary
+For example, the upcoming @|cname| semantics wraps any pair that crosses a boundary
  with a guard; this wrapper validates the elements of the pair upon
  future projections.
 Trace wrappers do not constrain behavior.

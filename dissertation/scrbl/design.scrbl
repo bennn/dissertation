@@ -22,7 +22,7 @@ To a first approximation, the designs fall into four broad strategies:
     @emph{Transient} inserts shape checks in type-checked code
      to guarantee that operations cannot not ``go wrong'' due to
      untyped values@~citep{vss-popl-2017,v-thesis-2019}.
-    A shape check validates a top-level value contstructor with respect to a
+    A shape check validates a top-level value constructor with respect to a
      top-level type constructor, which is just enough for this notion of safety.
   } @item{
     @emph{Natural} enforces types with higher-order checks
@@ -66,7 +66,7 @@ With this semantic framework, one can directly observe the possible behaviors
 
 The chosen models illustrate @emph{natural} (@${\nscr}), @emph{transient} (@${\tscr}),
  @emph{optional} (also known as @emph{erasure}, @${\escr}),
- and three other strategies (@${\cscr}, @${\fscr}, @${\ascr}) that demenstrate how to fill design gaps.
+ and three theoretical strategies (@emph{co-natural} @${\cscr}, @emph{forgetful} @${\fscr}, and @emph{amnesic} @${\ascr}) that demonstrate how to fill design gaps.
 The comparison excludes two classes of prior work:
  @emph{concrete}, because of the constraints it places on untyped code (@sectionref{sec:design:anti-concrete}),
  and mixed-typed languages that must analyze untyped code to interoperate with it.
@@ -123,7 +123,7 @@ In sum, the five properties enable a uniform analysis of existing strategies
 
 @section{Chapter Outline}
 
-Sections @exact{\ref{sec:design:jungle}} through @exact{\ref{sec:design:basic}} explain the
+Chapters @exact{\ref{sec:design:jungle}} through @exact{\ref{sec:design:basic}} explain the
  @emph{what}, @emph{why}, and @emph{how} of our design-space analysis.
 There is a huge body of work on mixed-typed language that desperately
  needs organizing principles (@sectionref{sec:design:jungle}).

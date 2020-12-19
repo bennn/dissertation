@@ -165,12 +165,17 @@ The notation is again a hint.
 A decorated type is equal to a normal type during static type checking,
  but makes a weaker statement about program behavior.
 
-The typing rules are straightforward.
-If anything, the only surprise is that one module may contain another with
+The typing rules are relatively simple, but declarative.
+The rules for modules, for example, give no hint about how to find a type
+ conclusion that fits the rest of the program.
+A second notably aspect is that one module may contain another with
  the same language flag.
+
 @Figureref{fig:both:extra-type} defines a
  subtyping judgment (@${\ssubt}) and a type-assignment for primitive
  operations (@${\sDelta}).
+These are both standard.
+
 
 @figure*[
   "fig:both:surface-type"
@@ -475,8 +480,7 @@ Instead, the evaluation syntax has three kinds of run-time check expression:
 Second, the @|sshallow|-typed functions from the surface syntax (@${\efun{\tann{\svar}{\tfloor{\stype}}}{\ssurface}})
  are replaced with shape-annotated functions (@${\efun{\tann{\svar}{\sshape}}{\sexpr}}).
 Type-shapes (@${\sshape}) express the outermost constructor of a type;
- the weakened function annotation reflects what is known, in general,
- at run-time.
+ the weakened function annotation reflects a weakened run-time guarantee.
 
 The evaluation syntax also includes values (@${\svalue}),
  errors (@${\serror}),
@@ -1060,7 +1064,7 @@ In fact, these boundaries are safe @|snoop|s because @|sshallow| pre-emptively
     \\\\
     \stypeenv_0 \sST \sexpr_1 : \tfloor{\stype_1} \scompile \sexpr_3
     \\
-    \fshape{\stype_1} = \sshape_0
+    \fshape{\stype_0} = \sshape_0
   }{
     \stypeenv_0 \sST \eappu{\sexpr_0}{\sexpr_1} : \tfloor{\stype_0} \scompile \escan{\sshape_0}{(\eappu{\sexpr_2}{\sexpr_3})}
   }
@@ -1378,7 +1382,7 @@ Most terms may have zero or more labels.
 Boundary terms are an exception;
  a @${\swrap}, @${\sscan}, or @${\snoop} boundary must have at least one label
  around its subexpression.
-The notation @${\obbars{\sexpr_0}{\sownerlist_0}} matches an expressiow with a sequence of labels
+The notation @${\obbars{\sexpr_0}{\sownerlist_0}} matches an expression with a sequence of labels
  (@${\sownerlist_0}).
 
 An ownership label @${\sowner_0} carries two pieces of information.
@@ -2590,7 +2594,7 @@ In principle, @|sdeep| code can avoid the slowdown with a custom parser
 Indeed, Phil Nguyen has written a @hyperlink["https://github.com/philnguyen/json-type-provider"]{library}
  for JSON that mitigates the overhead of @|sdeep| types.
 Such libraries are ideal, but until we have them for the next data exchange
- format (SQL, XML, YAML, ...) @|sshallow| types get the job with the parsers
+ format (SQL, XML, YAML, ...) @|sshallow| types get the job done with the parsers
  that are available today.
 
 

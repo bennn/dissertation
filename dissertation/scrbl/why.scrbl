@@ -152,7 +152,7 @@ Untyped code may require coercions, but a smart compiler can minimize
  their use.
 @citet{h-lfp-1992} compiles Scheme to a monomorphic type system and is able
  to resolve at least 50% of the coercions in six benchmarks.
-@citet{hr-fpca-1995} extend the method to polymophic types and
+@citet{hr-fpca-1995} extend the method to polymorphic types and
  implement IEEE Scheme using Standard ML.
 
 Conventional types, however, are not always sufficient to capture untyped
@@ -316,10 +316,11 @@ If the language can additionally report the source of the untyped value
 Going beyond soundness, a mixed-typed language that satisfies complete
  monitoring guarantees the run-time behavior of every type.
 If a value flows across a type-annotated source position, then future users
- of the value can depend on the type---no matter whether these uses are in
- statically-typed or untyped code (@chapter-ref{chap:design}).
-In other words, silent disagreements between a type and value cannot arise.
-Every mismatch stops the program before computations can become further derailed.
+ of the value can depend on the type---no matter whether these uses occur in
+ typed or untyped code (@chapter-ref{chap:design}).
+Type soundness makes no guarantee about behavior once a value
+ flows out to an untyped context; with complete monitoring, the types are
+ in control of all interactions.
 
 
 @section[#:tag "sec:why:decisions"]{MT: Design Choices}
@@ -335,7 +336,6 @@ My dissertation builds on a more focused theory that is grounded in the
 Typed Racket shares the same theory@~cite{t-thesis-2010,tfffgksst-snapl-2017}.
 Our aim is to maximize the potential benefits of a mixed-typed language,
  in spite of the risk that some goals may prove unattainable.
-As always, research is when it can fail.
 
 @subsection[#:tag "why:mt-r1"]{MT-r1: types for untyped code}
 
@@ -360,8 +360,12 @@ Programmers must deal with the type errors, either by inserting a cast
 
 @subsection[#:tag "why:mt-r3"]{MT-r3: sound types}
 
-Well-typed code must satisfy a non-trivial soundness guarantee.
+Well-typed code must provide a soundness guarantee in which types constrains
+ the possible results of an evaluation.
 Both @|sdeep| and @|sshallow| types are acceptable, but nothing less.
+For example, optional typing satisfies an inadequate soundness guarantee
+ that promises a well-formed value but nothing about how the type of an
+ expression limits the outcomes.
 
 
 @subsubsection{Blame}
@@ -383,21 +387,25 @@ An untyped module does not need to give specifications because any
 @; TODO also we don't want to touch
 
 By contrast, this dissertation is not directly concerned with true gradual
- languages that include a dynamic type@~cite{svcb-snapl-2015}.
+ languages that include a dynamic type and infer boundaries during
+ typechecking@~cite{svcb-snapl-2015}.
 Such languages can still benefit from my results at an intermediate step,
  after occurrences of the dynamic type have been replaced with precise types
  and casts.
-But it is unclear how to communicate intermediate behaviors up to the
- programmer.
+But one pragmatic question remains: a true gradual language must find a way
+ to communicate trouble at an inferred boundary up to the programmer,
+ who may not understand why the language decided to insert the failing cast.
 
 Requiring boundaries greatly simplifies and strengthens the type system.
 It is simpler because there is no dynamic type; standard definitions of
  types, subtyping, and all the rest suffice for the type checker.
 It is stronger because there is no type precision relation to allow
- odd constructions in otherwise-typed code.
-Untyped code can only sneak in through a boundary;
- refer to @section-ref{sec:transient:blame-performance} for a contrary
- example in Reticulated Python.
+ constructions that a standard type system would rule out.
+In a gradual language, code that looks typed can diverge through clever
+ use of the dynamic type; with boundaries, there is a clear line between
+ the typed and untyped code.
+Refer to @section-ref{sec:transient:blame-performance} for an example of how
+ odd behaviors can slip into apparently-typed Reticulated Python code.
 
 
 @subsubsection{Macro, Micro}
