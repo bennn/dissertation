@@ -70,7 +70,7 @@ I may have finished the book all the same, but what stands out is a lesson
 
 Thank you @|Matthias-Felleisen| for teaching me how to be a scientist,
  and that there is much more to programming languages than dependent type
- systems and the lambda calculus.
+ systems and lambda combinators.
 
 Thank you committee members: @|Jan-Vitek|, @|Amal-Ahmed|, @|Fritz-Henglein|,
  @|Shriram-Krishnamurthi|, and @|Sam-Tobin-Hochstadt|.

@@ -1,5 +1,6 @@
 @string{asplos = {ASPLOS}} %ACM International Conference on Architectural Support for Programming Languages and Operating Systems
 @string{cacm = {Communications of the ACM}}
+@string{cc = {CC}} % sigplan symposium on compiler construction
 @string{dls = {DLS}} %{"Dynamic Languages Symposium"}
 @string{ecoop = {ECOOP}} %{{European Conference on Object-Oriented Programming}}
 @string{esop = {ESOP}} %{{European Symposium on Programming}}
@@ -7,6 +8,7 @@
 @string{fpca = {FPCA}} % Functional Programming Languages and Computer Architecture
 @string{fse = {FSE}} %{"{ACM SIGSOFT} International Symposium on the Foundations of Software Engineering"}
 @string{hosc = {HOSC}} %{Higher-order and symbolic computation}
+@string{icalp = {ICALP}} % ....
 @string{icfp = {ICFP}} %{{{ACM SIGPLAN} International Conference on Functional Programming}}
 @string{icpc = {ICPC}} %{{International Conference on Program Comprehension}}
 @string{icse = {ICSE}} %{{International Conference on Software Engineering}}
@@ -30,6 +32,7 @@
 @string{toce = {ACM Transactions on Computing Education}}
 @string{toplas = {TOPLAS}} %{{ACM} Transactions on Programming Languages and Systems}}
 @string{vlhcc = {Visual Languages and Human Centric Computing}}
+@string{vmil = {VMIL}} % virtual machines ... oopsla workshop
 
 @inproceedings{sta-nt-base-types,
  author = {St-Amour, Vincent and Toronto, Neil},
@@ -708,7 +711,7 @@
 @inproceedings{st-sfp-2006,
   title="Gradual Typing for Functional Languages",
   author={Jeremy G. Siek and Walid Taha},
-  booktitle={{SFP}. University of Chicago, TR-2006-06},
+  booktitle={{SFP}. University of Chicago, {TR-2006-06}},
   pages={81--92},
   year={2006}
 }
@@ -1018,6 +1021,13 @@
  year = {2019},
 }
 
+@phdthesis{a-thesis-2020,
+ author = {Deyaaeldeen Almahallawi},
+ title = {Towards Efficient Gradual Typing via Monotonic References and Coercions},
+ school = {{I}ndiana {U}niversity},
+ year = {2020},
+}
+
 @mastersthesis{f-thesis-2015,
  author = {Daniel Feltey},
  title = {Gradual Typing for First-Class Modules},
@@ -1216,14 +1226,61 @@
   year={2011}
 }
 
+@inproceedings{f-icfp-2002,
+  title={Compilable and Composable Macros: You want it \emph{when?}},
+  author={Matthew Flatt},
+  booktitle=icfp,
+  pages={72--83},
+  year={2002}
+}
+
+@inproceedings{ctf-sfp-2007,
+  title={Advanced Macrology and the Implementation of {Typed Scheme}},
+  author={Ryan Culpepper and Sam Tobin-Hochstadt and Matthew Flatt},
+  booktitle={{SFP}. Universit\'{e} Laval, {DIUL-RT-0701}},
+  pages={1--14},
+  year={2007}
+}
+
 @inproceedings{grmhn-vmil-2019,
   title = {Which of My Transient Type Checks Are Not (Almost) Free?},
   author = {Gariano, Isaac Oscar and Roberts, Richard and Marr, Stefan and Homer, Michael and Noble, James},
-  booktitle = {{VMIL}},
+  booktitle = vmil,
   pages = {58--66},
   year = {2019}
 }
 
+@inproceedings{c-icalp-1976,
+  title={User-defined types as an aid to verifying {LISP} programs},
+  author={Robert Cartwright},
+  booktitle=icalp,
+  pages={228--256},
+  year={1976}
+}
+
+@inproceedings{w-cc-1984,
+  title={A semantic prototyping system},
+  author={Mitchell Wand},
+  booktitle=cc,
+  pages={213--221},
+  year={1984}
+}
+
+@techreport{h-tr-1995,
+  title={{Infer}: A statically-typed dialect of {Scheme}},
+  author={Haynes, Christopher T.},
+  institution={{Indiana} University},
+  number={{T}echnical {R}eport 367},
+  year={1995}
+}
+
+@inproceedings{dh-lfp-1994,
+  title={Dzeng, Hsianlin and Haynes, Christopher T.},
+  author={Type reconstruction for variable-arity procedures},
+  booktitle=lfp,
+  pages={239--249},
+  year={1994}
+}
 
 % (define gff-oopsla-2005
 %   (make-bib

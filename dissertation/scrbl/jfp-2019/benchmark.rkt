@@ -449,7 +449,11 @@
   (define-values [v0 v1] (values (cadr bm-name+v*) (cddr bm-name+v*)))
   (define pi-0 (benchmark-name->performance-info bm-name v0 #:full-name? #t))
   (define pi-1 (benchmark-name->performance-info bm-name v1 #:full-name? #t))
-  (parameterize ((*OVERHEAD-MAX* MAX-OVERHEAD))
+  (define mo
+    (if (eq? 'infer (*OVERHEAD-MAX*))
+      (max (max-overhead pi-0) (max-overhead pi-1))
+      MAX-OVERHEAD))
+  (parameterize ((*OVERHEAD-MAX* mo))
     (overhead-plot (list pi-0 pi-1))))
 
 (define (render-relative-exact-plot bm-name+v*)

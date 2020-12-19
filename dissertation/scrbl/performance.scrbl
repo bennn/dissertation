@@ -289,7 +289,7 @@ The unlabeled vertical ticks mark, from left-to-right:
   @elem{
 Overhead plots for @bm{fsm}, on Racket v@|lattice-version|
  and v@|relative-version|.
-The blue curve for v@|lattice-version| is higher, showing a relative improvement.
+The orange curve for v@|relative-version| is higher, showing a relative improvement.
   }
   ""
   tr:render-relative-overhead-plot

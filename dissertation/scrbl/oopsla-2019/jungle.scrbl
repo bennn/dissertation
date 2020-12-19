@@ -16,7 +16,7 @@
       {\textstrat{\ename{}}};
     \node (EBOX)
       [left=of E.south west,anchor=north west,xshift=2.5em,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-      {ActionScript\cite{rch-popl-2012}\({}^{\mtlangann}\) \quad
+      {ActionScript 3.0\cite{rch-popl-2012}\({}^{\mtlangann}\) \quad
        Common Lisp\({}^{\mtlangann}\) \quad
        mypy\({}^{\mtlangann}_{\dynlangann}\) \quad
        Flow\cite{cvgrl-oopsla-2017}\({}^{\mtlangann}_{\dynlangann}\) \quad
@@ -32,10 +32,9 @@
        Typed Lua\cite{mmi-dls-2015}\({}^{\mtlangann}\)};
 
     \node (NBOX)
-      [below=of EBOX.south west,anchor=north west,xshift=0.5em,yshift=-1ex,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
-      {Gradualtalk\cite{acftd-scp-2013}\({}^{\mtlangann}_{\dynlangann}\) ~~
-       Grift\({}_{\dynlangann}\) \\[0.4ex]
-       Pycket\cite{bbst-oopsla-2017}\({}^{\mtlangann}\) \quad
+      [below=of EBOX.south west,anchor=north west,xshift=0.4em,yshift=-1ex,draw=black!70!white,rectangle,rounded corners=5pt,align=center]
+      {Gradualtalk\cite{acftd-scp-2013}\({}^{\mtlangann}_{\dynlangann}\) \\[0.4ex]
+       Grift\({}_{\dynlangann}\) ~
        TPD\cite{wmwz-ecoop-2017}\({}^{\mtlangann}\) \\[0.4ex]
        Typed Racket\cite{tf-popl-2008}\({}^{\mtlangann}\)};
 
@@ -66,7 +65,7 @@
       {\textstrat{Concrete}};
 
     \node (EC)
-      [draw=black!80!white,dashed,ellipse,left=of EBOX.south east,xshift=0.9em,yshift=-1ex,anchor=north,align=center]
+      [draw=black!80!white,dashed,ellipse,left=of EBOX.south east,xshift=0em,yshift=-1ex,anchor=north,align=center]
       {\(\!\!\!\)StrongScript\cite{rzv-ecoop-2015}\(\!\!\!\)\\[0.4ex]
        Thorn\cite{wzlov-popl-2010}};
 
@@ -105,12 +104,14 @@ StrongScript and Thorn offer a choice of concrete and erased types@~citep{wzlov-
 Pyret uses @|nname|-style checks to validate fixed-size data and @|tname|-style checks
  for recursive types (e.g. lists) and higher-order types
  (personal communication with Benjamin Lerner and Shriram Krishnamurthi).
-The literature presents additional languages, as formal semantics without implementations, that defy a broad categorization.
-@citet{cl-icfp-2017} drop certain wrappers.
-@citet{svctg-esop-2015} give a monotonic semantics for references.
+The literature presents additional variations.
+@citet{cl-icfp-2017} present a @|nname| semantics that drops certain wrappers.
+@citet{svctg-esop-2015} give a monotonic semantics that associates types with
+ heap positions instead of creating wrappers.
+There are several implementation of the monotonic idea@~cite{rat-oopsla-2017,sfrbcsb-popl-2014,rsfbv-popl-2015,a-thesis-2020}.
 
 Our goal is a systematic comparison of type guarantees across the wide design space.
-Such a comparison is possible because, despite the variety, the different guarantees
+Such a comparison is possible despite the variety because the different guarantees
  arise from choices about how to enforce types at the boundaries between
  type-checked code and arbitrary dynamically-typed code.
 To illustrate, the following three subchapters discuss type boundary examples in the
@@ -122,7 +123,7 @@ To illustrate, the following three subchapters discuss type boundary examples in
 Flow is a migratory typing system for JavaScript,
  Reticulated equips Python with gradual types,
  Typed Racket extends Racket,
- and Nom is a new gradual-from-the-start object-oriented language.
+ and Nom is a new gradual-from-the-start language.
 
 
 @section{Enforcing a Base Type}

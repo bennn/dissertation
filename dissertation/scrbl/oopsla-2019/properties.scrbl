@@ -116,7 +116,10 @@ one example and @citet{dnff-icfp-2016} for further discussion.
 @section{Our Analysis}
 
 The primary formal property has to be type soundness, because it tells a
-programmer that evaluation is well-defined in each component of a mixed-typed programs.
+ programmer that evaluation is well-defined in each component of a mixed-typed programs.
+In addition, the canonical forms lemma that enables a proof of type soundness
+ also enables optimizations by specifying exactly which values can arise
+ in well-typed code.
 
 The second property, @emph{complete monitoring}, asks whether types
 guard all statically-declared and dynamically-created channels of

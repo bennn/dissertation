@@ -76,51 +76,46 @@ TODO
 - [X] st "big" some intuition for CM ... yes the labels are right but why
       do we care? maybe copy from chap 4
 - [X] aa see pdf
-
-- [ ] cd fig 46 unclear why checks must be there ... add example?
+- [X] cd fig 46 unclear why checks must be there ... add example?
       also perhaps discuss casts vs checks
-- [ ] st sec 2 whats the idea here, what inference systems in bounds?
+- [X] st sec 2 whats the idea here, what inference systems in bounds?
       be clear the goal (stepping stones) ... why else discuss set-based analysis
-- [ ] st more lisp .... SPCL does typechecking for -> too, but undocumented
+- [X] st more lisp .... SPCL does typechecking for -> too, but undocumented
       Typed Lisp, by Cartwright 1976 ... copy Sam's dissertation for comments
-- [ ] st StrongTalk unrelated to lisp, don't remove their history credit
+- [X] st StrongTalk unrelated to lisp, don't remove their history credit
       also they'll use types to optimize when safe
       Hack, similar, has given up
-- [ ] st remove Pycket from languages picture, it's not a PL, ditto for JFP
-- [ ] st double-check Strongscript TS* SafeTS for gradual/migratory
-- [ ] st double-check ActionScript too, add a version number
-- [ ] st add Sorbet to figure, gotta check the implementation for parts
-- [ ] st Monotonic is implemented in Grift and probably TS*
-- [ ] st Castagna close to Natural, acknowledge it, same for forgetful ... at this point in the paper they're alike
-- [ ] st canonical forms ... mention in sec 4.3 supports optimization
+- [X] st remove Pycket from languages picture, it's not a PL, ditto for JFP
+- [X] st double-check Strongscript TS* SafeTS for gradual/migratory
+      SS = non gradual b/c no implicit coercions to any
+           non migratory b/c concrete types
+      TS* , SafeTS = ditto
+- [X] st double-check ActionScript too, add a version number
+- [X] st Monotonic is implemented in Grift and probably TS*
+- [X] st Castagna close to Natural, acknowledge it, same for forgetful ... at this point in the paper they're alike
+- [X] st canonical forms ... mention in sec 4.3 supports optimization
          put lemmas into 4.6.X ... what do they look like? ditto JFP
-- [ ] st fig5 colors, descriptions are wrong so pick new colors anyway
-- [ ] st2 sec 5.3 fig 51? tr-pipeline, draw forks for transient
-- [ ] st2 (next page) "ensure ... get-field / send succeed" HEY its not
+- [X] st2 (next page) "ensure ... get-field / send succeed" HEY its not
       succeed , be clear about object members check
-- [ ] st2 remove (Syntaxof Symbol) too weird
-- [ ] st2 explain why (All (A) (Box A)) is sound, or give simpler example
-- [ ] st2 121 say that occurrence types are a general problem, not new to transient
-- [ ] st2 fig57 are all PR's merged? say so
-- [ ] st2 5.4 more about experimental conditions ... sw versions, commits (at top)
-- [ ] st2 fig59 copy to appendix that goes beyond 20x to the worst
-- [ ] st2 fig65 remove decimals from big numbers (dungeon) try a color scale
-          or at least bold for bad ones
-- [ ] st2 c6 fig68 put all typing rules in appendix, or here
-- [ ] st2 \Gamma_0 -> \Gamma
-- [ ] st2 sum -> plus
-- [ ] st2 rename "Completion" section to "Compilation" be clear that the completing step is an essential part of compiling
-- [ ] st2 (nearby) bad figures, too far from text
-- [ ] st2 fig76 add E defenition, we are compatible with respect to E
-- [ ] st2 (TS def) avoid type U lang U pun .... maybe just say "language" more
-- [ ] st2 TS add sentence about how to articulate errors (finer context / InvariantErr)
-- [ ] st2 6.2.1 cite stepping-stones ... You Want When, Advanced Mac., Lang as Lib
-- [ ] st2 6.2.2 unclear call_f explanation, rewrite
-- [ ] st2 6.2.3 tu-utils from Neil Toronto, give credit
-- [ ] st2 6.3.1 move emails to citations, add title date author, give credit
-      "people actually wrote them" instead of simple links
-- [ ] st2 xx cite Findler Blume about Any ... least restrictive contract ... any/c vs none/c
+- [X] st2 remove (Syntaxof Symbol) too weird
+- [X] st2 explain why (All (A) (Box A)) is sound, or give simpler example
+- [X] st2 121 say that occurrence types are a general problem, not new to transient
+- [X] st2 fig57 are all PR's merged? say so
+- [X] st2 5.4 more about experimental conditions ... sw versions, commits (at top)
+- [X] st2 fig59 copy to appendix that goes beyond 20x to the worst
+- [X] st2 \Gamma_0 -> \Gamma
+- [X] st2 sum -> plus
+- [X] st2 c6 fig68 put all typing rules in appendix, or here
+- [X] st2 rename "Completion" section to "Compilation" be clear that the completing step is an essential part of compiling
+- [X] st2 (nearby) bad figures, too far from text
+- [X] st2 fig76 add E defenition, we are compatible with respect to E
+- [X] st2 (TS def) avoid type U lang U pun .... maybe just say "language" more
+- [X] st2 TS add sentence about how to articulate errors (finer context / InvariantErr)
+- [X] st2 6.2.1 cite stepping-stones ... You Want When, Advanced Mac., Lang as Lib
+- [X] st2 6.2.2 unclear call_f explanation, rewrite
+- [X] st2 6.2.3 tu-utils from Neil Toronto, give credit
 - [ ] st2 fig81 change 42 to symbol, thats what we'd like to allow but overapproximately reject
+- [ ] st2 xx cite Findler Blume about Any ... least restrictive contract ... any/c vs none/c
 - [ ] st2 (No Missing Wrappers) cite wrapper-eq papers ... Thiemann, Miller ... search for more
 - [ ] st2 (External Data) "Deep is eager" major simplification ... refer to TR choices instead
 - [ ] st2 7.2 vitousek is not whole-program, be clear about their boundary assumption
@@ -129,6 +124,15 @@ TODO
 - [ ] st2 7.3 cite Allende Garcia Tanter about ooplsa ... fortified types ... 
 - [ ] st2 8 say where quote came from, if anon. survey then fine
 - [ ] cite Gray etal
+
+- [ ] st2 6.3.1 move emails to citations, add title date author, give credit
+      "people actually wrote them" instead of simple links
+- [ ] st fig5 colors, pick new ones
+- [ ] st2 sec 5.3 fig 51? tr-pipeline, draw forks for transient
+
+- [-] st2 fig65 remove decimals from big numbers (dungeon) try a color scale
+          or at least bold for bad ones
+- [-] st add Sorbet to figure, gotta check the implementation for parts
 
 - [-] fh review mcallester, kaist, rehof ... think semantic again
 

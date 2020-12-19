@@ -50,15 +50,14 @@ The observations, in particular, motivate design choices that characterize
 
 
 @section[#:tag "sec:why:related"]{Pre-MT: Hits and Misses}
-@; TODO what did Henglein do and how does it fit???
 
 In the days before migratory typing, language designers explored several ways
  to mix typed and untyped code.
 Some mixtures began with an untyped language and allowed
  user-supplied type annotations.
 Others began with a typed language and added untyped flexibility.
-Either way, each design had to decide on run-time guarantees for its
- generalized types.
+The following early works helped form the migratory typing ideas behind
+ my research.
 
 
 @subsection{Type Hints}
@@ -87,6 +86,15 @@ In other words, type hints come with all the perils of types in a C-like languag
     "(DECLARE (FLONUM (F FLONUM FLONUM)))"
     "(DEFUN (F A B) (PLUS A B))"
   ))]
+
+@emph{History Note:}
+Other early type systems for Lisp and Scheme go well beyond the spartan type
+ hints that appear in the MACLISP and Common Lisp specifications.
+@citet{c-icalp-1976} infers types that a theorem prover can depend on.
+@citet{w-cc-1984} presents a semantic prototyping system (SPS) that includes
+ a type system for Scheme.
+@citet{h-tr-1995} uses row types to handle Scheme idioms, including
+ variable-arity polymorphism@~cite{dh-lfp-1994}.
 
 
 @subsection{Soft and Set-Based Inference}
@@ -117,18 +125,13 @@ Soft inference adds slack variables to types, turns the
  inequalities into equalities, and then uses Hindley-Milner style inference@~cite{f-thesis-1992}.
 Set-based inference solves the inequalities by computing a transitive
  closure through constructors over the entire program@~cite{am-popl-1991,awl-popl-1994,f-thesis-1997,ff-pldi-1997,ffkwf-pldi-1996}.
-Both solutions, unfortunately, reveal major challenges for inference:
-@exact{
-\begin{itemize}
-\item
-  Types can quickly become unreadable as inference computes supersets based on
-   the syntax of a program.
-  Worse, small changes to a program can end in large changes to inferred types.
-\item
-  Type structure depends on the whole program.
-  Set-based analysis, in particular, faces serious performance issues
-   in larger programs@~cite{mfsw-hosc-2005}.
-\end{itemize}}
+Both solutions, unfortunately, reveal major challenges for inference.
+Types can quickly become unreadable as inference computes supersets based on
+ the syntax of a program.
+Type structure depends on the whole program;
+ small syntactic changes can disrupt the overall typing, and reasoning
+ about flows can lead to compile-time performance issues@~cite{mfsw-hosc-2005}.
+These challenge suggest that full inference for untyped code is impractical.
 
 @citet{w-thesis-1994} notes that user-provided annotations can help with
  brittleness and readability, despite friction with the tenets of soft typing.
@@ -188,8 +191,9 @@ A programmer cannot use optional types to predict the inputs that a function
 Optional typing is one valid way to use Lisp type hints.
 A Lisp compiler need not optimize based on type hints, and it may even ignore
  types completely@~cite{m-maclisp-1974,s-lisp-1990}.
-@citet{bg-oopsla-1993} deserve credit not for inventing the optional style,
- but for explaining why it is a practical mode of use.
+@citet{bg-oopsla-1993} independently developed the optional style,
+ explained why it is a practical mode of use,
+ and identified ways to safely optimize parts of optional programs.
 
 
 @subsection{Type Dynamic}

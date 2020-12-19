@@ -152,24 +152,28 @@ Type variables have trivial shapes in other contexts, @${\tagof{\alpha_0} = \top
 
 Reticulated Python provides a dynamic type in the micro gradual typing
  tradition.
-Consequently, every type-checking rule must accomodate the dynamic type
- in addition to the expected type.
+Consequently, the type system approves any elimination form on a dyn-typed
+ expression and depends on a run-time check to ensure that down-casts from
+ the dynamic type work out.
 Typed Racket does not have a dynamic type; instead it adds run-time tools
  so that a non-dynamic type system can make assumptions about untyped input.
 Using this macro approach, only a handful of typing rules need to deal
- with dynamically-typed values.
+ with untyped values.
 
 The differences between the dynamic (micro) and non-dynamic (macro) typing rules have implications
  for @|stransient| run-time checks.
 In the original model, the evaluation of any expression could bring
  a dynamically-typed value into a typed context.
+For example, the application @${(f~42)} type checks when @${f} has the dynamic
+ type; a run-time check must test whether the value of @${f} is a function.
 In a non-dyn model, only boundaries and elimination forms can introduce
  an untyped value.
+An application @${(f~42)} can only type check when @${f} is a function.
 @Figure-ref{fig:transient:app-compare} illustrates the difference by contrasting
  the @|stransient| checks needed for a function application.
-On the top, the dynamic approach requires three checks: two checks in case
- the function and argument are dynamically-typed, and one to validate the
- shape of the result.
+On the top, the dynamic approach requires three run-time checks in the worst case:
+ two checks in case the function and argument are dynamically-typed,
+ and one to validate the shape of the result.
 On the bottom, only one check is needed because the function and argument
  are certain to have a correct, non-dyn shape.
 
@@ -180,7 +184,7 @@ On the bottom, only one check is needed because the function and argument
    without (bottom).
    Both rules insert run-time shape checks.
    The micro rule depends on a type coercion (@${\scoerce})
-   metafunction@~cite{vss-popl-2017}.
+   metafunction to allow down-casts from the dynamic type@~cite{vss-popl-2017}.
   }
   @exact|{
     \begin{mathpar}
@@ -193,7 +197,7 @@ On the bottom, only one check is needed because the function and argument
       }{
         \stypeenv_0 \sWT \sexpr_0~\sexpr_1 : \stype_3
         \compilesto
-        \echeckone{\stype_3}{((\echeckone{(\tfun{\stype_2}{\stype_3})}{\sexpr_0'})~(\echeckone{\stype_2}{\sexpr_1'}))}
+        \echeckone{\stype_3}{((\ecastone{(\tfun{\stype_2}{\stype_3})}{\sexpr_0'})~(\ecastone{\stype_2}{\sexpr_1'}))}
       }
 
       \inferrule*[lab=Without Dyn]{
@@ -682,9 +686,8 @@ Because these two operations are the only elimination forms for the
  @codett{Pairof} constructor, the shape meets its goal.
 
 Types that support many first-order properties have more complex shape checks.
-For example, an object comes with field and method names.
-The shape check must ensure that type-correct calls to @codett{get-field}
- and @codett{send} succeed at run-time.
+For example, an object type comes with field and method names.
+The shape check must ensure that incoming objects have the correct members.
 
 Below are several more example types, chosen to illustrate the variety
  and challenges of extending @|stransient|.
@@ -781,15 +784,15 @@ Actual shapes in the implementation do not use contract combinators such
   Represents a syntax object that contains a string.
   The shape checks for a syntax object.
 }
-@item{
-  @example-type-shape[
-    #:type "(Syntaxof Symbol)"
-    #:shape "identifier?"
-    #:cost "O(1)"]
-
-  Represents a syntax object that contains a symbol.
-  The shape checks for a syntax object with a symbol inside.
-}
+@;@item{
+@;  @example-type-shape[
+@;    #:type "(Syntaxof Symbol)"
+@;    #:shape "identifier?"
+@;    #:cost "O(1)"]
+@;
+@;  Represents a syntax object that contains a symbol.
+@;  The shape checks for a syntax object with a symbol inside.
+@;}
 @item{
   @example-type-shape[
     #:type "Integer"
@@ -871,7 +874,9 @@ Actual shapes in the implementation do not use contract combinators such
   The shape checks for a cell.
   If typed code wants to extract a value from the cell, it must instatiate
    the polymorphic type.
-  The instantiation provides a shape to check the contents.
+  The instantiation provides a shape to check the box contents;
+   to ensure soundness, such checks appear at every location where typed code
+   reads from the box.
 }
 @item{
   @example-type-shape[
@@ -967,6 +972,7 @@ The current implementation attaches @|stransient| checks at two kinds
  of syntax: boundaries and run-time elimination forms.
 This approach does not suffice to protect all types, thus
  some well-typed programs are currently rejected to ensure soundness.
+@|sDeep| Typed Racket currently rejects these programs for the same reason.
 
 Unrestricted universal types are one problem.
 If the shape @${\tagof{\stype}} of a universally-quantified type
@@ -1079,61 +1085,63 @@ The unboxing in the @${\mathsf{float{\mhyphen}complex}} pass is only safe by vir
 @figure*[
   "fig:transient:pulls"
   @elem{Pull requests inspired by work on @|sShallow| Racket.}
-  @exact{
-  \begin{tabular}{rll}
-       & kind   & pull request
+  @exact{{
+  \deftablemacros{}
+  \begin{tabular}{rlll}
+       & kind   & merged? & pull request
   \\\hline
-     1 & bugfix & @github-pull["racket" "htdp" "98"]
+     1 & bugfix & \tblY & @github-pull["racket" "htdp" "98"]
   \\
-     2 & bugfix & @github-pull["racket" "pict" "60"]
+     2 & bugfix & \tblY & @github-pull["racket" "pict" "60"]
   \\
-     3 & bugfix & @github-pull["racket" "racket" "3182"]
+     3 & bugfix & \tblY & @github-pull["racket" "racket" "3182"]
   \\
-     4 & bugfix & @github-pull["racket" "typed-racket" "926"]
+     4 & bugfix &  & @github-pull["racket" "typed-racket" "926"]
   \\
-     5 & bugfix & @github-pull["racket" "typed-racket" "919"]
+     5 & bugfix & \tblY & @github-pull["racket" "typed-racket" "919"]
   \\
-     6 & bugfix & @github-pull["racket" "typed-racket" "916"]
+     6 & bugfix & \tblY & @github-pull["racket" "typed-racket" "916"]
   \\
-     7 & bugfix & @github-pull["racket" "typed-racket" "914"]
+     7 & bugfix & \tblY & @github-pull["racket" "typed-racket" "914"]
   \\
-     8 & bugfix & @github-pull["racket" "typed-racket" "912"]
+     8 & bugfix & \tblY & @github-pull["racket" "typed-racket" "912"]
   \\
-     9 & bugfix & @github-pull["racket" "typed-racket" "923"]
+     9 & bugfix & \tblY & @github-pull["racket" "typed-racket" "923"]
   \\
-    10 & bugfix & @github-pull["racket" "typed-racket" "921"]
+    10 & bugfix & \tblY & @github-pull["racket" "typed-racket" "921"]
   \\
-    11 & bugfix & @github-pull["racket" "typed-racket" "918"]
+    11 & bugfix & \tblY & @github-pull["racket" "typed-racket" "918"]
   \\
-    12 & bugfix & @github-pull["racket" "typed-racket" "913"]
+    12 & bugfix & \tblY & @github-pull["racket" "typed-racket" "913"]
   \\
-    13 & bugfix & @github-pull["racket" "typed-racket" "884"]
+    13 & bugfix & \tblY & @github-pull["racket" "typed-racket" "884"]
   \\
-    14 & bugfix & @github-pull["racket" "typed-racket" "855"]
+    14 & bugfix & \tblY & @github-pull["racket" "typed-racket" "855"]
   \\
-    15 & bugfix & @github-pull["racket" "typed-racket" "612"]
+    15 & bugfix & \tblY & @github-pull["racket" "typed-racket" "612"]
   \\
-    16 & bugfix & @github-pull["racket" "typed-racket" "600"]
+    16 & bugfix & \tblY & @github-pull["racket" "typed-racket" "600"]
   \\
-    17 & enhancement & @github-pull["racket" "typed-racket" "927"]
+    17 & enhancement & \tblY & @github-pull["racket" "typed-racket" "927"]
   \\
-    18 & enhancement & @github-pull["racket" "typed-racket" "925"]
+    18 & enhancement & \tblY & @github-pull["racket" "typed-racket" "925"]
   \\
-    19 & enhancement & @github-pull["racket" "typed-racket" "911"]
+    19 & enhancement & \tblY & @github-pull["racket" "typed-racket" "911"]
   \\
-    20 & enhancement & @github-pull["racket" "typed-racket" "907"]
+    20 & enhancement & \tblY & @github-pull["racket" "typed-racket" "907"]
   \\
-    21 & enhancement & @github-pull["racket" "typed-racket" "917"]
+    21 & enhancement & & @github-pull["racket" "typed-racket" "917"]
   \end{tabular}
-}]
+}}]
 
 The development of @|sShallow| Racket led to several improvements in
  other Racket libraries.
 Debugging sessions occasionally revealed bugs in existing code,
  and the integration of @|sShallow| and @|sDeep| Racket suggested
  enhancements for the latter.
-@Figure-ref{fig:transient:pulls} tabulates these fixes and enhancements;
- the third column contains links with more details.
+@Figure-ref{fig:transient:pulls} tabulates these fixes and enhancements.
+The third column shows that all but two requests are merged.
+The final column contains links with more details.
 
 Most improvements came about through @|stransient| run-time checks.
 During compilation, @|stransient| relies on types embedded in an intermediate
@@ -1200,11 +1208,13 @@ The loss of wrappers implies a loss of full type soundness, complete monitoring,
 As compensation, @|sshallow| needs to demonstrate improved performance.
 
 This section applies the method from @chapter-ref{chap:performance} to evaluate
- @|sShallow| Racket on the @|GTP| benchmarks.
+ @|sShallow| Racket on the @|GTP| benchmarks (version 6.0).
 The granularity of the experiment is module-level, same as our @|sDeep| Racket
  experiment from @section-ref{sec:tr:evaluation}.
 All data is from a dedicated Linux box with @id[NSA-num-cores] physical
   @id[NSA-core-name] @id[NSA-core-speed] cores and @id[NSA-RAM] RAM.
+The experiment uses Racket v7.8.0.5 (@github-commit["racket" "racket" "7c903871bd8cb4bd32ed7188c180b5124f9bc201"])
+ and @|sShallow| Racket extends Typed Racket v1.12 (@github-commit["bennn" "typed-racket" "c074c9333e467cb7cd2058511ac63a1d51b4948e"]).
 
 
 @subsection[#:tag "sec:transient:ratio"]{Performance Ratios}
@@ -1269,7 +1279,6 @@ The best-case benchmark for @|stransient| is @bm{lnm}, which runs only slightly
   Deep vs. Shallow
   }
   ""
-  ;; TODO stop at 10x? different title? (deep vs shallow?)
   render-relative-overhead-plot
   (for/list ((bm-name (in-list SHALLOW-CURRENT-BENCHMARK*)))
     (cons bm-name (cons transient-rkt-version stransient)))

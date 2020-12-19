@@ -277,7 +277,7 @@
 \newcommand{\stopofprogram}{\bullet}
 \newcommand{\sunop}{\textit{unop}}
 \newcommand{\sbinop}{\textit{binop}}
-\newcommand{\ssum}{\sfont{sum}}
+\newcommand{\ssum}{\sfont{plus}}
 \newcommand{\squotient}{\sfont{quotient}}
 \newcommand{\smod}{\sfont{module}}
 \newcommand{\mkvdash}[1]{\vdash_{#1}}
@@ -312,6 +312,7 @@
 \newcommand{\sincr}{\sfont{add1}}
 \newcommand{\sresult}{r}
 \newcommand{\scheck}{\sfont{check}}
+\newcommand{\scast}{\sfont{cast}}
 \newcommand{\sprevalue}{\sfont{w}}
 \newcommand{\sloc}{\sfont{p}}
 \newcommand{\sdirection}{\sfont{d}}
@@ -574,6 +575,8 @@
 \newcommand{\elet}[3]{\eletdecl{#1}{#2}~#3}
 \newcommand{\eunopt}[2]{\tinst{\sunop}{#1}\,#2}
 \newcommand{\eunop}[1]{\mktwoapp{\sunop}{#1}}
+\newcommand{\eunopfst}[1]{\mktwoapp{\sfst}{#1}}
+\newcommand{\eunopsnd}[1]{\mktwoapp{\ssnd}{#1}}
 \newcommand{\efst}[2]{\tinst{\sfst}{#1}\,#2}
 \newcommand{\esnd}[2]{\tinst{\ssnd}{#1}\,#2}
 \newcommand{\eincr}[1]{\sincr\,#1}
@@ -792,6 +795,7 @@
 \newcommand{\echeck}[4]{\scheck({#2}, {#3},{#4})}
 \newcommand{\echecktwo}[3]{\tinst{\scheck}{#1}\,{#2}\,{#3}}
 \newcommand{\echeckone}[2]{\tinst{\scheck}{#1}\,{#2}}
+\newcommand{\ecastone}[2]{\tinst{\scast}{#1}\,{#2}}
 \newcommand{\eloc}{\sloc}
 \newcommand{\eloczero}{\bullet} % placeholder variable, for the AT simulation
 \newcommand{\locations}{\mathbb{P}}
