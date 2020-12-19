@@ -2172,7 +2172,7 @@ This work-around requires a manual inspection, but it is more appealing than
 
 Typed Racket has a small API by Neil Toronto to let programmers control boundaries
  between @|sdeep| and @|suntyped| code.
-The API arose over time, as programmers---in particular, Neil---discovered challenges.
+The API arose over time, as programmers (including Neil) discovered challenges.
 Two forms in this API can lead to surprising results due to the existence of
  @|sshallow| code.
 

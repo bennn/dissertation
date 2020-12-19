@@ -398,7 +398,8 @@ Such languages can still benefit from my results at an intermediate step,
  and casts.
 But one pragmatic question remains: a true gradual language must find a way
  to communicate trouble at an inferred boundary up to the programmer,
- who may not understand why the language decided to insert the failing cast.
+ who may not understand why the language decided to insert the cast
+ that eventually failed.
 
 Requiring boundaries greatly simplifies and strengthens the type system.
 It is simpler because there is no dynamic type; standard definitions of

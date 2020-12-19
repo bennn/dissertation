@@ -171,7 +171,7 @@ MF edits, leftover
 - [ ] (p53) 4 think about solid vs dashed arrows
 - [ ] (p54) 4 specify error, in fig?
 - [X] (p63) 4 how to add dynamic type, orthogonal
-- [ ] (p64) 4 fix codeblock colors, use "a --" style with label on left at least
+- [X] (p64) 4 fix codeblock colors, use "a --" style with label on left at least
 - [ ] bring Deep and Shallow into chap 4
 - [ ] (p111) 4 conclusion, wrappers vs lambda
 - [ ] (p117) 5 move note to end? perf

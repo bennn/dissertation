@@ -454,7 +454,7 @@ Despite the incomplete check at the boundary, this delayed-checking semantics ev
 Higher-order values raise a similar question because a single run-time check
  cannot prove that a function value always behaves a certain way.
 Nevertheless, a language that checks every call and return is in full control
- of the interactions between a function and its context.
+ of the function's interactions.
 
 Our definition of complete monitoring translates these ideas about
  interactions and control into statements about @emph{ownership labels}@~citep{dfff-popl-2011}.
@@ -541,7 +541,7 @@ Each relation needs a lifted version to support an attempt at a complete
  monitoring proof.
 These lifted reduction relations are deferred to an appendix,
  but come about semi-automatically through the
- following informal guidelines, or ``natural laws,'' for labeling.
+ following informal guidelines, or natural (scientific) laws, for proper labeling.
 
 Each law describes a way that labels may be transferred or dropped
  during evaluation.

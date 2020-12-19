@@ -71,7 +71,7 @@ Each target comes with a target type system; type soundness relates
  surface types to target types.
 @Sectionref{sec:design:tech:common-HO} presents notions of reduction that are shared
  among several languages.
-The final sections state the six base semantics and their properties.
+The final sections state the six base semantics and assess their formal properties.
 
 Several properties depend on a lifted semantics that propagates
  ownership labels in accordance with the guidelines from @sectionref{sec:design:laws}.
@@ -244,7 +244,8 @@ Every function application and operator application comes with a type
 These annotations serve two purposes:
  to determine the behavior of the @|tname| and @|aname| semantics,
  and to tell apart statically-typed and dynamically-typed redexes.
-An implementation could easily infer valid annotations.
+An implementation could easily infer valid annotations from
+ well-typed subexpressions.
 The model keeps them explicit to easily formulate examples where subtyping
  affects behavior; for instance, the source-language terms
  @${\eunopt{\tnat}{\sexpr_0}} and
@@ -1144,7 +1145,7 @@ If @${\xsym} and @${\ysym} represent two strategies for type enforcement,
 }|
 
 @|noindent|If two semantics lie below one another on the error preorder, then they report
- type mismatches on exactly the same well-formed expressions.
+ type mismatches on the same well-formed expressions.
 
 @exact|{
 \begin{definition}[error equivalence]
@@ -2112,7 +2113,8 @@ Protected typed code can then interact with any untyped libraries.
 Not shown in @figureref{fig:transient-reduction} are rules for elimination
  forms that halt the program.
 When @${\sdelta} is undefined or when a non-function is applied, the result
- is either an invariant error or a tag error depending on the context.
+ is either an invariant error or a tag error depending on the context---analogous
+ to the higher-order semantics.
 
 @|tname| shape checks do not guarantee full type soundness,
  complete monitoring, or the standard blame soundness and completeness.
@@ -2589,7 +2591,7 @@ Note that @${(\ehopt{\sbset}{\sexpr})} is short for an expression that may or ma
 The elimination rules for guarded pairs show the clearest
  difference between checks in @|aname| and @|fname|.
 @|aname| ignores the type in the guard.
-@|fname| ignores the type annotation on the primitive operation.
+@|fname| ignores the type on the primitive operation.
 
 @figure*[
   "fig:amnesic-meta"
@@ -2650,7 +2652,7 @@ This is no surprise, since @|aname| creates and removes guard
  wrappers in the same manner as @|fname|.
 Unlike the @|fname| semantics, @|aname| uses trace wrappers to remember
  the boundaries that a value has crossed.
-This information leads to sound and complete blame messages.
+This information leads to sound and complete blame error outputs.
 
 @exact|{
 \begin{theorem}\label{thm:A-TS}
@@ -2671,7 +2673,7 @@ This information leads to sound and complete blame messages.
 
   \noindent{}The new boundary enforces the context's assumption ($\stype_0$)
    instead, but we know that $\stype_0$ is a supertype of $\stype_1$ by the
-   higher-order typing judgment.
+   definition of the higher-order typing judgment.
 \end{proofsketch}
 }|
 

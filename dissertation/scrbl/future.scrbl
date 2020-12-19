@@ -49,8 +49,7 @@ But regardless of whether run-time filtering can cover more types,
  we need to measure its usefulness.
 If filtering is unlikely to help programmers diagnose issues,
  then removing it can save a tremendous amount of bookkeeping.
-Without the need to filter, the blame map does not need to store types or
- actions---only pointers and source locations.
+The blame map can drop all types and actions.
 
 
 @section{Speed up Fully-Typed @|sTransient|}
@@ -176,7 +175,7 @@ If a language can create wrappers in @|sshallow| code, however, then the
  values; that is, the interactions do not require a static analysis
  because the wrappers carry information.
 
-A wholly-different approach is to adapt the idea of confined types@~cite{afgt-oopsla-2014}.
+A different approach is to adapt the idea of confined types@~cite{afgt-oopsla-2014}.
 If the type system can prove that a value originates in typed code
  and never escapes to untyped, then @|sdeep| and @|sshallow| can freely share
  the value.

@@ -51,7 +51,7 @@
 
 @; -----------------------------------------------------------------------------
 
-Thank you Sarah Lee Greenman for the support, financial or otherwise, and
+Thank you Sarah Lee Greenman for eight years of love, support, and
  civilizing guidance.
 Without Sarah, I might still be a Ph.D. student (why not?) living the monastic
  lifestyle.
@@ -60,10 +60,10 @@ You know the drill: saltine crackers and peanut butter, candlelight,
 With Sarah, I have two cats to attend and a baby on the way.
 It's been more fun, too.
 
-Thank you parents for your support, financial and otherwise.
+Thank you parents for twenty-nine years of love and all kinds of support.
 One stormy high-school afternoon, I set out to test my domestic liberty
  by reading The Communist Manifesto at home.
-Instead of outrage, though, this action met calm encouragement.
+But instead of outrage, this action met calm encouragement.
 ``That's great.''
 I may have finished the book all the same, but what stands out is a lesson
  in patience and respect for primary sources.

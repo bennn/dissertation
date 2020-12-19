@@ -65,8 +65,8 @@ The method summarizes performance for the exponentially-many ways that a program
 Informally, a mixture is good if it runs within a user-supplied overhead limit.
 Random sampling can approximate the proportion of good mixtures for programs
  in which exhaustive evaluation is not practical.
-As validation, this chapter evaluates the performance of two
- mixed-typed languages: Typed Racket and Reticulated Python.
+Two language evaluations, for Typed Racket and Reticulated Python,
+ validate the method.
 
 
 @section{Design Criteria}
@@ -667,7 +667,7 @@ Each comes with a summary and four fields:
  @emph{Origin} indicates the benchmark's source,
  @emph{Purpose} describes what it computes,
  @emph{Author} credits the original author,
- and @emph{Depends} lists significant contextual libraries that the benchmark depends on.
+ and @emph{Depends} lists significant contextual libraries.
 
 @; WARNING: benchmark order matters
 @; TODO wrapper function, to sort and check for missing?
@@ -1670,7 +1670,8 @@ At a glance, @figure-ref{fig:example-exact-plot} therefore shows the overall
    The @|x-axis| ranges over collapsible overhead and the @|y-axis|
     ranges over baseline overhead.
    A point @${(x, y)} is a head-to-head comparison;
-    points above the diagonal are better for collapsible.
+    points above the diagonal represent configurations
+    where collapsible is faster than the baseline.
   }
   (tr:render-scatterplot-example bm-name)
 ]
