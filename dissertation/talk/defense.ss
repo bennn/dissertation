@@ -3205,6 +3205,29 @@
     #:go (coord contribution-x-right below-sky-y 'lt) how-to-guarantees-pict
     #:go (coord contribution-x-right contribution-y-bot 'lt) how-to-perf-pict)
   (pslide
+      #:go text-coord-mid
+      (word-append
+        @ht3{Goal:}
+        @rrt-deep2{ mixed} @rrt{-} @rrt-untyped{typed } @rrt{code with } @bold-rrt{strong} @rrt{ guarantees})
+      (ysep tiny-y-sep)
+      (word-append @ht3{Problem:} @rrt{ high performance overhead})
+      (ysep small-y-sep)
+      #:next
+      (add-hubs (word-append q-pict @rt{What to do?}) 'QQ)
+      #:next
+      #:go (coord 15/100 52/100 'lt)
+      (item-line-append
+        (word-append @ht3{a. } @rrt{build a new language})
+        (word-append @ht3{a. } @rrt{build a new compiler})
+        (tag-pict (word-append @ht3{a. } @rrt{improve the current compiler}) 'AAA))
+      #:next
+      #:go (at-find-pict 'AAA lc-find 'cc #:abs-x (- tiny-x-sep)) pass-pict
+      #:next
+      #:go (at-find-pict 'AAA rc-find 'lc #:abs-x tiny-x-sep)
+      (text-line-append
+        (hb-append hyphen-pict @rrt{re-use type system})
+        (hb-append hyphen-pict @rrt{add new semantics})))
+  (pslide
     #:go heading-coord-mid
     @ht4{Thesis Statement}
     #:go title-coord-mid
@@ -3722,31 +3745,6 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
-      #:go text-coord-mid
-      (word-append
-        @ht3{Goal:}
-        @rrt-deep2{ mixed} @rrt{-} @rrt-untyped{typed } @rrt{code with } @bold-rrt{strong} @rrt{ guarantees})
-      (ysep tiny-y-sep)
-      (word-append @ht3{Problem:} @rrt{ high performance overhead})
-      (ysep small-y-sep)
-      #:next
-      (add-hubs (word-append q-pict @rt{What to do?}) 'QQ)
-      #:next
-      #:go (coord 5/100 77/100 'lt) (add-hubs (word-append @ht3{a. } @rrt{build a new language}) 'A1)
-      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lc-find (tag-append 'A1 'W) lt-find (* 40/100 turn) (* 78/100 turn) 1/2 1/2 'short-dash)))
-      #:next
-      #:go (coord 44/100 85/100 'lt) (add-hubs (word-append @ht3{a. } @rrt{build a new compiler (JIT?)}) 'A2)
-      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lc-find (tag-append 'A2 'W) ct-find (* 50/100 turn) (* 79/100 turn) 1/4 60/100 'short-dash)))
-      #:next
-      #:go (coord 97/100 73/100 'rt) (word-append (add-hubs @ht3{a. } 'A3) @rrt{improve the current compiler})
-      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lb-find (tag-append 'A3 'W) ct-find (* 70/100 turn) (* 77/100 turn) 1/4 60/100 'short-dash)))
-      #:next
-      #:go (coord 1/2 50/100 'ct)
-      (wide-takeaway-frame
-        (vl-append
-          (add-hubs (word-append a-pict @rt{Interoperate with a weaker semantics}) 'A4)
-          (ysep tiny-y-sep)))
-      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lb-find (tag-append 'A4 'W) ct-find (* 70/100 turn) (* 85/100 turn) 40/100 28/100 'solid)))
 
 
   )))
