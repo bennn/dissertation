@@ -58,12 +58,17 @@
 ;;       lots of words for these ... Sam used TR ... Max used Natural ... hm
 ;; - [X] sync the benchmarks, for displays ... avoid intro new names
 
-;; words
-;; - [ ] migration, faces ... 0.9x
+;; MF : when you record your talk, please (!) fix the following: 
+;; [ ] 1. create one new slide with the constraints that we set ourselves for this work 
+;;     — no new language
+;;     — no new type system (though warn of the caveats due to enforcement of type systems) 
+;;     — no new compiler, fix what we have 
+;;     — and explain the rationale for each (perhaps as a tree pointing to alternative efforts by project name, but no people names!)
+;; [ ] 2. call out your student collaborators by name, esp. Asumu 
 
 ;; visuals
 ;; - [ ] fancier takeaway frame
-;; - [ ] text size ... rt vs rrt
+;; - [X] text size ... rt vs rrt
 
 (require
   file/glob
@@ -379,8 +384,11 @@
 (define (rrt . str*)
   (rrt* str*))
 
-(define (rrt* str*)
-  (txt str* #:font body-text-font #:size sub-body-text-size #:color body-text-color))
+(define (bold-rrt . str*)
+  (rrt* str* #:font body-bold-font))
+
+(define (rrt* str* #:font [font body-text-font])
+  (txt str* #:font font #:size sub-body-text-size #:color body-text-color))
 
 (define (dark-rrt . str*)
   (dark-rrt* str*))
@@ -419,6 +427,14 @@
 
 (define (rrt*-deep str*)
   (txt str* #:font body-text-font #:size sub-body-text-size #:color deep-pen-color))
+
+(define (rrt-deep2 . str*)
+  (rrt*-deep2 str*))
+
+(define (rrt*-deep2 str*)
+  (define bg (txt str* #:font body-text-font #:size sub-body-text-size #:color white))
+  (define fg (txt str* #:font body-text-font #:size sub-body-text-size #:color deep-brush-color))
+  (cc-superimpose bg fg))
 
 (define (rt-shallow . str*)
   (rt*-shallow str*))
@@ -3706,6 +3722,31 @@
 (define raco-pict
   (ppict-do (filled-rectangle client-w client-h #:draw-border? #f #:color background-color)
 
+      #:go text-coord-mid
+      (word-append
+        @ht3{Goal:}
+        @rrt-deep2{ mixed} @rrt{-} @rrt-untyped{typed } @rrt{code with } @bold-rrt{strong} @rrt{ guarantees})
+      (ysep tiny-y-sep)
+      (word-append @ht3{Problem:} @rrt{ high performance overhead})
+      (ysep small-y-sep)
+      #:next
+      (add-hubs (word-append q-pict @rt{What to do?}) 'QQ)
+      #:next
+      #:go (coord 5/100 77/100 'lt) (add-hubs (word-append @ht3{a. } @rrt{build a new language}) 'A1)
+      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lc-find (tag-append 'A1 'W) lt-find (* 40/100 turn) (* 78/100 turn) 1/2 1/2 'short-dash)))
+      #:next
+      #:go (coord 44/100 85/100 'lt) (add-hubs (word-append @ht3{a. } @rrt{build a new compiler (JIT?)}) 'A2)
+      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lc-find (tag-append 'A2 'W) ct-find (* 50/100 turn) (* 79/100 turn) 1/4 60/100 'short-dash)))
+      #:next
+      #:go (coord 97/100 73/100 'rt) (word-append (add-hubs @ht3{a. } 'A3) @rrt{improve the current compiler})
+      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lb-find (tag-append 'A3 'W) ct-find (* 70/100 turn) (* 77/100 turn) 1/4 60/100 'short-dash)))
+      #:next
+      #:go (coord 1/2 50/100 'ct)
+      (wide-takeaway-frame
+        (vl-append
+          (add-hubs (word-append a-pict @rt{Interoperate with a weaker semantics}) 'A4)
+          (ysep tiny-y-sep)))
+      #:set (let ((pp ppict-do-state)) (add-code-arrow pp (code-arrow 'QQ lb-find (tag-append 'A4 'W) ct-find (* 70/100 turn) (* 85/100 turn) 40/100 28/100 'solid)))
 
 
   )))
