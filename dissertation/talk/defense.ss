@@ -3478,6 +3478,7 @@
      (scale (make-lattice 4 bits->path-node #:x-margin pico-x-sep #:y-margin lattice-y-sep) 7/10)
     ]
     @rrt{% of 3-deliverable paths}
+    #:next
     (ysep tiny-y-sep)
     (fancy-table
       (list
@@ -3493,6 +3494,7 @@
     @ht2{Better Together}
     #:go text-coord-mid
     @rrt{How many configs do best with a mix?}
+    #:next
     (ysep tiny-y-sep)
     (fancy-table
       (list
