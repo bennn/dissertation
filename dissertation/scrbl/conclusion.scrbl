@@ -68,3 +68,33 @@ With both styles available, programmers can avoid severe performance and
 Yet much remains to be done, especially to see how programmers comprehend
  the new types and leverage the new choices.
 
+
+@; future ....
+@;  @subsection{Design Ideas for Shapes}
+@; TODO cite "The VM Already Knew That" here? @~cite[rat-oopsla-2017]
+@;  
+@;  Clearly, the move from type tags to general shape checks raises
+@;   a new question for transient semantics.
+@;  One type @${\stype} may have several possible shapes, and the language
+@;   designer needs to choose one representative that strikes a balance
+@;   between guarantees and performance.
+@;  Consider an uncurried function type @${(\tfun{\stype_d \ldots}{\stype_c})}
+@;   that expects a fixed number of arguments and promises one result.
+@;  A shape cannot enforce the higher-order aspects of this type,
+@;   but there are still at least two ways to enforce first-order properties in
+@;   an instance such as @${(\tfun{\tint \tint}{\tint})}:
+@;   simply check for a procedure,
+@;   or check for a procedure that accepts two inputs.
+@;  The latter design may incur a higher run-time cost, but it offers stronger
+@;   guarantees for programmers and for type-directed optimizations.
+@;  
+@;  The choice problem calls for a guiding design.
+@;  Our implementation of transient for Typed Racket chooses to enforce
+@;   full type constructors with structural checks;
+@;   refer to @secref{design-choices} for examples.
+@;  This decision is inspired by Reticulated, which enforces constructors in the context
+@;   of a simpler type system in which ambiguities rarely arise@~cite[vss-popl-2017].
+@;  For example, Reticulated's shapes do not rule out Python arity errors.
+@;  Grace has a nominal type system, and is therefore able to equate shape checks
+@;   with name checks@~cite[rmhn-ecoop-2019].
+@;  Pallene has a structural type system, but limits itself to tag checks@~cite[gi-scp-2020].

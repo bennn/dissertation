@@ -1058,7 +1058,7 @@ These ``@|sdeep|'' optimizations are not safe for @|sShallow| Racket because it 
 
 @Figure-ref{fig:transient:optimize} lists all optimization topics and shows,
  suprisingly, that only two are unsafe for @|sshallow| types.
-The @${\mathsf{dead{\mhyphen}code}} pass remove type-inaccessible branches of an overloaded function.
+The @${\mathsf{dead{\mhyphen}code}} pass removes type-inaccessible branches of an overloaded function.
 With @|sdeep| types, run-time contracts make these branches inaccessible.
 @|sShallow| types allow raw functions to flow to untyped code, and therefore
  the branches are not sealed off by a wrapper.

@@ -711,7 +711,7 @@ Relative to this source-of-truth, blame soundness asks whether the
  names in @${\sbset_0} are a subset of the true owners.
 Blame completeness asks for a superset of the true owners.
 
-A semantics can trivially satisfy blame soundness alone by reporting an empty
+A semantics can trivially satisfy blame soundness by reporting an empty
  set of boundaries.
 Conversely, the trivial way to achieve blame completeness is to blame
  every boundary for every possible mismatch.
